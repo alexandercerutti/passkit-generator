@@ -15,6 +15,13 @@ const passModelsDir = _configuration.models.dir;
 const outputDir = _configuration.output.dir;
 const Certificates = _configuration.certificates;
 
+/**
+	Apply a filter to arg0 to remove hidden files names (starting with dot)
+	@function removeDotFiles
+	@params {[String]} from - list of file names
+	@return {[String]}
+*/
+
 function removeDotFiles(from) {
 	return from.filter(e => {
 		return e.charAt(0) !== "."
@@ -99,12 +106,15 @@ function generateManifestSignature(manifestPath) {
 function generateManifest(fromObject, tempFolderPath) {
 	return new Promise(function(done, failed) {
 		if (!fromObject || typeof fromObject !== "object" && typeof fromObject !== "string") {
-			return failed("generateManifest: Argument 0 must be of an object or a string");
+			return failed("generateManifest: Argument 0 is required and must be of an object or a string (source object)");
 		}
 
-		let source = typeof fromObject === "object" ? JSON.stringify(fromObject) : fromObject;
+		if (!tempFolderPath || typeof tempFolderPath !== "string") {
+			return failed("generateManifest: Argument 1 is required and must be a string (temporary folder path for manifest)");
+		}
 
-		let manifestBuffer = Buffer.from(source);
+		const source = typeof fromObject === "object" ? JSON.stringify(fromObject) : fromObject;
+		const manifestBuffer = Buffer.from(source);
 
 		let manifestWS = fs.createWriteStream(`${tempFolderPath}/manifest.json`);
 		manifestWS.write(source);
@@ -122,7 +132,7 @@ instance.get("/", function (req, res) {
 	res.send("Hello there");
 });
 
-instance.get("/gen/:type", function (req, res) {
+instance.get("/gen/:type/", function (req, res) {
 	fs.readdir(passModelsDir, {}, function (err, result) {
 		/* Invalid path for passModelsDir */
 		if (err) {
@@ -156,28 +166,32 @@ instance.get("/gen/:type", function (req, res) {
 				throw err;
 			}
 
+			// Manifest dictionary
 			let manifest = {};
 
-			//fs.readdir(`${tempFolderName}/${req.params.type}.pass`, function(err, fileList) {
-			fs.readdir(`${passModelsDir}/${req.params.type}.pass`, function(err, fileList) {
+			fs.readdir(`${passModelsDir}/${req.params.type}.pass`, function(err, files) {
 				if (err) {
 					throw err;
 				}
 
-				fileList = removeDotFiles(fileList);
+				let list = removeDotFiles(files);
 
-				if (!fileList) {
-					throw "Unable to create pass. Model has not files inside.";
+				if (!list.length) {
+					res.set("Content-Type", "application/json");
+					res.status(418).send({ ecode: 418, status: false, message: `Model for type [${req.params.type}] has no contents. Refer to https://apple.co/2IhJr0Q `})
+					return;
 				}
 
-				if (!fileList.includes("pass.json")) {
-					throw "Unable to create pass. Pass.json file is required but not found in model.";
+				if (!list.includes("pass.json")) {
+					res.set("Content-Type", "application/json");
+					res.status(418).send({ ecode: 418, status: false, message: "I'm a tea pot. How am I supposed to serve you pass without Pass.json in the chosen model as tea without water?" });
+					return;
 				}
 
 				let manifestRaw = {};
 				let archive = archiver("zip")
 
-				async.each(fileList, function getHashAndArchive(file, callback) {
+				async.each(list, function getHashAndArchive(file, callback) {
 					let passFileStream = fs.createReadStream(`${passModelsDir}/${req.params.type}.pass/${file}`);
 					let hashFlow = crypto.createHash("sha1");
 
@@ -189,7 +203,6 @@ instance.get("/gen/:type", function (req, res) {
 					});
 
 					passFileStream.on("error", function(e) {
-						console.log(e);
 						return callback(e);
 					});
 
@@ -221,7 +234,7 @@ instance.get("/gen/:type", function (req, res) {
 							archive.finalize();
 
 							outputWS.on("close", function() {
-								res.download(`${outputDir}/${req.params.type}.pkpass`, `${req.params.type}.pkpass`, {
+								res.status(201).download(`${outputDir}/${req.params.type}.pkpass`, `${req.params.type}.pkpass`, {
 									cacheControl: false,
 									headers: {
 										"Content-type": "application/vnd.apple.pkpass",
@@ -242,8 +255,4 @@ instance.get("/gen/:type", function (req, res) {
 			});
 		});
 	});
-});
-
-instance.on("error", function() {
-	console.log("got error");
 });

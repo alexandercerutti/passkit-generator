@@ -1,7 +1,6 @@
 const express = require("express");
 const crypto = require("crypto");
-const shellExec = require("child_process").exec;
-const spawn = require("child_process").spawn;
+const { spawn } = require("child_process");
 const os = require("os");
 const path = require("path");
 const archiver = require("archiver");

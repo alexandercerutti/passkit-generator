@@ -124,15 +124,16 @@ function generateManifest(fromObject, tempFolderPath) {
 }
 
 instance.listen(80, "0.0.0.0", function(req, res) {
-	console.log("Listening on 80")
+	console.log("Listening on 80");
 });
 
 instance.get("/", function (req, res) {
-	res.send("Hello there");
+	res.send("Hello there!");
 });
 
 instance.get("/gen/:type/", function (req, res) {
 	if (!supportedTypesOfPass.test(req.params.type)) {
+		// 😊
 		res.set("Content-Type", "application/json");
 		res.status(418).send({ ecode: 418, status: false, message: `Model unsupported. Refer to https://apple.co/2KKcCrB for supported pass models.`});
 		return;
@@ -141,6 +142,7 @@ instance.get("/gen/:type/", function (req, res) {
 	fs.readdir(`${passModelsDir}/${req.params.type}.pass`, {}, function (err, files) {
 		/* Invalid path for passModelsDir */
 		if (err) {
+			// 😊
 			res.set("Content-Type", "application/json");
 			res.status(418).send({ ecode: 418, status: false, message: `Model not available for requested type [${res.params.type}]. Provide a folder with specified name and .pass extension.`});
 			return;
@@ -149,16 +151,25 @@ instance.get("/gen/:type/", function (req, res) {
 		let list = removeDotFiles(files);
 
 		if (!list.length) {
+			// 😊
 			res.set("Content-Type", "application/json");
 			res.status(418).send({ ecode: 418, status: false, message: `Model for type [${req.params.type}] has no contents. Refer to https://apple.co/2IhJr0Q `});
 			return;
 		}
 
 		if (!list.includes("pass.json")) {
+			// 😊
 			res.set("Content-Type", "application/json");
 			res.status(418).send({ ecode: 418, status: false, message: "I'm a tea pot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?" });
 			return;
 		}
+
+		/*
+		 * Creating a temporary directory to keep the manifest.json of each pass.
+		 * This is done to pass the file as openssl parameter.
+		 * It would be better to pass openssl a buffer but sadly it seems not possible.
+		 * Feel free to contribute if you think there's a better way to achieve this.
+		*/
 
 		fs.mkdtemp(path.join(os.tmpdir(), "passkitWebServer-"), function(err, tempFolder) {
 			if (err) {
@@ -170,24 +181,29 @@ instance.get("/gen/:type/", function (req, res) {
 			let archive = archiver("zip");
 
 			async.each(list, function getHashAndArchive(file, callback) {
-				let passFileStream = fs.createReadStream(`${passModelsDir}/${req.params.type}.pass/${file}`);
-				let hashFlow = crypto.createHash("sha1");
+				if (file !== "manifest.json" && file !== "signature") {
+					let passFileStream = fs.createReadStream(`${passModelsDir}/${req.params.type}.pass/${file}`);
+					let hashFlow = crypto.createHash("sha1");
 
-				// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-				archive.file(`${passModelsDir}/${req.params.type}.pass/${file}`, { name: file });
+					// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
+					archive.file(`${passModelsDir}/${req.params.type}.pass/${file}`, { name: file });
 
-				passFileStream.on("data", function(data) {
-					hashFlow.update(data);
-				});
+					passFileStream.on("data", function(data) {
+						hashFlow.update(data);
+					});
 
-				passFileStream.on("error", function(e) {
-					return callback(e);
-				});
+					passFileStream.on("error", function(e) {
+						return callback(e);
+					});
 
-				passFileStream.on("end", function() {
-					manifestRaw[file] = hashFlow.digest("hex").trim();
+					passFileStream.on("end", function() {
+						manifestRaw[file] = hashFlow.digest("hex").trim();
+						return callback();
+					});
+				} else {
+					// skipping files
 					return callback();
-				});
+				}
 			}, function end(error) {
 				if (error) {
 					throw new Error(`Unable to compile manifest. ${error}`);

@@ -114,13 +114,12 @@ function generateManifest(fromObject, tempFolderPath) {
 		}
 
 		const source = typeof fromObject === "object" ? JSON.stringify(fromObject) : fromObject;
-		const manifestBuffer = Buffer.from(source);
-
 		let manifestWS = fs.createWriteStream(`${tempFolderPath}/manifest.json`);
+
 		manifestWS.write(source);
 		manifestWS.end();
 
-		return done(manifestBuffer);
+		return done(Buffer.from(source));
 	});
 }
 
@@ -133,31 +132,31 @@ instance.get("/", function (req, res) {
 });
 
 instance.get("/gen/:type/", function (req, res) {
-	fs.readdir(passModelsDir, {}, function (err, result) {
+	if (!supportedTypesOfPass.test(req.params.type)) {
+		res.set("Content-Type", "application/json");
+		res.status(418).send({ ecode: 418, status: false, message: `Model unsupported. Refer to https://apple.co/2KKcCrB for supported pass models.`});
+		return;
+	}
+
+	fs.readdir(`${passModelsDir}/${req.params.type}.pass`, {}, function (err, files) {
 		/* Invalid path for passModelsDir */
 		if (err) {
-			console.error(err);
-			throw err;
-		}
-
-		/* Removing all the files and folders which start with "." (hidden files and folder) from the Array */
-		result = removeDotFiles(result);
-
-		/* No folders inside passModelsDir */
-		if (!result) {
-			res.write("No pass models found.");
+			res.set("Content-Type", "application/json");
+			res.status(418).send({ ecode: 418, status: false, message: `Model not available for requested type [${res.params.type}]. Provide a folder with specified name and .pass extension.`});
 			return;
 		}
 
-		/* Type in URL not conformant to supportedTypesOfPass */
-		if (!supportedTypesOfPass.test(req.params.type)) {
-			res.send("The requested type of pass is not supported.");
+		let list = removeDotFiles(files);
+
+		if (!list.length) {
+			res.set("Content-Type", "application/json");
+			res.status(418).send({ ecode: 418, status: false, message: `Model for type [${req.params.type}] has no contents. Refer to https://apple.co/2IhJr0Q `});
 			return;
 		}
 
-		/* type in URL has not corresponding model in pass folder */
-		if (!result.some(model => model.toLowerCase().includes(req.params.type.toLowerCase()))) {
-			res.send("No models available for this query.");
+		if (!list.includes("pass.json")) {
+			res.set("Content-Type", "application/json");
+			res.status(418).send({ ecode: 418, status: false, message: "I'm a tea pot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?" });
 			return;
 		}
 
@@ -167,91 +166,68 @@ instance.get("/gen/:type/", function (req, res) {
 			}
 
 			// Manifest dictionary
-			let manifest = {};
+			let manifestRaw = {};
+			let archive = archiver("zip");
 
-			fs.readdir(`${passModelsDir}/${req.params.type}.pass`, function(err, files) {
-				if (err) {
-					throw err;
-				}
+			async.each(list, function getHashAndArchive(file, callback) {
+				let passFileStream = fs.createReadStream(`${passModelsDir}/${req.params.type}.pass/${file}`);
+				let hashFlow = crypto.createHash("sha1");
 
-				let list = removeDotFiles(files);
+				// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
+				archive.file(`${passModelsDir}/${req.params.type}.pass/${file}`, { name: file });
 
-				if (!list.length) {
-					res.set("Content-Type", "application/json");
-					res.status(418).send({ ecode: 418, status: false, message: `Model for type [${req.params.type}] has no contents. Refer to https://apple.co/2IhJr0Q `})
-					return;
-				}
-
-				if (!list.includes("pass.json")) {
-					res.set("Content-Type", "application/json");
-					res.status(418).send({ ecode: 418, status: false, message: "I'm a tea pot. How am I supposed to serve you pass without Pass.json in the chosen model as tea without water?" });
-					return;
-				}
-
-				let manifestRaw = {};
-				let archive = archiver("zip")
-
-				async.each(list, function getHashAndArchive(file, callback) {
-					let passFileStream = fs.createReadStream(`${passModelsDir}/${req.params.type}.pass/${file}`);
-					let hashFlow = crypto.createHash("sha1");
-
-					// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-					archive.file(`${passModelsDir}/${req.params.type}.pass/${file}`, { name: file });
-
-					passFileStream.on("data", function(data) {
-						hashFlow.update(data);
-					});
-
-					passFileStream.on("error", function(e) {
-						return callback(e);
-					});
-
-					passFileStream.on("end", function() {
-						manifestRaw[file] = hashFlow.digest("hex").trim();
-						return callback();
-					});
-				}, function end(error) {
-					if (error) {
-						throw new Error(`Unable to compile manifest. ${error}`);
-					}
-
-					generateManifest(manifestRaw, tempFolder)
-					.then(function(manifestBuffer) {
-
-						archive.append(manifestBuffer, { name: "manifest.json" });
-
-						generateManifestSignature(tempFolder)
-						.then(function(signatureBuffer) {
-
-							if (!fs.existsSync("output")) {
-								fs.mkdirSync("output");
-							}
-
-							archive.append(signatureBuffer, { name: "signature" });
-							let outputWS = fs.createWriteStream(`${outputDir}/${req.params.type}.pkpass`);
-
-							archive.pipe(outputWS);
-							archive.finalize();
-
-							outputWS.on("close", function() {
-								res.status(201).download(`${outputDir}/${req.params.type}.pkpass`, `${req.params.type}.pkpass`, {
-									cacheControl: false,
-									headers: {
-										"Content-type": "application/vnd.apple.pkpass",
-										"Content-length": fs.statSync(`${outputDir}/${req.params.type}.pkpass`).size
-									}
-								});
-							});
-						})
-						.catch(function(buffer) {
-							throw buffer.toString();
-						});
-					})
-					.catch(function(error) {
-						throw error;
-					});
+				passFileStream.on("data", function(data) {
+					hashFlow.update(data);
 				});
 
+				passFileStream.on("error", function(e) {
+					return callback(e);
+				});
+
+				passFileStream.on("end", function() {
+					manifestRaw[file] = hashFlow.digest("hex").trim();
+					return callback();
+				});
+			}, function end(error) {
+				if (error) {
+					throw new Error(`Unable to compile manifest. ${error}`);
+				}
+
+				generateManifest(manifestRaw, tempFolder)
+				.then(function(manifestBuffer) {
+
+					archive.append(manifestBuffer, { name: "manifest.json" });
+
+					generateManifestSignature(tempFolder)
+					.then(function(signatureBuffer) {
+
+						if (!fs.existsSync("output")) {
+							fs.mkdirSync("output");
+						}
+
+						archive.append(signatureBuffer, { name: "signature" });
+						let outputWS = fs.createWriteStream(`${outputDir}/${req.params.type}.pkpass`);
+
+						archive.pipe(outputWS);
+						archive.finalize();
+
+						outputWS.on("close", function() {
+							res.status(201).download(`${outputDir}/${req.params.type}.pkpass`, `${req.params.type}.pkpass`, {
+								cacheControl: false,
+								headers: {
+									"Content-type": "application/vnd.apple.pkpass",
+									"Content-length": fs.statSync(`${outputDir}/${req.params.type}.pkpass`).size
+								}
+							});
+						});
+					})
+					.catch(function(buffer) {
+						throw buffer.toString();
+					});
+				})
+				.catch(function(error) {
+					throw error;
+				});
 			});
 		});
 	});

@@ -10,10 +10,12 @@ const async = require("async");
 const _configuration = Object.freeze(require("./config.json"));
 
 const instance = express();
-const supportedTypesOfPass = /(boarding|event|coupon|generic|store)/i;
+const supportedTypesOfPass = /(boardingPass|eventTicket|coupon|generic|storeCard)/i;
 const passModelsDir = _configuration.models.dir;
 const outputDir = _configuration.output.dir;
 const Certificates = _configuration.certificates;
+
+instance.use(express.json());
 
 /**
 	Apply a filter to arg0 to remove hidden files names (starting with dot)
@@ -28,6 +30,25 @@ function removeDotFiles(from) {
 
 function capitalizeFirst(str) {
 	return str[0].toUpperCase()+str.slice(1);
+}
+
+function fileStreamToBuffer(path, ...callbacks) {
+	let stream = fs.createReadStream(path);
+	let bufferArray = [];
+
+	if (!path || typeof path !== "string") {
+		throw new Error("fileStreamToBuffer: Argument 0 is not provided or is not a string.");
+	}
+
+	if (!callbacks || !callbacks.length) {
+		throw new Error("fileStreamToBuffer: Argument 1, at least one function must be provided.");
+	}
+
+	stream
+		.on("data", chunk => bufferArray.push(chunk))
+		.on("end", () => callbacks[0](Buffer.concat(bufferArray)))
+		// calling callbacks 0 or 1, based on the condition
+		.on("error", (e) => callbacks[Number(callbacks.length > 1)](e));
 }
 
 /**
@@ -138,28 +159,68 @@ function generateManifest(fromObject, manifestUUID) {
 	});
 }
 
-instance.listen(80, "0.0.0.0", function(req, res) {
-	console.log("Listening on 80");
-});
+function queryToOptions(query) {
+	// Some options are not supported since should be included inside the model
+	// Replace null with handlers to check the correctness of the values if needed.
+	// Handlers should contain check
+	const supportedOptions = {
+		serialNumber: null,
+		userInfo: null,
+		expirationDate: null,
+		locations: null,
+		authenticationToken: null,
+		barcode: null
+	};
 
-instance.get("/", function (req, res) {
-	res.send("Hello there!");
-});
+	let options = {};
 
-instance.get("/gen/:type/", function (req, res) {
-	if (!supportedTypesOfPass.test(req.params.type)) {
+	Object.keys(supportedOptions).forEach(function(key) {
+		if (!!query[key]) {
+			if (!supportedOptions[key] || typeof supportedOptions[key] !== "function" || typeof supportedOptions[key] === "function" && supportedOptions[key](query[key])) {
+				options[key] = query[key];
+			}
+		}
+	});
+
+	return options;
+}
+
+function editPassStructure(object, passBuffer) {
+
+	if (!object) {
+		return Promise.resolve(passBuffer);
+	}
+
+	return new Promise(function(done, reject) {
+		try {
+			let passFile = JSON.parse(passBuffer.toString("utf8"));
+
+			for (prop in object) {
+				passFile[prop] = object[prop];
+			}
+
+			return done(Buffer.from(JSON.stringify(passFile)));
+		} catch(e) {
+			return reject(e);
+		}
+	});
+}
+
+
+function RequestHandler(request, response) {
+	if (!supportedTypesOfPass.test(request.params.type)) {
 		// 😊
-		res.set("Content-Type", "application/json");
-		res.status(418).send({ ecode: 418, status: false, message: `Model unsupported. Refer to https://apple.co/2KKcCrB for supported pass models.`});
+		response.set("Content-Type", "application/json");
+		response.status(418).send({ ecode: 418, status: false, message: `Model unsupported. Refer to https://apple.co/2KKcCrB for supported pass models.`});
 		return;
 	}
 
-	fs.readdir(`${passModelsDir}/${req.params.type}.pass`, {}, function (err, files) {
+	fs.readdir(`${passModelsDir}/${request.params.type}.pass`, function (err, files) {
 		/* Invalid path for passModelsDir */
 		if (err) {
 			// 😊
-			res.set("Content-Type", "application/json");
-			res.status(418).send({ ecode: 418, status: false, message: `Model not available for requested type [${res.params.type}]. Provide a folder with specified name and .pass extension.`});
+			response.set("Content-Type", "application/json");
+			response.status(418).send({ ecode: 418, status: false, message: `Model not available for request type [${request.params.type}]. Provide a folder with specified name and .pass extension.`});
 			return;
 		}
 
@@ -167,88 +228,114 @@ instance.get("/gen/:type/", function (req, res) {
 
 		if (!list.length) {
 			// 😊
-			res.set("Content-Type", "application/json");
-			res.status(418).send({ ecode: 418, status: false, message: `Model for type [${req.params.type}] has no contents. Refer to https://apple.co/2IhJr0Q `});
+			response.set("Content-Type", "application/json");
+			response.status(418).send({ ecode: 418, status: false, message: `Model for type [${request.params.type}] has no contents. Refer to https://apple.co/2IhJr0Q`});
 			return;
 		}
 
 		if (!list.includes("pass.json")) {
 			// 😊
-			res.set("Content-Type", "application/json");
-			res.status(418).send({ ecode: 418, status: false, message: "I'm a tea pot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?" });
+			response.set("Content-Type", "application/json");
+			response.status(418).send({ ecode: 418, status: false, message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?" });
 			return;
 		}
 
-		// Manifest dictionary
-		let manifestRaw = {};
-		let archive = archiver("zip");
+		let options = (request.method === "POST" ? request.body : (request.method === "GET" ? request.params : {}));
+		fileStreamToBuffer(`${passModelsDir}/${request.params.type}.pass/pass.json`, function _returnBuffer(bufferResult) {
+			editPassStructure(queryToOptions(options), bufferResult).then(function _afterJSONParse(passFileBuffer) {
+				// Manifest dictionary
+				let manifestRaw = {};
+				let archive = archiver("zip");
 
-		async.each(list, function getHashAndArchive(file, callback) {
-			if (file !== "manifest.json" && file !== "signature") {
-				let passFileStream = fs.createReadStream(`${passModelsDir}/${req.params.type}.pass/${file}`);
-				let hashFlow = crypto.createHash("sha1");
+				archive.append(passFileBuffer, { name: "pass.json" });
+				manifestRaw["pass.json"] = crypto.createHash("sha1").update(passFileBuffer).digest("hex").trim();
 
-				// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-				archive.file(`${passModelsDir}/${req.params.type}.pass/${file}`, { name: file });
-
-				passFileStream.on("data", function(data) {
-					hashFlow.update(data);
-				});
-
-				passFileStream.on("error", function(e) {
-					return callback(e);
-				});
-
-				passFileStream.on("end", function() {
-					manifestRaw[file] = hashFlow.digest("hex").trim();
-					return callback();
-				});
-			} else {
-				// skipping files
-				return callback();
-			}
-		}, function end(error) {
-			if (error) {
-				throw new Error(`Unable to compile manifest. ${error}`);
-			}
-
-			let uuid = UUIDGen();
-
-			generateManifest(manifestRaw, uuid)
-			.then(function(manifestBuffer) {
-
-				archive.append(manifestBuffer, { name: "manifest.json" });
-
-				generateManifestSignature(uuid)
-				.then(function(signatureBuffer) {
-
-					if (!fs.existsSync("output")) {
-						fs.mkdirSync("output");
+				async.each(list, function getHashAndArchive(file, callback) {
+					if (/(manifest|signature|pass)/ig.test(file)) {
+						// skipping files
+						return callback();
 					}
 
-					archive.append(signatureBuffer, { name: "signature" });
-					let outputWS = fs.createWriteStream(`${outputDir}/${req.params.type}.pkpass`);
+					// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
+					archive.file(`${passModelsDir}/${request.params.type}.pass/${file}`, { name: file });
 
-					archive.pipe(outputWS);
-					archive.finalize();
+					let hashFlow = crypto.createHash("sha1");
 
-					outputWS.on("close", function() {
-						res.status(201).download(`${outputDir}/${req.params.type}.pkpass`, `${req.params.type}.pkpass`, {
-							cacheControl: false,
-							headers: {
-								"Content-type": "application/vnd.apple.pkpass",
-								"Content-length": fs.statSync(`${outputDir}/${req.params.type}.pkpass`).size
-							}
-						});
+					fs.createReadStream(`${passModelsDir}/${request.params.type}.pass/${file}`)
+					.on("data", function(data) {
+						hashFlow.update(data);
+					})
+					.on("error", function(e) {
+						return callback(e);
+					})
+					.on("end", function() {
+						manifestRaw[file] = hashFlow.digest("hex").trim();
+						return callback();
 					});
-				})
-				.catch(function(buffer) {
-					throw buffer.toString();
+				}, function end(error) {
+					if (error) {
+						throw new Error(`Unable to compile manifest. ${error}`);
+					}
+
+					let uuid = UUIDGen();
+
+					generateManifest(manifestRaw, uuid)
+					.then(function(manifestBuffer) {
+
+						archive.append(manifestBuffer, { name: "manifest.json" });
+
+						generateManifestSignature(uuid)
+						.then(function(signatureBuffer) {
+
+							if (!fs.existsSync("output")) {
+								fs.mkdirSync("output");
+							}
+
+							archive.append(signatureBuffer, { name: "signature" });
+							let outputWS = fs.createWriteStream(`${outputDir}/${request.params.type}.pkpass`);
+
+							archive.pipe(outputWS);
+							archive.finalize();
+
+							outputWS.on("close", function() {
+								response.status(201).download(`${outputDir}/${request.params.type}.pkpass`, `${request.params.type}.pkpass`, {
+									cacheControl: false,
+									headers: {
+										"Content-type": "application/vnd.apple.pkpass",
+										"Content-length": fs.statSync(`${outputDir}/${request.params.type}.pkpass`).size
+									}
+								});
+							});
+						})
+						.catch(function(buffer) {
+							throw buffer.toString();
+						});
+					})
+					.catch(function(error) {
+						throw error;
+					});
 				});
+
 			})
-			.catch(function(error) {
-				throw error;
+			.catch(function(err) {
+				// 😊
+				response.set("Content-Type", "application/json");
+				response.status(418).send({ ecode: 418, status: false, message: `Got error while parsing pass.json file: ${err}` });
+				return;
 			});
+		}, function _error(e) {
+			console.log(e)
 		});
 	});
+}
+
+instance.listen(80, "0.0.0.0", function(request, response) {
+	console.log("Listening on 80");
 });
+
+instance.get("/", function (request, response) {
+	response.send("Hello there!");
+});
+
+instance.get("/gen/:type/", RequestHandler);
+instance.post("/gen/:type/", RequestHandler);

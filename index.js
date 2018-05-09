@@ -32,6 +32,12 @@ function capitalizeFirst(str) {
 	return str[0].toUpperCase()+str.slice(1);
 }
 
+/**
+	@function fileStreamToBuffer
+	@params {String} path - the path of the file to be read
+	@params {[Functions]} callbacks - Array of callbacks, only the first two are used, the first for .end() and the second for .error() (or the same, if only one is available)
+*/
+
 function fileStreamToBuffer(path, ...callbacks) {
 	let stream = fs.createReadStream(path);
 	let bufferArray = [];
@@ -159,17 +165,46 @@ function generateManifest(fromObject, manifestUUID) {
 	});
 }
 
-function queryToOptions(query) {
-	// Some options are not supported since should be included inside the model
-	// Replace null with handlers to check the correctness of the values if needed.
-	// Handlers should contain check
+/**
+	Filters the options received in the query from http request into supported options
+	by Apple and this application, based on the functions that can be provided to keys
+	in supportedOptions.
+
+	You can create your own function to check if keys in query meet your requirements.
+	They accept the value provided in the related query key as unique parameter.
+	Make them return a boolean value, true if the requirements are met, false otherwise.
+
+	Example:
+
+	barcode: function _checkBarcode() {
+		if ( type of barcode not supported ) {
+			return false;
+		}
+
+		if ( barcode value doesn't meet your requirements )
+			return false;
+		}
+
+		return true;
+	}
+
+	Please note that some options are not supported since should be included inside the
+	models you provide in "passModels" directory.
+
+	@function filterPassOptions
+	@params {Object} query - raw informations to be edited in the pass.json file
+							from HTTP Request Params or Body
+	@returns {Object} - filtered options based on above criterias.
+*/
+
+function filterPassOptions(query) {
 	const supportedOptions = {
-		serialNumber: null,
-		userInfo: null,
-		expirationDate: null,
-		locations: null,
-		authenticationToken: null,
-		barcode: null
+		"serialNumber": null,
+		"userInfo": null,
+		"expirationDate": null,
+		"locations": null,
+		"authenticationToken": null,
+		"barcode": null
 	};
 
 	let options = {};
@@ -185,9 +220,17 @@ function queryToOptions(query) {
 	return options;
 }
 
-function editPassStructure(object, passBuffer) {
+/**
+	Edits the buffer of pass.json based on the passed options.
 
-	if (!object) {
+	@function editPassStructure
+	@params {Object} options - options resulting from the filtering made by filterPassOptions function
+	@params {Buffer} passBuffer - Buffer of the contents of pass.json
+	@returns {Promise} - Edited pass.json buffer or Object containing error.
+*/
+
+function editPassStructure(options, passBuffer) {
+	if (!options) {
 		return Promise.resolve(passBuffer);
 	}
 
@@ -195,8 +238,8 @@ function editPassStructure(object, passBuffer) {
 		try {
 			let passFile = JSON.parse(passBuffer.toString("utf8"));
 
-			for (prop in object) {
-				passFile[prop] = object[prop];
+			for (prop in options) {
+				passFile[prop] = options[prop];
 			}
 
 			return done(Buffer.from(JSON.stringify(passFile)));

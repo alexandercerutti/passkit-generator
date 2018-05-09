@@ -285,7 +285,7 @@ function RequestHandler(request, response) {
 
 		let options = (request.method === "POST" ? request.body : (request.method === "GET" ? request.params : {}));
 		fileStreamToBuffer(`${passModelsDir}/${request.params.type}.pass/pass.json`, function _returnBuffer(bufferResult) {
-			editPassStructure(queryToOptions(options), bufferResult).then(function _afterJSONParse(passFileBuffer) {
+			editPassStructure(filterPassOptions(options), bufferResult).then(function _afterJSONParse(passFileBuffer) {
 				// Manifest dictionary
 				let manifestRaw = {};
 				let archive = archiver("zip");

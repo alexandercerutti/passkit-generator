@@ -4,18 +4,14 @@ const path = require("path");
 const crypto = require("crypto");
 const { spawn } = require("child_process");
 const archiver = require("archiver");
-const express = require("express");
 const async = require("async");
 
 const _configuration = Object.freeze(require("./config.json"));
 
-const instance = express();
 const supportedTypesOfPass = /(boardingPass|eventTicket|coupon|generic|storeCard)/i;
 const passModelsDir = _configuration.models.dir;
 const outputDir = _configuration.output.dir;
 const Certificates = _configuration.certificates;
-
-instance.use(express.json());
 
 /**
 	Apply a filter to arg0 to remove hidden files names (starting with dot)
@@ -372,13 +368,4 @@ function RequestHandler(request, response) {
 	});
 }
 
-instance.listen(80, "0.0.0.0", function(request, response) {
-	console.log("Listening on 80");
-});
-
-instance.get("/", function (request, response) {
-	response.send("Hello there!");
-});
-
-instance.get("/gen/:type/", RequestHandler);
-instance.post("/gen/:type/", RequestHandler);
+module.exports = { RequestHandler };

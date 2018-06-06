@@ -1,5 +1,7 @@
 const express = require("express");
-const { RequestHandler } = require("./index")
+const passkit = require("./index");
+
+passkit.init("./config.json");
 
 const instance = express();
 
@@ -13,5 +15,5 @@ instance.get("/", function (request, response) {
 	response.send("Hello there!");
 });
 
-instance.get("/gen/:type/", RequestHandler);
-instance.post("/gen/:type/", RequestHandler);
+instance.get("/gen/:type/",passkit.RequestHandler);
+instance.post("/gen/:type/", passkit.RequestHandler);

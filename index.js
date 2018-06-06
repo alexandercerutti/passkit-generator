@@ -114,25 +114,6 @@ function fileStreamToBuffer(path, ...callbacks) {
 }
 
 /**
-	Checks if the certificate and the key files originated from che .p12 file are available
-
-	@function checkSignatureRequirements
-	@returns {Object} Promise
-*/
-
-function checkSignatureRequirements() {
-	let checkCertificate = new Promise(function(available, notAvailable) {
-		fs.access(path.resolve(Certificates.dir, Certificates.files.signerCert), (e) => (!!e ? notAvailable : available)() );
-	});
-
-	let checkKey = new Promise(function(available, notAvailable) {
-		fs.access(path.resolve(Certificates.dir, Certificates.files.signerKey), (e) => (!!e ? notAvailable : available)() );
-	});
-
-	return Promise.all([checkCertificate, checkKey]);
-}
-
-/**
 	Generates the cryptografic signature for the manifest file.
 	Spawns Openssl process since Node.js has no support for PKCSs.
 

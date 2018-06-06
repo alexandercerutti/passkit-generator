@@ -1,17 +1,19 @@
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
+const forge = require("node-forge");
 const { spawn } = require("child_process");
 const archiver = require("archiver");
 const async = require("async");
 
-const _configuration = Object.freeze(require("./config.json"));
+let _configuration = Object.freeze(require("./config.json"));
 
 const supportedTypesOfPass = /(boardingPass|eventTicket|coupon|generic|storeCard)/i;
 const passModelsDir = _configuration.models.dir;
 const outputDir = _configuration.output.dir;
-const Certificates = _configuration.certificates;
+const Certificates = {
+	status: false
+};
 
 /**
 	Apply a filter to arg0 to remove hidden files names (starting with dot)
@@ -26,6 +28,61 @@ function removeDotFiles(from) {
 
 function capitalizeFirst(str) {
 	return str[0].toUpperCase()+str.slice(1);
+}
+
+function loadConfiguration(configurationPath) {
+	let setup = require(path.resolve(__dirname, configurationPath));
+	let reqFilesKeys = ["wwdr", "signerCert", "signerKey"];
+
+	// Node-Forge also accepts .cer certificates
+	if (!setup.certificates.dir || fs.accessSync(path.resolve(setup.certificates.dir)) !== undefined) {
+		throw new Error("Unable to load certificates directory. Check its existence or the permissions.");
+	}
+
+	if (!setup.certificates.files) {
+		throw new Error("Expected key 'files' in configuration file but not found.");
+	}
+
+	if (!setup.certificates.files.wwdr) {
+		throw new Error("Expected file path or content for key certificates.files.wwdr. Please provide a valid certificate from https://apple.co/2sc2pvv");
+	}
+
+	if (!setup.certificates.files.signerCert) {
+		throw new Error("Expected file path or content for key certificates.files.signerCert. Please provide a valid signer certificate.")
+	}
+
+	if (!setup.certificates.files.signerKey || !setup.certificates.credentials.privateKeySecret) {
+		throw new Error("Expected file path or content for key certificates.files.signerKey with an associated password at certificates.credentials.privateKeySecret but not found.")
+	}
+
+	let certPaths = reqFilesKeys.map(e => path.resolve(setup.certificates.dir, setup.certificates.files[e]));
+
+	return new Promise(function(success, reject) {
+		let docStruct = {};
+
+		async.concat(certPaths, fs.readFile, function(err, contents) {
+			// contents is a Buffer array
+
+			if (err) {
+				return reject(err);
+			}
+
+			return success(
+				contents.map(function(file, index) {
+					if (file.includes("PRIVATE KEY")) {
+						return forge.pki.decryptRsaPrivateKey(
+							file,
+							setup.certificates.credentials.privateKeySecret
+						);
+					} else if (file.includes("CERTIFICATE")) {
+						return forge.pki.certificateFromPem(file);
+					} else {
+						throw new Error("File not allowed in configuration. Only .pems files containing certificates and private keys are allowed");
+					}
+				})
+			)
+		});
+	});
 }
 
 /**
@@ -62,11 +119,11 @@ function fileStreamToBuffer(path, ...callbacks) {
 
 function checkSignatureRequirements() {
 	let checkCertificate = new Promise(function(available, notAvailable) {
-		fs.access(`${Certificates.dir}/${Certificates.files.certificate}`, (e) => (!!e ? notAvailable : available)() );
+		fs.access(path.resolve(Certificates.dir, Certificates.files.signerCert), (e) => (!!e ? notAvailable : available)() );
 	});
 
 	let checkKey = new Promise(function(available, notAvailable) {
-		fs.access(`${Certificates.dir}/${Certificates.files.key}`, (e) => (!!e ? notAvailable : available)() );
+		fs.access(path.resolve(Certificates.dir, Certificates.files.signerKey), (e) => (!!e ? notAvailable : available)() );
 	});
 
 	return Promise.all([checkCertificate, checkKey]);
@@ -88,48 +145,106 @@ function UUIDGen(a){return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+
 	@returns {Object} Promise
 */
 
-function generateManifestSignature(manifestUUID) {
-	return new Promise(function(done, rejected) {
-		checkSignatureRequirements()
-		.then(function() {
-			let opensslError = false;
-			let opensslBuffer = [];
 
-			let opensslProcess = spawn("openssl", [
-				"smime",
-				"-binary",
-				"-sign",
-				"-certfile", path.resolve(Certificates.dir, Certificates.files["wwdr_pem"]),
-				"-signer", path.resolve(Certificates.dir, Certificates.files["certificate"]),
-				"-inkey", path.resolve(Certificates.dir, Certificates.files["key"]),
-				"-in", path.resolve(`${os.tmpdir()}/manifest-${manifestUUID}.json`),
-//				"-out", path.resolve("passCreator", "event.pass", "./signature"),
-				"-outform", "DER",
-				"-passin", `pass:${Certificates.credentials["dev_pem_key"]}`
-			]);
+function generateManifestSignature(manifest) {
+//	return new Promise(function(done, rejected) {
+		let signature = forge.pkcs7.createSignedData();
 
-			opensslProcess.stdout.on("data", function(data) {
-				opensslBuffer.push(data);
-			});
+		if (typeof manifest === "object") {
+			signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8")
+		} else if (typeof manifest === "string") {
+			signature.content = manifest;
+		} else {
+			throw new Error(`Manifest content must be a string or an object. Unable to accept manifest of type ${typeof manifest}`);
+		}
 
-			opensslProcess.stderr.on("data", function(data) {
-				opensslBuffer.push(data);
-				opensslError = true;
-			});
+		signature.addCertificate(Certificates.wwdr);
+		signature.addCertificate(Certificates.signerCert);
 
-			opensslProcess.stdout.on("end", function() {
-				if (opensslError) {
-					return rejected(Buffer.concat(opensslBuffer));
-				}
-
-				return done(Buffer.concat(opensslBuffer));
-			});
-		})
-		.catch(function(e) {
-			return rejected(`Cannot fulfill signature requirements.\n${e}`);
+		signature.addSigner({
+			key: Certificates.signerKey,
+			certificate: Certificates.signerCert,
+			digestAlgorithm: forge.pki.oids.sha1,
+			authenticatedAttributes: [{
+				type: forge.pki.oids.contentType,
+				value: forge.pki.oids.data
+			}, {
+				type: forge.pki.oids.messageDigest,
+			}, {
+				// the value is autogenerated
+				type: forge.pki.oids.signingTime,
+			}]
 		});
-	});
+
+		signature.sign();
+
+		/*
+		 * Signing creates in contentInfo a JSON object nested BER/TLV (X.690 standard) structure.
+		 * Each object represents a component of ASN.1 (Abstract Syntax Notation)
+		 * For a more complete reference, refer to: https://en.wikipedia.org/wiki/X.690#BER_encoding
+		 *
+		 * signature.contentInfo.type => SEQUENCE OF (16)
+		 * signature.contentInfo.value[0].type => OBJECT IDENTIFIER (6)
+		 * signature.contantInfo.value[1].type => END OF CONTENT (EOC - 0)
+		 *
+		 * EOC are only present only in constructed indefinite-length methods
+		 * Since `signature.contentInfo.value[1].value` contains an object whose value contains the content we passed,
+		 * we have to pop the whole object away to avoid signature content invalidation.
+		 *
+		 */
+		signature.contentInfo.value.pop();
+
+		// Converting the JSON Structure into a DER (which is a subset of BER), ASN.1 valid structure
+		// Returning the buffer of the signature
+//		return done(Buffer.from(forge.asn1.toDer(signature.toAsn1()).getBytes(), 'binary'));
+
+		return Buffer.from(forge.asn1.toDer(signature.toAsn1()).getBytes(), 'binary');
+//	});
 }
+
+
+// function generateManifestSignature(manifestUUID) {
+// 	return new Promise(function(done, rejected) {
+// 		checkSignatureRequirements()
+// 		.then(function() {
+// 			let opensslError = false;
+// 			let opensslBuffer = [];
+
+// 			let opensslProcess = spawn("openssl", [
+// 				"smime",
+// 				"-binary",
+// 				"-sign",
+// 				"-certfile", path.resolve(Certificates.dir, Certificates.files["wwdr_pem"]),
+// 				"-signer", path.resolve(Certificates.dir, Certificates.files["certificate"]),
+// 				"-inkey", path.resolve(Certificates.dir, Certificates.files["key"]),
+// 				"-in", path.resolve(`${os.tmpdir()}/manifest-${manifestUUID}.json`),
+// //				"-out", path.resolve("passCreator", "event.pass", "./signature"),
+// 				"-outform", "DER",
+// 				"-passin", `pass:${Certificates.credentials["privateKeySecret"]}`
+// 			]);
+
+// 			opensslProcess.stdout.on("data", function(data) {
+// 				opensslBuffer.push(data);
+// 			});
+
+// 			opensslProcess.stderr.on("data", function(data) {
+// 				opensslBuffer.push(data);
+// 				opensslError = true;
+// 			});
+
+// 			opensslProcess.stdout.on("end", function() {
+// 				if (opensslError) {
+// 					return rejected(Buffer.concat(opensslBuffer));
+// 				}
+
+// 				return done(Buffer.concat(opensslBuffer));
+// 			});
+// 		})
+// 		.catch(function(e) {
+// 			return rejected(`Cannot fulfill signature requirements.\n${e}`);
+// 		});
+// 	});
+// }
 
 /**
 	Generates a Buffer of JSON file (manifest)
@@ -157,7 +272,8 @@ function generateManifest(fromObject, manifestUUID) {
 		manifestWS.write(source);
 		manifestWS.end();
 
-		return done(Buffer.from(source));
+		//return done(Buffer.from(source));
+		return done(Buffer.from(source).toString());
 	});
 }
 
@@ -245,8 +361,11 @@ function editPassStructure(options, passBuffer) {
 	});
 }
 
-
 function RequestHandler(request, response) {
+	if (!Certificates.status) {
+		throw new Error("passkit requires initialization by calling .init() method.");
+	}
+
 	if (!supportedTypesOfPass.test(request.params.type)) {
 		// 😊
 		response.set("Content-Type", "application/json");
@@ -283,11 +402,12 @@ function RequestHandler(request, response) {
 		fileStreamToBuffer(`${passModelsDir}/${request.params.type}.pass/pass.json`, function _returnBuffer(bufferResult) {
 			editPassStructure(filterPassOptions(options), bufferResult).then(function _afterJSONParse(passFileBuffer) {
 				// Manifest dictionary
-				let manifestRaw = {};
+				let manifest = {};
 				let archive = archiver("zip");
 
 				archive.append(passFileBuffer, { name: "pass.json" });
-				manifestRaw["pass.json"] = crypto.createHash("sha1").update(passFileBuffer).digest("hex").trim();
+
+				manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
 
 				async.each(list, function getHashAndArchive(file, callback) {
 					if (/(manifest|signature|pass)/ig.test(file)) {
@@ -298,17 +418,17 @@ function RequestHandler(request, response) {
 					// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
 					archive.file(`${passModelsDir}/${request.params.type}.pass/${file}`, { name: file });
 
-					let hashFlow = crypto.createHash("sha1");
+					let hashFlow = forge.md.sha1.create();
 
 					fs.createReadStream(`${passModelsDir}/${request.params.type}.pass/${file}`)
 					.on("data", function(data) {
-						hashFlow.update(data);
+						hashFlow.update(data.toString("binary"));
 					})
 					.on("error", function(e) {
 						return callback(e);
 					})
 					.on("end", function() {
-						manifestRaw[file] = hashFlow.digest("hex").trim();
+						manifest[file] = hashFlow.digest().toHex().trim();
 						return callback();
 					});
 				}, function end(error) {
@@ -316,47 +436,47 @@ function RequestHandler(request, response) {
 						throw new Error(`Unable to compile manifest. ${error}`);
 					}
 
-					let uuid = UUIDGen();
+				//	let uuid = UUIDGen();
 
-					generateManifest(manifestRaw, uuid)
-					.then(function(manifestBuffer) {
+					// generateManifest(manifestRaw, uuid)
+					// .then(function(manifestBuffer) {
 
-						archive.append(manifestBuffer, { name: "manifest.json" });
+						archive.append(Buffer.from(JSON.stringify(manifest), "utf8"), { name: "manifest.json" });
+						
+						let signatureBuffer = generateManifestSignature(manifest);
 
-						generateManifestSignature(uuid)
-						.then(function(signatureBuffer) {
 
-							if (!fs.existsSync("output")) {
-								fs.mkdirSync("output");
-							}
+						console.log(signatureBuffer)
 
-							archive.append(signatureBuffer, { name: "signature" });
-							let outputWS = fs.createWriteStream(`${outputDir}/${request.params.type}.pkpass`);
+						if (!fs.existsSync("output")) {
+							fs.mkdirSync("output");
+						}
 
-							archive.pipe(outputWS);
-							archive.finalize();
+						archive.append(signatureBuffer, { name: "signature" });
+						let outputWS = fs.createWriteStream(`${outputDir}/${request.params.type}.pkpass`);
 
-							outputWS.on("close", function() {
-								response.status(201).download(`${outputDir}/${request.params.type}.pkpass`, `${request.params.type}.pkpass`, {
-									cacheControl: false,
-									headers: {
-										"Content-type": "application/vnd.apple.pkpass",
-										"Content-length": fs.statSync(`${outputDir}/${request.params.type}.pkpass`).size
-									}
-								});
+						archive.pipe(outputWS);
+						archive.finalize();
+
+						outputWS.on("close", function() {
+							response.status(201).download(`${outputDir}/${request.params.type}.pkpass`, `${request.params.type}.pkpass`, {
+								cacheControl: false,
+								headers: {
+									"Content-type": "application/vnd.apple.pkpass",
+									"Content-length": fs.statSync(`${outputDir}/${request.params.type}.pkpass`).size
+								}
 							});
-						})
-						.catch(function(buffer) {
-							throw buffer.toString();
 						});
-					})
-					.catch(function(error) {
-						throw error;
-					});
+					// })
+					// .catch(function(error) {
+					// 	throw error;
+					// });
 				});
 
 			})
 			.catch(function(err) {
+throw err;
+
 				// 😊
 				response.set("Content-Type", "application/json");
 				response.status(418).send({ ecode: 418, status: false, message: `Got error while parsing pass.json file: ${err}` });
@@ -368,4 +488,24 @@ function RequestHandler(request, response) {
 	});
 }
 
-module.exports = { RequestHandler };
+function init(configPath) {
+	if (Certificates.status) {
+		throw new Error("Initialization must be triggered only once.");
+	}
+
+	if (!configPath || fs.accessSync(path.resolve(__dirname, configPath)) !== undefined) {
+		throw new Error(`Cannot load configuration from 'path' (${configPath}). File not existing or missing path.`);
+	}
+
+	loadConfiguration(configPath).then(function(config) {
+		Certificates.wwdr = config[0];
+		Certificates.signerCert = config[1];
+		Certificates.signerKey = config[2];
+		Certificates.status = true;
+	})
+	.catch(function(error) {
+		throw new Error(`Error: ${error}`);
+	});
+}
+
+module.exports = { init, RequestHandler };

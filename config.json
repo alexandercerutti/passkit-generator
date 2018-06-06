@@ -2,12 +2,12 @@
 	"certificates": {
 		"dir": "certificates",
 		"files": {
-			"wwdr_pem": "WWDR.pem",
-			"certificate": "passcertificate.pem",
-			"key": "passkey.pem"
+			"wwdr": "WWDR.pem",
+			"signerCert": "passcertificate.pem",
+			"signerKey": "passkey.pem"
 		},
 		"credentials": {
-			"dev_pem_key": "123456"
+			"privateKeySecret": "123456"
 		}
 	},
 	"output": {

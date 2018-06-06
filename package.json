@@ -11,6 +11,7 @@
   "dependencies": {
     "archiver": "^2.1.1",
     "async": "^2.6.0",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "node-forge": "^0.7.5"
   }
 }

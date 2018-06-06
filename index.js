@@ -355,12 +355,8 @@ function RequestHandler(request, response) {
 					}
 
 					archive.append(Buffer.from(JSON.stringify(manifest), "utf8"), { name: "manifest.json" });
-					
-					let signatureBuffer = createSignature(manifest);
 
-					if (!fs.existsSync("output")) {
-						fs.mkdirSync("output");
-					}
+					let signatureBuffer = createSignature(manifest);
 
 					archive.append(signatureBuffer, { name: "signature" });
 

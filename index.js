@@ -273,8 +273,9 @@ function RequestHandler(request, response) {
 		}
 
 		let options = (request.method === "POST" ? request.body : (request.method === "GET" ? request.params : {}));
-		fs.readFile(path.resolve(Configuration.passModelsDir, `${request.params.type}.pass`, "pass.json"), {}, function _returnBuffer(err, passStructBuffer) {
-			editPassStructure(filterPassOptions(options), passStructBuffer).then(function _afterJSONParse(passFileBuffer) {
+		fs.readFile(path.resolve(Configuration.passModelsDir, `${request.params.type}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
+			editPassStructure(filterPassOptions(options), passStructBuffer)
+			.then(function _afterJSONParse(passFileBuffer) {
 				// Manifest dictionary
 				let manifest = {};
 				let archive = archiver("zip");
@@ -318,7 +319,7 @@ function RequestHandler(request, response) {
 
 					response.set({
 						"Content-type": "application/vnd.apple.pkpass",
-						"Content-disposition": `attachment; filename=${request.params.type}.pkpass`
+						"Content-disposition": `attachment; filename=${request.query.name || request.body.name || request.params.type + (new Date()).toISOString().split('T')[0].replace(/-/ig, "") }.pkpass`
 					})
 
 					if (Configuration.output.shouldWrite && Configuration.output.dir != null && request.params.name) {

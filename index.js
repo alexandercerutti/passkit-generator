@@ -317,25 +317,27 @@ function RequestHandler(request, response) {
 
 					archive.append(signatureBuffer, { name: "signature" });
 
+					let passName = (request.query.name || request.body.name || request.params.type + (new Date()).toISOString().split('T')[0].replace(/-/ig, ""));
+
 					response.set({
 						"Content-type": "application/vnd.apple.pkpass",
-						"Content-disposition": `attachment; filename=${request.query.name || request.body.name || request.params.type + (new Date()).toISOString().split('T')[0].replace(/-/ig, "") }.pkpass`
-					})
+						"Content-disposition": `attachment; filename=${passName}.pkpass`
+					});
 
-					if (Configuration.output.shouldWrite && Configuration.output.dir != null && request.params.name) {
+					if (Configuration.output.shouldWrite && !!Configuration.output.dir) {
 						// Memorize and then make it download
-						let outputWS = fs.createWriteStream(`${Configuration.output.dir}/${request.params.type}.pkpass`);
+						let wstreamOutputPass = fs.createWriteStream(path.resolve(Configuration.output.dir, `${passName}.pkpass`));
+						archive.pipe(wstreamOutputPass);
 
-						archive.pipe(outputWS);
-
-						outputWS.on("close", function() {
-							response.status(201).download(`${Configuration.output.dir}/${request.params.type}.pkpass`, `${request.params.type}.pkpass`, {
+						wstreamOutputPass.on("close", function() {
+							response.status(201).download(path.resolve(Configuration.output.dir, `${passName}.pkpass`), `${passName}.pkpass`, {
 								cacheControl: false
 							});
 						});
 					} else {
-						archive.pipe(response)
-						response.status(201)
+						// Streaming directly the buffer
+						archive.pipe(response);
+						response.status(201);
 					}
 
 					archive.finalize();
@@ -392,6 +394,7 @@ function init(configPath) {
 
 		if (!paths[1] && setup.output.shouldWrite) {
 			Configuration.output.dir = setup.output.dir;
+			Configuration.output.shouldWrite = true
 		}
 
 		Certificates.wwdr = certs[0];

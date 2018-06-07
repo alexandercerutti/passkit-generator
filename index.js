@@ -89,31 +89,6 @@ function loadConfiguration(setup) {
 }
 
 /**
-	@function fileStreamToBuffer
-	@params {String} path - the path of the file to be read
-	@params {[Functions]} callbacks - Array of callbacks, only the first two are used, the first for .end() and the second for .error() (or the same, if only one is available)
-*/
-
-function fileStreamToBuffer(path, ...callbacks) {
-	let stream = fs.createReadStream(path);
-	let bufferArray = [];
-
-	if (!path || typeof path !== "string") {
-		throw new Error("fileStreamToBuffer: Argument 0 is not provided or is not a string.");
-	}
-
-	if (!callbacks || !callbacks.length) {
-		throw new Error("fileStreamToBuffer: Argument 1, at least one function must be provided.");
-	}
-
-	stream
-		.on("data", chunk => bufferArray.push(chunk))
-		.on("end", () => callbacks[0](Buffer.concat(bufferArray)))
-		// calling callbacks 0 or 1, based on the condition
-		.on("error", (e) => callbacks[Number(callbacks.length > 1)](e));
-}
-
-/**
 	Generates the cryptografic signature for the manifest file.
 	Spawns Openssl process since Node.js has no support for PKCSs.
 
@@ -298,8 +273,8 @@ function RequestHandler(request, response) {
 		}
 
 		let options = (request.method === "POST" ? request.body : (request.method === "GET" ? request.params : {}));
-		fileStreamToBuffer(`${Configuration.passModelsDir}/${request.params.type}.pass/pass.json`, function _returnBuffer(bufferResult) {
-			editPassStructure(filterPassOptions(options), bufferResult).then(function _afterJSONParse(passFileBuffer) {
+		fs.readFile(path.resolve(Configuration.passModelsDir, `${request.params.type}.pass`, "pass.json"), {}, function _returnBuffer(err, passStructBuffer) {
+			editPassStructure(filterPassOptions(options), passStructBuffer).then(function _afterJSONParse(passFileBuffer) {
 				// Manifest dictionary
 				let manifest = {};
 				let archive = archiver("zip");
@@ -346,7 +321,7 @@ function RequestHandler(request, response) {
 						"Content-disposition": `attachment; filename=${request.params.type}.pkpass`
 					})
 
-					if (Configuration.output.shouldWrite && Configuration.output.dir != null) {
+					if (Configuration.output.shouldWrite && Configuration.output.dir != null && request.params.name) {
 						// Memorize and then make it download
 						let outputWS = fs.createWriteStream(`${Configuration.output.dir}/${request.params.type}.pkpass`);
 

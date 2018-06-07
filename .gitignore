@@ -2,9 +2,6 @@
 node_modules
 output/
 passModels/
-certificates/pass.cer
-certificates/passCertificate-exported.p12
-certificates/passcertificate.pem
-certificates/passkey.pem
-certificates/source-AppleWWDRCA.cer
+certificates/
 improvements.rtf
+config.json

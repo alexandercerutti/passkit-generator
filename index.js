@@ -391,20 +391,41 @@ function init(configPath) {
 
 	let setup = require(configPathResolved);
 
-	loadConfiguration(setup).then(function(config) {
-		Certificates.wwdr = config[0];
-		Certificates.signerCert = config[1];
-		Certificates.signerKey = config[2];
+	let queue = [
+		new Promise(function(success, reject) {
+			fs.access(path.resolve(setup.models.dir), function(err) {
+				if (err) {
+					return reject("A valid pass model directory is required. Please provide one in the configuration file under voice 'models.dir'.")
+				}
+
+				return success(null);
+			});
+		}),
+		new Promise((success) => fs.access(path.resolve(setup.output.dir), success)),
+		loadConfiguration(setup)
+	];
+
+	Promise.all(queue)
+	.then(function(results) {
+		let paths = results.slice(0, 2);
+		let certs = results[results.length-1];
+
+		if (!paths[0]) {
+			Configuration.passModelsDir = setup.models.dir;
+		}
+
+		if (!paths[1] && setup.output.shouldWrite) {
+			Configuration.output.dir = setup.output.dir;
+		}
+
+		Certificates.wwdr = certs[0];
+		Certificates.signerCert = certs[1];
+		Certificates.signerKey = certs[2];
 		Certificates.status = true;
 	})
 	.catch(function(error) {
-		throw new Error(`Error: ${error}`);
+		throw new Error(error);
 	});
-
-	Configuration.passModelsDir = setup.models.dir;
-	Configuration.output.dir = setup.output.dir;
-	// for a future implementation
-	Configuration.output.shouldWrite = false
 }
 
 module.exports = { init, RequestHandler };

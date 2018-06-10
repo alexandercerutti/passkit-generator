@@ -11,6 +11,7 @@ const supportedTypesOfPass = /(boardingPass|eventTicket|coupon|generic|storeCard
 const Certificates = {
 	status: false
 };
+
 const Configuration = {
 	passModelsDir: null,
 	output: {
@@ -21,12 +22,12 @@ const Configuration = {
 
 /**
 	Apply a filter to arg0 to remove hidden files names (starting with dot)
-	@function removeDotFiles
+	@function removeHiddenFiles
 	@params {[String]} from - list of file names
 	@return {[String]}
 */
 
-function removeDotFiles(from) {
+function removeHiddenFiles(from) {
 	return from.filter(e => e.charAt(0) !== ".");
 }
 
@@ -64,8 +65,6 @@ function loadConfiguration(setup) {
 		let docStruct = {};
 
 		async.concat(certPaths, fs.readFile, function(err, contents) {
-			// contents is a Buffer array
-
 			if (err) {
 				return reject(err);
 			}
@@ -235,123 +234,127 @@ function editPassStructure(options, passBuffer) {
 	});
 }
 
-function RequestHandler(request, response) {
-	if (!Certificates.status) {
-		throw new Error("passkit requires initialization by calling .init() method.");
-	}
+/**
+	Creates a pass with the passed information
 
-	if (!supportedTypesOfPass.test(request.params.type)) {
-		// 😊
-		response.set("Content-Type", "application/json");
-		response.status(418).send({ ecode: 418, status: false, message: `Model unsupported. Refer to https://apple.co/2KKcCrB for supported pass models.`});
-		return;
-	}
+	@function generatePass
+	@params {Object} options - The options about the model to be used and override pass data,
+	@return {Promise} - A JSON structure containing the error or the stream of the generated pass.
+*/
 
-	fs.readdir(`${Configuration.passModelsDir}/${request.params.type}.pass`, function (err, files) {
-		/* Invalid path for Configuration.passModelsDir */
-		if (err) {
-			// 😊
-			response.set("Content-Type", "application/json");
-			response.status(418).send({ ecode: 418, status: false, message: `Model not available for request type [${request.params.type}]. Provide a folder with specified name and .pass extension.`});
-			return;
+function generatePass(options) {
+	return new Promise(function(success, reject) {
+		if (!options.modelName || typeof options.modelName !== "string") {
+			return reject({
+				status: false,
+				error: {
+					message: "A string model name must be provided in order to continue.",
+					ecode: 418
+				}
+			});
 		}
 
-		let list = removeDotFiles(files);
-
-		if (!list.length) {
-			// 😊
-			response.set("Content-Type", "application/json");
-			response.status(418).send({ ecode: 418, status: false, message: `Model for type [${request.params.type}] has no contents. Refer to https://apple.co/2IhJr0Q`});
-			return;
-		}
-
-		if (!list.includes("pass.json")) {
-			// 😊
-			response.set("Content-Type", "application/json");
-			response.status(418).send({ ecode: 418, status: false, message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?" });
-			return;
-		}
-
-		let options = (request.method === "POST" ? request.body : (request.method === "GET" ? request.params : {}));
-		fs.readFile(path.resolve(Configuration.passModelsDir, `${request.params.type}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
-			editPassStructure(filterPassOptions(options), passStructBuffer)
-			.then(function _afterJSONParse(passFileBuffer) {
-				// Manifest dictionary
-				let manifest = {};
-				let archive = archiver("zip");
-
-				archive.append(passFileBuffer, { name: "pass.json" });
-
-				manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
-
-				async.each(list, function getHashAndArchive(file, callback) {
-					if (/(manifest|signature|pass)/ig.test(file)) {
-						// skipping files
-						return callback();
+		fs.readdir(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`), function(err, files) {
+			if (err) {
+				return reject({
+					status: false,
+					error: {
+						message: "Provided model name doesn't match with any model in the folder.",
+						ecode: 418
 					}
+				});
+			}
 
-					// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-					archive.file(`${Configuration.passModelsDir}/${request.params.type}.pass/${file}`, { name: file });
+			let list = removeHiddenFiles(files);
 
-					let hashFlow = forge.md.sha1.create();
-
-					fs.createReadStream(`${Configuration.passModelsDir}/${request.params.type}.pass/${file}`)
-					.on("data", function(data) {
-						hashFlow.update(data.toString("binary"));
-					})
-					.on("error", function(e) {
-						return callback(e);
-					})
-					.on("end", function() {
-						manifest[file] = hashFlow.digest().toHex().trim();
-						return callback();
-					});
-				}, function end(error) {
-					if (error) {
-						throw new Error(`Unable to compile manifest. ${error}`);
+			if (!list.length) {
+				return reject({
+					status: false,
+					error: {
+						message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.",
+						ecode: 418
 					}
+				});
+			}
 
-					archive.append(Buffer.from(JSON.stringify(manifest), "utf8"), { name: "manifest.json" });
+			if (!list.includes("pass.json")) {
+				return reject({
+					status: false,
+					error: {
+						message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?",
+						ecode: 418
+					}
+				});
+			}
 
-					let signatureBuffer = createSignature(manifest);
+			fs.readFile(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
+				editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
+				.then(function _afterJSONParse(passFileBuffer) {
+					let manifest = {};
+					let archive = archiver("zip");
 
-					archive.append(signatureBuffer, { name: "signature" });
+					archive.append(passFileBuffer, { name: "pass.json" });
 
-					let passName = (request.query.name || request.body.name || request.params.type + (new Date()).toISOString().split('T')[0].replace(/-/ig, ""));
+					manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
 
-					response.set({
-						"Content-type": "application/vnd.apple.pkpass",
-						"Content-disposition": `attachment; filename=${passName}.pkpass`
-					});
+					async.each(list, function getHashAndArchive(file, callback) {
+						if (/(manifest|signature|pass)/ig.test(file)) {
+							// skipping files
+							return callback();
+						}
 
-					if (Configuration.output.shouldWrite && !!Configuration.output.dir) {
-						// Memorize and then make it download
-						let wstreamOutputPass = fs.createWriteStream(path.resolve(Configuration.output.dir, `${passName}.pkpass`));
-						archive.pipe(wstreamOutputPass);
+						// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
+						archive.file(`${Configuration.passModelsDir}/${options.modelName}.pass/${file}`, { name: file });
 
-						wstreamOutputPass.on("close", function() {
-							response.status(201).download(path.resolve(Configuration.output.dir, `${passName}.pkpass`), `${passName}.pkpass`, {
-								cacheControl: false
+						let hashFlow = forge.md.sha1.create();
+
+						fs.createReadStream(`${Configuration.passModelsDir}/${options.modelName}.pass/${file}`)
+						.on("data", function(data) {
+							hashFlow.update(data.toString("binary"));
+						})
+						.on("error", function(e) {
+							return callback(e);
+						})
+						.on("end", function() {
+							manifest[file] = hashFlow.digest().toHex().trim();
+							return callback();
+						});
+					}, function end(error) {
+						if (error) {
+							return reject({
+								status: false,
+								error: {
+									message: `Unable to compile manifest. ${error}`,
+									ecode: 418
+								}
+							});
+						}
+
+						archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+						let signatureBuffer = createSignature(manifest);
+						archive.append(signatureBuffer, { name: "signature" });
+
+						let passStream = new stream.PassThrough();
+						archive.pipe(passStream);
+						archive.finalize().then(function() {
+							return success({
+								status: true,
+								content: passStream,
 							});
 						});
-					} else {
-						// Streaming directly the buffer
-						archive.pipe(response);
-						response.status(201);
-					}
-
-					archive.finalize();
+					});
+				})
+				.catch(function(err) {
+					return reject({
+						status: false,
+						error: {
+							message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
+							ecode: 418
+						}
+					});
 				});
-
-			})
-			.catch(function(err) {
-				// 😊
-				response.set("Content-Type", "application/json");
-				response.status(418).send({ ecode: 418, status: false, message: `Got error while parsing pass.json file: ${err}` });
-				return;
 			});
-		}, function _error(e) {
-			console.log(e)
 		});
 	});
 }
@@ -361,40 +364,29 @@ function init(configPath) {
 		throw new Error("Initialization must be triggered only once.");
 	}
 
-	let configPathResolved = path.resolve(__dirname, configPath);
-
-	if (!configPath || fs.accessSync(configPathResolved) !== undefined) {
-		throw new Error(`Cannot load configuration from 'path' (${configPath}). File not existing or missing path.`);
+	if (!configPath || typeof configPath !== "object" || typeof configPath === "object" && !Object.keys(configPath).length) {
+		throw new Error(`Cannot initialize PassKit module. Param 0 expects a non-empty configuration object.`);
 	}
-
-	let setup = require(configPathResolved);
 
 	let queue = [
 		new Promise(function(success, reject) {
-			fs.access(path.resolve(setup.models.dir), function(err) {
+			fs.access(path.resolve(configPath.models.dir), function(err) {
 				if (err) {
 					return reject("A valid pass model directory is required. Please provide one in the configuration file under voice 'models.dir'.")
 				}
 
-				return success(null);
+				return success(true);
 			});
 		}),
-		new Promise((success) => fs.access(path.resolve(setup.output.dir), success)),
-		loadConfiguration(setup)
+		loadConfiguration(configPath)
 	];
 
 	Promise.all(queue)
 	.then(function(results) {
-		let paths = results.slice(0, 2);
-		let certs = results[results.length-1];
+		let certs = results[1];
 
-		if (!paths[0]) {
-			Configuration.passModelsDir = setup.models.dir;
-		}
-
-		if (!paths[1] && setup.output.shouldWrite) {
-			Configuration.output.dir = setup.output.dir;
-			Configuration.output.shouldWrite = true
+		if (results[0]) {
+			Configuration.passModelsDir = configPath.models.dir;
 		}
 
 		Certificates.wwdr = certs[0];
@@ -407,4 +399,4 @@ function init(configPath) {
 	});
 }
 
-module.exports = { init, RequestHandler };
+module.exports = { init, generatePass };

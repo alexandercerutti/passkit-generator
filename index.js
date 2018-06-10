@@ -304,11 +304,11 @@ function generatePass(options) {
 						}
 
 						// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-						archive.file(`${Configuration.passModelsDir}/${options.modelName}.pass/${file}`, { name: file });
+						archive.file(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file), { name: file });
 
 						let hashFlow = forge.md.sha1.create();
 
-						fs.createReadStream(`${Configuration.passModelsDir}/${options.modelName}.pass/${file}`)
+						fs.createReadStream(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file))
 						.on("data", function(data) {
 							hashFlow.update(data.toString("binary"));
 						})

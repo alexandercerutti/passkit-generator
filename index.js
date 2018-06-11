@@ -265,7 +265,10 @@ function generatePass(options) {
 				});
 			}
 
-			let list = removeHiddenFiles(files);
+			// Removing hidden files and folders
+			let list = removeHiddenFiles(files).filter(f => !f.includes(".lproj"));
+			// Getting only folders
+			let folderList = files.filter(f => f.includes(".lproj"));
 
 			if (!list.length) {
 				return reject({
@@ -287,16 +290,34 @@ function generatePass(options) {
 				});
 			}
 
-			fs.readFile(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
-				editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
-				.then(function _afterJSONParse(passFileBuffer) {
-					let manifest = {};
-					let archive = archiver("zip");
+			let manifest = {};
+			let archive = archiver("zip");
 
-					archive.append(passFileBuffer, { name: "pass.json" });
+			// Using async.parallel since the final part must be executed only when both are completed.
+			// Otherwise would had to put everything in editPassStructure's Promise .then().
+			async.parallel([
+				function _managePass(passCallback) {
+					fs.readFile(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
+						editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
+						.then(function _afterJSONParse(passFileBuffer) {
+							manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+							archive.append(passFileBuffer, { name: "pass.json" });
 
-					manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+							return passCallback(null)
+						})
+						.catch(function(err) {
+							return reject({
+								status: false,
+								error: {
+									message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
+									ecode: 418
+								}
+							});
+						});
+					});
+				},
 
+				function _manageBundle(bundleCallback) {
 					async.each(list, function getHashAndArchive(file, callback) {
 						if (/(manifest|signature|pass)/ig.test(file)) {
 							// skipping files
@@ -330,28 +351,21 @@ function generatePass(options) {
 							});
 						}
 
-						archive.append(JSON.stringify(manifest), { name: "manifest.json" });
-
-						let signatureBuffer = createSignature(manifest);
-						archive.append(signatureBuffer, { name: "signature" });
-
-						let passStream = new stream.PassThrough();
-						archive.pipe(passStream);
-						archive.finalize().then(function() {
-							return success({
-								status: true,
-								content: passStream,
-							});
-						});
+						return bundleCallback(null);
 					});
-				})
-				.catch(function(err) {
-					return reject({
-						status: false,
-						error: {
-							message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
-							ecode: 418
-						}
+				}
+			], function _composeStream() {
+				archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+				let signatureBuffer = createSignature(manifest);
+				archive.append(signatureBuffer, { name: "signature" });
+
+				let passStream = new stream.PassThrough();
+				archive.pipe(passStream);
+				archive.finalize().then(function() {
+					return success({
+						status: true,
+						content: passStream,
 					});
 				});
 			});

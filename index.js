@@ -1,8 +1,6 @@
-const os = require("os");
 const fs = require("fs");
 const path = require("path");
 const forge = require("node-forge");
-const { spawn } = require("child_process");
 const archiver = require("archiver");
 const async = require("async");
 const stream = require("stream");
@@ -88,8 +86,7 @@ function loadConfiguration(setup) {
 }
 
 /**
-	Generates the cryptografic signature for the manifest file.
-	Spawns Openssl process since Node.js has no support for PKCSs.
+	Generates the PKCS #7 cryptografic signature for the manifest file.
 
 	@function createSignature
 	@params {String} manifestPath - temp dir path created to keep the manifest file.

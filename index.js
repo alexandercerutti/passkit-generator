@@ -251,7 +251,9 @@ function generatePass(options) {
 			});
 		}
 
-		fs.readdir(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`), function(err, files) {
+		let modelPath = path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`);
+
+		fs.readdir(modelPath, function(err, files) {
 			if (err) {
 				return reject({
 					status: false,
@@ -264,8 +266,6 @@ function generatePass(options) {
 
 			// Removing hidden files and folders
 			let list = removeHiddenFiles(files).filter(f => !f.includes(".lproj"));
-			// Getting only folders
-			let folderList = files.filter(f => f.includes(".lproj"));
 
 			if (!list.length) {
 				return reject({
@@ -287,82 +287,106 @@ function generatePass(options) {
 				});
 			}
 
-			let manifest = {};
-			let archive = archiver("zip");
+			// Getting only folders
+			let folderList = files.filter(f => f.includes(".lproj"));
 
-			// Using async.parallel since the final part must be executed only when both are completed.
-			// Otherwise would had to put everything in editPassStructure's Promise .then().
-			async.parallel([
-				function _managePass(passCallback) {
-					fs.readFile(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
-						editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
-						.then(function _afterJSONParse(passFileBuffer) {
-							manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
-							archive.append(passFileBuffer, { name: "pass.json" });
+			// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
+			// The problem rise when I have to understand which is the first file of a folder which is not the first one.
+			// By doing this way, I get an Array containing an array of filenames for each folder.
 
-							return passCallback(null)
-						})
-						.catch(function(err) {
-							return reject({
-								status: false,
-								error: {
-									message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
-									ecode: 418
-								}
+			let folderExtractors = folderList.map(f => function(callback) {
+				let l10nPath = path.join(modelPath, f);
+
+				fs.readdir(l10nPath, function(err, list) {
+					if (err) {
+						return callback(err, null);
+					}
+
+					let filteredFiles = removeHiddenFiles(list);
+					return callback(null, filteredFiles);
+				});
+			});
+
+			async.parallel(folderExtractors, function(err, listByFolder) {
+				listByFolder.forEach((folder, index) => folder.forEach(f => list.push(path.join(folderList[index], f)) ) )
+
+				let manifest = {};
+				let archive = archiver("zip");
+
+				// Using async.parallel since the final part must be executed only when both are completed.
+				// Otherwise would had to put everything in editPassStructure's Promise .then().
+				async.parallel([
+					function _managePass(passCallback) {
+						fs.readFile(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
+							editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
+							.then(function _afterJSONParse(passFileBuffer) {
+								manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+								archive.append(passFileBuffer, { name: "pass.json" });
+
+								return passCallback(null)
+							})
+							.catch(function(err) {
+								return reject({
+									status: false,
+									error: {
+										message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
+										ecode: 418
+									}
+								});
 							});
 						});
-					});
-				},
+					},
 
-				function _manageBundle(bundleCallback) {
-					async.each(list, function getHashAndArchive(file, callback) {
-						if (/(manifest|signature|pass)/ig.test(file)) {
-							// skipping files
-							return callback();
-						}
+					function _manageBundle(bundleCallback) {
+						async.each(list, function getHashAndArchive(file, callback) {
+							if (/(manifest|signature|pass)/ig.test(file)) {
+								// skipping files
+								return callback();
+							}
 
-						// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-						archive.file(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file), { name: file });
+							// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
+							archive.file(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file), { name: file });
 
-						let hashFlow = forge.md.sha1.create();
+							let hashFlow = forge.md.sha1.create();
 
-						fs.createReadStream(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file))
-						.on("data", function(data) {
-							hashFlow.update(data.toString("binary"));
-						})
-						.on("error", function(e) {
-							return callback(e);
-						})
-						.on("end", function() {
-							manifest[file] = hashFlow.digest().toHex().trim();
-							return callback();
-						});
-					}, function end(error) {
-						if (error) {
-							return reject({
-								status: false,
-								error: {
-									message: `Unable to compile manifest. ${error}`,
-									ecode: 418
-								}
+							fs.createReadStream(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file))
+							.on("data", function(data) {
+								hashFlow.update(data.toString("binary"));
+							})
+							.on("error", function(e) {
+								return callback(e);
+							})
+							.on("end", function() {
+								manifest[file] = hashFlow.digest().toHex().trim();
+								return callback();
 							});
-						}
+						}, function end(error) {
+							if (error) {
+								return reject({
+									status: false,
+									error: {
+										message: `Unable to compile manifest. ${error}`,
+										ecode: 418
+									}
+								});
+							}
 
-						return bundleCallback(null);
-					});
-				}
-			], function _composeStream() {
-				archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+							return bundleCallback(null);
+						});
+					}
+				], function _composeStream() {
+					archive.append(JSON.stringify(manifest), { name: "manifest.json" });
 
-				let signatureBuffer = createSignature(manifest);
-				archive.append(signatureBuffer, { name: "signature" });
+					let signatureBuffer = createSignature(manifest);
+					archive.append(signatureBuffer, { name: "signature" });
 
-				let passStream = new stream.PassThrough();
-				archive.pipe(passStream);
-				archive.finalize().then(function() {
-					return success({
-						status: true,
-						content: passStream,
+					let passStream = new stream.PassThrough();
+					archive.pipe(passStream);
+					archive.finalize().then(function() {
+						return success({
+							status: true,
+							content: passStream,
+						});
 					});
 				});
 			});

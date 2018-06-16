@@ -1,10 +1,10 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const passkit = require("./index");
+const Passkit = require("./index");
 const Configuration = require("./config.json");
 
-passkit.init(Configuration);
+Passkit.init(Configuration);
 
 const instance = express();
 
@@ -30,14 +30,15 @@ function manageRequest(request, response) {
 		"Content-disposition": `attachment; filename=${passName}.pkpass`
 	});
 
-	passkit.generatePass({
+	let pass = new Passkit.Pass({
 		modelName: request.params.modelName || request.query.modelName,
 		overrides: {}
-	})
+	});
+
+	pass.generate()
 	.then(function(result) {
 		result.content.pipe(response);
 
-		// Writing to an output source
 		if (Configuration.output.dir && Configuration.output.shouldWrite && !fs.accessSync(path.resolve(Configuration.output.dir))) {
 			let wstreamOutputPass = fs.createWriteStream(path.resolve(Configuration.output.dir, `${passName}.pkpass`));
 			result.content.pipe(wstreamOutputPass);

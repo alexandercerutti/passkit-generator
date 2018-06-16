@@ -33,6 +33,325 @@ function capitalizeFirst(str) {
 	return str[0].toUpperCase()+str.slice(1);
 }
 
+
+// class Pass {
+// 	constructor(modelName, options) {
+// 		if (!modelName) {
+// 			throw new Error("A model is required. Provide in order to continue.");
+// 		}
+
+// 		this._model = path.resolve(modelName);
+// 		this._compiled = false;
+// 		this._l10n = [];
+// 	}
+
+// 	_modelExists() {
+// 		return !fs.accessSync(this._model);
+// 	}
+
+// 	_fetchModel() {
+// 		return new Promise((success, reject) => {
+// 			fs.readdir(this._model, function(err, files) {
+// 				if (err) {
+// 					// should not even enter in _fetchModel since the check is made by _modelExists method.
+// 					throw new Error("Seems like the previous check, this._modelExists(), failed.");
+// 				}
+
+// 				// Removing hidden files and folders
+// 				let list = removeHiddenFiles(files).filter(f => !f.includes(".lproj"));
+
+// 				if (!list.length) {
+// 					return reject("Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.");
+// 				}
+
+// 				if (!list.includes("pass.json")) {
+// 					return reject("I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?");
+// 				}
+
+// 				// Getting only folders
+// 				let folderList = files.filter(f => f.includes(".lproj"));
+
+// 				// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
+// 				// The problem rises when I have to understand which is the first file of a folder which is not the first one.
+// 				// By doing this way, I get an Array of folder contents (which is an array too).
+
+// 				let folderExtractors = folderList.map(f => function(callback) {
+// 					let l10nPath = path.join(modelPath, f);
+
+// 					fs.readdir(l10nPath, function(err, list) {
+// 						if (err) {
+// 							return callback(err, null);
+// 						}
+
+// 						let filteredFiles = removeHiddenFiles(list);
+
+// 						if (!filteredFiles.length) {
+// 							return callback(null, []);
+// 						}
+
+// 						this._l10n.push(f.replace(".lproj", ""));
+
+// 						return callback(null, filteredFiles);
+// 					});
+// 				});
+
+// 				async.parallel(folderExtractors, function(err, listByFolder) {
+// 					if (err) {
+// 						return reject(err);
+// 					}
+
+// 					//listByFolder.forEach((folder, index) => list.push(...folder.map(f => path.join(folderList[index], f))));
+
+// 					list.push(...listByFolder.reduce(function(accumulator, folder, index) {
+// 						accumulator.push(...folder.map(f => path.join(folderList[index], f)));
+// 						return accumulator;
+// 					}, []));
+
+// 					return success(listByFolder)
+// 				});
+// 			});
+// 		});
+// 	}
+
+// 	_patch(patches) {
+// 		if (!patches) {
+// 			return Promise.resolve();
+// 		}
+
+// 		return new Promise(function(done, reject) {
+// 			try {
+// 				let passFile = JSON.parse(this.content.toString("utf8"));
+
+// 				for (prop in patches) {
+// 					passFile[prop] = patches[prop];
+// 				}
+
+// 				this.content = Buffer.from(passFile);
+// 				return done();
+// 			} catch(e) {
+// 				return reject(e);
+// 			}
+// 		});
+// 	}
+
+// 	_fetchBody() {
+// 		return new Promise((success, reject) => {
+// 			fs.readFile(path.resolve(Configuration.passModelsDir, `${this._model}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
+// 				if (err) {
+// 					return reject("Unable to fetch pass body buffer.");
+// 				}
+
+// 				this.content = passStructBuffer;
+// 				return success(null);
+
+// 				// editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
+// 				// .then(function _afterJSONParse(passFileBuffer) {
+// 				// 	manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+// 				// 	archive.append(passFileBuffer, { name: "pass.json" });
+
+// 				// 	return passCallback(null);
+// 				// })
+// 				// .catch(function(err) {
+// 				// 	return reject({
+// 				// 		status: false,
+// 				// 		error: {
+// 				// 			message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
+// 				// 			ecode: 418
+// 				// 		}
+// 				// 	});
+// 				// });
+// 			});
+// 		});
+// 	}
+
+// 	generate() {
+// 		if (this._compiled) {
+// 			throw new Error("Cannot generate the pass again.");
+// 		}
+
+// 		this._compiled = !this._compiled;
+
+// 		return new Promise((success, reject) => {
+// 			if (this._modelExists()) {
+// 				this._fetchModel().then((list) => {
+
+// 				});
+// 			}
+// 		});
+// 	}
+// }
+
+
+
+class Pass {
+	constructor(options) {
+		this.options = options
+	}
+
+	/**
+		Compiles the pass
+
+		@method generate
+		@return {Promise} - A JSON structure containing the error or the stream of the generated pass.
+	*/
+
+	generate() {
+		return new Promise((success, reject) => {
+			if (!this.options.modelName || typeof this.options.modelName !== "string") {
+				return reject({
+					status: false,
+					error: {
+						message: "A string model name must be provided in order to continue.",
+						ecode: 418
+					}
+				});
+			}
+
+			let modelPath = path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`);
+
+			fs.readdir(modelPath, (err, files) => {
+				if (err) {
+					return reject({
+						status: false,
+						error: {
+							message: "Provided model name doesn't match with any model in the folder.",
+							ecode: 418
+						}
+					});
+				}
+
+				// Removing hidden files and folders
+				let list = removeHiddenFiles(files).filter(f => !f.includes(".lproj"));
+
+				if (!list.length) {
+					return reject({
+						status: false,
+						error: {
+							message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.",
+							ecode: 418
+						}
+					});
+				}
+
+				if (!list.includes("pass.json")) {
+					return reject({
+						status: false,
+						error: {
+							message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?",
+							ecode: 418
+						}
+					});
+				}
+
+				// Getting only folders
+				let folderList = files.filter(f => f.includes(".lproj"));
+
+				// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
+				// The problem rise when I have to understand which is the first file of a folder which is not the first one.
+				// By doing this way, I get an Array containing an array of filenames for each folder.
+
+				let folderExtractors = folderList.map(f => function(callback) {
+					let l10nPath = path.join(modelPath, f);
+
+					fs.readdir(l10nPath, function(err, list) {
+						if (err) {
+							return callback(err, null);
+						}
+
+						let filteredFiles = removeHiddenFiles(list);
+						return callback(null, filteredFiles);
+					});
+				});
+
+				async.parallel(folderExtractors, (err, listByFolder) => {
+					listByFolder.forEach((folder, index) => list.push(...folder.map(f => path.join(folderList[index], f))));
+
+					let manifest = {};
+					let archive = archiver("zip");
+
+					// Using async.parallel since the final part must be executed only when both are completed.
+					// Otherwise would had to put everything in editPassStructure's Promise .then().
+					async.parallel([
+						(passCallback) => {
+							fs.readFile(path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`, "pass.json"), {}, (err, passStructBuffer) => {
+								editPassStructure(filterPassOptions(this.options.overrides), passStructBuffer)
+								.then(function _afterJSONParse(passFileBuffer) {
+									manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+									archive.append(passFileBuffer, { name: "pass.json" });
+
+									return passCallback(null);
+								})
+								.catch(function(err) {
+									return reject({
+										status: false,
+										error: {
+											message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
+											ecode: 418
+										}
+									});
+								});
+							});
+						},
+
+						(bundleCallback) => {
+							async.each(list, (file, callback) => {
+								if (/(manifest|signature|pass)/ig.test(file)) {
+									// skipping files
+									return callback();
+								}
+
+								// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
+								archive.file(path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`, file), { name: file });
+
+								let hashFlow = forge.md.sha1.create();
+
+								fs.createReadStream(path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`, file))
+								.on("data", function(data) {
+									hashFlow.update(data.toString("binary"));
+								})
+								.on("error", function(e) {
+									return callback(e);
+								})
+								.on("end", function() {
+									manifest[file] = hashFlow.digest().toHex().trim();
+									return callback();
+								});
+							}, function end(error) {
+								if (error) {
+									return reject({
+										status: false,
+										error: {
+											message: `Unable to compile manifest. ${error}`,
+											ecode: 418
+										}
+									});
+								}
+
+								return bundleCallback(null);
+							});
+						}
+					], function _composeStream() {
+						archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+						let signatureBuffer = createSignature(manifest);
+						archive.append(signatureBuffer, { name: "signature" });
+
+						let passStream = new stream.PassThrough();
+						archive.pipe(passStream);
+						archive.finalize().then(function() {
+							return success({
+								status: true,
+								content: passStream,
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+}
+
+
 function loadConfiguration(setup) {
 	let reqFilesKeys = ["wwdr", "signerCert", "signerKey"];
 
@@ -231,169 +550,6 @@ function editPassStructure(options, passBuffer) {
 	});
 }
 
-/**
-	Creates a pass with the passed information
-
-	@function generatePass
-	@params {Object} options - The options about the model to be used and override pass data,
-	@return {Promise} - A JSON structure containing the error or the stream of the generated pass.
-*/
-
-function generatePass(options) {
-	return new Promise(function(success, reject) {
-		if (!options.modelName || typeof options.modelName !== "string") {
-			return reject({
-				status: false,
-				error: {
-					message: "A string model name must be provided in order to continue.",
-					ecode: 418
-				}
-			});
-		}
-
-		let modelPath = path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`);
-
-		fs.readdir(modelPath, function(err, files) {
-			if (err) {
-				return reject({
-					status: false,
-					error: {
-						message: "Provided model name doesn't match with any model in the folder.",
-						ecode: 418
-					}
-				});
-			}
-
-			// Removing hidden files and folders
-			let list = removeHiddenFiles(files).filter(f => !f.includes(".lproj"));
-
-			if (!list.length) {
-				return reject({
-					status: false,
-					error: {
-						message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.",
-						ecode: 418
-					}
-				});
-			}
-
-			if (!list.includes("pass.json")) {
-				return reject({
-					status: false,
-					error: {
-						message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?",
-						ecode: 418
-					}
-				});
-			}
-
-			// Getting only folders
-			let folderList = files.filter(f => f.includes(".lproj"));
-
-			// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
-			// The problem rise when I have to understand which is the first file of a folder which is not the first one.
-			// By doing this way, I get an Array containing an array of filenames for each folder.
-
-			let folderExtractors = folderList.map(f => function(callback) {
-				let l10nPath = path.join(modelPath, f);
-
-				fs.readdir(l10nPath, function(err, list) {
-					if (err) {
-						return callback(err, null);
-					}
-
-					let filteredFiles = removeHiddenFiles(list);
-					return callback(null, filteredFiles);
-				});
-			});
-
-			async.parallel(folderExtractors, function(err, listByFolder) {
-				listByFolder.forEach((folder, index) => folder.forEach(f => list.push(path.join(folderList[index], f)) ) )
-
-				let manifest = {};
-				let archive = archiver("zip");
-
-				// Using async.parallel since the final part must be executed only when both are completed.
-				// Otherwise would had to put everything in editPassStructure's Promise .then().
-				async.parallel([
-					function _managePass(passCallback) {
-						fs.readFile(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
-							editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
-							.then(function _afterJSONParse(passFileBuffer) {
-								manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
-								archive.append(passFileBuffer, { name: "pass.json" });
-
-								return passCallback(null)
-							})
-							.catch(function(err) {
-								return reject({
-									status: false,
-									error: {
-										message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
-										ecode: 418
-									}
-								});
-							});
-						});
-					},
-
-					function _manageBundle(bundleCallback) {
-						async.each(list, function getHashAndArchive(file, callback) {
-							if (/(manifest|signature|pass)/ig.test(file)) {
-								// skipping files
-								return callback();
-							}
-
-							// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-							archive.file(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file), { name: file });
-
-							let hashFlow = forge.md.sha1.create();
-
-							fs.createReadStream(path.resolve(Configuration.passModelsDir, `${options.modelName}.pass`, file))
-							.on("data", function(data) {
-								hashFlow.update(data.toString("binary"));
-							})
-							.on("error", function(e) {
-								return callback(e);
-							})
-							.on("end", function() {
-								manifest[file] = hashFlow.digest().toHex().trim();
-								return callback();
-							});
-						}, function end(error) {
-							if (error) {
-								return reject({
-									status: false,
-									error: {
-										message: `Unable to compile manifest. ${error}`,
-										ecode: 418
-									}
-								});
-							}
-
-							return bundleCallback(null);
-						});
-					}
-				], function _composeStream() {
-					archive.append(JSON.stringify(manifest), { name: "manifest.json" });
-
-					let signatureBuffer = createSignature(manifest);
-					archive.append(signatureBuffer, { name: "signature" });
-
-					let passStream = new stream.PassThrough();
-					archive.pipe(passStream);
-					archive.finalize().then(function() {
-						return success({
-							status: true,
-							content: passStream,
-						});
-					});
-				});
-			});
-		});
-	});
-}
-
 function init(configPath) {
 	if (Certificates.status) {
 		throw new Error("Initialization must be triggered only once.");
@@ -434,4 +590,4 @@ function init(configPath) {
 	});
 }
 
-module.exports = { init, generatePass };
+module.exports = { init, Pass };

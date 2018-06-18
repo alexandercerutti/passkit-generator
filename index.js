@@ -274,7 +274,7 @@ class Pass {
 					async.parallel([
 						(passCallback) => {
 							fs.readFile(path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`, "pass.json"), {}, (err, passStructBuffer) => {
-								editPassStructure(filterPassOptions(this.options.overrides), passStructBuffer)
+								this._patch(this._filterOptions(this.options.overrides), passStructBuffer)
 								.then(function _afterJSONParse(passFileBuffer) {
 									manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
 									archive.append(passFileBuffer, { name: "pass.json" });
@@ -410,6 +410,90 @@ class Pass {
 
 		return Buffer.from(forge.asn1.toDer(signature.toAsn1()).getBytes(), 'binary');
 	}
+
+	/**
+		Edits the buffer of pass.json based on the passed options.
+
+		@method _patch
+		@params {Object} options - options resulting from the filtering made by filterPassOptions function
+		@params {Buffer} passBuffer - Buffer of the contents of pass.json
+		@returns {Promise} - Edited pass.json buffer or Object containing error.
+	*/
+
+	_patch(options, passBuffer) {
+		if (!options) {
+			return Promise.resolve(passBuffer);
+		}
+
+		return new Promise(function(done, reject) {
+			try {
+				let passFile = JSON.parse(passBuffer.toString("utf8"));
+
+				for (prop in options) {
+					passFile[prop] = options[prop];
+				}
+
+				return done(Buffer.from(JSON.stringify(passFile)));
+			} catch(e) {
+				return reject(e);
+			}
+		});
+	}
+
+	/**
+		Filters the options received in the query from http request into supported options
+		by Apple and this application, based on the functions that can be provided to keys
+		in supportedOptions.
+
+		You can create your own function to check if keys in query meet your requirements.
+		They accept the value provided in the related query key as unique parameter.
+		Make them return a boolean value, true if the requirements are met, false otherwise.
+
+		Example:
+
+		barcode: function _checkBarcode() {
+			if ( type of barcode not supported ) {
+				return false;
+			}
+
+			if ( barcode value doesn't meet your requirements )
+				return false;
+			}
+
+			return true;
+		}
+
+		Please note that some options are not supported since should be included inside the
+		models you provide in "passModels" directory.
+
+		@method _filterOptions
+		@params {Object} query - raw informations to be edited in the pass.json file
+								from HTTP Request Params or Body
+		@returns {Object} - filtered options based on above criterias.
+	*/
+
+	_filterOptions(query) {
+		const supportedOptions = {
+			"serialNumber": null,
+			"userInfo": null,
+			"expirationDate": null,
+			"locations": null,
+			"authenticationToken": null,
+			"barcode": null
+		};
+
+		let options = {};
+
+		Object.keys(supportedOptions).forEach(function(key) {
+			if (!!query[key]) {
+				if (!supportedOptions[key] || typeof supportedOptions[key] !== "function" || typeof supportedOptions[key] === "function" && supportedOptions[key](query[key])) {
+					options[key] = query[key];
+				}
+			}
+		});
+
+		return options;
+	}
 }
 
 
@@ -462,90 +546,6 @@ function loadConfiguration(setup) {
 				})
 			)
 		});
-	});
-}
-
-/**
-	Filters the options received in the query from http request into supported options
-	by Apple and this application, based on the functions that can be provided to keys
-	in supportedOptions.
-
-	You can create your own function to check if keys in query meet your requirements.
-	They accept the value provided in the related query key as unique parameter.
-	Make them return a boolean value, true if the requirements are met, false otherwise.
-
-	Example:
-
-	barcode: function _checkBarcode() {
-		if ( type of barcode not supported ) {
-			return false;
-		}
-
-		if ( barcode value doesn't meet your requirements )
-			return false;
-		}
-
-		return true;
-	}
-
-	Please note that some options are not supported since should be included inside the
-	models you provide in "passModels" directory.
-
-	@function filterPassOptions
-	@params {Object} query - raw informations to be edited in the pass.json file
-							from HTTP Request Params or Body
-	@returns {Object} - filtered options based on above criterias.
-*/
-
-function filterPassOptions(query) {
-	const supportedOptions = {
-		"serialNumber": null,
-		"userInfo": null,
-		"expirationDate": null,
-		"locations": null,
-		"authenticationToken": null,
-		"barcode": null
-	};
-
-	let options = {};
-
-	Object.keys(supportedOptions).forEach(function(key) {
-		if (!!query[key]) {
-			if (!supportedOptions[key] || typeof supportedOptions[key] !== "function" || typeof supportedOptions[key] === "function" && supportedOptions[key](query[key])) {
-				options[key] = query[key];
-			}
-		}
-	});
-
-	return options;
-}
-
-/**
-	Edits the buffer of pass.json based on the passed options.
-
-	@function editPassStructure
-	@params {Object} options - options resulting from the filtering made by filterPassOptions function
-	@params {Buffer} passBuffer - Buffer of the contents of pass.json
-	@returns {Promise} - Edited pass.json buffer or Object containing error.
-*/
-
-function editPassStructure(options, passBuffer) {
-	if (!options) {
-		return Promise.resolve(passBuffer);
-	}
-
-	return new Promise(function(done, reject) {
-		try {
-			let passFile = JSON.parse(passBuffer.toString("utf8"));
-
-			for (prop in options) {
-				passFile[prop] = options[prop];
-			}
-
-			return done(Buffer.from(JSON.stringify(passFile)));
-		} catch(e) {
-			return reject(e);
-		}
 	});
 }
 

@@ -4,6 +4,8 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const async = require("async");
 const stream = require("stream");
+const Joi = require("joi");
+const settingSchema = require("./schema.js");
 
 const supportedTypesOfPass = /(boardingPass|eventTicket|coupon|generic|storeCard)/i;
 const Certificates = {
@@ -33,159 +35,14 @@ function capitalizeFirst(str) {
 	return str[0].toUpperCase()+str.slice(1);
 }
 
-
-// class Pass {
-// 	constructor(modelName, options) {
-// 		if (!modelName) {
-// 			throw new Error("A model is required. Provide in order to continue.");
-// 		}
-
-// 		this._model = path.resolve(modelName);
-// 		this._compiled = false;
-// 		this._l10n = [];
-// 	}
-
-// 	_modelExists() {
-// 		return !fs.accessSync(this._model);
-// 	}
-
-// 	_fetchModel() {
-// 		return new Promise((success, reject) => {
-// 			fs.readdir(this._model, function(err, files) {
-// 				if (err) {
-// 					// should not even enter in _fetchModel since the check is made by _modelExists method.
-// 					throw new Error("Seems like the previous check, this._modelExists(), failed.");
-// 				}
-
-// 				// Removing hidden files and folders
-// 				let list = removeHiddenFiles(files).filter(f => !f.includes(".lproj"));
-
-// 				if (!list.length) {
-// 					return reject("Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.");
-// 				}
-
-// 				if (!list.includes("pass.json")) {
-// 					return reject("I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?");
-// 				}
-
-// 				// Getting only folders
-// 				let folderList = files.filter(f => f.includes(".lproj"));
-
-// 				// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
-// 				// The problem rises when I have to understand which is the first file of a folder which is not the first one.
-// 				// By doing this way, I get an Array of folder contents (which is an array too).
-
-// 				let folderExtractors = folderList.map(f => function(callback) {
-// 					let l10nPath = path.join(modelPath, f);
-
-// 					fs.readdir(l10nPath, function(err, list) {
-// 						if (err) {
-// 							return callback(err, null);
-// 						}
-
-// 						let filteredFiles = removeHiddenFiles(list);
-
-// 						if (!filteredFiles.length) {
-// 							return callback(null, []);
-// 						}
-
-// 						this._l10n.push(f.replace(".lproj", ""));
-
-// 						return callback(null, filteredFiles);
-// 					});
-// 				});
-
-// 				async.parallel(folderExtractors, function(err, listByFolder) {
-// 					if (err) {
-// 						return reject(err);
-// 					}
-
-// 					//listByFolder.forEach((folder, index) => list.push(...folder.map(f => path.join(folderList[index], f))));
-
-// 					list.push(...listByFolder.reduce(function(accumulator, folder, index) {
-// 						accumulator.push(...folder.map(f => path.join(folderList[index], f)));
-// 						return accumulator;
-// 					}, []));
-
-// 					return success(listByFolder)
-// 				});
-// 			});
-// 		});
-// 	}
-
-// 	_patch(patches) {
-// 		if (!patches) {
-// 			return Promise.resolve();
-// 		}
-
-// 		return new Promise(function(done, reject) {
-// 			try {
-// 				let passFile = JSON.parse(this.content.toString("utf8"));
-
-// 				for (prop in patches) {
-// 					passFile[prop] = patches[prop];
-// 				}
-
-// 				this.content = Buffer.from(passFile);
-// 				return done();
-// 			} catch(e) {
-// 				return reject(e);
-// 			}
-// 		});
-// 	}
-
-// 	_fetchBody() {
-// 		return new Promise((success, reject) => {
-// 			fs.readFile(path.resolve(Configuration.passModelsDir, `${this._model}.pass`, "pass.json"), {}, function _parsePassJSONBuffer(err, passStructBuffer) {
-// 				if (err) {
-// 					return reject("Unable to fetch pass body buffer.");
-// 				}
-
-// 				this.content = passStructBuffer;
-// 				return success(null);
-
-// 				// editPassStructure(filterPassOptions(options.overrides), passStructBuffer)
-// 				// .then(function _afterJSONParse(passFileBuffer) {
-// 				// 	manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
-// 				// 	archive.append(passFileBuffer, { name: "pass.json" });
-
-// 				// 	return passCallback(null);
-// 				// })
-// 				// .catch(function(err) {
-// 				// 	return reject({
-// 				// 		status: false,
-// 				// 		error: {
-// 				// 			message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
-// 				// 			ecode: 418
-// 				// 		}
-// 				// 	});
-// 				// });
-// 			});
-// 		});
-// 	}
-
-// 	generate() {
-// 		if (this._compiled) {
-// 			throw new Error("Cannot generate the pass again.");
-// 		}
-
-// 		this._compiled = !this._compiled;
-
-// 		return new Promise((success, reject) => {
-// 			if (this._modelExists()) {
-// 				this._fetchModel().then((list) => {
-
-// 				});
-// 			}
-// 		});
-// 	}
-// }
-
-
-
 class Pass {
 	constructor(options) {
-		this.options = options
+		this.overrides = options.overrides || {};
+		this.Certificates = {};
+		this.handlers = {};
+		this.modelDirectory = null;
+		this._parseSettings(options)
+		.then(() => console.log("WAT IS", this))
 	}
 
 	/**
@@ -197,7 +54,7 @@ class Pass {
 
 	generate() {
 		return new Promise((success, reject) => {
-			if (!this.options.modelName || typeof this.options.modelName !== "string") {
+			if (!this.modelName || typeof this.modelName !== "string") {
 				return reject({
 					status: false,
 					error: {
@@ -207,7 +64,7 @@ class Pass {
 				});
 			}
 
-			let modelPath = path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`);
+			let modelPath = path.resolve(this.modelDirectory, `${this.modelName}.pass`);
 
 			fs.readdir(modelPath, (err, files) => {
 				if (err) {
@@ -273,8 +130,8 @@ class Pass {
 					// Otherwise would had to put everything in editPassStructure's Promise .then().
 					async.parallel([
 						(passCallback) => {
-							fs.readFile(path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`, "pass.json"), {}, (err, passStructBuffer) => {
-								this._patch(this._filterOptions(this.options.overrides), passStructBuffer)
+							fs.readFile(path.resolve(this.modelDirectory, `${this.modelName}.pass`, "pass.json"), {}, (err, passStructBuffer) => {
+								this._patch(this._filterOptions(this.overrides), passStructBuffer)
 								.then(function _afterJSONParse(passFileBuffer) {
 									manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
 									archive.append(passFileBuffer, { name: "pass.json" });
@@ -301,11 +158,11 @@ class Pass {
 								}
 
 								// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-								archive.file(path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`, file), { name: file });
+								archive.file(path.resolve(this.modelDirectory, `${this.modelName}.pass`, file), { name: file });
 
 								let hashFlow = forge.md.sha1.create();
 
-								fs.createReadStream(path.resolve(Configuration.passModelsDir, `${this.options.modelName}.pass`, file))
+								fs.createReadStream(path.resolve(this.modelDirectory, `${this.modelName}.pass`, file))
 								.on("data", function(data) {
 									hashFlow.update(data.toString("binary"));
 								})
@@ -369,12 +226,12 @@ class Pass {
 			throw new Error(`Manifest content must be a string or an object. Unable to accept manifest of type ${typeof manifest}`);
 		}
 
-		signature.addCertificate(Certificates.wwdr);
-		signature.addCertificate(Certificates.signerCert);
+		signature.addCertificate(this.Certificates.wwdr);
+		signature.addCertificate(this.Certificates.signerCert);
 
 		signature.addSigner({
-			key: Certificates.signerKey,
-			certificate: Certificates.signerCert,
+			key: this.Certificates.signerKey,
+			certificate: this.Certificates.signerCert,
 			digestAlgorithm: forge.pki.oids.sha1,
 			authenticatedAttributes: [{
 				type: forge.pki.oids.contentType,
@@ -494,99 +351,82 @@ class Pass {
 
 		return options;
 	}
-}
 
+	/**
+		Validates the contents of the passed options and assigns the contents to the right properties
+	*/
 
-function loadConfiguration(setup) {
-	let reqFilesKeys = ["wwdr", "signerCert", "signerKey"];
+	_parseSettings(options) {
+		return new Promise((success, reject) => {
+			// var contents = {
+			// 	"certificates": {
+			// 		"wwdr": "aaaa",
+			// 		"signer": {
+			// 			"cert": "aaaaa",
+			// 			"key": "aaaa"
+			// 		}
+			// 	},
+			// 	"handlers": {
+			// 		"barcode": function() { console.log("aaa"); }
+			// 	}
+			// };
 
-	// Node-Forge also accepts .cer certificates
-	if (!setup.certificates.dir || fs.accessSync(path.resolve(setup.certificates.dir)) !== undefined) {
-		throw new Error("Unable to load certificates directory. Check its existence or the permissions.");
-	}
-
-	if (!setup.certificates.files) {
-		throw new Error("Expected key 'files' in configuration file but not found.");
-	}
-
-	if (!setup.certificates.files.wwdr) {
-		throw new Error("Expected file path or content for key certificates.files.wwdr. Please provide a valid certificate from https://apple.co/2sc2pvv");
-	}
-
-	if (!setup.certificates.files.signerCert) {
-		throw new Error("Expected file path or content for key certificates.files.signerCert. Please provide a valid signer certificate.")
-	}
-
-	if (!setup.certificates.files.signerKey || !setup.certificates.credentials.privateKeySecret) {
-		throw new Error("Expected file path or content for key certificates.files.signerKey with an associated password at certificates.credentials.privateKeySecret but not found.")
-	}
-
-	let certPaths = reqFilesKeys.map(e => path.resolve(setup.certificates.dir, setup.certificates.files[e]));
-
-	return new Promise(function(success, reject) {
-		let docStruct = {};
-
-		async.concat(certPaths, fs.readFile, function(err, contents) {
-			if (err) {
-				return reject(err);
+			if (!settingSchema.validate(options)) {
+				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.")
 			}
 
-			return success(
-				contents.map(function(file, index) {
-					if (file.includes("PRIVATE KEY")) {
-						return forge.pki.decryptRsaPrivateKey(
-							file,
-							setup.certificates.credentials.privateKeySecret
-						);
-					} else if (file.includes("CERTIFICATE")) {
-						return forge.pki.certificateFromPem(file);
-					} else {
-						throw new Error("File not allowed in configuration. Only .pems files containing certificates and private keys are allowed");
-					}
-				})
-			)
-		});
-	});
-}
+			this.modelDirectory = path.resolve(__dirname, options.modelDir);
+			this.Certificates.dir = options.certificates.dir;
+			this.modelName = options.modelName;
 
-function init(configPath) {
-	if (Certificates.status) {
-		throw new Error("Initialization must be triggered only once.");
-	}
-
-	if (!configPath || typeof configPath !== "object" || typeof configPath === "object" && !Object.keys(configPath).length) {
-		throw new Error(`Cannot initialize PassKit module. Param 0 expects a non-empty configuration object.`);
-	}
-
-	let queue = [
-		new Promise(function(success, reject) {
-			fs.access(path.resolve(configPath.models.dir), function(err) {
-				if (err) {
-					return reject("A valid pass model directory is required. Please provide one in the configuration file under voice 'models.dir'.")
-				}
-
-				return success(true);
+			let certPaths = Object.keys(options.certificates).filter(v => v !== "dir").map((val) => {
+				return path.resolve(this.Certificates.dir, typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"])
 			});
-		}),
-		loadConfiguration(configPath)
-	];
 
-	Promise.all(queue)
-	.then(function(results) {
-		let certs = results[1];
+			async.parallel([
+				(function __certificatesParser(callback) {
+					async.concat(certPaths, fs.readFile, (err, contents) => {
+						if (err) {
+							return reject(err);
+						}
 
-		if (results[0]) {
-			Configuration.passModelsDir = configPath.models.dir;
+						contents.forEach(file => {
+							let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
+							if (!pem.key || !pem.value) {
+								throw new Error("Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase).");
+							}
+
+							this.Certificates[pem.key] = pem.value;
+						});
+
+						return callback();
+					});
+				}).bind(this),
+
+				(function __handlersAssign(callback) {
+					this.handlers = options.handlers || {};
+					return callback();
+				}).bind(this)
+			], success);
+		});
+	}
+
+	__parsePEM(element, passphrase) {
+		if (element.includes("PRIVATE KEY") && !!passphrase) {
+			return {
+				key: "signerKey",
+				value: forge.pki.decryptRsaPrivateKey(element, String(passphrase))
+			};
+		} else if (element.includes("CERTIFICATE")) {
+			// PEM-exported certificates with keys are in PKCS#12 format, hence they are composed of bags.
+			return {
+				key: element.includes("Bag Attributes") ? "signerCert" : "wwdr",
+				value: forge.pki.certificateFromPem(element)
+			};
+		} else {
+			return { key: null, value: null };
 		}
-
-		Certificates.wwdr = certs[0];
-		Certificates.signerCert = certs[1];
-		Certificates.signerKey = certs[2];
-		Certificates.status = true;
-	})
-	.catch(function(error) {
-		throw new Error(error);
-	});
+	}
 }
 
-module.exports = { init, Pass };
+module.exports = { Pass };

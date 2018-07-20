@@ -113,7 +113,17 @@ class Pass {
 					// Otherwise would had to put everything in editPassStructure's Promise .then().
 					async.parallel([
 						passCallback => {
-							fs.readFile(path.resolve(this.modelDirectory, `${this.modelName}.pass`, "pass.json"), {}, (err, passStructBuffer) => {
+							fs.readFile(path.resolve(computedModelPath, "pass.json"), {}, (err, passStructBuffer) => {
+								if (err) {
+									// Flow should never enter in there since pass.json existence-check is already done above.
+									return passCallback({
+										status: false,
+										error: {
+											message: `Unable to read pass.json file @ ${computedModelPath}`
+										}
+									});
+								}
+
 								if (!this._validateType(passStructBuffer)) {
 									return passCallback({
 										status: false,

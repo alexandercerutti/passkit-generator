@@ -4,21 +4,7 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const async = require("async");
 const stream = require("stream");
-const Joi = require("joi");
 const settingSchema = require("./schema.js");
-
-const supportedTypesOfPass = /(boardingPass|eventTicket|coupon|generic|storeCard)/i;
-const Certificates = {
-	status: false
-};
-
-const Configuration = {
-	passModelsDir: null,
-	output: {
-		shouldWrite: false,
-		dir: null,
-	}
-}
 
 /**
 	Apply a filter to arg0 to remove hidden files names (starting with dot)
@@ -31,10 +17,6 @@ function removeHiddenFiles(from) {
 	return from.filter(e => e.charAt(0) !== ".");
 }
 
-function capitalizeFirst(str) {
-	return str[0].toUpperCase()+str.slice(1);
-}
-
 class Pass {
 	constructor(options) {
 		this.overrides = options.overrides || {};
@@ -42,7 +24,8 @@ class Pass {
 		this.handlers = {};
 		this.modelDirectory = null;
 		this._parseSettings(options)
-		.then(() => console.log("WAT IS", this))
+;//			.then(() => console.log("WAT IS", this));
+		this.passTypes = /^(boardingPass|eventTicket|coupon|generic|storeCard)$/;
 	}
 
 	/**
@@ -64,9 +47,9 @@ class Pass {
 				});
 			}
 
-			let modelPath = path.resolve(this.modelDirectory, `${this.modelName}.pass`);
+			let computedModelPath = path.resolve(this.modelDirectory, `${this.modelName}.pass`);
 
-			fs.readdir(modelPath, (err, files) => {
+			fs.readdir(computedModelPath, (err, files) => {
 				if (err) {
 					return reject({
 						status: false,
@@ -104,11 +87,11 @@ class Pass {
 				let folderList = files.filter(f => f.includes(".lproj"));
 
 				// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
-				// The problem rise when I have to understand which is the first file of a folder which is not the first one.
+				// The problem rises when I have to understand which is the first file of a folder which is not the first one.
 				// By doing this way, I get an Array containing an array of filenames for each folder.
 
 				let folderExtractors = folderList.map(f => function(callback) {
-					let l10nPath = path.join(modelPath, f);
+					let l10nPath = path.join(computedModelPath, f);
 
 					fs.readdir(l10nPath, function(err, list) {
 						if (err) {
@@ -129,28 +112,38 @@ class Pass {
 					// Using async.parallel since the final part must be executed only when both are completed.
 					// Otherwise would had to put everything in editPassStructure's Promise .then().
 					async.parallel([
-						(passCallback) => {
+						passCallback => {
 							fs.readFile(path.resolve(this.modelDirectory, `${this.modelName}.pass`, "pass.json"), {}, (err, passStructBuffer) => {
-								this._patch(this._filterOptions(this.overrides), passStructBuffer)
-								.then(function _afterJSONParse(passFileBuffer) {
-									manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
-									archive.append(passFileBuffer, { name: "pass.json" });
-
-									return passCallback(null);
-								})
-								.catch(function(err) {
-									return reject({
+								if (!this._validateType(passStructBuffer)) {
+									return passCallback({
 										status: false,
 										error: {
-											message: `pass.json Buffer is not a valid buffer. Unable to continue.\n${err}`,
-											ecode: 418
+											message: `Unable to validate pass type or pass file is not a valid buffer. Refer to https://apple.co/2Nvshvn to use a valid type.`
 										}
 									});
-								});
+								}
+
+								this._patch(this._filterOptions(this.overrides), passStructBuffer)
+									.then(function _afterJSONParse(passFileBuffer) {
+										manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+										archive.append(passFileBuffer, { name: "pass.json" });
+
+										// no errors happened
+										return passCallback(null);
+									})
+									.catch(function(err) {
+										return passCallback({
+											status: false,
+											error: {
+												message: `Unable to read pass.json as buffer @ ${computedModelPath}. Unable to continue.\n${err}`,
+												ecode: 418
+											}
+										});
+									});
 							});
 						},
 
-						(bundleCallback) => {
+						bundleCallback => {
 							async.each(list, (file, callback) => {
 								if (/(manifest|signature|pass)/ig.test(file)) {
 									// skipping files
@@ -163,16 +156,16 @@ class Pass {
 								let hashFlow = forge.md.sha1.create();
 
 								fs.createReadStream(path.resolve(this.modelDirectory, `${this.modelName}.pass`, file))
-								.on("data", function(data) {
-									hashFlow.update(data.toString("binary"));
-								})
-								.on("error", function(e) {
-									return callback(e);
-								})
-								.on("end", function() {
-									manifest[file] = hashFlow.digest().toHex().trim();
-									return callback();
-								});
+									.on("data", function(data) {
+										hashFlow.update(data.toString("binary"));
+									})
+									.on("error", function(e) {
+										return callback(e);
+									})
+									.on("end", function() {
+										manifest[file] = hashFlow.digest().toHex().trim();
+										return callback();
+									});
 							}, function end(error) {
 								if (error) {
 									return reject({
@@ -187,7 +180,11 @@ class Pass {
 								return bundleCallback(null);
 							});
 						}
-					], () => {
+					], (error) => {
+						if (error) {
+							return reject(error);
+						}
+
 						archive.append(JSON.stringify(manifest), { name: "manifest.json" });
 
 						let signatureBuffer = this._sign(manifest);
@@ -207,6 +204,18 @@ class Pass {
 		});
 	}
 
+	_validateType(passBuffer) {
+		try {
+			let passFile = JSON.parse(passBuffer.toString("utf8"));
+
+			return Object.keys(passFile).some(key => this.passTypes.test(key));
+		} catch (e) {
+			return false;
+		}
+	}
+
+
+
 	/**
 		Generates the PKCS #7 cryptografic signature for the manifest file.
 
@@ -219,7 +228,7 @@ class Pass {
 		let signature = forge.pkcs7.createSignedData();
 
 		if (typeof manifest === "object") {
-			signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8")
+			signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8");
 		} else if (typeof manifest === "string") {
 			signature.content = manifest;
 		} else {
@@ -265,7 +274,7 @@ class Pass {
 		// Converting the JSON Structure into a DER (which is a subset of BER), ASN.1 valid structure
 		// Returning the buffer of the signature
 
-		return Buffer.from(forge.asn1.toDer(signature.toAsn1()).getBytes(), 'binary');
+		return Buffer.from(forge.asn1.toDer(signature.toAsn1()).getBytes(), "binary");
 	}
 
 	/**
@@ -286,7 +295,7 @@ class Pass {
 			try {
 				let passFile = JSON.parse(passBuffer.toString("utf8"));
 
-				for (prop in options) {
+				for (let prop in options) {
 					passFile[prop] = options[prop];
 				}
 
@@ -342,7 +351,7 @@ class Pass {
 		let options = {};
 
 		Object.keys(supportedOptions).forEach(function(key) {
-			if (!!query[key]) {
+			if (query[key]) {
 				if (!supportedOptions[key] || typeof supportedOptions[key] !== "function" || typeof supportedOptions[key] === "function" && supportedOptions[key](query[key])) {
 					options[key] = query[key];
 				}
@@ -372,16 +381,21 @@ class Pass {
 			// };
 
 			if (!settingSchema.validate(options)) {
-				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.")
+				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.");
 			}
 
 			this.modelDirectory = path.resolve(__dirname, options.modelDir);
 			this.Certificates.dir = options.certificates.dir;
 			this.modelName = options.modelName;
 
-			let certPaths = Object.keys(options.certificates).filter(v => v !== "dir").map((val) => {
-				return path.resolve(this.Certificates.dir, typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"])
-			});
+			let certPaths = Object.keys(options.certificates)
+				.filter(v => v !== "dir")
+				.map((val) =>
+					path.resolve(
+						this.Certificates.dir,
+						typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"]
+					)
+				);
 
 			async.parallel([
 				(function __certificatesParser(callback) {

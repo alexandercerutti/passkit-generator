@@ -25,7 +25,7 @@ class Pass {
 		this.modelDirectory = null;
 		this._parseSettings(options)
 ;//			.then(() => console.log("WAT IS", this));
-		this.passTypes = /^(boardingPass|eventTicket|coupon|generic|storeCard)$/;
+		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 	}
 
 	/**
@@ -214,11 +214,19 @@ class Pass {
 		});
 	}
 
+	/**
+		Checks if pass model type is one of the supported ones
+		
+		@method _validateType
+		@params {Buffer} passBuffer - buffer of the pass structure content
+		@returns {Boolean} - true if type is supported, false otherwise.
+	*/
+
 	_validateType(passBuffer) {
 		try {
 			let passFile = JSON.parse(passBuffer.toString("utf8"));
 
-			return Object.keys(passFile).some(key => this.passTypes.test(key));
+			return this.passTypes.some(passType => passFile.hasOwnProperty(passType));
 		} catch (e) {
 			return false;
 		}
@@ -305,9 +313,7 @@ class Pass {
 			try {
 				let passFile = JSON.parse(passBuffer.toString("utf8"));
 
-				for (let prop in options) {
-					passFile[prop] = options[prop];
-				}
+				Object.keys(options).forEach(opt => passFile[opt] = options[opt]);
 
 				return done(Buffer.from(JSON.stringify(passFile)));
 			} catch(e) {

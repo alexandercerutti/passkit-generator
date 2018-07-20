@@ -8,24 +8,32 @@ const settingSchema = require("./schema.js");
 
 /**
 	Apply a filter to arg0 to remove hidden files names (starting with dot)
-	@function removeHiddenFiles
+	@function removeHidden
 	@params {[String]} from - list of file names
 	@return {[String]}
 */
 
-function removeHiddenFiles(from) {
+function removeHidden(from) {
 	return from.filter(e => e.charAt(0) !== ".");
 }
 
 class Pass {
 	constructor(options) {
+		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 		this.overrides = options.overrides || {};
 		this.Certificates = {};
 		this.handlers = {};
-		this.modelDirectory = null;
+		this.model = {
+			name: null,
+			dir: null,
+			computed: null,
+		};
+
 		this._parseSettings(options)
-;//			.then(() => console.log("WAT IS", this));
-		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
+			.then(() => {
+				this._checkReqs()
+					.catch(e => { throw new Error(e) });
+			});
 	}
 
 	/**
@@ -37,74 +45,37 @@ class Pass {
 
 	generate() {
 		return new Promise((success, reject) => {
-			if (!this.modelName || typeof this.modelName !== "string") {
-				return reject({
-					status: false,
-					error: {
-						message: "A string model name must be provided in order to continue.",
-						ecode: 418
-					}
-				});
-			}
+			fs.readdir(this.model.computed, (err, files) => {
+				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
+				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
 
-			let computedModelPath = path.resolve(this.modelDirectory, `${this.modelName}.pass`);
+				// list without localization files (they will be added later in the flow)
+				let bundleList = noDynList.filter(f => !f.includes(".lproj"));
 
-			fs.readdir(computedModelPath, (err, files) => {
-				if (err) {
-					return reject({
-						status: false,
-						error: {
-							message: "Provided model name doesn't match with any model in the folder.",
-							ecode: 418
-						}
-					});
-				}
-
-				// Removing hidden files and folders
-				let list = removeHiddenFiles(files).filter(f => !f.includes(".lproj"));
-
-				if (!list.length) {
-					return reject({
-						status: false,
-						error: {
-							message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.",
-							ecode: 418
-						}
-					});
-				}
-
-				if (!list.includes("pass.json")) {
-					return reject({
-						status: false,
-						error: {
-							message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?",
-							ecode: 418
-						}
-					});
-				}
-
-				// Getting only folders
-				let folderList = files.filter(f => f.includes(".lproj"));
+				const L10N = {
+					// localization folders
+					list: noDynList.filter(f => f.includes(".lproj"))
+				};
 
 				// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
 				// The problem rises when I have to understand which is the first file of a folder which is not the first one.
 				// By doing this way, I get an Array containing an array of filenames for each folder.
 
-				let folderExtractors = folderList.map(f => function(callback) {
-					let l10nPath = path.join(computedModelPath, f);
+				L10N.extractors = L10N.list.map(f => ((callback) => {
+					let l10nPath = path.join(this.model.computed, f);
 
 					fs.readdir(l10nPath, function(err, list) {
 						if (err) {
 							return callback(err, null);
 						}
 
-						let filteredFiles = removeHiddenFiles(list);
+						let filteredFiles = removeHidden(list);
 						return callback(null, filteredFiles);
 					});
-				});
+				}));
 
-				async.parallel(folderExtractors, (err, listByFolder) => {
-					listByFolder.forEach((folder, index) => list.push(...folder.map(f => path.join(folderList[index], f))));
+				async.parallel(L10N.extractors, (err, listByFolder) => {
+					listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
 
 					let manifest = {};
 					let archive = archiver("zip");
@@ -113,13 +84,13 @@ class Pass {
 					// Otherwise would had to put everything in editPassStructure's Promise .then().
 					async.parallel([
 						passCallback => {
-							fs.readFile(path.resolve(computedModelPath, "pass.json"), {}, (err, passStructBuffer) => {
+							fs.readFile(path.resolve(this.model.computed, "pass.json"), {}, (err, passStructBuffer) => {
 								if (err) {
 									// Flow should never enter in there since pass.json existence-check is already done above.
 									return passCallback({
 										status: false,
 										error: {
-											message: `Unable to read pass.json file @ ${computedModelPath}`
+											message: `Unable to read pass.json file @ ${this.model.computed}`
 										}
 									});
 								}
@@ -145,7 +116,7 @@ class Pass {
 										return passCallback({
 											status: false,
 											error: {
-												message: `Unable to read pass.json as buffer @ ${computedModelPath}. Unable to continue.\n${err}`,
+												message: `Unable to read pass.json as buffer @ ${this.model.computed}. Unable to continue.\n${err}`,
 												ecode: 418
 											}
 										});
@@ -154,40 +125,32 @@ class Pass {
 						},
 
 						bundleCallback => {
-							async.each(list, (file, callback) => {
-								if (/(manifest|signature|pass)/ig.test(file)) {
-									// skipping files
+							let pathList = bundleList.map(f => path.resolve(this.model.computed, f));
+
+							async.concat(pathList, fs.readFile, (err, modelBuffers) => {
+								let modelFiles = Object.assign({}, ...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
+
+								async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
+									let hashFlow = forge.md.sha1.create();
+									hashFlow.update(fileBuffer.toString("binary"));
+
+									manifest[bufferKey] = hashFlow.digest().toHex().trim();
+									archive.file(path.resolve(this.model.computed, bufferKey), { name: bufferKey });
+
 									return callback();
-								}
+								}, function(error) {
+									if (error) {
+										return reject({
+											status: false,
+											error: {
+												message: `Unable to compile manifest. ${error}`,
+												ecode: 418
+											}
+										});
+									}
 
-								// adding the files to the zip - i'm not using .directory method because it adds also hidden files like .DS_Store on macOS
-								archive.file(path.resolve(this.modelDirectory, `${this.modelName}.pass`, file), { name: file });
-
-								let hashFlow = forge.md.sha1.create();
-
-								fs.createReadStream(path.resolve(this.modelDirectory, `${this.modelName}.pass`, file))
-									.on("data", function(data) {
-										hashFlow.update(data.toString("binary"));
-									})
-									.on("error", function(e) {
-										return callback(e);
-									})
-									.on("end", function() {
-										manifest[file] = hashFlow.digest().toHex().trim();
-										return callback();
-									});
-							}, function end(error) {
-								if (error) {
-									return reject({
-										status: false,
-										error: {
-											message: `Unable to compile manifest. ${error}`,
-											ecode: 418
-										}
-									});
-								}
-
-								return bundleCallback(null);
+									return bundleCallback(null);
+								});
 							});
 						}
 					], (error) => {
@@ -210,6 +173,54 @@ class Pass {
 						});
 					});
 				});
+			});
+		});
+	}
+
+	/**
+		Check if the requirements are satisfied
+
+		@method _checkReqs
+		@returns {Promise} - success if requirements are satisfied, reject otherwise
+	*/
+
+	_checkReqs() {
+		return new Promise((success, reject) => {
+			fs.readdir(this.model.computed, function(err, files) {
+				if (err) {
+					return reject({
+						status: false,
+						error: {
+							message: "Provided model name doesn't match with any model in the folder.",
+							ecode: 418
+						}
+					});
+				}
+
+				// Removing hidden files and folders
+				let list = removeHidden(files);
+
+				if (!list.length) {
+					return reject({
+						status: false,
+						error: {
+							message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.",
+							ecode: 418
+						}
+					});
+				}
+
+				if (!list.includes("pass.json")) {
+					return reject({
+						status: false,
+						error: {
+							message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?",
+							ecode: 418
+						}
+					});
+				}
+
+				return success();
 			});
 		});
 	}
@@ -400,9 +411,21 @@ class Pass {
 				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.");
 			}
 
-			this.modelDirectory = path.resolve(__dirname, options.modelDir);
+			if (!options.modelName || typeof options.modelName !== "string") {
+				return reject({
+					status: false,
+					error: {
+						message: "A string model name must be provided in order to continue.",
+						ecode: 418
+					}
+				});
+			}
+
+			this.model.dir = path.resolve(__dirname, options.modelDir);
+			this.model.name = options.modelName;
+			this.model.computed = path.resolve(this.model.dir, `${this.model.name}.pass`);
+
 			this.Certificates.dir = options.certificates.dir;
-			this.modelName = options.modelName;
 
 			let certPaths = Object.keys(options.certificates)
 				.filter(v => v !== "dir")
@@ -414,7 +437,7 @@ class Pass {
 				);
 
 			async.parallel([
-				(function __certificatesParser(callback) {
+				__certsParseCallback => {
 					async.concat(certPaths, fs.readFile, (err, contents) => {
 						if (err) {
 							return reject(err);
@@ -429,14 +452,14 @@ class Pass {
 							this.Certificates[pem.key] = pem.value;
 						});
 
-						return callback();
+						return __certsParseCallback();
 					});
-				}).bind(this),
+				},
 
-				(function __handlersAssign(callback) {
+				__handlersAssignCallback => {
 					this.handlers = options.handlers || {};
-					return callback();
-				}).bind(this)
+					return __handlersAssignCallback();
+				}
 			], success);
 		});
 	}

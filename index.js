@@ -53,13 +53,17 @@ class Pass {
 				let bundleList = noDynList.filter(f => !f.includes(".lproj"));
 
 				const L10N = {
-					// localization folders
+					// localization folders only
 					list: noDynList.filter(f => f.includes(".lproj"))
 				};
 
-				// I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
-				// The problem rises when I have to understand which is the first file of a folder which is not the first one.
-				// By doing this way, I get an Array containing an array of filenames for each folder.
+				/*
+				 * I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
+				 * The problem rises when I have to understand which is the first file of a folder which is not the first one.
+				 *
+				 * Therefore, I generate a function for each localization (L10N) folder inside the model.
+				 * Each function will read at the same time the content of the folder and return an array of the filenames inside that L10N folder.
+				 */
 
 				L10N.extractors = L10N.list.map(f => ((callback) => {
 					let l10nPath = path.join(this.model.computed, f);
@@ -128,6 +132,7 @@ class Pass {
 							let pathList = bundleList.map(f => path.resolve(this.model.computed, f));
 
 							async.concat(pathList, fs.readFile, (err, modelBuffers) => {
+								// I want to get an object containing each buffer associated with its own file name
 								let modelFiles = Object.assign({}, ...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
 
 								async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
@@ -437,7 +442,7 @@ class Pass {
 				);
 
 			async.parallel([
-				__certsParseCallback => {
+				certsParseCallback => {
 					async.concat(certPaths, fs.readFile, (err, contents) => {
 						if (err) {
 							return reject(err);
@@ -456,7 +461,7 @@ class Pass {
 					});
 				},
 
-				__handlersAssignCallback => {
+				handlersAssignCallback => {
 					this.handlers = options.handlers || {};
 					return __handlersAssignCallback();
 				}

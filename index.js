@@ -4,7 +4,7 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const async = require("async");
 const stream = require("stream");
-const settingSchema = require("./schema.js");
+const schema = require("./schema.js");
 
 /**
 	Apply a filter to arg0 to remove hidden files names (starting with dot)
@@ -114,7 +114,7 @@ class Pass {
 								// no errors happened
 								return passCallback(null);
 							})
-							.catch(function(err) {
+							.catch(err => {
 								return passCallback({
 									status: false,
 									error: {
@@ -127,6 +127,10 @@ class Pass {
 				});
 
 				async.parallel([passExtractor, ...L10N.extractors], (err, listByFolder) => {
+					if (err) {
+						return reject(err);
+					}
+
 					// removing result of passExtractor, which is undefined or null.
 					listByFolder.shift();
 
@@ -135,6 +139,10 @@ class Pass {
 					let pathList = bundleList.map(f => path.resolve(this.model.computed, f));
 
 					async.concat(pathList, fs.readFile, (err, modelBuffers) => {
+						if (err) {
+							return reject(err);
+						}
+
 						// I want to get an object containing each buffer associated with its own file name
 						let modelFiles = Object.assign(...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
 
@@ -324,6 +332,30 @@ class Pass {
 			try {
 				let passFile = JSON.parse(passBuffer.toString("utf8"));
 
+				// "barcodes" support got introduced in iOS 9 as array of barcode.
+				// "barcode" is still used in older iOS versions
+
+				if (passFile["barcode"]) {
+					let barcode = passFile["barcode"];
+					let barcodeKeys = Object.keys(barcode);
+
+					if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.CONSTANTS.barcode)) {
+						console.log("\x1b[41m", "Barcode syntax is not correct. Please refer to https://apple.co/2myAbst.", "\x1b[0m");
+					}
+
+					if (!passFile["barcodes"] || !(passFiles["barcodes"] instanceof Array)) {
+						console.log("\x1b[33m", "Your pass is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it backward-compatible.", "\x1b[0m");
+					}
+				} else if (passFile["barcodes"] && (passFile["barcodes"] instanceof Array)) {
+					if (!passFile["barcodes"].length || !passFile["barcodes"].every(b => schema.isValid(b, schema.CONSTANTS.barcode))) {
+						console.log("\x1b[41m", "Some of your barcodes are not well-formed / have syntax errors. Please refer to https://apple.co/2myAbst.", "\x1b[0m");
+					}
+
+					if (!passFile["barcode"] || !(passFile["barcode"] instanceof Object)) {
+						console.log("\x1b[33m", "Your pass is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it forward-compatible.", "\x1b[0m");
+					}
+				}
+
 				Object.keys(options).forEach(opt => passFile[opt] = options[opt]);
 
 				return done(Buffer.from(JSON.stringify(passFile)));
@@ -407,7 +439,7 @@ class Pass {
 			// 	}
 			// };
 
-			if (!settingSchema.validate(options)) {
+			if (!schema.isValid(options, schema.CONSTANTS.instance)) {
 				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.");
 			}
 

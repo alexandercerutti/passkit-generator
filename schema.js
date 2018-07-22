@@ -1,39 +1,38 @@
 const Joi = require("joi");
 
-const schema = Joi.object().keys({
-	modelDir: Joi.string(),
-	modelName: Joi.string(),
-	certificates: Joi.object().keys({
-		dir: Joi.string(),
-		wwdr: Joi.string(),
-		signerCert: Joi.string(),
-		signerKey: Joi.object().keys({
-			keyFile: Joi.string(),
-			passphrase: Joi.string(),
-		})
+const CONSTANTS = {
+	instance: Joi.object().keys({
+		modelDir: Joi.string().required(),
+		modelName: Joi.string(),
+		certificates: Joi.object().keys({
+			dir: Joi.string().required(),
+			wwdr: Joi.string().required(),
+			signerCert: Joi.string().required(),
+			signerKey: Joi.object().keys({
+				keyFile: Joi.string().required(),
+				passphrase: Joi.string().required(),
+			}).required()
+		}).required(),
+		handlers: Joi.object().keys({
+			barcode: Joi.func(),
+			serialNumber: Joi.func()
+		}),
+		overrides: Joi.object()
 	}),
-	handlers: Joi.object().keys({
-		barcode: Joi.func(),
-		serialNumber: Joi.func()
-	}),
-	overrides: Joi.object()
-});
 
-const requiredSchema = schema.requiredKeys(
-	"",
-	"modelDir",
-	"certificates",
-	"certificates.dir",
-	"certificates.wwdr",
-	"certificates.signerCert",
-	"certificates.signerKey",
-	"certificates.signerKey.keyFile",
-	"certificates.signerKey.passphrase"
-);
+	barcode: Joi.object().keys({
+		altText: Joi.string(),
+		messageEncoding: Joi.string(),
+		format: Joi.string().required().regex(/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/, "barcodeType"),
+		message: Joi.string().required()
+	}),
+
+};
 
 module.exports = {
-	validate: (opts) => {
-		let validation = Joi.validate(opts, requiredSchema);
+	CONSTANTS,
+	isValid: (opts, schemaName) => {
+		let validation = Joi.validate(opts, schemaName);
 		return !validation.error;
 	}
 };

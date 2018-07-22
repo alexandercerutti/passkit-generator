@@ -44,6 +44,9 @@ class Pass {
 	*/
 
 	generate() {
+		let manifest = {};
+		let archive = archiver("zip");
+
 		return new Promise((success, reject) => {
 			fs.readdir(this.model.computed, (err, files) => {
 				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
@@ -58,11 +61,15 @@ class Pass {
 				};
 
 				/*
-				 * I may have (and I rathered) used async.concat to achieve this but it returns a list of filenames ordered by folder.
-				 * The problem rises when I have to understand which is the first file of a folder which is not the first one.
+				 * I may have (and I rathered) used async.concat to achieve this but it returns an
+				 * array of filenames ordered by folder, without any kind of folder indication.
+				 * So, the problem rises when I have to understand which is the first file of a
+				 * folder which is not the first one, as I don't know how many file there are in
+				 * a folder.
 				 *
-				 * Therefore, I generate a function for each localization (L10N) folder inside the model.
-				 * Each function will read at the same time the content of the folder and return an array of the filenames inside that L10N folder.
+				 * Therefore, I generate a function for each localization (L10N) folder inside the
+				 * model. Each function will read at the same time the content of the folder and
+				 * return an array of the filenames inside that L10N folder.
 				 */
 
 				L10N.extractors = L10N.list.map(f => ((callback) => {
@@ -78,102 +85,90 @@ class Pass {
 					});
 				}));
 
-				async.parallel(L10N.extractors, (err, listByFolder) => {
-					listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
-
-					let manifest = {};
-					let archive = archiver("zip");
-
-					// Using async.parallel since the final part must be executed only when both are completed.
-					// Otherwise would had to put everything in editPassStructure's Promise .then().
-					async.parallel([
-						passCallback => {
-							fs.readFile(path.resolve(this.model.computed, "pass.json"), {}, (err, passStructBuffer) => {
-								if (err) {
-									// Flow should never enter in there since pass.json existence-check is already done above.
-									return passCallback({
-										status: false,
-										error: {
-											message: `Unable to read pass.json file @ ${this.model.computed}`
-										}
-									});
+				let passExtractor = (passCallback => {
+					fs.readFile(path.resolve(this.model.computed, "pass.json"), {}, (err, passStructBuffer) => {
+						if (err) {
+							// Flow should never enter in there since pass.json existence-check is already done above.
+							return passCallback({
+								status: false,
+								error: {
+									message: `Unable to read pass.json file @ ${this.model.computed}`
 								}
-
-								if (!this._validateType(passStructBuffer)) {
-									return passCallback({
-										status: false,
-										error: {
-											message: `Unable to validate pass type or pass file is not a valid buffer. Refer to https://apple.co/2Nvshvn to use a valid type.`
-										}
-									});
-								}
-
-								this._patch(this._filterOptions(this.overrides), passStructBuffer)
-									.then(function _afterJSONParse(passFileBuffer) {
-										manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
-										archive.append(passFileBuffer, { name: "pass.json" });
-
-										// no errors happened
-										return passCallback(null);
-									})
-									.catch(function(err) {
-										return passCallback({
-											status: false,
-											error: {
-												message: `Unable to read pass.json as buffer @ ${this.model.computed}. Unable to continue.\n${err}`,
-												ecode: 418
-											}
-										});
-									});
 							});
-						},
+						}
 
-						bundleCallback => {
-							let pathList = bundleList.map(f => path.resolve(this.model.computed, f));
+						if (!this._validateType(passStructBuffer)) {
+							return passCallback({
+								status: false,
+								error: {
+									message: `Unable to validate pass type or pass file is not a valid buffer. Refer to https://apple.co/2Nvshvn to use a valid type.`
+								}
+							});
+						}
 
-							async.concat(pathList, fs.readFile, (err, modelBuffers) => {
-								// I want to get an object containing each buffer associated with its own file name
-								let modelFiles = Object.assign({}, ...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
+						this._patch(this._filterOptions(this.overrides), passStructBuffer)
+							.then(function _afterJSONParse(passFileBuffer) {
+								manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+								archive.append(passFileBuffer, { name: "pass.json" });
 
-								async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
-									let hashFlow = forge.md.sha1.create();
-									hashFlow.update(fileBuffer.toString("binary"));
-
-									manifest[bufferKey] = hashFlow.digest().toHex().trim();
-									archive.file(path.resolve(this.model.computed, bufferKey), { name: bufferKey });
-
-									return callback();
-								}, function(error) {
-									if (error) {
-										return reject({
-											status: false,
-											error: {
-												message: `Unable to compile manifest. ${error}`,
-												ecode: 418
-											}
-										});
+								// no errors happened
+								return passCallback(null);
+							})
+							.catch(function(err) {
+								return passCallback({
+									status: false,
+									error: {
+										message: `Unable to read pass.json as buffer @ ${this.model.computed}. Unable to continue.\n${err}`,
+										ecode: 418
 									}
-
-									return bundleCallback(null);
 								});
 							});
-						}
-					], (error) => {
-						if (error) {
-							return reject(error);
-						}
+					});
+				});
 
-						archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+				async.parallel([passExtractor, ...L10N.extractors], (err, listByFolder) => {
+					// removing result of passExtractor, which is undefined or null.
+					listByFolder.shift();
 
-						let signatureBuffer = this._sign(manifest);
-						archive.append(signatureBuffer, { name: "signature" });
+					listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
 
-						let passStream = new stream.PassThrough();
-						archive.pipe(passStream);
-						archive.finalize().then(function() {
-							return success({
-								status: true,
-								content: passStream,
+					let pathList = bundleList.map(f => path.resolve(this.model.computed, f));
+
+					async.concat(pathList, fs.readFile, (err, modelBuffers) => {
+						// I want to get an object containing each buffer associated with its own file name
+						let modelFiles = Object.assign(...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
+
+						async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
+							let hashFlow = forge.md.sha1.create();
+							hashFlow.update(fileBuffer.toString("binary"));
+
+							manifest[bufferKey] = hashFlow.digest().toHex().trim();
+							archive.file(path.resolve(this.model.computed, bufferKey), { name: bufferKey });
+
+							return callback();
+						}, (error) => {
+							if (error) {
+								return reject({
+									status: false,
+									error: {
+										message: `Unable to compile manifest. ${error}`,
+										ecode: 418
+									}
+								});
+							}
+
+							archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+							let signatureBuffer = this._sign(manifest);
+							archive.append(signatureBuffer, { name: "signature" });
+
+							let passStream = new stream.PassThrough();
+							archive.pipe(passStream);
+							archive.finalize().then(function() {
+								return success({
+									status: true,
+									content: passStream,
+								});
 							});
 						});
 					});
@@ -457,13 +452,13 @@ class Pass {
 							this.Certificates[pem.key] = pem.value;
 						});
 
-						return __certsParseCallback();
+						return certsParseCallback();
 					});
 				},
 
 				handlersAssignCallback => {
 					this.handlers = options.handlers || {};
-					return __handlersAssignCallback();
+					return handlersAssignCallback();
 				}
 			], success);
 		});

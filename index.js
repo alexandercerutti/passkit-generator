@@ -415,41 +415,31 @@ class Pass {
 				});
 			}
 
-			this.model = path.resolve(options.model) + (!path.extname(options.model) ? ".pass" : "");
+			this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
 
 			let certPaths = Object.keys(options.certificates)
 				.filter(v => v !== "dir")
-				.map((val) =>
-					path.resolve(
-						typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"]
-					)
-				);
+				.map((val) => path.resolve(typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"]));
 
-			async.parallel([
-				certsParseCallback => {
-					async.concat(certPaths, fs.readFile, (err, contents) => {
-						if (err) {
-							return reject(err);
-						}
+			async.concat(certPaths, fs.readFile, (err, contents) => {
+				if (err) {
+					return reject(err);
+				}
 
-						contents.forEach(file => {
-							let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
-							if (!pem.key || !pem.value) {
-								return reject({
-									status: false,
-									error: {
-										message: "Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase).",
-										ecode: 418
-									}
-								})
+				contents.forEach(file => {
+					let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
+					if (!pem) {
+						return reject({
+							status: false,
+							error: {
+								message: "Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase).",
+								ecode: 418
 							}
+						})
+					}
 
-							this.Certificates[pem.key] = pem.value;
-						});
-
-						return certsParseCallback();
-					});
-				},
+					this.Certificates[pem.key] = pem.value;
+				});
 
 				return success();
 			});
@@ -469,7 +459,7 @@ class Pass {
 				value: forge.pki.certificateFromPem(element)
 			};
 		} else {
-			return { key: null, value: null };
+			return {};
 		}
 	}
 }

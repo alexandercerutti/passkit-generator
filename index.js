@@ -22,12 +22,10 @@ class Pass {
 		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 		this.overrides = options.overrides || {};
 		this.Certificates = {};
-		this.model = null;
+		this.model = "";
+
 		this._parseSettings(options)
-			.then(() => {
-				this._checkReqs()
-					.catch(e => { throw new Error(e.error.message) });
-			});
+			.catch(e => console.log(e));
 	}
 
 	/**
@@ -43,8 +41,26 @@ class Pass {
 
 		return new Promise((success, reject) => {
 			fs.readdir(this.model, (err, files) => {
+				if (err) {
+					return reject({
+						status: false,
+						error: {
+							message: "Model not found. Provide a valid one to continue."
+						}
+					})
+				}
+
 				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
 				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
+
+				if (!noDynList.length) {
+					return reject({
+						status: false,
+						error: {
+							message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q and documentation to fill the model correctly."
+						}
+					});
+				}
 
 				// list without localization files (they will be added later in the flow)
 				let bundleList = noDynList.filter(f => !f.includes(".lproj"));
@@ -184,54 +200,6 @@ class Pass {
 
 					async.concat(pathList, fs.readFile, _addBuffers);
 				});
-			});
-		});
-	}
-
-	/**
-		Check if the requirements are satisfied
-
-		@method _checkReqs
-		@returns {Promise} - success if requirements are satisfied, reject otherwise
-	*/
-
-	_checkReqs() {
-		return new Promise((success, reject) => {
-			fs.readdir(this.model, function(err, files) {
-				if (err) {
-					return reject({
-						status: false,
-						error: {
-							message: "Provided model name doesn't match with any model in the folder.",
-							ecode: 418
-						}
-					});
-				}
-
-				// Removing hidden files and folders
-				let list = removeHidden(files);
-
-				if (!list.length) {
-					return reject({
-						status: false,
-						error: {
-							message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q to fill the model correctly.",
-							ecode: 418
-						}
-					});
-				}
-
-				if (!list.includes("pass.json")) {
-					return reject({
-						status: false,
-						error: {
-							message: "I'm a teapot. How am I supposed to serve you pass without pass.json in the chosen model as tea without water?",
-							ecode: 418
-						}
-					});
-				}
-
-				return success();
 			});
 		});
 	}

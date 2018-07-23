@@ -394,10 +394,16 @@ class Pass {
 	*/
 
 	_parseSettings(options) {
+		if (!schema.isValid(options, schema.constants.instance)) {
+			return Promise.reject({
+				status: false,
+				error: {
+					message: "The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly."
+				}
+			});
+		}
+
 		return new Promise((success, reject) => {
-			if (!schema.isValid(options, schema.constants.instance)) {
-				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.");
-			}
 
 			if (!options.model || typeof options.model !== "string") {
 				return reject({

@@ -465,7 +465,13 @@ class Pass {
 						contents.forEach(file => {
 							let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
 							if (!pem.key || !pem.value) {
-								throw new Error("Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase).");
+								return reject({
+									status: false,
+									error: {
+										message: "Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase).",
+										ecode: 418
+									}
+								})
 							}
 
 							this.Certificates[pem.key] = pem.value;

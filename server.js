@@ -31,11 +31,10 @@ function manageRequest(request, response) {
 	let pass = new Passkit.Pass({
 		model: "./passModels/"+(request.params.modelName || request.query.modelName),
 		certificates: {
-			dir: "certificates/",
-			wwdr: "WWDR.pem",
-			signerCert: "passcertificate.pem",
+			wwdr: "./certificates/WWDR.pem",
+			signerCert: "./certificates/passcertificate.pem",
 			signerKey: {
-				keyFile: "passkey.pem",
+				keyFile: "./certificates/passkey.pem",
 				passphrase: "123456"
 			}
 		},

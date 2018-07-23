@@ -446,13 +446,11 @@ class Pass {
 			}
 
 			this.model = path.resolve(options.model) + (!path.extname(options.model) ? ".pass" : "");
-			this.Certificates.dir = options.certificates.dir;
 
 			let certPaths = Object.keys(options.certificates)
 				.filter(v => v !== "dir")
 				.map((val) =>
 					path.resolve(
-						this.Certificates.dir,
 						typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"]
 					)
 				);

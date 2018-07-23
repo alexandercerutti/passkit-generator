@@ -29,8 +29,7 @@ function manageRequest(request, response) {
 	});
 
 	let pass = new Passkit.Pass({
-		modelDir: "passModels/",
-		modelName: request.params.modelName || request.query.modelName,
+		model: "./passModels/"+(request.params.modelName || request.query.modelName),
 		certificates: {
 			dir: "certificates/",
 			wwdr: "WWDR.pem",

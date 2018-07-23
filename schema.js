@@ -1,8 +1,8 @@
 const Joi = require("joi");
 
 let instance = Joi.object().keys({
-	modelDir: Joi.string().required(),
-	modelName: Joi.string(),
+	// modelDir: Joi.string().required(),
+	model: Joi.string(),
 	certificates: Joi.object().keys({
 		dir: Joi.string().required(),
 		wwdr: Joi.string().required(),

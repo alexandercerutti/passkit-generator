@@ -23,12 +23,8 @@ class Pass {
 		this.overrides = options.overrides || {};
 		this.Certificates = {};
 		this.handlers = {};
-		this.model = {
-			name: null,
-			dir: null,
-			computed: null,
-		};
 
+		this.model = null;
 		this._parseSettings(options)
 			.then(() => {
 				this._checkReqs()
@@ -48,7 +44,7 @@ class Pass {
 		let archive = archiver("zip");
 
 		return new Promise((success, reject) => {
-			fs.readdir(this.model.computed, (err, files) => {
+			fs.readdir(this.model, (err, files) => {
 				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
 				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
 
@@ -73,7 +69,7 @@ class Pass {
 				 */
 
 				L10N.extractors = L10N.list.map(f => ((callback) => {
-					let l10nPath = path.join(this.model.computed, f);
+					let l10nPath = path.join(this.model, f);
 
 					fs.readdir(l10nPath, function(err, list) {
 						if (err) {
@@ -88,13 +84,13 @@ class Pass {
 				// === flow definition ===
 
 				let passExtractor = (passCallback => {
-					fs.readFile(path.resolve(this.model.computed, "pass.json"), {}, (err, passStructBuffer) => {
+					fs.readFile(path.resolve(this.model, "pass.json"), {}, (err, passStructBuffer) => {
 						if (err) {
 							// Flow should never enter in there since pass.json existence-check is already done above.
 							return passCallback({
 								status: false,
 								error: {
-									message: `Unable to read pass.json file @ ${this.model.computed}`
+									message: `Unable to read pass.json file @ ${this.model}`
 								}
 							});
 						}
@@ -120,7 +116,7 @@ class Pass {
 								return passCallback({
 									status: false,
 									error: {
-										message: `Unable to read pass.json as buffer @ ${this.model.computed}. Unable to continue.\n${err}`,
+										message: `Unable to read pass.json as buffer @ ${this.model}. Unable to continue.\n${err}`,
 										ecode: 418
 									}
 								});
@@ -141,7 +137,7 @@ class Pass {
 						hashFlow.update(fileBuffer.toString("binary"));
 
 						manifest[bufferKey] = hashFlow.digest().toHex().trim();
-						archive.file(path.resolve(this.model.computed, bufferKey), { name: bufferKey });
+						archive.file(path.resolve(this.model, bufferKey), { name: bufferKey });
 
 						return callback();
 					}, _finalize);
@@ -186,7 +182,7 @@ class Pass {
 
 					listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
 
-					let pathList = bundleList.map(f => path.resolve(this.model.computed, f));
+					let pathList = bundleList.map(f => path.resolve(this.model, f));
 
 					async.concat(pathList, fs.readFile, _addBuffers);
 				});
@@ -203,7 +199,7 @@ class Pass {
 
 	_checkReqs() {
 		return new Promise((success, reject) => {
-			fs.readdir(this.model.computed, function(err, files) {
+			fs.readdir(this.model, function(err, files) {
 				if (err) {
 					return reject({
 						status: false,
@@ -435,24 +431,11 @@ class Pass {
 
 	_parseSettings(options) {
 		return new Promise((success, reject) => {
-			// var contents = {
-			// 	"certificates": {
-			// 		"wwdr": "aaaa",
-			// 		"signer": {
-			// 			"cert": "aaaaa",
-			// 			"key": "aaaa"
-			// 		}
-			// 	},
-			// 	"handlers": {
-			// 		"barcode": function() { console.log("aaa"); }
-			// 	}
-			// };
-
 			if (!schema.isValid(options, schema.constants.instance)) {
 				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.");
 			}
 
-			if (!options.modelName || typeof options.modelName !== "string") {
+			if (!options.model || typeof options.model !== "string") {
 				return reject({
 					status: false,
 					error: {
@@ -462,10 +445,7 @@ class Pass {
 				});
 			}
 
-			this.model.dir = path.resolve(__dirname, options.modelDir);
-			this.model.name = options.modelName;
-			this.model.computed = path.resolve(this.model.dir, `${this.model.name}.pass`);
-
+			this.model = path.resolve(options.model) + (!path.extname(options.model) ? ".pass" : "");
 			this.Certificates.dir = options.certificates.dir;
 
 			let certPaths = Object.keys(options.certificates)

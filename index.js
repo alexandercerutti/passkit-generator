@@ -83,7 +83,7 @@ class Pass {
 
 				// === flow definition ===
 
-				let passExtractor = (passCallback => {
+				let _passExtractor = (passCallback => {
 					fs.readFile(path.resolve(this.model, "pass.json"), {}, (err, passStructBuffer) => {
 						if (err) {
 							// Flow should never enter in there since pass.json existence-check is already done above.
@@ -172,7 +172,7 @@ class Pass {
 
 				// === execution ===
 
-				async.parallel([passExtractor, ...L10N.extractors], (err, listByFolder) => {
+				async.parallel([_passExtractor, ...L10N.extractors], (err, listByFolder) => {
 					if (err) {
 						return reject(err);
 					}
@@ -255,8 +255,6 @@ class Pass {
 			return false;
 		}
 	}
-
-
 
 	/**
 		Generates the PKCS #7 cryptografic signature for the manifest file.

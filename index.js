@@ -32,7 +32,7 @@ class Pass {
 		this._parseSettings(options)
 			.then(() => {
 				this._checkReqs()
-					.catch(e => { throw new Error(e) });
+					.catch(e => { throw new Error(e.error.message) });
 			});
 	}
 
@@ -68,8 +68,8 @@ class Pass {
 				 * a folder.
 				 *
 				 * Therefore, I generate a function for each localization (L10N) folder inside the
-				 * model. Each function will read at the same time the content of the folder and
-				 * return an array of the filenames inside that L10N folder.
+				 * model. Each function will read the content of the folder and return an array of
+				 * the filenames inside that L10N folder.
 				 */
 
 				L10N.extractors = L10N.list.map(f => ((callback) => {
@@ -84,6 +84,8 @@ class Pass {
 						return callback(null, filteredFiles);
 					});
 				}));
+
+				// === flow definition ===
 
 				let passExtractor = (passCallback => {
 					fs.readFile(path.resolve(this.model.computed, "pass.json"), {}, (err, passStructBuffer) => {
@@ -126,60 +128,67 @@ class Pass {
 					});
 				});
 
+				let _addBuffers = ((err, modelBuffers) => {
+					if (err) {
+						return reject(err);
+					}
+
+					// I want to get an object containing each buffer associated with its own file name
+					let modelFiles = Object.assign(...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
+
+					async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
+						let hashFlow = forge.md.sha1.create();
+						hashFlow.update(fileBuffer.toString("binary"));
+
+						manifest[bufferKey] = hashFlow.digest().toHex().trim();
+						archive.file(path.resolve(this.model.computed, bufferKey), { name: bufferKey });
+
+						return callback();
+					}, _finalize);
+				});
+
+				let _finalize = (err => {
+					if (err) {
+						return reject({
+							status: false,
+							error: {
+								message: `Unable to compile manifest. ${err}`,
+								ecode: 418
+							}
+						});
+					}
+
+					archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+					let signatureBuffer = this._sign(manifest);
+					archive.append(signatureBuffer, { name: "signature" });
+
+					let passStream = new stream.PassThrough();
+
+					archive.pipe(passStream);
+					archive.finalize().then(function() {
+						return success({
+							status: true,
+							content: passStream,
+						});
+					});
+				});
+
+				// === execution ===
+
 				async.parallel([passExtractor, ...L10N.extractors], (err, listByFolder) => {
 					if (err) {
 						return reject(err);
 					}
 
-					// removing result of passExtractor, which is undefined or null.
+					// removing result of passExtractor, which is undefined.
 					listByFolder.shift();
 
 					listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
 
 					let pathList = bundleList.map(f => path.resolve(this.model.computed, f));
 
-					async.concat(pathList, fs.readFile, (err, modelBuffers) => {
-						if (err) {
-							return reject(err);
-						}
-
-						// I want to get an object containing each buffer associated with its own file name
-						let modelFiles = Object.assign(...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
-
-						async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
-							let hashFlow = forge.md.sha1.create();
-							hashFlow.update(fileBuffer.toString("binary"));
-
-							manifest[bufferKey] = hashFlow.digest().toHex().trim();
-							archive.file(path.resolve(this.model.computed, bufferKey), { name: bufferKey });
-
-							return callback();
-						}, (error) => {
-							if (error) {
-								return reject({
-									status: false,
-									error: {
-										message: `Unable to compile manifest. ${error}`,
-										ecode: 418
-									}
-								});
-							}
-
-							archive.append(JSON.stringify(manifest), { name: "manifest.json" });
-
-							let signatureBuffer = this._sign(manifest);
-							archive.append(signatureBuffer, { name: "signature" });
-
-							let passStream = new stream.PassThrough();
-							archive.pipe(passStream);
-							archive.finalize().then(function() {
-								return success({
-									status: true,
-									content: passStream,
-								});
-							});
-						});
-					});
+					async.concat(pathList, fs.readFile, _addBuffers);
 				});
 			});
 		});
@@ -339,20 +348,20 @@ class Pass {
 					let barcode = passFile["barcode"];
 					let barcodeKeys = Object.keys(barcode);
 
-					if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.CONSTANTS.barcode)) {
+					if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.constants.barcode)) {
 						console.log("\x1b[41m", "Barcode syntax is not correct. Please refer to https://apple.co/2myAbst.", "\x1b[0m");
 					}
 
-					if (!passFile["barcodes"] || !(passFiles["barcodes"] instanceof Array)) {
-						console.log("\x1b[33m", "Your pass is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it backward-compatible.", "\x1b[0m");
+					if (!passFile["barcodes"] || !(passFile["barcodes"] instanceof Array)) {
+						console.log("\x1b[33m", "Your pass is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.", "\x1b[0m");
 					}
 				} else if (passFile["barcodes"] && (passFile["barcodes"] instanceof Array)) {
-					if (!passFile["barcodes"].length || !passFile["barcodes"].every(b => schema.isValid(b, schema.CONSTANTS.barcode))) {
+					if (!passFile["barcodes"].length || !passFile["barcodes"].every(b => schema.isValid(b, schema.constants.barcode))) {
 						console.log("\x1b[41m", "Some of your barcodes are not well-formed / have syntax errors. Please refer to https://apple.co/2myAbst.", "\x1b[0m");
 					}
 
 					if (!passFile["barcode"] || !(passFile["barcode"] instanceof Object)) {
-						console.log("\x1b[33m", "Your pass is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it forward-compatible.", "\x1b[0m");
+						console.log("\x1b[33m", "Your pass is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it backward-compatible.", "\x1b[0m");
 					}
 				}
 
@@ -439,7 +448,7 @@ class Pass {
 			// 	}
 			// };
 
-			if (!schema.isValid(options, schema.CONSTANTS.instance)) {
+			if (!schema.isValid(options, schema.constants.instance)) {
 				throw new Error("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.");
 			}
 

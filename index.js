@@ -22,8 +22,6 @@ class Pass {
 		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 		this.overrides = options.overrides || {};
 		this.Certificates = {};
-		this.handlers = {};
-
 		this.model = null;
 		this._parseSettings(options)
 			.then(() => {
@@ -479,11 +477,8 @@ class Pass {
 					});
 				},
 
-				handlersAssignCallback => {
-					this.handlers = options.handlers || {};
-					return handlersAssignCallback();
-				}
-			], success);
+				return success();
+			});
 		});
 	}
 

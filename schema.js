@@ -10,10 +10,6 @@ let instance = Joi.object().keys({
 			passphrase: Joi.string().required(),
 		}).required()
 	}).required(),
-	handlers: Joi.object().keys({
-		barcode: Joi.func(),
-		serialNumber: Joi.func()
-	}),
 	overrides: Joi.object()
 });
 

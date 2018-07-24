@@ -8,13 +8,11 @@ const schema = require("./schema.js");
 
 class Pass {
 	constructor(options) {
+		this.options = options;
 		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 		this.overrides = options.overrides || {};
 		this.Certificates = {};
 		this.model = "";
-
-		this._parseSettings(options)
-			.catch(e => console.log(e));
 	}
 
 	/**
@@ -29,167 +27,173 @@ class Pass {
 		let archive = archiver("zip");
 
 		return new Promise((success, reject) => {
-			fs.readdir(this.model, (err, files) => {
-				if (err) {
-					return reject({
-						status: false,
-						error: {
-							message: "Model not found. Provide a valid one to continue."
-						}
-					})
-				}
-
-				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
-				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
-
-				if (!noDynList.length) {
-					return reject({
-						status: false,
-						error: {
-							message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q and documentation to fill the model correctly."
-						}
-					});
-				}
-
-				// list without localization files (they will be added later in the flow)
-				let bundleList = noDynList.filter(f => !f.includes(".lproj"));
-
-				const L10N = {
-					// localization folders only
-					list: noDynList.filter(f => f.includes(".lproj"))
-				};
-
-				/*
-				 * I may have (and I rathered) used async.concat to achieve this but it returns an
-				 * array of filenames ordered by folder, without any kind of folder indication.
-				 * So, the problem rises when I have to understand which is the first file of a
-				 * folder which is not the first one, as I don't know how many file there are in
-				 * a folder.
-				 *
-				 * Therefore, I generate a function for each localization (L10N) folder inside the
-				 * model. Each function will read the content of the folder and return an array of
-				 * the filenames inside that L10N folder.
-				 */
-
-				L10N.extractors = L10N.list.map(f => ((callback) => {
-					let l10nPath = path.join(this.model, f);
-
-					fs.readdir(l10nPath, function(err, list) {
-						if (err) {
-							return callback(err, null);
-						}
-
-						let filteredFiles = removeHidden(list);
-						return callback(null, filteredFiles);
-					});
-				}));
-
-				// === flow definition ===
-
-				let _passExtractor = (passCallback => {
-					fs.readFile(path.resolve(this.model, "pass.json"), {}, (err, passStructBuffer) => {
-						if (err) {
-							// Flow should never enter in there since pass.json existence-check is already done above.
-							return passCallback({
-								status: false,
-								error: {
-									message: `Unable to read pass.json file @ ${this.model}`
-								}
-							});
-						}
-
-						if (!this._validateType(passStructBuffer)) {
-							return passCallback({
-								status: false,
-								error: {
-									message: `Unable to validate pass type or pass file is not a valid buffer. Refer to https://apple.co/2Nvshvn to use a valid type.`
-								}
-							});
-						}
-
-						this._patch(this._filterOptions(this.overrides), passStructBuffer)
-							.then(function _afterJSONParse(passFileBuffer) {
-								manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
-								archive.append(passFileBuffer, { name: "pass.json" });
-
-								// no errors happened
-								return passCallback(null);
-							})
-							.catch(err => {
-								return passCallback({
-									status: false,
-									error: {
-										message: `Unable to read pass.json as buffer @ ${this.model}. Unable to continue.\n${err}`,
-										ecode: 418
-									}
-								});
-							});
-					});
-				});
-
-				let _addBuffers = ((err, modelBuffers) => {
-					if (err) {
-						return reject(err);
-					}
-
-					// I want to get an object containing each buffer associated with its own file name
-					let modelFiles = Object.assign(...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
-
-					async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
-						let hashFlow = forge.md.sha1.create();
-						hashFlow.update(fileBuffer.toString("binary"));
-
-						manifest[bufferKey] = hashFlow.digest().toHex().trim();
-						archive.file(path.resolve(this.model, bufferKey), { name: bufferKey });
-
-						return callback();
-					}, _finalize);
-				});
-
-				let _finalize = (err => {
+			let _gen = (() => {
+				fs.readdir(this.model, (err, files) => {
 					if (err) {
 						return reject({
 							status: false,
 							error: {
-								message: `Unable to compile manifest. ${err}`,
-								ecode: 418
+								message: "Model not found. Provide a valid one to continue."
+							}
+						})
+					}
+
+					// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
+					let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
+
+					if (!noDynList.length) {
+						return reject({
+							status: false,
+							error: {
+								message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q and documentation to fill the model correctly."
 							}
 						});
 					}
 
-					archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+					// list without localization files (they will be added later in the flow)
+					let bundleList = noDynList.filter(f => !f.includes(".lproj"));
 
-					let signatureBuffer = this._sign(manifest);
-					archive.append(signatureBuffer, { name: "signature" });
+					const L10N = {
+						// localization folders only
+						list: noDynList.filter(f => f.includes(".lproj"))
+					};
 
-					let passStream = new stream.PassThrough();
+					/*
+					 * I may have (and I rathered) used async.concat to achieve this but it returns an
+					 * array of filenames ordered by folder, without any kind of folder indication.
+					 * So, the problem rises when I have to understand which is the first file of a
+					 * folder which is not the first one, as I don't know how many file there are in
+					 * a folder.
+					 *
+					 * Therefore, I generate a function for each localization (L10N) folder inside the
+					 * model. Each function will read the content of the folder and return an array of
+					 * the filenames inside that L10N folder.
+					 */
 
-					archive.pipe(passStream);
-					archive.finalize().then(function() {
-						return success({
-							status: true,
-							content: passStream,
+					L10N.extractors = L10N.list.map(f => ((callback) => {
+						let l10nPath = path.join(this.model, f);
+
+						fs.readdir(l10nPath, function(err, list) {
+							if (err) {
+								return callback(err, null);
+							}
+
+							let filteredFiles = removeHidden(list);
+							return callback(null, filteredFiles);
+						});
+					}));
+
+					// === flow definition ===
+
+					let _passExtractor = (passCallback => {
+						fs.readFile(path.resolve(this.model, "pass.json"), {}, (err, passStructBuffer) => {
+							if (err) {
+								// Flow should never enter in there since pass.json existence-check is already done above.
+								return passCallback({
+									status: false,
+									error: {
+										message: `Unable to read pass.json file @ ${this.model}`
+									}
+								});
+							}
+
+							if (!this._validateType(passStructBuffer)) {
+								return passCallback({
+									status: false,
+									error: {
+										message: `Unable to validate pass type or pass file is not a valid buffer. Refer to https://apple.co/2Nvshvn to use a valid type.`
+									}
+								});
+							}
+
+							this._patch(this._filterOptions(this.overrides), passStructBuffer)
+								.then(function _afterJSONParse(passFileBuffer) {
+									manifest["pass.json"] = forge.md.sha1.create().update(passFileBuffer.toString("binary")).digest().toHex();
+									archive.append(passFileBuffer, { name: "pass.json" });
+
+									// no errors happened
+									return passCallback(null);
+								})
+								.catch(err => {
+									return passCallback({
+										status: false,
+										error: {
+											message: `Unable to read pass.json as buffer @ ${this.model}. Unable to continue.\n${err}`,
+											ecode: 418
+										}
+									});
+								});
 						});
 					});
-				});
 
-				// === execution ===
+					let _addBuffers = ((err, modelBuffers) => {
+						if (err) {
+							return reject(err);
+						}
 
-				async.parallel([_passExtractor, ...L10N.extractors], (err, listByFolder) => {
-					if (err) {
-						return reject(err);
-					}
+						// I want to get an object containing each buffer associated with its own file name
+						let modelFiles = Object.assign(...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
 
-					// removing result of passExtractor, which is undefined.
-					listByFolder.shift();
+						async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
+							let hashFlow = forge.md.sha1.create();
+							hashFlow.update(fileBuffer.toString("binary"));
 
-					listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
+							manifest[bufferKey] = hashFlow.digest().toHex().trim();
+							archive.file(path.resolve(this.model, bufferKey), { name: bufferKey });
 
-					let pathList = bundleList.map(f => path.resolve(this.model, f));
+							return callback();
+						}, _finalize);
+					});
 
-					async.concat(pathList, fs.readFile, _addBuffers);
-				});
+					let _finalize = (err => {
+						if (err) {
+							return reject({
+								status: false,
+								error: {
+									message: `Unable to compile manifest. ${err}`,
+									ecode: 418
+								}
+							});
+						}
+
+						archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+						let signatureBuffer = this._sign(manifest);
+						archive.append(signatureBuffer, { name: "signature" });
+
+						let passStream = new stream.PassThrough();
+
+						archive.pipe(passStream);
+						archive.finalize().then(function() {
+							return success({
+								status: true,
+								content: passStream,
+							});
+						});
+					});
+
+					// === execution ===
+
+					async.parallel([_passExtractor, ...L10N.extractors], (err, listByFolder) => {
+						if (err) {
+							return reject(err);
+						}
+
+						// removing result of passExtractor, which is undefined.
+						listByFolder.shift();
+
+						listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
+
+						let pathList = bundleList.map(f => path.resolve(this.model, f));
+
+						async.concat(pathList, fs.readFile, _addBuffers);
+					});
+				})
 			});
+
+			this._parseSettings(this.options)
+				.then(_gen)
+				.catch(reject)
 		});
 	}
 

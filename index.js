@@ -290,7 +290,7 @@ class Pass {
 			return Promise.resolve(passBuffer);
 		}
 
-		return new Promise(function(done, reject) {
+		return new Promise((success, reject) => {
 			try {
 				let passFile = JSON.parse(passBuffer.toString("utf8"));
 
@@ -299,28 +299,25 @@ class Pass {
 
 				if (passFile["barcode"]) {
 					let barcode = passFile["barcode"];
-					let barcodeKeys = Object.keys(barcode);
 
 					if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.constants.barcode)) {
-						console.log("\x1b[41m", "Barcode syntax is not correct. Please refer to https://apple.co/2myAbst.", "\x1b[0m");
+						console.log("\x1b[41m", `Barcode syntax of the chosen model (${path.parse(this.model).base}) is not correct. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
 					}
+				} else {
+					console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it backward-compatible.`, "\x1b[0m");
+				}
 
-					if (!passFile["barcodes"] || !(passFile["barcodes"] instanceof Array)) {
-						console.log("\x1b[33m", "Your pass is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.", "\x1b[0m");
-					}
-				} else if (passFile["barcodes"] && (passFile["barcodes"] instanceof Array)) {
+				if (passFile["barcodes"] && passFile["barcodes"] instanceof Array) {
 					if (!passFile["barcodes"].length || !passFile["barcodes"].every(b => schema.isValid(b, schema.constants.barcode))) {
-						console.log("\x1b[41m", "Some of your barcodes are not well-formed / have syntax errors. Please refer to https://apple.co/2myAbst.", "\x1b[0m");
+						console.log("\x1b[41m", `Some of the barcodes of the chosen model (${path.parse(this.model).base}) are not well-formed / have syntax errors. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
 					}
-
-					if (!passFile["barcode"] || !(passFile["barcode"] instanceof Object)) {
-						console.log("\x1b[33m", "Your pass is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it backward-compatible.", "\x1b[0m");
-					}
+				} else {
+					console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.`, "\x1b[0m");
 				}
 
 				Object.keys(options).forEach(opt => passFile[opt] = options[opt]);
 
-				return done(Buffer.from(JSON.stringify(passFile)));
+				return success(Buffer.from(JSON.stringify(passFile)));
 			} catch(e) {
 				return reject(e);
 			}

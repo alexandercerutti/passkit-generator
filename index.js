@@ -6,17 +6,6 @@ const async = require("async");
 const stream = require("stream");
 const schema = require("./schema.js");
 
-/**
-	Apply a filter to arg0 to remove hidden files names (starting with dot)
-	@function removeHidden
-	@params {[String]} from - list of file names
-	@return {[String]}
-*/
-
-function removeHidden(from) {
-	return from.filter(e => e.charAt(0) !== ".");
-}
-
 class Pass {
 	constructor(options) {
 		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
@@ -462,6 +451,17 @@ class Pass {
 			return {};
 		}
 	}
+}
+
+/**
+	Apply a filter to arg0 to remove hidden files names (starting with dot)
+	@function removeHidden
+	@params {[String]} from - list of file names
+	@return {[String]}
+*/
+
+function removeHidden(from) {
+	return from.filter(e => e.charAt(0) !== ".");
 }
 
 module.exports = { Pass };

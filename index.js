@@ -101,7 +101,7 @@ class Pass {
 								return passCallback({
 									status: false,
 									error: {
-										message: `Unable to validate pass type or pass file is not a valid buffer. Refer to https://apple.co/2Nvshvn to use a valid type.`
+										message: `Unable to validate pass type or pass file is not a valid buffer. Check the syntax of your pass.json file or refer to https://apple.co/2Nvshvn to use a valid type.`
 									}
 								});
 							}
@@ -326,29 +326,7 @@ class Pass {
 
 	/**
 		Filters the options received in the query from http request into supported options
-		by Apple and this application, based on the functions that can be provided to keys
-		in supportedOptions.
-
-		You can create your own function to check if keys in query meet your requirements.
-		They accept the value provided in the related query key as unique parameter.
-		Make them return a boolean value, true if the requirements are met, false otherwise.
-
-		Example:
-
-		barcode: function _checkBarcode() {
-			if ( type of barcode not supported ) {
-				return false;
-			}
-
-			if ( barcode value doesn't meet your requirements )
-				return false;
-			}
-
-			return true;
-		}
-
-		Please note that some options are not supported since should be included inside the
-		models you provide in "passModels" directory.
+		by Apple and this application.
 
 		@method _filterOptions
 		@params {Object} query - raw informations to be edited in the pass.json file
@@ -357,22 +335,13 @@ class Pass {
 	*/
 
 	_filterOptions(query) {
-		const supportedOptions = {
-			"serialNumber": null,
-			"userInfo": null,
-			"expirationDate": null,
-			"locations": null,
-			"authenticationToken": null,
-			"barcode": null
-		};
+		const supportedOptions = ["serialNumber", "userInfo", "expirationDate", "locations", "authenticationToken", "barcode"];
 
 		let options = {};
 
-		Object.keys(supportedOptions).forEach(function(key) {
+		supportedOptions.forEach(function(key) {
 			if (query[key]) {
-				if (!supportedOptions[key] || typeof supportedOptions[key] !== "function" || typeof supportedOptions[key] === "function" && supportedOptions[key](query[key])) {
-					options[key] = query[key];
-				}
+				options[key] = query[key];
 			}
 		});
 

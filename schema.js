@@ -28,26 +28,36 @@ let field = Joi.object().keys({
 	textAlignment: Joi.string().regex(/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/, "graphic-alignment"),
 	key: Joi.string().required(),
 	value: Joi.string().required()
-})
+});
 
-let structure = Joi.object().keys({
+let struct = {
 	auxiliaryFields: Joi.array().items(field),
 	backFields: Joi.array().items(field),
 	headerFields: Joi.array().items(field),
 	primaryFields: Joi.array().items(field),
-	secondaryFields: Joi.array().items(field),
-	transitType: Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/)
-});
+	secondaryFields: Joi.array().items(field)
+};
+
+let basicStructure = Joi.object().keys(struct);
+let boardingStructure = Joi.object().keys(Object.assign({
+	transitType: Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/).required()
+}, struct));
 
 module.exports = {
 	constants: {
 		instance,
 		barcode,
 		field,
-		structure
+		basicStructure,
+		boardingStructure
 	},
-	isValid: (opts, schemaName) => {
+	isValid: (opts, schemaName, debug = false) => {
 		let validation = Joi.validate(opts, schemaName);
+
+		if (debug) {
+			console.log(validation)
+		}
+
 		return !validation.error;
 	}
 };

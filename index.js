@@ -208,8 +208,14 @@ class Pass {
 	_validateType(passBuffer) {
 		try {
 			let passFile = JSON.parse(passBuffer.toString("utf8"));
+			let index = this.passTypes.findIndex(passType => passFile.hasOwnProperty(passType));
 
-			return this.passTypes.some(passType => passFile.hasOwnProperty(passType));
+			if (index == -1) {
+				return false;
+			}
+
+			let type = this.passTypes[index];
+			return schema.isValid(passFile[type], schema.constants[(type === "boardingPass" ? "boarding" : "basic") + "Structure"]);
 		} catch (e) {
 			return false;
 		}

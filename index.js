@@ -10,7 +10,7 @@ class Pass {
 	constructor(options) {
 		this.options = options;
 		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
-		this.overrides = options.overrides || {};
+		this.overrides = this.options.overrides || {};
 		this.Certificates = {};
 		this.model = "";
 	}
@@ -321,7 +321,7 @@ class Pass {
 					console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.`, "\x1b[0m");
 				}
 
-				Object.keys(options).forEach(opt => passFile[opt] = options[opt]);
+				Object.assign(passFile, options);
 
 				return success(Buffer.from(JSON.stringify(passFile)));
 			} catch(e) {

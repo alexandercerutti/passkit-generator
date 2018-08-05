@@ -6,10 +6,14 @@ const async = require("async");
 const stream = require("stream");
 const schema = require("./schema.js");
 
+const util = require("util");
+
+const readdir = util.promisify(fs.readdir);
+const readFile = util.promisify(fs.readFile);
+
 class Pass {
 	constructor(options) {
 		this.options = options;
-		this.passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 		this.overrides = this.options.overrides || {};
 		this.Certificates = {};
 		this.model = "";
@@ -205,15 +209,17 @@ class Pass {
 	*/
 
 	_validateType(passBuffer) {
+		let passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
+
 		try {
 			let passFile = JSON.parse(passBuffer.toString("utf8"));
-			let index = this.passTypes.findIndex(passType => passFile.hasOwnProperty(passType));
+			let index = passTypes.findIndex(passType => passFile.hasOwnProperty(passType));
 
 			if (index == -1) {
 				return false;
 			}
 
-			let type = this.passTypes[index];
+			let type = passTypes[index];
 			return schema.isValid(passFile[type], schema.constants[(type === "boardingPass" ? "boarding" : "basic") + "Structure"]);
 		} catch (e) {
 			return false;

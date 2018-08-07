@@ -23,6 +23,8 @@ function manageRequest(request, response) {
 					request.body.modelName ||
 					request.params.modelName) + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 
+	let overrides = Object.keys(request.body).length ? request.body : request.query;
+
 	response.set({
 		"Content-type": "application/vnd.apple.pkpass",
 		"Content-disposition": `attachment; filename=${passName}.pkpass`
@@ -38,7 +40,7 @@ function manageRequest(request, response) {
 				passphrase: "123456"
 			}
 		},
-		overrides: {}
+		overrides: overrides
 	});
 
 	pass.generate()

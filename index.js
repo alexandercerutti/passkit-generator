@@ -27,82 +27,45 @@ class Pass {
 	*/
 
 	generate() {
-		let manifest = {};
 		let archive = archiver("zip");
 
-		return new Promise((success, reject) => {
-			let _gen = (() => {
-				fs.readdir(this.model, (err, files) => {
-					if (err) {
-						return reject({
-							status: false,
-							error: {
-								message: "Model not found. Provide a valid one to continue."
-							}
-						})
-					}
+		return this._parseSettings(this.options)
+			.then(() => readdir(this.model))
+			.catch(() => Promise.reject({
+				status: false,
+				error: {
+					message: `Model ${this.model} not found. Provide a valid one to continue`
+				}
+			}))
+			.then(files => {
+				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
+				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
 
-					// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
-					let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
+				if (!noDynList.length) {
+					return Promise.reject({
+						status: false,
+						error: {
+							message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q and documentation to fill the model correctly."
+						}
+					});
+				}
 
-					if (!noDynList.length) {
-						return reject({
-							status: false,
-							error: {
-								message: "Model provided matched but unitialized. Refer to https://apple.co/2IhJr0Q and documentation to fill the model correctly."
-							}
-						});
-					}
+				// list without localization files (they will be added later in the flow)
+				let bundle = noDynList.filter(f => !f.includes(".lproj"));
 
-					// list without localization files (they will be added later in the flow)
-					let bundleList = noDynList.filter(f => !f.includes(".lproj"));
+				// Localization folders only
+				const L10N = noDynList.filter(f => f.includes(".lproj"));
 
-					const L10N = {
-						// localization folders only
-						list: noDynList.filter(f => f.includes(".lproj"))
-					};
+				/*
+				 * Defining pass.json patcher and extractor
+				 * Extracting it with the other paths
+				 */
 
-					/*
-					 * I may have (and I rathered) used async.concat to achieve this but it returns an
-					 * array of filenames ordered by folder, without any kind of folder indication.
-					 * So, the problem rises when I have to understand which is the first file of a
-					 * folder which is not the first one, as I don't know how many file there are in
-					 * a folder.
-					 *
-					 * Therefore, I generate a function for each localization (L10N) folder inside the
-					 * model. Each function will read the content of the folder and return an array of
-					 * the filenames inside that L10N folder.
-					 */
-
-					L10N.extractors = L10N.list.map(f => ((callback) => {
-						let l10nPath = path.join(this.model, f);
-
-						fs.readdir(l10nPath, function(err, list) {
-							if (err) {
-								return callback(err, null);
-							}
-
-							let filteredFiles = removeHidden(list);
-							return callback(null, filteredFiles);
-						});
-					}));
-
-					// === flow definition ===
-
-					let _passExtractor = (passCallback => {
-						fs.readFile(path.resolve(this.model, "pass.json"), {}, (err, passStructBuffer) => {
-							if (err) {
-								// Flow should never enter in there since pass.json existence-check is already done above.
-								return passCallback({
-									status: false,
-									error: {
-										message: `Unable to read pass.json file @ ${this.model}`
-									}
-								});
-							}
-
+				let _passExtractor = (() => {
+					return readFile(path.resolve(this.model, "pass.json"))
+						.then(passStructBuffer => {
 							if (!this._validateType(passStructBuffer)) {
-								return passCallback({
+								return Promise.reject({
 									status: false,
 									error: {
 										message: `Unable to validate pass type or pass file is not a valid buffer. Check the syntax of your pass.json file or refer to https://apple.co/2Nvshvn to use a valid type.`
@@ -110,94 +73,66 @@ class Pass {
 								});
 							}
 
-							try {
-								let patchedPass = this._patch(this._filterOptions(this.overrides), passStructBuffer);
+							bundle.push("pass.json");
 
-								manifest["pass.json"] = forge.md.sha1.create().update(patchedPass.toString("binary")).digest().toHex();
-								archive.append(patchedPass, { name: "pass.json" });
-
-								return passCallback();
-							} catch (e) {
-								return passCallback({
-									status: false,
-									error: {
-										message: `Unable to read pass.json as buffer @ ${this.model}. Unable to continue.\n${err}`,
-										ecode: 418
-									}
-								});
-							}
-						});
-					});
-
-					let _addBuffers = ((err, modelBuffers) => {
-						if (err) {
-							return reject(err);
-						}
-
-						// I want to get an object containing each buffer associated with its own file name
-						let modelFiles = Object.assign(...modelBuffers.map((buf, index) => ({ [bundleList[index]]: buf })));
-
-						async.eachOf(modelFiles, (fileBuffer, bufferKey, callback) => {
-							let hashFlow = forge.md.sha1.create();
-							hashFlow.update(fileBuffer.toString("binary"));
-
-							manifest[bufferKey] = hashFlow.digest().toHex().trim();
-							archive.file(path.resolve(this.model, bufferKey), { name: bufferKey });
-
-							return callback();
-						}, _finalize);
-					});
-
-					let _finalize = (err => {
-						if (err) {
-							return reject({
+							return this._patch(this._filterOptions(this.overrides), passStructBuffer);
+						})
+						.catch(err => {
+							console.log(err);
+							return Promise.reject({
 								status: false,
 								error: {
-									message: `Unable to compile manifest. ${err}`,
-									ecode: 418
+									message: `Unable to validate pass type or pass file is not a valid buffer. Check the syntax of your pass.json file or refer to https://apple.co/2Nvshvn to use a valid type.`
 								}
-							});
-						}
-
-						archive.append(JSON.stringify(manifest), { name: "manifest.json" });
-
-						let signatureBuffer = this._sign(manifest);
-						archive.append(signatureBuffer, { name: "signature" });
-
-						let passStream = new stream.PassThrough();
-
-						archive.pipe(passStream);
-						archive.finalize().then(function() {
-							return success({
-								status: true,
-								content: passStream,
-							});
+							})
 						});
-					});
+				});
 
-					// === execution ===
+				return Promise.all(L10N.map(f => readdir(path.join(this.model, f)).then(removeHidden)))
+					.then(listByFolder => {
+						listByFolder.forEach((folder, index) => bundle.push(...folder.map(f => path.join(L10N[index], f))));
 
-					async.parallel([_passExtractor, ...L10N.extractors], (err, listByFolder) => {
-						if (err) {
-							return reject(err);
-						}
+						return Promise.all([...bundle.map(f => readFile(path.resolve(this.model, f))), _passExtractor()]).then(buffers => [buffers, bundle]);
+					})
+			})
+			.then(([buffers, bundle]) => {
+				/*
+				 * Parsing the buffers and pushing them into the archive
+				 */
 
-						// removing result of passExtractor, which is undefined.
-						listByFolder.shift();
+				let manifest = {};
 
-						listByFolder.forEach((folder, index) => bundleList.push(...folder.map(f => path.join(L10N.list[index], f))));
+				let hashAppendTemplate = ((buffer, key) => {
+					let hashFlow = forge.md.sha1.create();
+					hashFlow.update(buffer.toString("binary"));
 
-						let pathList = bundleList.map(f => path.resolve(this.model, f));
+					manifest[key] = hashFlow.digest().toHex();
 
-						async.concat(pathList, fs.readFile, _addBuffers);
-					});
-				})
+					archive.append(buffer, { name: key });
+					return Promise.resolve();
+				});
+
+				let passFilesFn = buffers.map((buf, index) => hashAppendTemplate.bind(null, buf, bundle[index])());
+
+				return Promise.all(passFilesFn).then(() => manifest);
+			})
+			.then((manifest) => {
+				archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+				let signatureBuffer = this._sign(manifest);
+				archive.append(signatureBuffer, { name: "signature" });
+
+				let passStream = new stream.PassThrough();
+
+				archive.pipe(passStream);
+
+				return archive.finalize().then(() => {
+					return {
+						status: true,
+						content: passStream,
+					};
+				});
 			});
-
-			this._parseSettings(this.options)
-				.then(_gen)
-				.catch(reject)
-		});
 	}
 
 	/**

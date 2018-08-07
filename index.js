@@ -297,54 +297,55 @@ class Pass {
 	*/
 
 	_patch(options, passBuffer) {
-
-		if (!options) {
-			return passBuffer;
-		}
-
-		let passFile = JSON.parse(passBuffer.toString("utf8"));
-
-		// "barcodes" support got introduced in iOS 9 as array of barcode.
-		// "barcode" is still used in older iOS versions
-
-		if (passFile["barcode"]) {
-			let barcode = passFile["barcode"];
-
-			if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.constants.barcode) || !options.barcode && barcode.message === "") {
-				console.log("\x1b[41m", `Barcode syntax of the chosen model (${path.parse(this.model).base}) is not correct or the override content was not provided got removed. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
-				delete passFile["barcode"];
-			} else {
-				// options.barcode may not be defined
-				passFile["barcode"].message = options.barcode || passFile["barcode"].message;
-			}
-		} else {
-			console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it backward-compatible.`, "\x1b[0m");
-		}
-
-		if (passFile["barcodes"] && passFile["barcodes"] instanceof Array) {
-			if (!passFile["barcodes"].length) {
-				console.log("\x1b[33m", `No barcodes support specified. The element got removed.`, "\x1b[0m");
-				delete passFile["barcodes"];
+		return new Promise((resolve, reject) => {
+			if (!options) {
+				return resolve(passBuffer);
 			}
 
-			passFile["barcodes"].forEach((b,i) => {
-				if (!schema.isValid(b, schema.constants.barcode) && !!options.barcode && b.message !== "") {
-					passFile["barcodes"].splice(i, 1);
-					console.log("\x1b[41m", `Barcode @ index ${i} of the chosen model (${path.parse(this.model).base}) is not well-formed or have syntax errors and got removed. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
+			let passFile = JSON.parse(passBuffer.toString("utf8"));
+
+			// "barcodes" support got introduced in iOS 9 as array of barcode.
+			// "barcode" is still used in older iOS versions
+
+			if (passFile["barcode"]) {
+				let barcode = passFile["barcode"];
+
+				if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.constants.barcode) || !options.barcode && barcode.message === "") {
+					console.log("\x1b[41m", `Barcode syntax of the chosen model (${path.parse(this.model).base}) is not correct and got removed or the override content was not provided. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
+					delete passFile["barcode"];
 				} else {
 					// options.barcode may not be defined
-					b.message = options.barcode || b.message;
+					passFile["barcode"].message = options.barcode || passFile["barcode"].message;
 				}
-			});
-		} else {
-			console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.`, "\x1b[0m");
-		}
+			} else {
+				console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it backward-compatible.`, "\x1b[0m");
+			}
 
-		delete options["barcode"];
+			if (passFile["barcodes"] && passFile["barcodes"] instanceof Array) {
+				if (!passFile["barcodes"].length) {
+					console.log("\x1b[33m", `No barcodes support specified. The element got removed.`, "\x1b[0m");
+					delete passFile["barcodes"];
+				}
 
-		Object.assign(passFile, options);
+				passFile["barcodes"].forEach((b,i) => {
+					if (!schema.isValid(b, schema.constants.barcode) && !!options.barcode && b.message !== "") {
+						passFile["barcodes"].splice(i, 1);
+						console.log("\x1b[41m", `Barcode @ index ${i} of the chosen model (${path.parse(this.model).base}) is not well-formed or have syntax errors and got removed. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
+					} else {
+						// options.barcode may not be defined
+						b.message = options.barcode || b.message;
+					}
+				});
+			} else {
+				console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.`, "\x1b[0m");
+			}
 
-		return Buffer.from(JSON.stringify(passFile));
+			delete options["barcode"];
+
+			Object.assign(passFile, options);
+
+			return resolve(Buffer.from(JSON.stringify(passFile)));
+		});
 	}
 
 	/**

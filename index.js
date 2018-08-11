@@ -17,6 +17,7 @@ class Pass {
 		this.overrides = this.options.overrides || {};
 		this.Certificates = {};
 		this.model = "";
+		this.l10n = {};
 	}
 
 	/**
@@ -50,7 +51,7 @@ class Pass {
 				let bundle = noDynList.filter(f => !f.includes(".lproj"));
 
 				// Localization folders only
-				const L10N = noDynList.filter(f => f.includes(".lproj"));
+				const L10N = noDynList.filter(f => f.includes(".lproj") && Object.keys(this.l10n).includes(path.parse(f).name));
 
 				let _passExtractor = (() => {
 					return readFile(path.resolve(this.model, "pass.json"))
@@ -105,6 +106,23 @@ class Pass {
 
 				return archive.finalize().then(() => passStream);
 			});
+	}
+
+	/*
+
+	*/
+
+	localize(lang, translations) {
+		this.l10n[lang] = translations;
+	}
+
+	_generateStringFile(lang) {
+		if (this.l10n[lang] === undefined || !Object.keys(this.l10n[lang]).length) {
+			return Buffer.from("", "utf8");
+		}
+
+		let strings = Object.keys(this.l10n[lang]).map(key => `"${key}" = "${this.l10n[lang][key]}";`);
+		return Buffer.from(strings.join("\n"), "utf8");
 	}
 
 	/**

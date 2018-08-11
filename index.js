@@ -43,7 +43,7 @@ class Pass {
 				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
 
 				if (!noDynList.length || !noDynList.some(f => f.includes("icon"))) {
-					throw new Error(`Provided model (${path.parse(this.model).name}) matched but unitialized. Refer to https://apple.co/2IhJr0Q and documentation to fill the model correctly.`);
+					throw new Error(`Provided model (${path.parse(this.model).name}) matched but unitialized or may not contain icon. Refer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.`);
 				}
 
 				// list without localization files (they will be added later in the flow)
@@ -52,16 +52,11 @@ class Pass {
 				// Localization folders only
 				const L10N = noDynList.filter(f => f.includes(".lproj"));
 
-				/*
-				 * Defining pass.json patcher and extractor
-				 * Extracting it with the other paths
-				 */
-
 				let _passExtractor = (() => {
 					return readFile(path.resolve(this.model, "pass.json"))
 						.then(passStructBuffer => {
 							if (!this._validateType(passStructBuffer)) {
-								throw new Error(`Unable to validate pass type or pass file is not a valid buffer. Check the syntax of your pass.json file or refer to https://apple.co/2Nvshvn to use a valid type.`)
+								throw new Error(`Unable to validate pass type or pass file is not a valid buffer. Check the syntax of your pass.json file or refer to https://apple.co/2Nvshvn and to use a valid type.`)
 							}
 
 							bundle.push("pass.json");

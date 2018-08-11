@@ -70,7 +70,14 @@ class Pass {
 					.then(listByFolder => {
 						listByFolder.forEach((folder, index) => bundle.push(...folder.map(f => path.join(L10N[index], f))));
 
-						return Promise.all([...bundle.map(f => readFile(path.resolve(this.model, f))), _passExtractor()]).then(buffers => [buffers, bundle]);
+						return Promise.all([...bundle.map(f => readFile(path.resolve(this.model, f))), _passExtractor()]).then(buffers => {
+							Object.keys(this.l10n).forEach(l => {
+								buffers.push(this._generateStringFile(l));
+								bundle.push(path.join(`${l}.lproj`, `pass.strings`));
+							});
+
+							return [buffers, bundle];
+						});
 					})
 			})
 			.then(([buffers, bundle]) => {

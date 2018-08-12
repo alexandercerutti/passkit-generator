@@ -135,12 +135,21 @@ class Pass {
 		}
 	}
 
+	/**
+	 * Creates a buffer of translations in Apple .strings format
+	 *
+	 * @method _generateStringFile
+	 * @params {String} lang - the ISO 3166 alpha-2 code for the language
+	 * @returns {Buffer} - Buffer to be written in pass.strings for language in lang
+	 * @see https://apple.co/2M9LWVu - String Resources
+	 */
+
 	_generateStringFile(lang) {
-		if (this.l10n[lang] === undefined || !Object.keys(this.l10n[lang]).length) {
+		if (!Object.keys(this.l10n[lang]).length) {
 			return Buffer.from("", "utf8");
 		}
 
-		let strings = Object.keys(this.l10n[lang]).map(key => `"${key}" = "${this.l10n[lang][key]}";`);
+		let strings = Object.keys(this.l10n[lang]).map(key => `"${key}" = "${this.l10n[lang][key].replace(/"/g, /\\"/)}";`);
 		return Buffer.from(strings.join("\n"), "utf8");
 	}
 

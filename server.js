@@ -45,18 +45,22 @@ function manageRequest(request, response) {
 
 	pass.generate()
 	.then(function(result) {
-		result.content.pipe(response);
-
 		if (Configuration.output.dir && Configuration.output.shouldWrite && !fs.accessSync(path.resolve(Configuration.output.dir))) {
 			let wstreamOutputPass = fs.createWriteStream(path.resolve(Configuration.output.dir, `${passName}.pkpass`));
-			result.content.pipe(wstreamOutputPass);
 		}
+
+		result.pipe(response);
 	})
 	.catch(function(err) {
-		console.log(err);
+		console.log(err.message);
 
 		response.set("Content-Type", "application/json");
-		response.status(418).send(err);
+		response.status(418).send({
+			status: false,
+			error: {
+				message: err.message
+			}
+		});
 	})
 }
 

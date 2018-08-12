@@ -72,8 +72,11 @@ class Pass {
 
 						return Promise.all([...bundle.map(f => readFile(path.resolve(this.model, f))), _passExtractor()]).then(buffers => {
 							Object.keys(this.l10n).forEach(l => {
-								buffers.push(this._generateStringFile(l));
-								bundle.push(path.join(`${l}.lproj`, `pass.strings`));
+								const strings = this._generateStringFile(l);
+								if (strings.length) {
+									buffers.push(strings);
+									bundle.push(path.join(`${l}.lproj`, `pass.strings`));
+								}
 							});
 
 							return [buffers, bundle];

@@ -118,12 +118,21 @@ class Pass {
 			});
 	}
 
-	/*
-
-	*/
+	/**
+	 * Adds traslated strings object to the list of translation to be inserted into the pass
+	 *
+	 * @method localize
+	 * @params {String} lang - the ISO 3166 alpha-2 code for the language
+	 * @params {Object} translations - key/value pairs where key is the
+	 * 		string appearing in pass.json and value the translated string
+	 *
+	 * @see https://apple.co/2KOv0OW - Passes support localization
+	 */
 
 	localize(lang, translations) {
-		this.l10n[lang] = translations;
+		if (typeof translations === "object") {
+			this.l10n[lang] = translations;
+		}
 	}
 
 	_generateStringFile(lang) {

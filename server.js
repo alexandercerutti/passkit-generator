@@ -43,6 +43,24 @@ function manageRequest(request, response) {
 		overrides: overrides
 	});
 
+	pass.localize("it", {
+		"EVENT": "Evento",
+		"LOCATION": "Dove"
+	});
+
+	pass.localize("en", {
+		"EVENT": "Event",
+		"LOCATION": "Location"
+	})
+
+	// non-existing language code
+	pass.localize("ol", {
+		"EVENT": "numashat",
+		"LOCATION": "abelret"
+	});
+
+	//pass.localize("zu", {});
+
 	pass.generate()
 	.then(function(result) {
 		if (Configuration.output.dir && Configuration.output.shouldWrite && !fs.accessSync(path.resolve(Configuration.output.dir))) {

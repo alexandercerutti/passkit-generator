@@ -4,7 +4,8 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const async = require("async");
 const stream = require("stream");
-const schema = require("./schema.js");
+const schema = require("./schema");
+const fields = require("./fields");
 
 const util = require("util");
 
@@ -18,6 +19,8 @@ class Pass {
 		this.Certificates = {};
 		this.model = "";
 		this.l10n = {};
+
+		fields.areas.forEach(a => this[a] = new fields.FieldsArea());
 	}
 
 	/**
@@ -173,6 +176,8 @@ class Pass {
 			}
 
 			let type = passTypes[index];
+
+			this.type = type;
 			return schema.isValid(passFile[type], schema.constants[(type === "boardingPass" ? "boarding" : "basic") + "Structure"]);
 		} catch (e) {
 			return false;
@@ -295,6 +300,12 @@ class Pass {
 		delete options["barcode"];
 
 		Object.assign(passFile, options);
+
+		fields.areas.forEach(area => {
+			if (this[area].fields.length) {
+				passFile[this.type][area].push(...this[area].fields);
+			}
+		});
 
 		return Promise.resolve(Buffer.from(JSON.stringify(passFile)));
 	}

@@ -24,10 +24,11 @@ class Pass {
 	}
 
 	/**
-		Compiles the pass
-
-		@method generate
-		@return {Promise} - A JSON structure containing the error or the stream of the generated pass.
+	 * Generates the pass Stream
+	 *
+	 * @async
+	 * @method generate
+	 * @return {Promise<Stream>} A Promise containing the stream of the generated pass.
 	*/
 
 	generate() {
@@ -157,12 +158,12 @@ class Pass {
 	}
 
 	/**
-		Checks if pass model type is one of the supported ones
-		
-		@method _validateType
-		@params {Buffer} passBuffer - buffer of the pass structure content
-		@returns {Boolean} - true if type is supported, false otherwise.
-	*/
+	 * Checks if pass model type is one of the supported ones
+	 *
+	 * @method _validateType
+	 * @params {Buffer} passBuffer - buffer of the pass structure content
+	 * @returns {Boolean} true if type is supported, false otherwise.
+	 */
 
 	_validateType(passBuffer) {
 		let passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
@@ -185,12 +186,12 @@ class Pass {
 	}
 
 	/**
-		Generates the PKCS #7 cryptografic signature for the manifest file.
-
-		@method _sign
-		@params {String|Object} manifest - Manifest content.
-		@returns {Object} Promise
-	*/
+	 * Generates the PKCS #7 cryptografic signature for the manifest file.
+	 *
+	 * @method _sign
+	 * @params {String|Object} manifest - Manifest content.
+	 * @returns {Buffer}
+	 */
 
 	_sign(manifest) {
 		let signature = forge.pkcs7.createSignedData();
@@ -246,13 +247,13 @@ class Pass {
 	}
 
 	/**
-		Edits the buffer of pass.json based on the passed options.
-
-		@method _patch
-		@params {Object} options - options resulting from the filtering made by filterPassOptions function
-		@params {Buffer} passBuffer - Buffer of the contents of pass.json
-		@returns {Promise} - Edited pass.json buffer or Object containing error.
-	*/
+	 * Edits the buffer of pass.json based on the passed options.
+	 *
+	 * @method _patch
+	 * @params {Object} options - options resulting from the filtering made by filterPassOptions function
+	 * @params {Buffer} passBuffer - Buffer of the contents of pass.json
+	 * @returns {Promise<Buffer>} Edited pass.json buffer or Object containing error.
+	 */
 
 	_patch(options, passBuffer) {
 		if (!options) {
@@ -311,14 +312,14 @@ class Pass {
 	}
 
 	/**
-		Filters the options received in the query from http request into supported options
-		by Apple and this application.
-
-		@method _filterOptions
-		@params {Object} query - raw informations to be edited in the pass.json file
-								from HTTP Request Params or Body
-		@returns {Object} - filtered options based on above criterias.
-	*/
+	 * Filters the options received in the query from http request into supported options
+	 * by Apple and this application.
+	 *
+	 * @method _filterOptions
+	 * @params {Object} opts - raw informations to be edited in the pass.json file
+	 *							from HTTP Request Params or Body
+	 * @returns {Object} - filtered options based on above criterias.
+	 */
 
 	_filterOptions(query) {
 		const supportedOptions = ["serialNumber", "userInfo", "expirationDate", "locations", "authenticationToken", "barcode"];
@@ -335,8 +336,13 @@ class Pass {
 	}
 
 	/**
-		Validates the contents of the passed options and assigns the contents to the right properties
-	*/
+	 * Validates the contents of the passed options and assigns the contents to the right properties
+	 *
+	 * @async
+	 * @method _parseSettings
+	 * @params {Object} options - the options passed to be parsed
+	 * @returns {Promise}
+	 */
 
 	_parseSettings(options) {
 		if (!schema.isValid(options, schema.constants.instance)) {
@@ -373,6 +379,15 @@ class Pass {
 		});
 	}
 
+	/**
+	 * Parses the PEM-formatted passed text (certificates)
+	 *
+	 * @method __parsePEM
+	 * @params {String} element - Text content of .pem files
+	 * @params {String} passphrase - passphrase for the key
+	 * @returns {Object} - Object containing name of the certificate and its parsed content
+	 */
+
 	__parsePEM(element, passphrase) {
 		if (element.includes("PRIVATE KEY") && !!passphrase) {
 			return {
@@ -392,11 +407,11 @@ class Pass {
 }
 
 /**
-	Apply a filter to arg0 to remove hidden files names (starting with dot)
-	@function removeHidden
-	@params {[String]} from - list of file names
-	@return {[String]}
-*/
+ *	Apply a filter to arg0 to remove hidden files names (starting with dot)
+ *	@function removeHidden
+ *	@params {String[]} from - list of file names
+ *	@return {String[]}
+ */
 
 function removeHidden(from) {
 	return from.filter(e => e.charAt(0) !== ".");

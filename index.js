@@ -321,18 +321,13 @@ class Pass {
 	 * @returns {Object} - filtered options based on above criterias.
 	 */
 
-	_filterOptions(query) {
-		const supportedOptions = ["serialNumber", "userInfo", "expirationDate", "locations", "authenticationToken", "barcode"];
+	_filterOptions(opts) {
+		const forbidden = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
+		const supported = ["serialNumber", "userInfo", "expirationDate", "locations", "authenticationToken", "barcode"];
 
-		let options = {};
+		let valid = Object.keys(opts).filter(o => !forbidden.includes(o) && supported.includes(o));
 
-		supportedOptions.forEach(function(key) {
-			if (query[key]) {
-				options[key] = query[key];
-			}
-		});
-
-		return options;
+		return Object.assign(...valid.map(v => ({ [v]: opts[v] })), {});
 	}
 
 	/**

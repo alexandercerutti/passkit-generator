@@ -54,13 +54,15 @@ function manageRequest(request, response) {
 
 	pass.localize("it", {
 		"EVENT": "Evento",
-		"LOCATION": "Dove"
+		"LOCATION": "Dove",
+		"PARTY": "Festa",
+		"ROW": "Riga"
 	});
 
 	pass.localize("en", {
 		"EVENT": "Event",
 		"LOCATION": "Location"
-	})
+	});
 
 	// non-existing language code
 	pass.localize("ol", {

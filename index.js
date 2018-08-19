@@ -161,6 +161,40 @@ class Pass {
 	}
 
 	/**
+	 * Sets expirationDate property to the W3C date
+	 *
+	 * @method expiration
+	 * @params {String} date - the date in string
+	 * @returns {this}
+	 */
+
+	expiration(date) {
+		if (typeof date !== "string") {
+			return this;
+		}
+
+		const convDate = dateToW3CString(date);
+
+		if (convDate) {
+			this.props.expirationDate = convDate;
+		}
+
+		return this;
+	}
+
+	/**
+	 * Sets voided property to true
+	 *
+	 * @method void
+	 * @return {this}
+	 */
+
+	void() {
+		this.props.voided = true;
+		return this;
+	}
+
+	/**
 	 * Checks if pass model type is one of the supported ones
 	 *
 	 * @method _validateType
@@ -404,6 +438,27 @@ class Pass {
 			return {};
 		}
 	}
+}
+
+/**
+ * Converts a date to W3C Standard format
+ *
+ * @function dateToW3Cstring
+ * @params {String}
+ */
+
+function dateToW3CString(date) {
+	if (typeof date !== "string") {
+		return "";
+	}
+
+	let parsedDate = moment(date, ["MM-DD-YYYY"]).format();
+
+	if (parsedDate === "Invalid date") {
+		return "";
+	}
+
+	return parsedDate;
 }
 
 /**

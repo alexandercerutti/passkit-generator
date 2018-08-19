@@ -129,6 +129,7 @@ class Pass {
 	 * @params {String} lang - the ISO 3166 alpha-2 code for the language
 	 * @params {Object} translations - key/value pairs where key is the
 	 * 		string appearing in pass.json and value the translated string
+	 * @returns {this}
 	 *
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
@@ -146,7 +147,7 @@ class Pass {
 	 *
 	 * @method _generateStringFile
 	 * @params {String} lang - the ISO 3166 alpha-2 code for the language
-	 * @returns {Buffer} - Buffer to be written in pass.strings for language in lang
+	 * @returns {Buffer} Buffer to be written in pass.strings for language in lang
 	 * @see https://apple.co/2M9LWVu - String Resources
 	 */
 

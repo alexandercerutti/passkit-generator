@@ -137,6 +137,8 @@ class Pass {
 		if (typeof translations === "object") {
 			this.l10n[lang] = translations;
 		}
+
+		return this;
 	}
 
 	/**

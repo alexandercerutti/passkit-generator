@@ -25,6 +25,15 @@ function manageRequest(request, response) {
 
 	let overrides = Object.keys(request.body).length ? request.body : request.query;
 
+	/* This gets removed since not the right way to populate.
+	 *
+	 * overrides["primaryFields"] = [{
+	 * 	key: "alpha",
+	 * 	value: "beto",
+	 * 	label: "muhahahah"
+	 * }];
+	 */
+
 	response.set({
 		"Content-type": "application/vnd.apple.pkpass",
 		"Content-disposition": `attachment; filename=${passName}.pkpass`
@@ -61,6 +70,36 @@ function manageRequest(request, response) {
 
 	//pass.localize("zu", {});
 
+	pass.primaryFields.push({
+		key: "Meh",
+		value: "AppleParty",
+		label: "PARTY"
+	}, {
+		key: "Meh2",
+		value: "AppleParty2",
+		label: "PARTY"
+	});
+
+	// pass.primaryFields.push([{
+	// 	key: "Meh",
+	// 	value: "AppleParty",
+	// 	label: "PARTY"
+	// }, {
+	// 	key: "Meh2",
+	// 	value: "AppleParty2",
+	// 	label: "PARTY"
+	// }]);
+
+	pass.secondaryFields.push({
+		key: "Something",
+		value: "Second row",
+		label: "ROW"
+	});
+
+	// pass.expiration("05-02-2017");
+	// pass.expiration("05-02-2017").void();
+	// pass.void();
+
 	pass.generate()
 	.then(function(result) {
 		if (Configuration.output.dir && Configuration.output.shouldWrite && !fs.accessSync(path.resolve(Configuration.output.dir))) {
@@ -70,7 +109,8 @@ function manageRequest(request, response) {
 		result.pipe(response);
 	})
 	.catch(function(err) {
-		console.log(err.message);
+		console.log(err);
+		// console.log(err.message);
 
 		response.set("Content-Type", "application/json");
 		response.status(418).send({

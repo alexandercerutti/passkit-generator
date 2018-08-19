@@ -388,7 +388,8 @@ class Pass {
 			}
 
 			this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
-			this.props = this._filterOptions(options.overrides);
+
+			Object.assign(this.props, this._filterOptions(options.overrides));
 
 			let certPaths = Object.keys(options.certificates)
 				.filter(v => v !== "dir")

@@ -360,8 +360,8 @@ class Pass {
 	 */
 
 	_filterOptions(opts) {
-		const forbidden = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
-		const supported = ["serialNumber", "userInfo", "expirationDate", "locations", "authenticationToken", "barcode"];
+		const forbidden = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields", "expirationDate", "voided"];
+		const supported = ["serialNumber", "userInfo", "locations", "authenticationToken", "barcode"];
 
 		let valid = Object.keys(opts).filter(o => !forbidden.includes(o) && supported.includes(o));
 

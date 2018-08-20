@@ -30,6 +30,20 @@ let field = Joi.object().keys({
 	value: Joi.string().required()
 });
 
+let beaconsDict = Joi.object().keys({
+	major: Joi.number().integer().positive().max(65536),
+	minor: Joi.number().integer().positive().max(65536),
+	proximityUUID: Joi.string().required(),
+	relevantText: Joi.string()
+});
+
+let locationsDict = Joi.object().keys({
+	altitude: Joi.number(),
+	latitude: Joi.number().required(),
+	longitude: Joi.number().required(),
+	relevantText: Joi.string()
+});
+
 let struct = {
 	auxiliaryFields: Joi.array().items(field),
 	backFields: Joi.array().items(field),
@@ -49,7 +63,9 @@ module.exports = {
 		barcode,
 		field,
 		basicStructure,
-		boardingStructure
+		boardingStructure,
+		beaconsDict,
+		locationsDict
 	},
 	isValid: (opts, schemaName, debug = false) => {
 		let validation = Joi.validate(opts, schemaName);

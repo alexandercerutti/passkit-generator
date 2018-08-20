@@ -194,6 +194,39 @@ class Pass {
 		return this;
 	}
 
+	relevance(type, data) {
+		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
+
+		if (!type || !data || !types.includes(type)) {
+			return 0;
+		}
+
+		if (type === "beacons" || type === "locations") {
+			if (!(data instanceof Array)) {
+				data = [data];
+			}
+
+			let valid = data.filter(d => schema.isValid(d, schema.constants[type+"Dict"]));
+			this.props[type] = valid;
+
+			return valid.length;
+		}
+
+		if (type === "maxDistance" && (typeof data === "string" || typeof data === "number")) {
+			this.props[type] = String(data);
+
+			return 1;
+		} else if (type === "relevantDate") {
+			let convDate = dateToW3CString(data);
+
+			if (convDate) {
+				this.props[type] = convDate;
+			}
+
+			return Number(!!convDate);
+		}
+	}
+
 	/**
 	 * Checks if pass model type is one of the supported ones
 	 *

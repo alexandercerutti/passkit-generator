@@ -64,11 +64,18 @@ function manageRequest(request, response) {
 		"LOCATION": "Location"
 	});
 
-	// non-existing language code
+	// non-existing language code get also inserted but (probabily) not used
 	pass.localize("ol", {
 		"EVENT": "numashat",
 		"LOCATION": "abelret"
 	});
+
+	pass.relevance("locations", [{
+		latitude: 45.601565099999995,
+		longitude: 12.320653600000002
+	}]);
+
+	pass.relevance("maxDistance", 150);
 
 	//pass.localize("zu", {});
 

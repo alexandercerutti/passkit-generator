@@ -213,7 +213,7 @@ class Pass {
 		}
 
 		if (type === "maxDistance" && (typeof data === "string" || typeof data === "number")) {
-			this.props[type] = String(data);
+			this.props[type] = Number(data);
 
 			return 1;
 		} else if (type === "relevantDate") {

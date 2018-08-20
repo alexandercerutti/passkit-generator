@@ -48,7 +48,7 @@ class Pass {
 				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
 				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
 
-				if (!noDynList.length || !noDynList.some(f => f.includes("icon"))) {
+				if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))) {
 					throw new Error(`Provided model (${path.parse(this.model).name}) matched but unitialized or may not contain icon. Refer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.`);
 				}
 

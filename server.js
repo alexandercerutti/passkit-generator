@@ -49,7 +49,8 @@ function manageRequest(request, response) {
 				passphrase: "123456"
 			}
 		},
-		overrides: overrides
+		overrides: overrides,
+		shouldOverwrite: true
 	});
 
 	pass.localize("it", {
@@ -75,7 +76,7 @@ function manageRequest(request, response) {
 		longitude: 12.320653600000002
 	}]);
 
-	pass.relevance("maxDistance", 150);
+	pass.relevance("maxDistance", 10);
 
 	//pass.localize("zu", {});
 

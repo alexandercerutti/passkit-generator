@@ -19,6 +19,7 @@ class Pass {
 		this.model = "";
 		this.l10n = {};
 		this.props = {};
+		this.shouldOverwrite = !(this.options.hasOwnProperty("shouldOverwrite") && !this.options.shouldOverwrite);
 
 		fields.areas.forEach(a => this[a] = new fields.FieldsArea());
 	}
@@ -370,8 +371,24 @@ class Pass {
 
 		delete this.props["barcode"];
 
-		// Merging the original and the new properties
-		Object.assign(passFile, this.props);
+		if (this.shouldOverwrite) {
+			Object.assign(passFile, this.props);
+		} else {
+			Object.keys(this.props).forEach(prop => {
+				if (passFile[prop]) {
+					if (passFile[prop] instanceof Array) {
+						passFile[prop].push(...this.props[prop]);
+						return;
+					} else if (passFile[prop] instanceof Object) {
+						Object.assign(passFile[prop], this.props[prop]);
+						return;
+					}
+					return;
+				} else {
+					passFile[prop] = this.props[prop];
+				}
+			});
+		}
 
 		fields.areas.forEach(area => {
 			if (this[area].fields.length) {

@@ -10,7 +10,8 @@ let instance = Joi.object().keys({
 			passphrase: Joi.string().required(),
 		}).required()
 	}).required(),
-	overrides: Joi.object()
+	overrides: Joi.object(),
+	shouldOverwrite: Joi.boolean()
 });
 
 let barcode = Joi.object().keys({

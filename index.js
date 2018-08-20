@@ -8,6 +8,7 @@ const async = require("async");
 const moment = require("moment");
 const schema = require("./schema");
 const fields = require("./fields");
+const { errors, warnings } = require("./messages");
 
 const readdir = util.promisify(fs.readdir);
 const readFile = util.promisify(fs.readFile);
@@ -39,7 +40,7 @@ class Pass {
 			.then(() => readdir(this.model))
 			.catch((err) => {
 				if (err.code && err.code === "ENOENT") {
-					throw new Error(`Model ${this.model ? this.model+" " : ""}not found. Provide a valid one to continue`);
+					throw new Error(errors.NOT_FOUND.replace("%s", (this.model ? this.model+" " : "")));
 				}
 
 				throw new Error(err);
@@ -49,7 +50,7 @@ class Pass {
 				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
 
 				if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))) {
-					throw new Error(`Provided model (${path.parse(this.model).name}) matched but unitialized or may not contain icon. Refer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.`);
+					throw new Error(errors.UNINITIALIZED.replace("%s", path.parse(this.model).name));
 				}
 
 				// list without localization files (they will be added later in the flow)
@@ -62,7 +63,7 @@ class Pass {
 					return readFile(path.resolve(this.model, "pass.json"))
 						.then(passStructBuffer => {
 							if (!this._validateType(passStructBuffer)) {
-								throw new Error(`Unable to validate pass type or pass file is not a valid buffer. Check the syntax of your pass.json file or refer to https://apple.co/2Nvshvn and to use a valid type.`)
+								throw new Error(errors.VALIDATION_FAILED)
 							}
 
 							bundle.push("pass.json");
@@ -272,7 +273,7 @@ class Pass {
 		} else if (typeof manifest === "string") {
 			signature.content = manifest;
 		} else {
-			throw new Error(`Manifest content must be a string or an object. Unable to accept manifest of type ${typeof manifest}`);
+			throw new Error(errors.MANIFEST_TYPE.replace("%s", typeof manifest));
 		}
 
 		signature.addCertificate(this.Certificates.wwdr);
@@ -339,34 +340,36 @@ class Pass {
 		if (passFile["barcode"]) {
 			let barcode = passFile["barcode"];
 
-			if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.constants.barcode) || !this.props.barcode && barcode.message === "") {
-				console.log("\x1b[41m", `Barcode syntax of the chosen model (${path.parse(this.model).base}) is not correct and got removed or the override content was not provided. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
+			if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.constants.barcode) ||
+			  !this.props.barcode && barcode.message === "") {
+				console.log(warnings.BARCODE_SYNREM.replace("%s", path.parse(this.model).base));
 				delete passFile["barcode"];
 			} else {
 				// options.barcode may not be defined
 				passFile["barcode"].message = this.props.barcode || passFile["barcode"].message;
 			}
 		} else {
-			console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it backward-compatible.`, "\x1b[0m");
+			console.log(warnings.BARCODE_INCOMP8);
 		}
 
 		if (passFile["barcodes"] && passFile["barcodes"] instanceof Array) {
 			if (!passFile["barcodes"].length) {
-				console.log("\x1b[33m", `No barcodes support specified. The element got removed.`, "\x1b[0m");
+				console.log(warnings.BARCODE_NOT_SPECIFIED);
 				delete passFile["barcodes"];
 			}
 
 			passFile["barcodes"].forEach((b,i) => {
 				if (!schema.isValid(b, schema.constants.barcode) && !!this.props.barcode && b.message !== "") {
 					passFile["barcodes"].splice(i, 1);
-					console.log("\x1b[41m", `Barcode @ index ${i} of the chosen model (${path.parse(this.model).base}) is not well-formed or have syntax errors and got removed. Please refer to https://apple.co/2myAbst.`, "\x1b[0m");
+					const warnings_outputs = [path.parse(this.model).base, i];
+					console.log(warnings.BARCODES_SYNREM.replace(/%s/g, (r) => warnings_outputs.pop()))
 				} else {
 					// options.barcode may not be defined
 					b.message = this.props.barcode || b.message;
 				}
 			});
 		} else {
-			console.log("\x1b[33m", `Your pass model (${path.parse(this.model).base}) is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.`, "\x1b[0m");
+			console.log(warnings.BARCODE_INCOMP9.replace("%s", path.parse(this.model).base));
 		}
 
 		delete this.props["barcode"];
@@ -429,12 +432,12 @@ class Pass {
 
 	_parseSettings(options) {
 		if (!schema.isValid(options, schema.constants.instance)) {
-			return Promise.reject("The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.");
+			return Promise.reject(errors.REQS_NOT_MET);
 		}
 
 		return new Promise((success, reject) => {
 			if (!options.model || typeof options.model !== "string") {
-				return reject("A string model name must be provided in order to continue.");
+				return reject(errors.MODEL_NOT_STRING);
 			}
 
 			this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
@@ -453,7 +456,7 @@ class Pass {
 				contents.forEach(file => {
 					let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
 					if (!pem) {
-						return reject("Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase).")
+						return reject(errors.INVALID_CERTS)
 					}
 
 					this.Certificates[pem.key] = pem.value;

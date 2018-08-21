@@ -209,7 +209,9 @@ class Pass {
 		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
 
 		if (!type || !data || !types.includes(type)) {
-			return 0;
+			return Object.assign({
+				length: 0
+			}, this);
 		}
 
 		if (type === "beacons" || type === "locations") {
@@ -220,13 +222,17 @@ class Pass {
 			let valid = data.filter(d => schema.isValid(d, schema.constants[type+"Dict"]));
 			this.props[type] = valid;
 
-			return valid.length;
+			return Object.assign({
+				length: valid.length
+			}, this);
 		}
 
 		if (type === "maxDistance" && (typeof data === "string" || typeof data === "number")) {
 			this.props[type] = Number(data);
 
-			return 1;
+			return Object.assign({
+				length: 1
+			}, this);
 		} else if (type === "relevantDate") {
 			let convDate = dateToW3CString(data);
 
@@ -234,7 +240,9 @@ class Pass {
 				this.props[type] = convDate;
 			}
 
-			return Number(!!convDate);
+			return Object.assign({
+				length: Number(!!convDate)
+			}, this);
 		}
 	}
 

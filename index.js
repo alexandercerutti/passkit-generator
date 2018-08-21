@@ -515,6 +515,10 @@ class Pass {
  */
 
 function isValidRGB(value) {
+	if (!value || typeof value !== "string") {
+		return false;
+	}
+
 	let rgb = value.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/);
 
 	if (!rgb) {

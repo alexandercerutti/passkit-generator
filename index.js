@@ -344,46 +344,6 @@ class Pass {
 		const rgbValues = ["backgroundColor", "foregroundColor", "labelColor"];
 		let passFile = JSON.parse(passBuffer.toString("utf8"));
 
-		// "barcodes" support got introduced in iOS 9 as array of barcode.
-		// "barcode" is still used in older iOS versions
-
-		if (passFile["barcode"]) {
-			let barcode = passFile["barcode"];
-
-			if (!(barcode instanceof Object) || !schema.isValid(barcode, schema.constants.barcode) ||
-			  !this.props.barcode && barcode.message === "") {
-				console.log(warnings.BARCODE_SYNREM.replace("%s", path.parse(this.model).base));
-				delete passFile["barcode"];
-			} else {
-				// options.barcode may not be defined
-				passFile["barcode"].message = this.props.barcode || passFile["barcode"].message;
-			}
-		} else {
-			console.log(warnings.BARCODE_INCOMP8);
-		}
-
-		if (passFile["barcodes"] && passFile["barcodes"] instanceof Array) {
-			if (!passFile["barcodes"].length) {
-				console.log(warnings.BARCODE_NOT_SPECIFIED);
-				delete passFile["barcodes"];
-			}
-
-			passFile["barcodes"].forEach((b,i) => {
-				if (!schema.isValid(b, schema.constants.barcode) && !!this.props.barcode && b.message !== "") {
-					passFile["barcodes"].splice(i, 1);
-					const warnings_outputs = [path.parse(this.model).base, i];
-					console.log(warnings.BARCODES_SYNREM.replace(/%s/g, (r) => warnings_outputs.pop()))
-				} else {
-					// options.barcode may not be defined
-					b.message = this.props.barcode || b.message;
-				}
-			});
-		} else {
-			console.log(warnings.BARCODE_INCOMP9.replace("%s", path.parse(this.model).base));
-		}
-
-		delete this.props["barcode"];
-
 		rgbValues.filter(v => this.props[v] && !isValidRGB(this.props[v])).forEach(v => delete this.props[v]);
 
 		if (this.shouldOverwrite) {
@@ -412,6 +372,141 @@ class Pass {
 		});
 
 		return Promise.resolve(Buffer.from(JSON.stringify(passFile)));
+	}
+
+	/**
+	 * Adds barcodes to "barcode" and "barcodes" properties.
+	 * It will let later to add the missing versions
+	 *
+	 * @method barcode
+	 * @params {Object|String} data - the data to be added
+	 * @return {this} Improved this with length property and other methods
+	 */
+
+	barcode(data) {
+		if (!data) {
+			return 0;
+		}
+
+		if (typeof data === "string" || (data instanceof Object && !data.format && data.message)) {
+			let autogen = this.__autogenBarcode(data);
+			this.props["barcode"] = autogen[0] || {};
+			this.props["barcodes"] = autogen;
+			return Object.assign({
+				length: 4,
+				autocomplete: () => {},
+				retroCompatibility: this.__barcodeChooseBackward.bind(this)
+			}, this);
+		}
+
+		if (!(data instanceof Array)) {
+			data = [data];
+		}
+
+		let valid = data.filter(b => {
+			if (!(b instanceof Object)) {
+				return false;
+			}
+
+			b.messageEncoding = b.messageEncoding || "iso-8859-1";
+
+			return schema.isValid(b, schema.constants.barcode);
+		});
+
+		this.props["barcode"] = valid[0] || {};
+		this.props["barcodes"] = valid;
+
+		return Object.assign({
+			length: valid.length,
+			autocomplete: this.__barcodeAutocomplete.bind(this),
+			backward: this.__barcodeChooseBackward.bind(this)
+		}, this);
+	}
+
+	/**
+	 * Given an already compiled props["barcodes"] with missing objects
+	 * (less than 4), takes infos from the first object and replicate them
+	 * in the missing structures. Then pushes the missing structure among the others
+	 *
+	 * @method __barcodeAutocomplete
+	 * @returns {this} Improved this, with length property and retroCompatibility method.
+	 */
+
+	__barcodeAutocomplete() {
+		let props = this.props["barcodes"];
+
+		if (props.length === 4) {
+			return 0;
+		}
+
+		let usedFormats = props.map(p => p.format);
+
+		let formats = [
+			"PKBarcodeFormatQR", "PKBarcodeFormatPDF417",
+			"PKBarcodeFormatAztec", "PKBarcodeFormatCode128"
+		].filter(pkb => !usedFormats.includes(pkb));
+
+		this.props["barcodes"].push(...formats.map(T => (Object.assign({}, props[0], { format: T }))));
+
+		return Object.assign({
+			length: 4,
+			backward: this.__barcodeChooseBackward.bind(this)
+		}, this);
+	}
+
+	/**
+	 * Given an index <= the amount of already set "barcodes",
+	 * this let you choose which structure to use for retrocompatibility
+	 * property "barcode".
+	 *
+	 * @method __barcodeChooseRetroCompatibility
+	 * @params {Number} index - the position in this.props
+	 * @return {this}
+	 */
+
+	__barcodeChooseBackward(index) {
+		if (typeof index !== "number") {
+			return this;
+		}
+
+		if (index > this.props["barcodes"].length) {
+			// resetting from left
+			index = index - this.props["barcodes"].length - 1;
+		} else if (index < 0) {
+			// resetting from rigth
+			index = Math.abs(this.props["barcodes"].length - Math.abs(index));
+		}
+
+		this.props["barcode"] = this.props["barcodes"][index];
+
+		return this;
+	}
+
+	/**
+	 * Automatically generates barcodes for all the types given common info
+	 *
+	 * @method __autogenBarcode
+	 * @params {Object|String} data - common info, may be object or the message itself
+	 * @params {String} data.message - the content to be placed inside "message" field
+	 * @params {String} [data.altText=data.message] - alternativeText, is message content if not overwritten
+	 * @params {String} [data.messageEncoding=iso-8859-1] - the encoding
+	 * @return {Object[]} Object array barcodeDict compliant
+	 */
+
+	__autogenBarcode(data) {
+		if (!data || data instanceof Object && data.message || typeof data !== "string") {
+			return [];
+		}
+
+		let types = ["PKBarcodeFormatQR", "PKBarcodeFormatPDF417", "PKBarcodeFormatAztec", "PKBarcodeFormatCode128"];
+
+		let source = {
+			message: data.message || data,
+			altText: data.altText || data.message || data,
+			messageEncoding: data.messageEncoding || "iso-8859-1"
+		};
+
+		return types.map(T => (Object.assign({ format: T }, source)))
 	}
 
 	/**

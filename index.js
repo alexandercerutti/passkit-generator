@@ -353,12 +353,9 @@ class Pass {
 				if (passFile[prop]) {
 					if (passFile[prop] instanceof Array) {
 						passFile[prop].push(...this.props[prop]);
-						return;
 					} else if (passFile[prop] instanceof Object) {
 						Object.assign(passFile[prop], this.props[prop]);
-						return;
 					}
-					return;
 				} else {
 					passFile[prop] = this.props[prop];
 				}

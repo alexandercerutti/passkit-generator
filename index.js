@@ -504,6 +504,24 @@ class Pass {
 }
 
 /**
+ * Checks if an rgb value is compliant with CSS-like syntax
+ *
+ * @function isValidRGB
+ * @params {String} value - string to analyze
+ * @returns {Boolean} True if valid rgb, false otherwise
+ */
+
+function isValidRGB(value) {
+	let rgb = value.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/);
+
+	if (!rgb) {
+		return false;
+	}
+
+	return rgb.slice(1,4).every(v => Math.abs(Number(v)) <= 255);
+}
+
+/**
  * Converts a date to W3C Standard format
  *
  * @function dateToW3Cstring

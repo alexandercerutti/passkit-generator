@@ -196,6 +196,15 @@ class Pass {
 		return this;
 	}
 
+	/**
+	 * Checks and sets data for "beacons", "locations", "maxDistance" and "relevantDate" keys
+	 *
+	 * @method relevance
+	 * @params {String} type - one of the key above
+	 * @params {Any[]} data - the data to be pushed to the property
+	 * @return {Number} The quantity of data pushed
+	 */
+
 	relevance(type, data) {
 		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
 

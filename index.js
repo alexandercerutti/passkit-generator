@@ -341,6 +341,7 @@ class Pass {
 			return Promise.resolve(passBuffer);
 		}
 
+		const rgbValues = ["backgroundColor", "foregroundColor", "labelColor"];
 		let passFile = JSON.parse(passBuffer.toString("utf8"));
 
 		// "barcodes" support got introduced in iOS 9 as array of barcode.
@@ -382,6 +383,8 @@ class Pass {
 		}
 
 		delete this.props["barcode"];
+
+		rgbValues.filter(v => this.props[v] && !isValidRGB(this.props[v])).forEach(v => delete this.props[v]);
 
 		if (this.shouldOverwrite) {
 			Object.assign(passFile, this.props);

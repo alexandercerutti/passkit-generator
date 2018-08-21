@@ -16,7 +16,7 @@ let instance = Joi.object().keys({
 
 let barcode = Joi.object().keys({
 	altText: Joi.string(),
-	messageEncoding: Joi.string(),
+	messageEncoding: Joi.string().required(),
 	format: Joi.string().required().regex(/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/, "barcodeType"),
 	message: Joi.string().required()
 });
@@ -32,8 +32,8 @@ let field = Joi.object().keys({
 });
 
 let beaconsDict = Joi.object().keys({
-	major: Joi.number().integer().positive().max(65536),
-	minor: Joi.number().integer().positive().max(65536),
+	major: Joi.number().integer().positive().max(65535),
+	minor: Joi.number().integer().positive().max(65535),
 	proximityUUID: Joi.string().required(),
 	relevantText: Joi.string()
 });

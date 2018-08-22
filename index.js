@@ -92,37 +92,48 @@ class Pass {
 
 						listByFolder.forEach((folder, index) => bundle.push(...folder.map(f => path.join(L10N[index], f))));
 
-						return Promise.all([...bundle.map(f => readFile(path.resolve(this.model, f))), _passExtractor()]).then(buffers => {
-							Object.keys(this.l10n).forEach(l => {
-								const strings = this._generateStringFile(l);
-								if (strings.length) {
-									buffers.push(strings);
-									bundle.push(path.join(`${l}.lproj`, `pass.strings`));
-								}
-							});
+						/*
+						 * Getting all bundle file buffers, pass.json included and appending
+						 */
 
-							return [buffers, bundle];
-						});
-					})
+						let bundleBuffers = bundle.map(f => readFile(path.resolve(this.model, f)));
+						let passBuffer = passExtractor();
+
+						return Promise.all([...bundleBuffers, passBuffer])
+							.then(buffers => {
+								Object.keys(this.l10n).forEach(l => {
+									const strings = this._generateStringFile(l);
+
+									// if .string file buffer is empty, no translations were added
+									// but still wanted to include the language
+
+									if (strings.length) {
+										buffers.push(strings);
+										bundle.push(path.join(`${l}.lproj`, `pass.strings`));
+									}
+								});
+
+								return [buffers, bundle];
+							});
+					});
 			})
 			.then(([buffers, bundle]) => {
-				/* Parsing the buffers, pushing them into the archive and returning the manifest */
+				/*
+				 * Parsing the buffers, pushing them into the archive
+				 * and returning the compiled manifest
+				 */
 
-				let manifest = {};
-
-				let hashAppendTemplate = ((buffer, key) => {
+				return buffers.reduce((acc, current, index) => {
+					let filename = bundle[index];
 					let hashFlow = forge.md.sha1.create();
-					hashFlow.update(buffer.toString("binary"));
 
-					manifest[key] = hashFlow.digest().toHex();
+					hashFlow.update(current.toString("binary"));
+					archive.append(current, { name: filename });
 
-					archive.append(buffer, { name: key });
-					return Promise.resolve();
-				});
+					acc[filename] = hashFlow.digest().toHex();
 
-				let passFilesFn = buffers.map((buf, index) => hashAppendTemplate.bind(null, buf, bundle[index])());
-
-				return Promise.all(passFilesFn).then(() => manifest);
+					return acc;
+				}, {});
 			})
 			.then((manifest) => {
 				archive.append(JSON.stringify(manifest), { name: "manifest.json" });

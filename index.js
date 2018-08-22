@@ -390,7 +390,11 @@ class Pass {
 
 	barcode(data) {
 		if (!data) {
-			return 0;
+			return Object.assign({
+				length: 0,
+				autocomplete: () => {},
+				backward: () => {}
+			}, this);
 		}
 
 		if (typeof data === "string" || (data instanceof Object && !data.format && data.message)) {
@@ -440,8 +444,11 @@ class Pass {
 	__barcodeAutocomplete() {
 		let props = this.props["barcodes"];
 
-		if (props.length === 4) {
-			return 0;
+		if (props.length === 4 || !props.length) {
+			return Object.assign({
+				length: 0,
+				backward: () => {}
+			}, this);
 		}
 
 		let usedFormats = props.map(p => p.format);
@@ -509,7 +516,7 @@ class Pass {
 			messageEncoding: data.messageEncoding || "iso-8859-1"
 		};
 
-		return types.map(T => (Object.assign({ format: T }, source)))
+		return types.map(T => (Object.assign({ format: T }, source)));
 	}
 
 	/**

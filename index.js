@@ -39,6 +39,7 @@ class Pass {
 		return this._parseSettings(this.options)
 			.then(() => readdir(this.model))
 			.catch((err) => {
+				// May have not used this catch but ENOENT error is not enough self-explanatory in the case of external usage
 				if (err.code && err.code === "ENOENT") {
 					throw new Error(errors.NOT_FOUND.replace("%s", (this.model ? this.model+" " : "")));
 				}
@@ -59,7 +60,14 @@ class Pass {
 				// Localization folders only
 				const L10N = noDynList.filter(f => f.includes(".lproj") && Object.keys(this.l10n).includes(path.parse(f).name));
 
-				let _passExtractor = (() => {
+				/**
+				 * Reads pass.json file and apply patches on it
+				 * @function
+				 * @name passExtractor
+				 * @return {Promise<Buffer>} The patched pass.json buffer
+				 */
+
+				let passExtractor = (() => {
 					return readFile(path.resolve(this.model, "pass.json"))
 						.then(passStructBuffer => {
 							if (!this._validateType(passStructBuffer)) {
@@ -72,8 +80,16 @@ class Pass {
 						});
 				});
 
+				/*
+				 * Reading all the localization selected folders and removing hidden files (the ones that starts with ".")
+				 * from the list. Returning a Promise containing all those files
+				 */
+
 				return Promise.all(L10N.map(f => readdir(path.join(this.model, f)).then(removeHidden)))
 					.then(listByFolder => {
+
+						/* Each file name is joined with its own path and pushed to the bundle files array. */
+
 						listByFolder.forEach((folder, index) => bundle.push(...folder.map(f => path.join(L10N[index], f))));
 
 						return Promise.all([...bundle.map(f => readFile(path.resolve(this.model, f))), _passExtractor()]).then(buffers => {
@@ -90,9 +106,7 @@ class Pass {
 					})
 			})
 			.then(([buffers, bundle]) => {
-				/*
-				 * Parsing the buffers and pushing them into the archive
-				 */
+				/* Parsing the buffers, pushing them into the archive and returning the manifest */
 
 				let manifest = {};
 

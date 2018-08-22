@@ -4,7 +4,6 @@ const stream = require("stream");
 const util = require("util");
 const forge = require("node-forge");
 const archiver = require("archiver");
-const async = require("async");
 const moment = require("moment");
 const schema = require("./schema");
 const fields = require("./fields");

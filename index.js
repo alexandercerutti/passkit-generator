@@ -400,7 +400,7 @@ class Pass {
 			return Object.assign({
 				length: 4,
 				autocomplete: () => {},
-				retroCompatibility: this.__barcodeChooseBackward.bind(this)
+				backward: this.__barcodeChooseBackward.bind(this)
 			}, this);
 		}
 
@@ -465,21 +465,19 @@ class Pass {
 	 * property "barcode".
 	 *
 	 * @method __barcodeChooseRetroCompatibility
-	 * @params {Number} index - the position in this.props
+	 * @params {String} format - the format, or part of it, to be used
 	 * @return {this}
 	 */
 
-	__barcodeChooseBackward(index) {
-		if (typeof index !== "number") {
+	__barcodeChooseBackward(format) {
+		if (typeof format !== "string") {
 			return this;
 		}
 
-		if (index > this.props["barcodes"].length) {
-			// resetting from left
-			index = index - this.props["barcodes"].length - 1;
-		} else if (index < 0) {
-			// resetting from rigth
-			index = Math.abs(this.props["barcodes"].length - Math.abs(index));
+		let index = this.props["barcodes"].findIndex(b => b.format.toLowerCase().includes(format.toLowerCase()));
+
+		if (index === -1) {
+			return this;
 		}
 
 		this.props["barcode"] = this.props["barcodes"][index];

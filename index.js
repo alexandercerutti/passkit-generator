@@ -477,6 +477,11 @@ class Pass {
 	 */
 
 	__barcodeChooseBackward(format) {
+		if (format === null) {
+			this.props["barcode"] = undefined;
+			return this;
+		}
+
 		if (typeof format !== "string") {
 			return this;
 		}

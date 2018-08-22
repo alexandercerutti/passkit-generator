@@ -579,37 +579,30 @@ class Pass {
 
 	_parseSettings(options) {
 		if (!schema.isValid(options, schema.constants.instance)) {
-			return Promise.reject(errors.REQS_NOT_MET);
+			throw new Error(errors.REQS_NOT_MET);
 		}
 
-		return new Promise((success, reject) => {
-			if (!options.model || typeof options.model !== "string") {
-				return reject(errors.MODEL_NOT_STRING);
-			}
+		if (!options.model || typeof options.model !== "string") {
+			throw new Error(errors.MODEL_NOT_STRING);
+		}
 
-			this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
+		this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
 
-			Object.assign(this.props, this._filterOptions(options.overrides));
+		Object.assign(this.props, this._filterOptions(options.overrides));
 
-			let certPaths = Object.keys(options.certificates)
-				.filter(v => v !== "dir")
-				.map((val) => path.resolve(typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"]));
+		let certPaths = Object.keys(options.certificates)
+			.filter(v => v !== "dir")
+			.map((val) => readFile(path.resolve(typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"])));
 
-			async.concat(certPaths, fs.readFile, (err, contents) => {
-				if (err) {
-					return reject(err);
+
+		return Promise.all(certPaths).then(contents => {
+			contents.forEach(file => {
+				let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
+				if (!pem) {
+					return reject(errors.INVALID_CERTS)
 				}
 
-				contents.forEach(file => {
-					let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
-					if (!pem) {
-						return reject(errors.INVALID_CERTS)
-					}
-
-					this.Certificates[pem.key] = pem.value;
-				});
-
-				return success();
+				this.Certificates[pem.key] = pem.value;
 			});
 		});
 	}

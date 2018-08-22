@@ -592,8 +592,13 @@ class Pass {
 
 		let certPaths = Object.keys(options.certificates)
 			.filter(v => v !== "dir")
-			.map((val) => readFile(path.resolve(typeof options.certificates[val] !== "object" ? options.certificates[val] : options.certificates[val]["keyFile"])));
+			.map((val) => {
+				const cert = options.certificates[val];
+				const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];
+				const resolvedPath = path.resolve(filePath);
 
+				return readFile(resolvedPath);
+			});
 
 		return Promise.all(certPaths).then(contents => {
 			contents.forEach(file => {

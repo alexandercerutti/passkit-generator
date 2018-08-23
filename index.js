@@ -199,11 +199,7 @@ class Pass {
 			return this;
 		}
 
-		const convDate = dateToW3CString(date);
-
-		if (convDate) {
-			this.props.expirationDate = convDate;
-		}
+		this.props.expirationDate = dateToW3CString(date);
 
 		return this;
 	}
@@ -258,11 +254,7 @@ class Pass {
 				length: 1
 			}, this);
 		} else if (type === "relevantDate") {
-			let convDate = dateToW3CString(data);
-
-			if (convDate) {
-				this.props[type] = convDate;
-			}
+			this.props[type] = dateToW3CString(data);
 
 			return Object.assign({
 				length: Number(!!convDate)
@@ -652,7 +644,9 @@ function isValidRGB(value) {
  * Converts a date to W3C Standard format
  *
  * @function dateToW3Cstring
- * @params {String}
+ * @params {String} - The date to be parsed
+ * @returns {String|undefined} The parsed string if the parameter is valid,
+ * 	 undefined otherwise
  */
 
 function dateToW3CString(date) {
@@ -663,7 +657,7 @@ function dateToW3CString(date) {
 	let parsedDate = moment(date, ["MM-DD-YYYY"]).format();
 
 	if (parsedDate === "Invalid date") {
-		return "";
+		return undefined;
 	}
 
 	return parsedDate;

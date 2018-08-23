@@ -8,12 +8,6 @@ let errors = {
 	INVALID_CERTS: "Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase)."
 };
 
-let warnings = {
-	BARCODE_SYNREM: "\x1b[41mBarcode syntax of the chosen model (%s) is not correct and got removed or the override content was not provided. Please refer to https://apple.co/2myAbst.\x1b[0m",
-	BARCODES_SYNREM: "\x1b[41mBarcode @ index %s of the chosen model (%s) is not well-formed or have syntax errors and got removed. Please refer to https://apple.co/2myAbst.\x1b[0m",
-	BARCODE_INCOMP8: "\x1b[33mYour pass model (%s) is not compatible with iOS versions lower than iOS 9. Please refer to https://apple.co/2O5K65k to make it backward-compatible.\x1b[0m",
-	BARCODE_INCOMP9: "\x1b[33mYour pass model (%s) is not compatible with iOS versions greater than iOS 8. Refer to https://apple.co/2O5K65k to make it forward-compatible.\x1b[0m",
-	BARCODE_NOT_SPECIFIED: "\x1b[33mNo barcodes support specified. The element got removed.\x1b[0m"
-};
+let warnings = {};
 
 module.exports = { errors, warnings };

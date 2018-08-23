@@ -91,9 +91,7 @@ class Pass {
 
 						listByFolder.forEach((folder, index) => bundle.push(...folder.map(f => path.join(L10N[index], f))));
 
-						/*
-						 * Getting all bundle file buffers, pass.json included and appending
-						 */
+						/* Getting all bundle file buffers, pass.json included, and appending */
 
 						let bundleBuffers = bundle.map(f => readFile(path.resolve(this.model, f)));
 						let passBuffer = passExtractor();
@@ -103,8 +101,10 @@ class Pass {
 								Object.keys(this.l10n).forEach(l => {
 									const strings = this._generateStringFile(l);
 
-									// if .string file buffer is empty, no translations were added
-									// but still wanted to include the language
+									/*
+									 * if .string file buffer is empty, no translations were added
+									 * but still wanted to include the language
+									 */
 
 									if (strings.length) {
 										buffers.push(strings);

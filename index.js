@@ -584,7 +584,6 @@ class Pass {
 		Object.assign(this.props, this._filterOptions(options.overrides));
 
 		let certPaths = Object.keys(options.certificates)
-			.filter(v => v !== "dir")
 			.map((val) => {
 				const cert = options.certificates[val];
 				const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];

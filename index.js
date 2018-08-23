@@ -135,10 +135,10 @@ class Pass {
 				}, {});
 			})
 			.then((manifest) => {
-				archive.append(JSON.stringify(manifest), { name: "manifest.json" });
-
 				let signatureBuffer = this._sign(manifest);
+
 				archive.append(signatureBuffer, { name: "signature" });
+				archive.append(JSON.stringify(manifest), { name: "manifest.json" });
 
 				let passStream = new stream.PassThrough();
 
@@ -289,9 +289,11 @@ class Pass {
 		}
 
 		if (typeof data === "string" || (data instanceof Object && !data.format && data.message)) {
-			let autogen = this.__autogenBarcode(data);
+			let autogen = this.__barcodeAutogen(data instanceof Object ? data : { message: data });
+
 			this.props["barcode"] = autogen[0] || {};
-			this.props["barcodes"] = autogen;
+			this.props["barcodes"] = autogen || [];
+
 			return Object.assign({
 				length: 4,
 				autocomplete: () => {},
@@ -308,13 +310,14 @@ class Pass {
 				return false;
 			}
 
+			// messageEncoding is required
 			b.messageEncoding = b.messageEncoding || "iso-8859-1";
 
 			return schema.isValid(b, schema.constants.barcode);
 		});
 
 		this.props["barcode"] = valid[0] || {};
-		this.props["barcodes"] = valid;
+		this.props["barcodes"] = valid || [];
 
 		return Object.assign({
 			length: valid.length,
@@ -324,9 +327,34 @@ class Pass {
 	}
 
 	/**
+	 * Automatically generates barcodes for all the types given common info
+	 *
+	 * @method __barcodeAutogen
+	 * @params {Object} data - common info, may be object or the message itself
+	 * @params {String} data.message - the content to be placed inside "message" field
+	 * @params {String} [data.altText=data.message] - alternativeText, is message content if not overwritten
+	 * @params {String} [data.messageEncoding=iso-8859-1] - the encoding
+	 * @return {Object[]} Object array barcodeDict compliant
+	 */
+
+	__barcodeAutogen(data) {
+		if (!data || !(data instanceof Object) || !data.message) {
+			return [];
+		}
+
+		let types = ["PKBarcodeFormatQR", "PKBarcodeFormatPDF417", "PKBarcodeFormatAztec", "PKBarcodeFormatCode128"];
+
+		data.altText = data.altText || data.message;
+		data.messageEncoding = data.messageEncoding || "iso-8859-1";
+		delete data.format;
+
+		return types.map(T => Object.assign({ format: T }, data));
+	}
+
+	/**
 	 * Given an already compiled props["barcodes"] with missing objects
 	 * (less than 4), takes infos from the first object and replicate them
-	 * in the missing structures. Then pushes the missing structure among the others
+	 * in the missing structures.
 	 *
 	 * @method __barcodeAutocomplete
 	 * @returns {this} Improved this, with length property and retroCompatibility method.
@@ -338,18 +366,11 @@ class Pass {
 		if (props.length === 4 || !props.length) {
 			return Object.assign({
 				length: 0,
-				backward: () => {}
+				backward: this.__barcodeChooseBackward.bind(this)
 			}, this);
 		}
 
-		let usedFormats = props.map(p => p.format);
-
-		let formats = [
-			"PKBarcodeFormatQR", "PKBarcodeFormatPDF417",
-			"PKBarcodeFormatAztec", "PKBarcodeFormatCode128"
-		].filter(pkb => !usedFormats.includes(pkb));
-
-		this.props["barcodes"].push(...formats.map(T => (Object.assign({}, props[0], { format: T }))));
+		this.props["barcodes"] = this.__barcodeAutogen(props[0]);
 
 		return Object.assign({
 			length: 4,
@@ -362,7 +383,7 @@ class Pass {
 	 * this let you choose which structure to use for retrocompatibility
 	 * property "barcode".
 	 *
-	 * @method __barcodeChooseRetroCompatibility
+	 * @method __barcodeChooseBackward
 	 * @params {String} format - the format, or part of it, to be used
 	 * @return {this}
 	 */
@@ -386,33 +407,6 @@ class Pass {
 		this.props["barcode"] = this.props["barcodes"][index];
 
 		return this;
-	}
-
-	/**
-	 * Automatically generates barcodes for all the types given common info
-	 *
-	 * @method __autogenBarcode
-	 * @params {Object|String} data - common info, may be object or the message itself
-	 * @params {String} data.message - the content to be placed inside "message" field
-	 * @params {String} [data.altText=data.message] - alternativeText, is message content if not overwritten
-	 * @params {String} [data.messageEncoding=iso-8859-1] - the encoding
-	 * @return {Object[]} Object array barcodeDict compliant
-	 */
-
-	__autogenBarcode(data) {
-		if (!data || data instanceof Object && data.message || typeof data !== "string") {
-			return [];
-		}
-
-		let types = ["PKBarcodeFormatQR", "PKBarcodeFormatPDF417", "PKBarcodeFormatAztec", "PKBarcodeFormatCode128"];
-
-		let source = {
-			message: data.message || data,
-			altText: data.altText || data.message || data,
-			messageEncoding: data.messageEncoding || "iso-8859-1"
-		};
-
-		return types.map(T => (Object.assign({ format: T }, source)));
 	}
 
 	/**

@@ -583,51 +583,49 @@ class Pass {
 
 		Object.assign(this.props, this._filterOptions(options.overrides));
 
-		let certPaths = Object.keys(options.certificates)
-			.map((val) => {
-				const cert = options.certificates[val];
-				const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];
-				const resolvedPath = path.resolve(filePath);
+		let optCertsNames = Object.keys(options.certificates);
 
-				return readFile(resolvedPath);
-			});
+		let certPaths = optCertsNames.map((val) => {
+			const cert = options.certificates[val];
+			const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];
+			const resolvedPath = path.resolve(filePath);
+
+			return readFile(resolvedPath);
+		});
 
 		return Promise.all(certPaths).then(contents => {
-			contents.forEach(file => {
-				let pem = this.__parsePEM(file, options.certificates.signerKey.passphrase);
+			contents.forEach((file, index) => {
+				let certName = optCertsNames[index];
+				let pem = parsePEM(file, options.certificates[certName].passphrase);
+
 				if (!pem) {
 					return reject(errors.INVALID_CERTS)
 				}
 
-				this.Certificates[pem.key] = pem.value;
+				this.Certificates[certName] = pem;
 			});
 		});
 	}
+}
 
-	/**
-	 * Parses the PEM-formatted passed text (certificates)
-	 *
-	 * @method __parsePEM
-	 * @params {String} element - Text content of .pem files
-	 * @params {String} passphrase - passphrase for the key
-	 * @returns {Object} - Object containing name of the certificate and its parsed content
-	 */
 
-	__parsePEM(element, passphrase) {
-		if (element.includes("PRIVATE KEY") && !!passphrase) {
-			return {
-				key: "signerKey",
-				value: forge.pki.decryptRsaPrivateKey(element, String(passphrase))
-			};
-		} else if (element.includes("CERTIFICATE")) {
-			// PEM-exported certificates with keys are in PKCS#12 format, hence they are composed of bags.
-			return {
-				key: element.includes("Bag Attributes") ? "signerCert" : "wwdr",
-				value: forge.pki.certificateFromPem(element)
-			};
-		} else {
-			return {};
-		}
+/**
+ * Parses the PEM-formatted passed text (certificates)
+ *
+ * @function parsePEM
+ * @params {String} element - Text content of .pem files
+ * @params {String=} passphrase - passphrase for the key
+ * @returns {Object} The parsed certificate or key in node forge format
+ */
+
+function parsePEM(element, passphrase) {
+	if (element.includes("PRIVATE KEY") && passphrase) {
+		return forge.pki.decryptRsaPrivateKey(element, String(passphrase));
+	} else if (element.includes("CERTIFICATE")) {
+		// PEM-exported certificates with keys are in PKCS#12 format, hence they are composed of bags.
+		return forge.pki.certificateFromPem(element);
+	} else {
+		return null;
 	}
 }
 

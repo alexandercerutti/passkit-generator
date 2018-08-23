@@ -502,7 +502,6 @@ class Pass {
 	 * Edits the buffer of pass.json based on the passed options.
 	 *
 	 * @method _patch
-	 * @params {Object} options - options resulting from the filtering made by filterPassOptions function
 	 * @params {Buffer} passBuffer - Buffer of the contents of pass.json
 	 * @returns {Promise<Buffer>} Edited pass.json buffer or Object containing error.
 	 */
@@ -608,7 +607,6 @@ class Pass {
 	}
 }
 
-
 /**
  * Parses the PEM-formatted passed text (certificates)
  *
@@ -622,7 +620,6 @@ function parsePEM(element, passphrase) {
 	if (element.includes("PRIVATE KEY") && passphrase) {
 		return forge.pki.decryptRsaPrivateKey(element, String(passphrase));
 	} else if (element.includes("CERTIFICATE")) {
-		// PEM-exported certificates with keys are in PKCS#12 format, hence they are composed of bags.
 		return forge.pki.certificateFromPem(element);
 	} else {
 		return null;

@@ -34,13 +34,12 @@ class Pass {
 
 	generate() {
 		let archive = archiver("zip");
-
 		return this._parseSettings(this.options)
 			.then(() => readdir(this.model))
 			.catch((err) => {
 				// May have not used this catch but ENOENT error is not enough self-explanatory in the case of external usage
 				if (err.code && err.code === "ENOENT") {
-					throw new Error(errors.NOT_FOUND.replace("%s", (this.model ? this.model+" " : "")));
+					throw new Error(errors.MODEL_NOT_FOUND.replace("%s", (this.model ? this.model+" " : "")));
 				}
 
 				throw new Error(err);

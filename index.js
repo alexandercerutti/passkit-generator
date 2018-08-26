@@ -653,7 +653,7 @@ function dateToW3CString(date) {
 		return "";
 	}
 
-	let parsedDate = moment(date, ["MM-DD-YYYY"]).format();
+	let parsedDate = moment(date, ["MM-DD-YYYY hh:mm:ss", "YYYY-MM-DD hh:mm:ss", "DD-MM-YYYY hh:mm:ss"]).format();
 
 	if (parsedDate === "Invalid date") {
 		return undefined;

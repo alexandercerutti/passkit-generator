@@ -6,7 +6,7 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const moment = require("moment");
 const schema = require("./schema");
-const { areas: fieldsName, FieldsContainer, StringField } = require("./fields");
+const { areas: fieldsName, FieldsContainer } = require("./fields");
 const { errors, warnings } = require("./messages");
 
 const readdir = util.promisify(fs.readdir);
@@ -22,7 +22,7 @@ class Pass {
 		this.shouldOverwrite = !(this.options.hasOwnProperty("shouldOverwrite") && !this.options.shouldOverwrite);
 
 		fieldsName.forEach(a => this[a] = new FieldsContainer());
-		this.transitType = new StringField();
+		this._transitType = "";
 	}
 
 	/**
@@ -608,6 +608,18 @@ class Pass {
 			}).catch(err => {
 				throw new Error(errors.INVALID_CERTS);
 			});
+	}
+
+	set transitType(v) {
+		if (schema.isValid(v, schema.constants.transitType)) {
+			this._transitType = v;
+		} else {
+			this._transitType = this._transitType || "";
+		}
+	}
+
+	get transitType() {
+		return this._transitType;
 	}
 }
 

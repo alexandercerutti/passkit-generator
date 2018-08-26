@@ -499,29 +499,28 @@ class Pass {
 	 */
 
 	_patch(passBuffer) {
-		if (!Object.keys(this.props).length) {
-			return Promise.resolve(passBuffer);
-		}
-
-		const rgbValues = ["backgroundColor", "foregroundColor", "labelColor"];
 		let passFile = JSON.parse(passBuffer.toString("utf8"));
 
-		rgbValues.filter(v => this.props[v] && !isValidRGB(this.props[v])).forEach(v => delete this.props[v]);
+		if (Object.keys(this.props).length) {
+			const rgbValues = ["backgroundColor", "foregroundColor", "labelColor"];
 
-		if (this.shouldOverwrite) {
-			Object.assign(passFile, this.props);
-		} else {
-			Object.keys(this.props).forEach(prop => {
-				if (passFile[prop]) {
-					if (passFile[prop] instanceof Array) {
-						passFile[prop].push(...this.props[prop]);
-					} else if (passFile[prop] instanceof Object) {
-						Object.assign(passFile[prop], this.props[prop]);
+			rgbValues.filter(v => this.props[v] && !isValidRGB(this.props[v])).forEach(v => delete this.props[v]);
+
+			if (this.shouldOverwrite) {
+				Object.assign(passFile, this.props);
+			} else {
+				Object.keys(this.props).forEach(prop => {
+					if (passFile[prop]) {
+						if (passFile[prop] instanceof Array) {
+							passFile[prop].push(...this.props[prop]);
+						} else if (passFile[prop] instanceof Object) {
+							Object.assign(passFile[prop], this.props[prop]);
+						}
+					} else {
+						passFile[prop] = this.props[prop];
 					}
-				} else {
-					passFile[prop] = this.props[prop];
-				}
-			});
+				});
+			}
 		}
 
 		fieldsName.forEach(area => {

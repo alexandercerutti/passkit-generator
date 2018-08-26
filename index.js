@@ -583,18 +583,21 @@ class Pass {
 			return readFile(resolvedPath);
 		});
 
-		return Promise.all(certPaths).then(contents => {
-			contents.forEach((file, index) => {
-				let certName = optCertsNames[index];
-				let pem = parsePEM(file, options.certificates[certName].passphrase);
+		return Promise.all(certPaths)
+			.then(contents => {
+				contents.forEach((file, index) => {
+					let certName = optCertsNames[index];
+					let pem = parsePEM(file, options.certificates[certName].passphrase);
 
-				if (!pem) {
-					return reject(errors.INVALID_CERTS)
-				}
+					if (!pem) {
+						return reject(errors.INVALID_CERTS)
+					}
 
-				this.Certificates[certName] = pem;
+					this.Certificates[certName] = pem;
+				});
+			}).catch(err => {
+				throw new Error(errors.INVALID_CERTS);
 			});
-		});
 	}
 }
 

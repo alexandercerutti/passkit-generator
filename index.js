@@ -6,7 +6,7 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const moment = require("moment");
 const schema = require("./schema");
-const fields = require("./fields");
+const { areas: fieldsName, FieldsContainer, StringField } = require("./fields");
 const { errors, warnings } = require("./messages");
 
 const readdir = util.promisify(fs.readdir);
@@ -21,7 +21,8 @@ class Pass {
 		this.props = {};
 		this.shouldOverwrite = !(this.options.hasOwnProperty("shouldOverwrite") && !this.options.shouldOverwrite);
 
-		fields.areas.forEach(a => this[a] = new fields.FieldsArea());
+		fieldsName.forEach(a => this[a] = new FieldsContainer());
+		this.transitType = new StringField();
 	}
 
 	/**
@@ -523,11 +524,17 @@ class Pass {
 			});
 		}
 
-		fields.areas.forEach(area => {
+		fieldsName.forEach(area => {
 			if (this[area].fields.length) {
 				passFile[this.type][area].push(...this[area].fields);
 			}
 		});
+
+		if (this.type === "boardingPass" && this.transitType) {
+			passFile[this.type]["transitType"] = this.transitType;
+		} else {
+			throw new Error("Cannot proceed with pass creation. transitType field is required for boardingPasses.");
+		}
 
 		return Promise.resolve(Buffer.from(JSON.stringify(passFile)));
 	}

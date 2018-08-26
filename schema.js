@@ -66,7 +66,8 @@ module.exports = {
 		basicStructure,
 		boardingStructure,
 		beaconsDict,
-		locationsDict
+		locationsDict,
+		transitType
 	},
 	isValid: (opts, schemaName, debug = false) => {
 		let validation = Joi.validate(opts, schemaName);

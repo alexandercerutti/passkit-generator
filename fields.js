@@ -5,7 +5,7 @@ const schema = require("./schema");
  * @see https://apple.co/2wkUBd
  */
 
-class FieldsArea {
+class FieldsContainer {
 	constructor() {
 		this.fields = [];
 	}
@@ -57,7 +57,21 @@ class FieldsArea {
 	}
 }
 
+class StringField {
+	set transitType(v) {
+		if (schema.isValid(v, schema.constants.transitType, true)) {
+			this.fields = v;
+		} else {
+			this.fields = this.fields && this.fields !== "" ? this.fields : "";
+		}
+	}
+	get transitType() {
+		return this.fields;
+	}
+}
+
 module.exports = {
 	areas: ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"],
-	FieldsArea
+	FieldsContainer,
+	StringField
 };

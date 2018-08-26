@@ -423,7 +423,7 @@ class Pass {
 			let type = passTypes[index];
 
 			this.type = type;
-			return schema.isValid(passFile[type], schema.constants[(type === "boardingPass" ? "boarding" : "basic") + "Structure"]);
+			return schema.isValid(passFile[type], schema.constants.passDict);
 		} catch (e) {
 			return false;
 		}

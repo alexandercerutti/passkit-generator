@@ -45,26 +45,22 @@ let locationsDict = Joi.object().keys({
 	relevantText: Joi.string()
 });
 
-let struct = {
+let passDict = Joi.object().keys({
 	auxiliaryFields: Joi.array().items(field),
 	backFields: Joi.array().items(field),
 	headerFields: Joi.array().items(field),
 	primaryFields: Joi.array().items(field),
 	secondaryFields: Joi.array().items(field)
-};
+});
 
-let basicStructure = Joi.object().keys(struct);
-let boardingStructure = Joi.object().keys(Object.assign({
-	transitType: Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/).required()
-}, struct));
+let transitType = Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/);
 
 module.exports = {
 	constants: {
 		instance,
 		barcode,
 		field,
-		basicStructure,
-		boardingStructure,
+		passDict,
 		beaconsDict,
 		locationsDict,
 		transitType

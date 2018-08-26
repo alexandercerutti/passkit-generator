@@ -526,7 +526,11 @@ class Pass {
 
 		fieldsName.forEach(area => {
 			if (this[area].fields.length) {
-				passFile[this.type][area].push(...this[area].fields);
+				if (this.shouldOverwrite) {
+					passFile[this.type][area] = this[area].fields;
+				} else {
+					passFile[this.type][area].push(...this[area].fields);
+				}
 			}
 		});
 

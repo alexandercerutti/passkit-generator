@@ -533,13 +533,13 @@ class Pass {
 			}
 		});
 
-		if (this.type === "boardingPass" && this.transitType) {
-			passFile[this.type]["transitType"] = this.transitType;
-		} else {
+		if (!this.transitType && this.type === "boardingPass") {
 			throw new Error("Cannot proceed with pass creation. transitType field is required for boardingPasses.");
 		}
 
-		return Promise.resolve(Buffer.from(JSON.stringify(passFile)));
+		passFile[this.type]["transitType"] = this.transitType;
+
+		return Buffer.from(JSON.stringify(passFile));
 	}
 
 	/**

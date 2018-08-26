@@ -160,8 +160,8 @@ class Pass {
 	 */
 
 	localize(lang, translations) {
-		if (typeof translations === "object") {
-			this.l10n[lang] = translations;
+		if (typeof translations === "object" || translations === undefined) {
+			this.l10n[lang] = translations || {};
 		}
 
 		return this;

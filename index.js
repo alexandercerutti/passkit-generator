@@ -401,6 +401,18 @@ class Pass {
 		return this;
 	}
 
+	nfc(...data) {
+		if (data.length === 1 && data[0] instanceof Array) {
+			data = data[0];
+		}
+
+		let valid = data.filter(d => d instanceof Object && schema.isValid(d, schema.constants.nfcDict));
+
+		this.props["nfc"] = valid;
+
+		return this;
+	}
+
 	/**
 	 * Checks if pass model type is one of the supported ones
 	 *

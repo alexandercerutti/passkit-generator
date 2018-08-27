@@ -66,11 +66,11 @@ module.exports = {
 		locationsDict,
 		transitType
 	},
-	isValid: (opts, schemaName, debug = false) => {
+	isValid: (opts, schemaName) => {
 		let validation = Joi.validate(opts, schemaName);
 
-		if (debug) {
-			console.log(validation)
+		if (validation.error) {
+			debug(`validation failed due to :: ${validation.error.message}`);
 		}
 
 		return !validation.error;

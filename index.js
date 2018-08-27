@@ -303,7 +303,7 @@ class Pass {
 			}
 
 			// messageEncoding is required
-			b.messageEncoding = b.messageEncoding || "iso-8859-1";
+			// b.messageEncoding = b.messageEncoding || "iso-8859-1";
 
 			return schema.isValid(b, schema.constants.barcode);
 		});

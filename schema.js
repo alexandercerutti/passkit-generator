@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const debug = require("debug")("Schema");
 
 let instance = Joi.object().keys({
 	model: Joi.string(),
@@ -16,24 +17,24 @@ let instance = Joi.object().keys({
 
 let barcode = Joi.object().keys({
 	altText: Joi.string(),
-	messageEncoding: Joi.string().required(),
+	messageEncoding: Joi.string().default("iso-8859-1").required(),
 	format: Joi.string().required().regex(/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/, "barcodeType"),
 	message: Joi.string().required()
 });
 
 let field = Joi.object().keys({
-	attributedValue: Joi.string(),
-	changeMessage: Joi.string(),
+	attributedValue: Joi.string().allow(""),
+	changeMessage: Joi.string().allow("").regex(/%@/),
 	dataDetectorType: Joi.array().items(Joi.string().regex(/(PKDataDetectorTypePhoneNumber|PKDataDetectorTypeLink|PKDataDetectorTypeAddress|PKDataDetectorTypeCalendarEvent)/, "dataDetectorType")),
-	label: Joi.string(),
+	label: Joi.string().allow(""),
 	textAlignment: Joi.string().regex(/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/, "graphic-alignment"),
 	key: Joi.string().required(),
-	value: Joi.string().required()
+	value: Joi.string().allow("").required()
 });
 
 let beaconsDict = Joi.object().keys({
-	major: Joi.number().integer().positive().max(65535),
-	minor: Joi.number().integer().positive().max(65535),
+	major: Joi.number().integer().positive().max(65535).greater(Joi.ref("minor")),
+	minor: Joi.number().integer().positive().max(65535).less(Joi.ref("major")),
 	proximityUUID: Joi.string().required(),
 	relevantText: Joi.string()
 });

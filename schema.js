@@ -45,7 +45,24 @@ let field = Joi.object().keys({
 	label: Joi.string().allow(""),
 	textAlignment: Joi.string().regex(/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/, "graphic-alignment"),
 	key: Joi.string().required(),
-	value: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()).required()
+	value: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()).required(),
+	// date fields formatters, all optionals
+	dateStyle: Joi.string().regex(/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/, "date style"),
+	ignoreTimeZone: Joi.boolean(),
+	isRelative: Joi.boolean(),
+	timeStyle: Joi.string().regex(/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/, "date style"),
+	// number fields formatters, all optionals
+	currencyCode: Joi.string()
+		.when("value", {
+			is: Joi.number(),
+			otherwise: Joi.string().forbidden()
+		}),
+	numberStyle: Joi.string()
+		.regex(/(PKNumberStyleDecimal|PKNumberStylePercent|PKNumberStyleScientific|PKNumberStyleSpellOut)/)
+		.when("value", {
+			is: Joi.number(),
+			otherwise: Joi.string().forbidden()
+		}),
 });
 
 let beaconsDict = Joi.object().keys({

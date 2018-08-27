@@ -15,6 +15,22 @@ let instance = Joi.object().keys({
 	shouldOverwrite: Joi.boolean()
 });
 
+let supportedOptions = Joi.object().keys({
+	serialNumber: Joi.string(),
+	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
+	webServiceURL: Joi.string().regex(/^https?:\/\/(?:[a-z0-9]+\.[a-z0-9]+\.[a-z]+(?:\.[a-z]+)?|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/?(?:[a-z\/_%0-9A-Z.]+)?/),
+	authenticationToken: Joi.when("webServiceURL", {
+		is: Joi.exist(),
+		then: Joi.string().token().min(16).required(),
+		otherwise: Joi.string().token().min(16)
+	}),
+	backgroundColor: Joi.string().min(10).max(16),
+	foregroundColor: Joi.string().min(10).max(16),
+	labelColor: Joi.string().min(10).max(16),
+	groupingIdentifier: Joi.string(),
+	suppressStripShine: Joi.boolean()
+});
+
 let barcode = Joi.object().keys({
 	altText: Joi.string(),
 	messageEncoding: Joi.string().default("iso-8859-1").required(),
@@ -56,6 +72,37 @@ let passDict = Joi.object().keys({
 
 let transitType = Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/);
 
+let nfcDict = Joi.object().keys({
+	message: Joi.string().required().max(64),
+	encryptionPublicKey: Joi.string()
+});
+
+let isValid = (opts, schemaName) => {
+	let validation = Joi.validate(opts, schemaName);
+
+	if (validation.error) {
+		debug(`validation failed due to error: ${validation.error.message}`);
+	}
+
+	return !validation.error;
+};
+
+let filter = (opts, schemaName) => {
+	let isObject = opts instanceof Object;
+	let list = isObject ? Object.keys(opts) : opts;
+
+	return list.reduce((acc, current, index) => {
+		let ref = isObject ? current : index;
+		let check = isObject ? { [current] : opts[current] } : [ opts[index] ];
+
+		if (isValid(check, schemaName)) {
+			acc[ref] = opts[ref];
+		}
+
+		return acc;
+	}, isObject ? {} : []);
+}
+
 module.exports = {
 	constants: {
 		instance,
@@ -64,15 +111,10 @@ module.exports = {
 		passDict,
 		beaconsDict,
 		locationsDict,
-		transitType
+		transitType,
+		nfcDict,
+		supportedOptions
 	},
-	isValid: (opts, schemaName) => {
-		let validation = Joi.validate(opts, schemaName);
-
-		if (validation.error) {
-			debug(`validation failed due to error: ${validation.error.message}`);
-		}
-
-		return !validation.error;
-	}
+	isValid,
+	filter
 };

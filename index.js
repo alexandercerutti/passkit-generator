@@ -543,25 +543,6 @@ class Pass {
 	}
 
 	/**
-	 * Filters the options received in the query from http request into supported options
-	 * by Apple and this application.
-	 *
-	 * @method _filterOptions
-	 * @params {Object} opts - raw informations to be edited in the pass.json file
-	 *							from HTTP Request Params or Body
-	 * @returns {Object} - filtered options based on above criterias.
-	 */
-
-	_filterOptions(opts) {
-		const forbidden = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields", "expirationDate", "voided", "locations", "beacons", "maxDistance", "relevantDate"];
-		const supported = ["serialNumber", "userInfo", "authenticationToken", "barcode", "backgroundColor", "foregroundColor", "labelColor"];
-
-		let valid = Object.keys(opts).filter(o => !forbidden.includes(o) && supported.includes(o));
-
-		return Object.assign(...valid.map(v => ({ [v]: opts[v] })), {});
-	}
-
-	/**
 	 * Validates the contents of the passed options and assigns the contents to the right properties
 	 *
 	 * @async
@@ -581,7 +562,9 @@ class Pass {
 
 		this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
 
-		Object.assign(this.props, this._filterOptions(options.overrides));
+		const filteredOpts = schema.filter(options, schema.constants.supportedOptions);
+
+		Object.assign(this.props, filteredOpts);
 
 		let optCertsNames = Object.keys(options.certificates);
 

@@ -23,13 +23,13 @@ let barcode = Joi.object().keys({
 });
 
 let field = Joi.object().keys({
-	attributedValue: Joi.string().allow(""),
+	attributedValue: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()),
 	changeMessage: Joi.string().allow("").regex(/%@/),
 	dataDetectorType: Joi.array().items(Joi.string().regex(/(PKDataDetectorTypePhoneNumber|PKDataDetectorTypeLink|PKDataDetectorTypeAddress|PKDataDetectorTypeCalendarEvent)/, "dataDetectorType")),
 	label: Joi.string().allow(""),
 	textAlignment: Joi.string().regex(/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/, "graphic-alignment"),
 	key: Joi.string().required(),
-	value: Joi.string().allow("").required()
+	value: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()).required()
 });
 
 let beaconsDict = Joi.object().keys({
@@ -70,7 +70,7 @@ module.exports = {
 		let validation = Joi.validate(opts, schemaName);
 
 		if (validation.error) {
-			debug(`validation failed due to :: ${validation.error.message}`);
+			debug(`validation failed due to error: ${validation.error.message}`);
 		}
 
 		return !validation.error;

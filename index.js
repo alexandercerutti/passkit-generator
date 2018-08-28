@@ -298,16 +298,12 @@ class Pass {
 			data = [data];
 		}
 
-		let valid = data.filter(b => {
-			if (!(b instanceof Object)) {
-				return false;
-			}
+		let valid = data.filter(b => b instanceof Object && schema.isValid(b, "barcode"));
 
-			return schema.isValid(b, "barcode");
-		});
-
-		this.props["barcode"] = valid[0] || {};
+		this.props["barcode"] = valid[0] || undefined;
 		this.props["barcodes"] = valid || [];
+
+		// I bind "this" to get a clean this when returning from the methods
 
 		return Object.assign({
 			length: valid.length,
@@ -390,6 +386,7 @@ class Pass {
 			return this;
 		}
 
+		// Checking which object among barcodes has the same format of the specified one.
 		let index = this.props["barcodes"].findIndex(b => b.format.toLowerCase().includes(format.toLowerCase()));
 
 		if (index === -1) {

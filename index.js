@@ -399,6 +399,14 @@ class Pass {
 		return this;
 	}
 
+	/**
+	 * Sets nfc fields in properties
+	 *
+	 * @method nfc
+	 * @params {Array<Object>} data - the data to be pushed in the pass
+	 * @returns {this}
+	 */
+
 	nfc(...data) {
 		if (data.length === 1 && data[0] instanceof Array) {
 			data = data[0];

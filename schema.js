@@ -19,10 +19,9 @@ let supportedOptions = Joi.object().keys({
 	serialNumber: Joi.string(),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
 	webServiceURL: Joi.string().regex(/^https?:\/\/(?:[a-z0-9]+\.[a-z0-9]+\.[a-z]+(?:\.[a-z]+)?|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/?(?:[a-z\/_%0-9A-Z.]+)?/),
-	authenticationToken: Joi.when("webServiceURL", {
+	authenticationToken: Joi.string().token().min(16).when("webServiceURL", {
 		is: Joi.exist(),
-		then: Joi.string().token().min(16).required(),
-		otherwise: Joi.string().token().min(16)
+		then: Joi.required()
 	}),
 	backgroundColor: Joi.string().min(10).max(16),
 	foregroundColor: Joi.string().min(10).max(16),

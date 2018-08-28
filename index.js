@@ -239,7 +239,7 @@ class Pass {
 				data = [data];
 			}
 
-			let valid = data.filter(d => schema.isValid(d, schema.constants[type+"Dict"]));
+			let valid = data.filter(d => schema.isValid(d, type+"Dict"));
 			this.props[type] = valid;
 
 			return Object.assign({
@@ -302,10 +302,7 @@ class Pass {
 				return false;
 			}
 
-			// messageEncoding is required
-			// b.messageEncoding = b.messageEncoding || "iso-8859-1";
-
-			return schema.isValid(b, schema.constants.barcode);
+			return schema.isValid(b, "barcode");
 		});
 
 		this.props["barcode"] = valid[0] || {};
@@ -406,7 +403,7 @@ class Pass {
 			data = data[0];
 		}
 
-		let valid = data.filter(d => d instanceof Object && schema.isValid(d, schema.constants.nfcDict));
+		let valid = data.filter(d => d instanceof Object && schema.isValid(d, "nfcDict"));
 
 		this.props["nfc"] = valid;
 
@@ -435,7 +432,7 @@ class Pass {
 			let type = passTypes[index];
 
 			this.type = type;
-			return schema.isValid(passFile[type], schema.constants.passDict);
+			return schema.isValid(passFile[type], "passDict");
 		} catch (e) {
 			return false;
 		}
@@ -564,7 +561,7 @@ class Pass {
 	 */
 
 	_parseSettings(options) {
-		if (!schema.isValid(options, schema.constants.instance)) {
+		if (!schema.isValid(options, "instance")) {
 			throw new Error(errors.REQS_NOT_MET);
 		}
 
@@ -574,7 +571,7 @@ class Pass {
 
 		this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
 
-		const filteredOpts = schema.filter(options, schema.constants.supportedOptions);
+		const filteredOpts = schema.filter(options.overrides, "supportedOptions");
 
 		Object.assign(this.props, filteredOpts);
 
@@ -606,7 +603,7 @@ class Pass {
 	}
 
 	set transitType(v) {
-		if (schema.isValid(v, schema.constants.transitType)) {
+		if (schema.isValid(v, "transitType")) {
 			this._transitType = v;
 		} else {
 			this._transitType = this._transitType || "";

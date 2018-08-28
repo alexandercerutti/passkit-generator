@@ -25,7 +25,7 @@ class FieldsContainer {
 			fields = fields[0];
 		}
 
-		let validFields = fields.filter(f => typeof f === "object" && schema.isValid(f, schema.constants.field));
+		let validFields = fields.filter(f => typeof f === "object" && schema.isValid(f, "field"));
 
 		this.fields.push(...validFields);
 

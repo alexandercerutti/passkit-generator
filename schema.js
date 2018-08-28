@@ -2,7 +2,7 @@ const Joi = require("joi");
 const debug = require("debug")("Schema");
 
 let instance = Joi.object().keys({
-	model: Joi.string(),
+	model: Joi.string().required(),
 	certificates: Joi.object().keys({
 		wwdr: Joi.string().required(),
 		signerCert: Joi.string().required(),
@@ -94,8 +94,31 @@ let nfcDict = Joi.object().keys({
 	encryptionPublicKey: Joi.string()
 });
 
+let schemas = {
+	instance,
+	barcode,
+	field,
+	passDict,
+	beaconsDict,
+	locationsDict,
+	transitType,
+	nfcDict,
+	supportedOptions
+};
+
+let resolveSchemaName = (name) => {
+	return schemas[name] || "";
+};
+
 let isValid = (opts, schemaName) => {
-	let validation = Joi.validate(opts, schemaName);
+	let resolvedSchema = resolveSchemaName(schemaName);
+
+	if (!resolvedSchema) {
+		debug(`validation failed due to missing or mispelled schema name`);
+		return false;
+	}
+
+	let validation = Joi.validate(opts, resolvedSchema);
 
 	if (validation.error) {
 		debug(`validation failed due to error: ${validation.error.message}`);
@@ -121,17 +144,6 @@ let filter = (opts, schemaName) => {
 }
 
 module.exports = {
-	constants: {
-		instance,
-		barcode,
-		field,
-		passDict,
-		beaconsDict,
-		locationsDict,
-		transitType,
-		nfcDict,
-		supportedOptions
-	},
 	isValid,
 	filter
 };

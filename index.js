@@ -6,6 +6,7 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const moment = require("moment");
 const schema = require("./schema");
+const barcodeDebug = require("debug")("passkit:barcode");
 const { areas: fieldsName, FieldsContainer } = require("./fields");
 const { errors, warnings } = require("./messages");
 
@@ -328,6 +329,7 @@ class Pass {
 
 	__barcodeAutogen(data) {
 		if (!data || !(data instanceof Object) || !data.message) {
+			barcodeDebug("Unable to autogenerate barcodes. Data is not an object or has not message field.");
 			return [];
 		}
 
@@ -384,12 +386,14 @@ class Pass {
 		}
 
 		if (typeof format !== "string") {
+			barcodeDebug("format must be a string or null. Cannot set backward compatibility.");
 			return this;
 		}
 
 		let index = this.props["barcodes"].findIndex(b => b.format.toLowerCase().includes(format.toLowerCase()));
 
 		if (index === -1) {
+			barcodeDebug("format not found among barcodes. Cannot set backward compatibility.");
 			return this;
 		}
 

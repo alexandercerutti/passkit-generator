@@ -7,6 +7,7 @@ const schema = require("./schema");
 
 class FieldsContainer {
 	constructor() {
+		this.uniqueKeys = [];
 		this.fields = [];
 	}
 
@@ -25,7 +26,15 @@ class FieldsContainer {
 			fields = fields[0];
 		}
 
-		let validFields = fields.filter(f => typeof f === "object" && schema.isValid(f, "field"));
+		let validFields = fields.filter(f => {
+			if (this.uniqueKeys.includes(f.key)) {
+				return false;
+			}
+
+			this.uniqueKeys.push(f.key);
+
+			return typeof f === "object" && schema.isValid(f, "field");
+		});
 
 		this.fields.push(...validFields);
 
@@ -49,10 +58,12 @@ class FieldsContainer {
 		if (quantity > -1) {
 			let removedElements = this.fields.slice(quantity);
 			this.fields = this.fields.slice(0, this.fields.length - quantity);
+			this.uniqueKeys = this.uniqueKeys.slice(0, this.uniqueKeys - quantity);
 
 			return removedElements;
 		}
 
+		this.uniqueKeys.pop();
 		return this.fields.pop();
 	}
 }

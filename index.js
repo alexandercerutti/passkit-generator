@@ -256,10 +256,16 @@ class Pass {
 		}
 
 		if (type === "maxDistance" && (typeof data === "string" || typeof data === "number")) {
-			this.props[type] = Number(data);
+			let conv = Number(data);
+			// condition to proceed
+			let cond = isNaN(conv);
+
+			if (!cond) {
+				this.props[type] = conv;
+			}
 
 			return Object.assign({
-				length: 1
+				length: Number(!cond)
 			}, this);
 		} else if (type === "relevantDate") {
 			let dateParse = dateToW3CString(data);
@@ -271,7 +277,7 @@ class Pass {
 			}
 
 			return Object.assign({
-				length: Number(!!convDate)
+				length: Number(!!dateParse)
 			}, this);
 		}
 	}

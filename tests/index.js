@@ -47,4 +47,36 @@ describe("Node-Passkit-generator", function() {
 			expect(pass.l10n["it"]["Test"]).toBe("Prova");
 		});
 	});
+
+	describe("expiration()", () => {
+		it("Missing first argument or not a string won't apply changes", () => {
+			pass.expiration();
+			expect(pass.props["expirationDate"]).toBe(undefined);
+			pass.expiration(42);
+			expect(pass.props["expirationDate"]).toBe(undefined);
+		});
+
+		it("A date with defined format DD-MM-YYYY will apply changes", () => {
+			pass.expiration("10-04-2021", "DD-MM-YYYY");
+			expect(pass.props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
+		});
+
+		it("A date with undefined custom format, will apply changes", () => {
+			pass.expiration("10-04-2021");
+			expect(pass.props["expirationDate"]).toBe("2021-10-04T00:00:00+02:00");
+		});
+
+		it("A date with defined format but with slashes will apply changes", () => {
+			pass.expiration("10/04/2021", "DD-MM-YYYY");
+			expect(pass.props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
+		});
+
+		it("An invalid date, will not apply changes", () => {
+			pass.expiration("32/18/228317");
+			expect(pass.props["expirationDate"]).toBe(undefined);
+
+			pass.expiration("32/18/228317", "DD-MM-YYYY");
+			expect(pass.props["expirationDate"]).toBe(undefined);			
+		});
+	});
 });

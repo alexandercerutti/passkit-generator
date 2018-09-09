@@ -9,7 +9,7 @@
  */
 
 const app = require("./webserver");
-const { Pass } = require("../index");
+const { Pass } = require("..");
 
 app.all(function manageRequest(request, response) {
 

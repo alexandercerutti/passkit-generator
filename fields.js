@@ -50,15 +50,15 @@ class FieldsContainer {
 	 * @returns {Number} - the amount of removed elements
 	 */
 
-	pop(quantity = -1) {
+	pop(amount = -1) {
 		if (!this.fields.length) {
 			return undefined;
 		}
 
-		if (quantity > -1) {
-			let removedElements = this.fields.slice(quantity);
-			this.fields = this.fields.slice(0, this.fields.length - quantity);
-			this.uniqueKeys = this.uniqueKeys.slice(0, this.uniqueKeys - quantity);
+		if (amount > -1) {
+			let removedElements = this.fields.slice(amount);
+			this.fields = this.fields.slice(0, this.fields.length - amount);
+			this.uniqueKeys = this.uniqueKeys.slice(0, this.uniqueKeys - amount);
 
 			return removedElements;
 		}

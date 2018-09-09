@@ -433,7 +433,9 @@ class Pass {
 
 		let valid = data.filter(d => d instanceof Object && schema.isValid(d, "nfcDict"));
 
-		this.props["nfc"] = valid;
+		if (valid.length) {
+			this.props["nfc"] = valid;
+		}
 
 		return this;
 	}

@@ -7,6 +7,7 @@ const archiver = require("archiver");
 const moment = require("moment");
 const schema = require("./schema");
 const barcodeDebug = require("debug")("passkit:barcode");
+const genericDebug = require("debug")("passkit:generic");
 const { areas: fieldsName, FieldsContainer } = require("./fields");
 const { errors, warnings } = require("./messages");
 
@@ -200,7 +201,13 @@ class Pass {
 			return this;
 		}
 
-		this.props.expirationDate = dateToW3CString(date);
+		let dataParse = dateToW3CString(date);
+
+		if (!dateParse) {
+			genericDebug("Expiration Date was not set due to invalid format.");
+		} else {
+			this.props.expirationDate = dataParse;
+		}
 
 		return this;
 	}
@@ -255,7 +262,13 @@ class Pass {
 				length: 1
 			}, this);
 		} else if (type === "relevantDate") {
-			this.props[type] = dateToW3CString(data);
+			let dateParse = dateToW3CString(data);
+
+			if (!dateParse) {
+				genericDebug("Relevant Date was not set due to incorrect date format.");
+			} else {
+				this.props[type] = dataParse;
+			}
 
 			return Object.assign({
 				length: Number(!!convDate)

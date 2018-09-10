@@ -4,7 +4,8 @@
   "description": "A passkit generator webserver",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "jasmine tests/index.js"
   },
   "author": "Alexander Patrick Cerutti",
   "license": "ISC",
@@ -17,6 +18,7 @@
     "node-forge": "^0.7.6"
   },
   "devDependencies": {
-    "eslint": "^5.1.0"
+    "eslint": "^5.1.0",
+    "jasmine": "^3.2.0"
   }
 }

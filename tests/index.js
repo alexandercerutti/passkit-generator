@@ -1,7 +1,7 @@
 const Passkit = require("..");
 
 describe("Node-Passkit-generator", function() {
-	var pass = null;
+	let pass;
 	beforeEach(() => {
 		pass = new Passkit.Pass({
 			model: "../examples/examplePass.pass",
@@ -78,5 +78,66 @@ describe("Node-Passkit-generator", function() {
 			pass.expiration("32/18/228317", "DD-MM-YYYY");
 			expect(pass.props["expirationDate"]).toBe(undefined);			
 		});
+	});
+
+	describe("relevance()", () => {
+		describe("relevance('relevantDate')", () => {
+			it("A date with defined format DD-MM-YYYY will apply changes", () => {
+				pass.relevance("relevantDate", "10-04-2021", "DD-MM-YYYY");
+				expect(pass.props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
+			});
+
+			it("A date with undefined custom format, will apply changes", () => {
+				pass.relevance("relevantDate", "10-04-2021");
+				expect(pass.props["relevantDate"]).toBe("2021-10-04T00:00:00+02:00");
+			});
+
+			it("A date with defined format but with slashes will apply changes", () => {
+				pass.relevance("relevantDate", "10/04/2021", "DD-MM-YYYY");
+				expect(pass.props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
+			});
+		});
+
+		describe("relevance('maxDistance')", () => {
+			it("A string is accepted and converted to Number", () => {
+				pass.relevance("maxDistance", "150");
+				expect(pass.props["maxDistance"]).toBe(150);
+			});
+
+			it("A number is accepeted and will apply changes", () => {
+				pass.relevance("maxDistance", 150);
+				expect(pass.props["maxDistance"]).toBe(150);
+			});
+
+			it("Passing NaN value won't apply changes", () => {
+				pass.relevance("maxDistance", NaN);
+				expect(pass.props["maxDistance"]).toBe(undefined);
+			});
+		});
+
+		describe("relevance('locations') && relevance('beacons')", () => {
+			it("A one-Invalid-schema location won't apply changes", () => {
+				pass.relevance("locations", [{
+					"ibrupofene": "no",
+					"longitude": 0.00000000
+				}]);
+
+				expect(pass.props["locations"]).toBe(undefined);
+			});
+
+			it("A two locations, with one invalid, will be filtered", () => {
+				pass.relevance("locations", [{
+					"ibrupofene": "no",
+					"longitude": 0.00000000
+				}, {
+					"longitude": 4.42634523,
+					"latitude": 5.344233323352
+				}]);
+
+				expect(pass.props["locations"].length).toBe(1);
+			});
+		});
+
+
 	});
 });

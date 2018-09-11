@@ -137,7 +137,91 @@ describe("Node-Passkit-generator", function() {
 				expect(pass.props["locations"].length).toBe(1);
 			});
 		});
+	});
 
+	describe("barcode()", () => {
+		it("Missing data will won't apply changes", () => {
+			pass.barcode();
 
+			expect(pass.props["barcode"]).toBe(undefined);
+			expect(pass.props["barcodes"]).toBe(undefined);
+		});
+
+		it("Boolean parameter won't apply changes", () => {
+			pass.barcode(true);
+
+			expect(pass.props["barcode"]).toBe(undefined);
+			expect(pass.props["barcodes"]).toBe(undefined);
+		});
+
+		it("Numeric parameter won't apply changes", () => {
+			pass.barcode(42);
+
+			expect(pass.props["barcode"]).toBe(undefined);
+			expect(pass.props["barcodes"]).toBe(undefined);
+		});
+
+		it("String parameter will autogenerate all the objects", () => {
+			pass.barcode("28363516282");
+
+			expect(pass.props["barcode"] instanceof Object).toBe(true);
+			expect(pass.props["barcode"].message).toBe("28363516282");
+			expect(pass.props["barcodes"].length).toBe(4);
+		});
+
+		it("Object parameter will be automatically converted to one-element Array", () => {
+			pass.barcode({
+				message: "28363516282",
+				format: "PKBarcodeFormatPDF417",
+				messageEncoding: "utf8"
+			});
+
+			expect(pass.props["barcode"] instanceof Object).toBe(true);
+			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatPDF417");
+			expect(pass.props["barcodes"].length).toBe(1);
+		});
+
+		it("Array parameter will apply changes", () => {
+			pass.barcode({
+				message: "28363516282",
+				format: "PKBarcodeFormatPDF417",
+				messageEncoding: "utf8"
+			});
+
+			expect(pass.props["barcode"] instanceof Object).toBe(true);
+			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatPDF417");
+			expect(pass.props["barcodes"].length).toBe(1);
+		});
+
+		it("Missing messageEncoding gets automatically added.", () => {
+			pass.barcode([{
+				message: "28363516282",
+				format: "PKBarcodeFormatPDF417",
+			}]);
+
+			expect(pass.props["barcode"] instanceof Object).toBe(true);
+			expect(pass.props["barcode"].messageEncoding).toBe("iso-8859-1");
+			expect(pass.props["barcodes"][0].messageEncoding).toBe("iso-8859-1");
+		});
+
+		it("Object without message property, will be filtered out", () => {
+			pass.barcode([{
+				format: "PKBarcodeFormatPDF417",
+			}]);
+
+			expect(pass.props["barcode"]).toBe(undefined);
+			expect(pass.props["barcodes"]).toBe(undefined);
+		});
+
+		it("Array containing non-object elements will be filtered out", () => {
+			pass.barcode([5, 10, 15, {
+				message: "28363516282",
+				format: "PKBarcodeFormatPDF417"
+			}, 7, 1]);
+
+			expect(pass.props["barcode"] instanceof Object).toBe(true);
+			expect(pass.props["barcodes"].length).toBe(1);
+			expect(pass.props["barcodes"][0] instanceof Object).toBe(true);
+		})
 	});
 });

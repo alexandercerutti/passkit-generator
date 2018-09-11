@@ -222,6 +222,33 @@ describe("Node-Passkit-generator", function() {
 			expect(pass.props["barcode"] instanceof Object).toBe(true);
 			expect(pass.props["barcodes"].length).toBe(1);
 			expect(pass.props["barcodes"][0] instanceof Object).toBe(true);
-		})
+		});
+	});
+
+	describe("barcode().backward()", () => {
+		it("Passing argument of type different from string or null, won't apply changes", function() {
+			pass
+				.barcode("Message-22645272183")
+				.backward(5);
+
+			// unchanged
+			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatQR");
+		});
+
+		it("Null will delete backward support", () => {
+			pass
+				.barcode("Message-22645272183")
+				.backward(null);
+
+			expect(pass.props["barcode"]).toBe(undefined);
+		});
+
+		it("Unknown format won't apply changes", () => {
+			pass
+				.barcode("Message-22645272183")
+				.backward("PKBingoBongoFormat");
+
+			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatQR");
+		});
 	});
 });

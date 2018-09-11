@@ -193,20 +193,21 @@ class Pass {
 	 *
 	 * @method expiration
 	 * @params {String} date - the date in string
+	 * @params {String} format - a custom format for the date
 	 * @returns {this}
 	 */
 
-	expiration(date) {
+	expiration(date, format) {
 		if (typeof date !== "string") {
 			return this;
 		}
 
-		let dataParse = dateToW3CString(date);
+		let dateParse = dateToW3CString(date, format);
 
 		if (!dateParse) {
 			genericDebug("Expiration Date was not set due to invalid format.");
 		} else {
-			this.props.expirationDate = dataParse;
+			this.props.expirationDate = dateParse;
 		}
 
 		return this;
@@ -230,10 +231,11 @@ class Pass {
 	 * @method relevance
 	 * @params {String} type - one of the key above
 	 * @params {Any[]} data - the data to be pushed to the property
+	 * @params {String} [relevanceDateFormat] - A custom format for the date
 	 * @return {Number} The quantity of data pushed
 	 */
 
-	relevance(type, data) {
+	relevance(type, data, relevanceDateFormat) {
 		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
 
 		if (!type || !data || !types.includes(type)) {
@@ -268,12 +270,12 @@ class Pass {
 				length: Number(!cond)
 			}, this);
 		} else if (type === "relevantDate") {
-			let dateParse = dateToW3CString(data);
+			let dateParse = dateToW3CString(data, relevanceDateFormat);
 
 			if (!dateParse) {
 				genericDebug("Relevant Date was not set due to incorrect date format.");
 			} else {
-				this.props[type] = dataParse;
+				this.props[type] = dateParse;
 			}
 
 			return Object.assign({
@@ -695,17 +697,18 @@ function isValidRGB(value) {
  * Converts a date to W3C Standard format
  *
  * @function dateToW3Cstring
- * @params {String} - The date to be parsed
+ * @params {String} date - The date to be parsed
+ * @params {String} [format] - a custom format
  * @returns {String|undefined} The parsed string if the parameter is valid,
  * 	 undefined otherwise
  */
 
-function dateToW3CString(date) {
+function dateToW3CString(date, format) {
 	if (typeof date !== "string") {
 		return "";
 	}
 
-	let parsedDate = moment(date, ["MM-DD-YYYY hh:mm:ss", "YYYY-MM-DD hh:mm:ss", "DD-MM-YYYY hh:mm:ss"]).format();
+	let parsedDate = moment(date.replace(/\//g, "-"), format || ["MM-DD-YYYY hh:mm:ss", "DD-MM-YYYY hh:mm:ss"]).format();
 
 	if (parsedDate === "Invalid date") {
 		return undefined;

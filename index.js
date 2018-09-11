@@ -233,6 +233,7 @@ class Pass {
 			}
 
 			let valid = data.filter(d => schema.isValid(d, type+"Dict"));
+
 			this._props[type] = valid.length ? valid : undefined;
 
 			return Object.assign({

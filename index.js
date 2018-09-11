@@ -390,7 +390,7 @@ class Pass {
 		this.props["barcodes"] = this.__barcodeAutogen(props[0]);
 
 		return Object.assign({
-			length: 4,
+			length: 4 - props.length,
 			backward: this.__barcodeChooseBackward.bind(this)
 		}, this);
 	}

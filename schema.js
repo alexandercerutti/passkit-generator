@@ -32,7 +32,7 @@ let supportedOptions = Joi.object().keys({
 
 let barcode = Joi.object().keys({
 	altText: Joi.string(),
-	messageEncoding: Joi.string().default("iso-8859-1").required(),
+	messageEncoding: Joi.string().default("iso-8859-1"),
 	format: Joi.string().required().regex(/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/, "barcodeType"),
 	message: Joi.string().required()
 });
@@ -140,9 +140,21 @@ let filter = (opts, schemaName) => {
 
 		return acc;
 	}, isObject ? {} : []);
-}
+};
+
+let getValidated = (opts, schemaName) => {
+	let resolvedSchema = resolveSchemaName(schemaName);
+	let validation = Joi.validate(opts, resolvedSchema);
+
+	if (validation.error) {
+		return !validation.error;
+	}
+
+	return validation.value;
+};
 
 module.exports = {
 	isValid,
-	filter
+	filter,
+	getValidated
 };

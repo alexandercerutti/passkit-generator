@@ -317,12 +317,21 @@ class Pass {
 			data = [data];
 		}
 
-		let valid = data.filter(b => b instanceof Object && schema.isValid(b, "barcode"));
+		// messageEncoding is required but has a default value.
+		// Therefore I assign a validated version of the object with the default value
+		// to the ones that doesn't have messageEncoding.
+		// if o is not a valid object, false is returned and then filtered later
 
-		this.props["barcode"] = valid[0] || undefined;
-		this.props["barcodes"] = valid || [];
+		let valid = data
+			.map(o => schema.getValidated(o, "barcode"))
+			.filter(o => o instanceof Object);
 
-		// I bind "this" to get a clean this when returning from the methods
+		if (valid.length) {
+			this.props["barcode"] = valid[0];
+			this.props["barcodes"] = valid;
+		}
+
+		// I bind "this" to get a clean context (without these two methods) when returning from the methods
 
 		return Object.assign({
 			length: valid.length,

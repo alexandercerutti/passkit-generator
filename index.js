@@ -163,7 +163,7 @@ class Pass {
 	 */
 
 	localize(lang, translations) {
-		if (typeof translations === "object" || translations === undefined) {
+		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
 			this.l10n[lang] = translations || {};
 		}
 

@@ -4,24 +4,26 @@
   "description": "The easiest way to generate custom Apple Wallet passes in Node.js",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
     "test": "jasmine tests/index.js"
   },
   "author": "Alexander Patrick Cerutti",
   "license": "MIT",
   "repository": "https://github.com/alexandercerutti/passkit-generator",
   "bugs": "https://github.com/alexandercerutti/passkit-generator/issues",
-  "keywords": ["Apple", "Passkit", "Wallet", "Pass"],
+  "keywords": [
+    "Apple",
+    "Passkit",
+    "Wallet",
+    "Pass"
+  ],
   "dependencies": {
     "archiver": "^2.1.1",
     "debug": "^3.1.0",
-    "express": "^4.16.3",
     "joi": "^13.6.0",
     "moment": "^2.22.2",
     "node-forge": "^0.7.6"
   },
   "devDependencies": {
-    "eslint": "^5.1.0",
     "jasmine": "^3.2.0"
   }
 }

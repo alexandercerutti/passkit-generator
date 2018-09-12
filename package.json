@@ -1,7 +1,7 @@
 {
-  "name": "passkit-webserver",
-  "version": "1.2.0",
-  "description": "A passkit generator webserver",
+  "name": "passkit-generator",
+  "version": "1.3.0",
+  "description": "The easiest way to generate custom Apple Wallet passes in Node.js",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
@@ -9,6 +9,9 @@
   },
   "author": "Alexander Patrick Cerutti",
   "license": "MIT",
+  "repository": "https://github.com/alexandercerutti/passkit-generator",
+  "bugs": "https://github.com/alexandercerutti/passkit-generator/issues",
+  "keywords": ["Apple", "Passkit", "Wallet", "Pass"],
   "dependencies": {
     "archiver": "^2.1.1",
     "debug": "^3.1.0",

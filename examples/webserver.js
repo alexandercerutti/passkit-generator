@@ -1,6 +1,7 @@
 /*
  * Generic webserver instance for the examples
  * @Author Alexander P. Cerutti
+ * Requires express to run
  */
 
 const express = require("express");

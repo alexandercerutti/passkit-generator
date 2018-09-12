@@ -2,3 +2,5 @@
 node_modules
 passModels/
 certificates/
+output/
+develop.sh

@@ -1,13 +1,14 @@
 const fs = require("fs");
 const path = require("path");
-const stream = require("stream");
 const util = require("util");
+const stream = require("stream");
+const moment = require("moment");
 const forge = require("node-forge");
 const archiver = require("archiver");
-const moment = require("moment");
-const schema = require("./schema");
 const barcodeDebug = require("debug")("passkit:barcode");
 const genericDebug = require("debug")("passkit:generic");
+
+const schema = require("./schema");
 const { areas: fieldsName, FieldsContainer } = require("./fields");
 const { errors, warnings } = require("./messages");
 

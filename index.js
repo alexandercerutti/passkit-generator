@@ -10,7 +10,7 @@ const genericDebug = require("debug")("passkit:generic");
 
 const schema = require("./schema");
 const { areas: fieldsName, FieldsContainer } = require("./fields");
-const { errors, warnings } = require("./messages");
+const errors = require("./messages");
 
 const readdir = util.promisify(fs.readdir);
 const readFile = util.promisify(fs.readFile);

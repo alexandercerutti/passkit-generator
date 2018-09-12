@@ -8,6 +8,4 @@ let errors = {
 	INVALID_CERTS: "Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase)."
 };
 
-let warnings = {};
-
-module.exports = { errors, warnings };
+module.exports = errors;

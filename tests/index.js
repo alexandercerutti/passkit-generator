@@ -1,5 +1,16 @@
 const Passkit = require("..");
 
+/*
+ * Yes, I know that I'm checking against "private" properties
+ * and that I shouldn't do that, but there's no other way to check
+ * the final results for each test. The only possible way is to
+ * read the generated stream of the zip file, unzip it
+ * (hopefully in memory) and check each property in pass.json file
+ * and .lproj directories. I hope who is reading this, will understand.
+ *
+ * Tests created upon Jasmine testing suite.
+ */
+
 describe("Node-Passkit-generator", function() {
 	let pass;
 	beforeEach(() => {
@@ -51,32 +62,32 @@ describe("Node-Passkit-generator", function() {
 	describe("expiration()", () => {
 		it("Missing first argument or not a string won't apply changes", () => {
 			pass.expiration();
-			expect(pass.props["expirationDate"]).toBe(undefined);
+			expect(pass._props["expirationDate"]).toBe(undefined);
 			pass.expiration(42);
-			expect(pass.props["expirationDate"]).toBe(undefined);
+			expect(pass._props["expirationDate"]).toBe(undefined);
 		});
 
 		it("A date with defined format DD-MM-YYYY will apply changes", () => {
 			pass.expiration("10-04-2021", "DD-MM-YYYY");
-			expect(pass.props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
+			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
 		});
 
 		it("A date with undefined custom format, will apply changes", () => {
 			pass.expiration("10-04-2021");
-			expect(pass.props["expirationDate"]).toBe("2021-10-04T00:00:00+02:00");
+			expect(pass._props["expirationDate"]).toBe("2021-10-04T00:00:00+02:00");
 		});
 
 		it("A date with defined format but with slashes will apply changes", () => {
 			pass.expiration("10/04/2021", "DD-MM-YYYY");
-			expect(pass.props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
+			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
 		});
 
 		it("An invalid date, will not apply changes", () => {
 			pass.expiration("32/18/228317");
-			expect(pass.props["expirationDate"]).toBe(undefined);
+			expect(pass._props["expirationDate"]).toBe(undefined);
 
 			pass.expiration("32/18/228317", "DD-MM-YYYY");
-			expect(pass.props["expirationDate"]).toBe(undefined);			
+			expect(pass._props["expirationDate"]).toBe(undefined);			
 		});
 	});
 
@@ -84,34 +95,34 @@ describe("Node-Passkit-generator", function() {
 		describe("relevance('relevantDate')", () => {
 			it("A date with defined format DD-MM-YYYY will apply changes", () => {
 				pass.relevance("relevantDate", "10-04-2021", "DD-MM-YYYY");
-				expect(pass.props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
+				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
 			});
 
 			it("A date with undefined custom format, will apply changes", () => {
 				pass.relevance("relevantDate", "10-04-2021");
-				expect(pass.props["relevantDate"]).toBe("2021-10-04T00:00:00+02:00");
+				expect(pass._props["relevantDate"]).toBe("2021-10-04T00:00:00+02:00");
 			});
 
 			it("A date with defined format but with slashes will apply changes", () => {
 				pass.relevance("relevantDate", "10/04/2021", "DD-MM-YYYY");
-				expect(pass.props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
+				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
 			});
 		});
 
 		describe("relevance('maxDistance')", () => {
 			it("A string is accepted and converted to Number", () => {
 				pass.relevance("maxDistance", "150");
-				expect(pass.props["maxDistance"]).toBe(150);
+				expect(pass._props["maxDistance"]).toBe(150);
 			});
 
 			it("A number is accepeted and will apply changes", () => {
 				pass.relevance("maxDistance", 150);
-				expect(pass.props["maxDistance"]).toBe(150);
+				expect(pass._props["maxDistance"]).toBe(150);
 			});
 
 			it("Passing NaN value won't apply changes", () => {
 				pass.relevance("maxDistance", NaN);
-				expect(pass.props["maxDistance"]).toBe(undefined);
+				expect(pass._props["maxDistance"]).toBe(undefined);
 			});
 		});
 
@@ -122,7 +133,7 @@ describe("Node-Passkit-generator", function() {
 					"longitude": 0.00000000
 				}]);
 
-				expect(pass.props["locations"]).toBe(undefined);
+				expect(pass._props["locations"]).toBe(undefined);
 			});
 
 			it("A two locations, with one invalid, will be filtered", () => {
@@ -134,7 +145,7 @@ describe("Node-Passkit-generator", function() {
 					"latitude": 5.344233323352
 				}]);
 
-				expect(pass.props["locations"].length).toBe(1);
+				expect(pass._props["locations"].length).toBe(1);
 			});
 		});
 	});
@@ -143,30 +154,30 @@ describe("Node-Passkit-generator", function() {
 		it("Missing data will won't apply changes", () => {
 			pass.barcode();
 
-			expect(pass.props["barcode"]).toBe(undefined);
-			expect(pass.props["barcodes"]).toBe(undefined);
+			expect(pass._props["barcode"]).toBe(undefined);
+			expect(pass._props["barcodes"]).toBe(undefined);
 		});
 
 		it("Boolean parameter won't apply changes", () => {
 			pass.barcode(true);
 
-			expect(pass.props["barcode"]).toBe(undefined);
-			expect(pass.props["barcodes"]).toBe(undefined);
+			expect(pass._props["barcode"]).toBe(undefined);
+			expect(pass._props["barcodes"]).toBe(undefined);
 		});
 
 		it("Numeric parameter won't apply changes", () => {
 			pass.barcode(42);
 
-			expect(pass.props["barcode"]).toBe(undefined);
-			expect(pass.props["barcodes"]).toBe(undefined);
+			expect(pass._props["barcode"]).toBe(undefined);
+			expect(pass._props["barcodes"]).toBe(undefined);
 		});
 
 		it("String parameter will autogenerate all the objects", () => {
 			pass.barcode("28363516282");
 
-			expect(pass.props["barcode"] instanceof Object).toBe(true);
-			expect(pass.props["barcode"].message).toBe("28363516282");
-			expect(pass.props["barcodes"].length).toBe(4);
+			expect(pass._props["barcode"] instanceof Object).toBe(true);
+			expect(pass._props["barcode"].message).toBe("28363516282");
+			expect(pass._props["barcodes"].length).toBe(4);
 		});
 
 		it("Object parameter will be automatically converted to one-element Array", () => {
@@ -176,9 +187,9 @@ describe("Node-Passkit-generator", function() {
 				messageEncoding: "utf8"
 			});
 
-			expect(pass.props["barcode"] instanceof Object).toBe(true);
-			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatPDF417");
-			expect(pass.props["barcodes"].length).toBe(1);
+			expect(pass._props["barcode"] instanceof Object).toBe(true);
+			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatPDF417");
+			expect(pass._props["barcodes"].length).toBe(1);
 		});
 
 		it("Array parameter will apply changes", () => {
@@ -188,9 +199,9 @@ describe("Node-Passkit-generator", function() {
 				messageEncoding: "utf8"
 			});
 
-			expect(pass.props["barcode"] instanceof Object).toBe(true);
-			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatPDF417");
-			expect(pass.props["barcodes"].length).toBe(1);
+			expect(pass._props["barcode"] instanceof Object).toBe(true);
+			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatPDF417");
+			expect(pass._props["barcodes"].length).toBe(1);
 		});
 
 		it("Missing messageEncoding gets automatically added.", () => {
@@ -199,9 +210,9 @@ describe("Node-Passkit-generator", function() {
 				format: "PKBarcodeFormatPDF417",
 			}]);
 
-			expect(pass.props["barcode"] instanceof Object).toBe(true);
-			expect(pass.props["barcode"].messageEncoding).toBe("iso-8859-1");
-			expect(pass.props["barcodes"][0].messageEncoding).toBe("iso-8859-1");
+			expect(pass._props["barcode"] instanceof Object).toBe(true);
+			expect(pass._props["barcode"].messageEncoding).toBe("iso-8859-1");
+			expect(pass._props["barcodes"][0].messageEncoding).toBe("iso-8859-1");
 		});
 
 		it("Object without message property, will be filtered out", () => {
@@ -209,8 +220,8 @@ describe("Node-Passkit-generator", function() {
 				format: "PKBarcodeFormatPDF417",
 			}]);
 
-			expect(pass.props["barcode"]).toBe(undefined);
-			expect(pass.props["barcodes"]).toBe(undefined);
+			expect(pass._props["barcode"]).toBe(undefined);
+			expect(pass._props["barcodes"]).toBe(undefined);
 		});
 
 		it("Array containing non-object elements will be filtered out", () => {
@@ -219,9 +230,9 @@ describe("Node-Passkit-generator", function() {
 				format: "PKBarcodeFormatPDF417"
 			}, 7, 1]);
 
-			expect(pass.props["barcode"] instanceof Object).toBe(true);
-			expect(pass.props["barcodes"].length).toBe(1);
-			expect(pass.props["barcodes"][0] instanceof Object).toBe(true);
+			expect(pass._props["barcode"] instanceof Object).toBe(true);
+			expect(pass._props["barcodes"].length).toBe(1);
+			expect(pass._props["barcodes"][0] instanceof Object).toBe(true);
 		});
 	});
 
@@ -232,7 +243,7 @@ describe("Node-Passkit-generator", function() {
 				.backward(5);
 
 			// unchanged
-			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatQR");
+			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatQR");
 		});
 
 		it("Null will delete backward support", () => {
@@ -240,7 +251,7 @@ describe("Node-Passkit-generator", function() {
 				.barcode("Message-22645272183")
 				.backward(null);
 
-			expect(pass.props["barcode"]).toBe(undefined);
+			expect(pass._props["barcode"]).toBe(undefined);
 		});
 
 		it("Unknown format won't apply changes", () => {
@@ -248,7 +259,7 @@ describe("Node-Passkit-generator", function() {
 				.barcode("Message-22645272183")
 				.backward("PKBingoBongoFormat");
 
-			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatQR");
+			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatQR");
 		});
 	});
 });

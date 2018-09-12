@@ -31,33 +31,33 @@ ___
 
 ### Index:
 
-* [Instance](#method:constructor)
+* [Instance](#method_constructor)
 	* Localize the pass
-		* [.localize()](#method:localize)
+		* [.localize()](#method_localize)
 	* Setting barcode
-		* [.barcode()](#method:barcode)
-			* [.backward()](#method:bBackward)
-			* [.autocomplete()](#method:bAutocomplete)
+		* [.barcode()](#method_barcode)
+			* [.backward()](#method_bBackward)
+			* [.autocomplete()](#method_bAutocomplete)
 	* Setting expiration / voiding the pass
-		* [.expiration()](#method:expiration)
-		* [.void()](#method:void)
+		* [.expiration()](#method_expiration)
+		* [.void()](#method_void)
 	* Setting relevance
-		* [.relevance()](#method:relevance)
+		* [.relevance()](#method_relevance)
 	* Setting NFC
-		* [.nfc()](#method:nfc)
+		* [.nfc()](#method_nfc)
 	* Setting Pass Structure Keys (primaryFields, secondaryFields, ...)
-		* [<field>.push()](#prop:fields-push)
-		* [<field>.pop()](#prop:fields-pop)
-		* [TransitType](#prop:transitType)
+		* [<field>.push()](#prop_fields-push)
+		* [<field>.pop()](#prop_fields-pop)
+		* [TransitType](#prop_transitType)
 	* Generating the compiled pass.
-		* [.generate()](#method:generate)
+		* [.generate()](#method_generate)
 
 <br><br>
 ___
 
-<a name="method:constructor">
+<a name="method_constructor"></a>
+
 #### constructor()
-</a>
 
 ```javascript
 var pass = new Pass(options);
@@ -96,9 +96,9 @@ The only differences stands in the way the only method below is used and how the
 > If you are designing your pass for a language only, you can directly replace the placeholders in `pass.json` with translation.
 
 <br>
-<a name="method:localize">
+<a name="method_localize"></a>
+
 #### .localize()
-</a>
 
 ```javascript
 pass.localize(lang, options);
@@ -144,9 +144,9 @@ ___
 **Setting barcodes**:
 ___
 
-<a name="method:barcode">
+<a name="method_barcode"></a>
+
 #### .barcode()
-</a>
 
 ```javascript
 pass.barcode(data);
@@ -204,9 +204,9 @@ To support versions prior to iOS 9, `barcode` key is automatically supported as 
 
 **See**: [PassKit Package Format Reference # Barcode Dictionary](https://apple.co/2myAbst)
 <br>
-<a name="method:bBackward">
+<a name="method_bBackward"></a>
+
 #### .barcode().backward()
-</a>
 
 ```javascript
 pass.barcode(data).backward(format);
@@ -242,9 +242,9 @@ pass
 ```
 
 <br>
-<a name="method:bAutocomplete">
+<a name="method_bAutocomplete"></a>
+
 #### .barcode().autocomplete()
-</a>
 
 ```javascript
 pass.barcode(data).autocomplete();
@@ -264,9 +264,9 @@ ___
 **Setting expiration / void the pass**:
 ___
 
-<a name="method:expiration">
+<a name="method_expiration"></a>
+
 #### .expiration()
-</a>
 
 ```javascript
 pass.expiration(date [, format]);
@@ -295,9 +295,10 @@ If the parsing fails, the error will be emitted only in debug mode and the prope
 | date | String/date | The date on which the pass will expire | false | -
 | format | String | A custom format to be used to parse the date | true | undefined
 
-<a name="method:void">
+<a name="method_void"></a>
+
 #### .void()
-</a>
+
 ```javascript
 pass.void();
 ```
@@ -316,9 +317,9 @@ ___
 **Setting relevance**:
 ___
 
-<a name="method:relevance">
+<a name="method_relevance"></a>
+
 #### .relevance()
-</a>
 
 ```javascript
 pass.relevance(key, value [, relevanceDateFormat]);
@@ -335,7 +336,7 @@ See [Apple Documentation dedicated page](https://apple.co/2QiE9Ds) for more.
 
 For the first two keys, the argument 'value' (which will be of type **Array\<Object>**) will be checked and filtered against a schema (one for type).
 
-For *relevantDate*, the date is parsed in the same formats of [#expiration()](#method:expiration). For *maxDistance*, the value is simply converted as Number and pushed only with successful conversion.
+For *relevantDate*, the date is parsed in the same formats of [#expiration()](#method_expiration). For *maxDistance*, the value is simply converted as Number and pushed only with successful conversion.
 
 
 **Arguments**:
@@ -369,9 +370,9 @@ ___
 **NFC Support**:
 ___
 
-<a name="method:nfc">
+<a name="method_nfc"></a>
+
 #### .nfc()
-</a>
 
 ```javascript
 pass.nfc([data, ...])
@@ -406,9 +407,9 @@ Unlike method-set properties or overrides, to set fields inside areas (*primaryF
 
 <br>
 
-<a name="prop:fields-push">
+<a name="prop_fields-push"></a>
+
 #### <field>.push()
-</a>
 
 ```javascript
 pass.<field>.push(...fields);
@@ -461,9 +462,9 @@ pass.primaryFields.push({
 
 <br>
 
-<a name="prop:fields-pop">
+<a name="prop_fields-pop"></a>
+
 #### <field>.pop()
-</a>
 
 ```javascript
 pass.<field>.pop(amount);
@@ -494,9 +495,9 @@ pass.backFields.pop(5); // last five elements are popped out.
 
 <br>
 
-<a name="prop:transitType">
+<a name="prop_transitType"></a>
+
 #### .transitType
-</a>
 
 ```javascript
 pass.transitType = "PKTransitTypeAir";
@@ -518,9 +519,9 @@ As you can see in [examples folder](/examples), to send a .pkpass file, a basic 
 
 <br>
 
-<a name="method:generate">
+<a name="method_generate"></a>
+
 #### .generate()
-</a>
 
 ```javascript
 pass.generate();

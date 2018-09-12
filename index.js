@@ -101,7 +101,7 @@ class Pass {
 						return Promise.all([...bundleBuffers, passBuffer])
 							.then(buffers => {
 								Object.keys(this.l10n).forEach(l => {
-									const strings = this._generateStringFile(l);
+									const strings = generateStringFile(this.l10n[l]);
 
 									/*
 									 * if .string file buffer is empty, no translations were added
@@ -168,24 +168,6 @@ class Pass {
 		}
 
 		return this;
-	}
-
-	/**
-	 * Creates a buffer of translations in Apple .strings format
-	 *
-	 * @method _generateStringFile
-	 * @params {String} lang - the ISO 3166 alpha-2 code for the language
-	 * @returns {Buffer} Buffer to be written in pass.strings for language in lang
-	 * @see https://apple.co/2M9LWVu - String Resources
-	 */
-
-	_generateStringFile(lang) {
-		if (!Object.keys(this.l10n[lang]).length) {
-			return Buffer.from("", "utf8");
-		}
-
-		let strings = Object.keys(this.l10n[lang]).map(key => `"${key}" = "${this.l10n[lang][key].replace(/"/g, /\\"/)}";`);
-		return Buffer.from(strings.join("\n"), "utf8");
 	}
 
 	/**
@@ -719,6 +701,7 @@ function dateToW3CString(date, format) {
 
 /**
  *	Apply a filter to arg0 to remove hidden files names (starting with dot)
+ *
  *	@function removeHidden
  *	@params {String[]} from - list of file names
  *	@return {String[]}
@@ -726,6 +709,29 @@ function dateToW3CString(date, format) {
 
 function removeHidden(from) {
 	return from.filter(e => e.charAt(0) !== ".");
+}
+
+/**
+ * Creates a buffer of translations in Apple .strings format
+ *
+ * @function generateStringFile
+ * @params {Object} lang - structure containing related to ISO 3166 alpha-2 code for the language
+ * @returns {Buffer} Buffer to be written in pass.strings for language in lang
+ * @see https://apple.co/2M9LWVu - String Resources
+ */
+
+function generateStringFile(lang) {
+	if (!Object.keys(lang).length) {
+		return Buffer.from("", "utf8");
+	}
+
+	// Pass.strings format is the following one for each row:
+	// "key" = "value";
+
+	let strings = Object.keys(lang)
+		.map(key => `"${key}" = "${lang[key].replace(/"/g, /\\"/)}";`);
+
+	return Buffer.from(strings.join("\n"), "utf8");
 }
 
 module.exports = { Pass };

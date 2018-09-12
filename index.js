@@ -21,7 +21,7 @@ class Pass {
 		this.Certificates = {};
 		this.model = "";
 		this.l10n = {};
-		this.props = {};
+		this._props = {};
 		this.shouldOverwrite = !(this.options.hasOwnProperty("shouldOverwrite") && !this.options.shouldOverwrite);
 
 		fieldsName.forEach(a => this[a] = new FieldsContainer());
@@ -190,7 +190,7 @@ class Pass {
 		if (!dateParse) {
 			genericDebug("Expiration Date was not set due to invalid format.");
 		} else {
-			this.props.expirationDate = dateParse;
+			this._props.expirationDate = dateParse;
 		}
 
 		return this;
@@ -204,7 +204,7 @@ class Pass {
 	 */
 
 	void() {
-		this.props.voided = true;
+		this._props.voided = true;
 		return this;
 	}
 
@@ -233,7 +233,7 @@ class Pass {
 			}
 
 			let valid = data.filter(d => schema.isValid(d, type+"Dict"));
-			this.props[type] = valid.length ? valid : undefined;
+			this._props[type] = valid.length ? valid : undefined;
 
 			return Object.assign({
 				length: valid.length
@@ -246,7 +246,7 @@ class Pass {
 			let cond = isNaN(conv);
 
 			if (!cond) {
-				this.props[type] = conv;
+				this._props[type] = conv;
 			}
 
 			return Object.assign({
@@ -258,7 +258,7 @@ class Pass {
 			if (!dateParse) {
 				genericDebug("Relevant Date was not set due to incorrect date format.");
 			} else {
-				this.props[type] = dateParse;
+				this._props[type] = dateParse;
 			}
 
 			return Object.assign({
@@ -288,8 +288,8 @@ class Pass {
 		if (typeof data === "string" || (data instanceof Object && !data.format && data.message)) {
 			let autogen = this.__barcodeAutogen(data instanceof Object ? data : { message: data });
 
-			this.props["barcode"] = autogen[0] || {};
-			this.props["barcodes"] = autogen || [];
+			this._props["barcode"] = autogen[0] || {};
+			this._props["barcodes"] = autogen || [];
 
 			return Object.assign({
 				length: 4,
@@ -312,8 +312,8 @@ class Pass {
 			.filter(o => o instanceof Object);
 
 		if (valid.length) {
-			this.props["barcode"] = valid[0];
-			this.props["barcodes"] = valid;
+			this._props["barcode"] = valid[0];
+			this._props["barcodes"] = valid;
 		}
 
 		// I bind "this" to get a clean context (without these two methods) when returning from the methods
@@ -361,7 +361,7 @@ class Pass {
 	 */
 
 	__barcodeAutocomplete() {
-		let props = this.props["barcodes"];
+		let props = this._props["barcodes"];
 
 		if (props.length === 4 || !props.length) {
 			return Object.assign({
@@ -370,7 +370,7 @@ class Pass {
 			}, this);
 		}
 
-		this.props["barcodes"] = this.__barcodeAutogen(props[0]);
+		this._props["barcodes"] = this.__barcodeAutogen(props[0]);
 
 		return Object.assign({
 			length: 4 - props.length,
@@ -390,7 +390,7 @@ class Pass {
 
 	__barcodeChooseBackward(format) {
 		if (format === null) {
-			this.props["barcode"] = undefined;
+			this._props["barcode"] = undefined;
 			return this;
 		}
 
@@ -400,14 +400,14 @@ class Pass {
 		}
 
 		// Checking which object among barcodes has the same format of the specified one.
-		let index = this.props["barcodes"].findIndex(b => b.format.toLowerCase().includes(format.toLowerCase()));
+		let index = this._props["barcodes"].findIndex(b => b.format.toLowerCase().includes(format.toLowerCase()));
 
 		if (index === -1) {
 			barcodeDebug("format not found among barcodes. Cannot set backward compatibility.");
 			return this;
 		}
 
-		this.props["barcode"] = this.props["barcodes"][index];
+		this._props["barcode"] = this._props["barcodes"][index];
 
 		return this;
 	}
@@ -428,7 +428,7 @@ class Pass {
 		let valid = data.filter(d => d instanceof Object && schema.isValid(d, "nfcDict"));
 
 		if (valid.length) {
-			this.props["nfc"] = valid;
+			this._props["nfc"] = valid;
 		}
 
 		return this;
@@ -530,23 +530,23 @@ class Pass {
 	_patch(passBuffer) {
 		let passFile = JSON.parse(passBuffer.toString("utf8"));
 
-		if (Object.keys(this.props).length) {
+		if (Object.keys(this._props).length) {
 			const rgbValues = ["backgroundColor", "foregroundColor", "labelColor"];
 
-			rgbValues.filter(v => this.props[v] && !isValidRGB(this.props[v])).forEach(v => delete this.props[v]);
+			rgbValues.filter(v => this._props[v] && !isValidRGB(this._props[v])).forEach(v => delete this._props[v]);
 
 			if (this.shouldOverwrite) {
-				Object.assign(passFile, this.props);
+				Object.assign(passFile, this._props);
 			} else {
-				Object.keys(this.props).forEach(prop => {
+				Object.keys(this._props).forEach(prop => {
 					if (passFile[prop]) {
 						if (passFile[prop] instanceof Array) {
-							passFile[prop].push(...this.props[prop]);
+							passFile[prop].push(...this._props[prop]);
 						} else if (passFile[prop] instanceof Object) {
-							Object.assign(passFile[prop], this.props[prop]);
+							Object.assign(passFile[prop], this._props[prop]);
 						}
 					} else {
-						passFile[prop] = this.props[prop];
+						passFile[prop] = this._props[prop];
 					}
 				});
 			}
@@ -593,7 +593,7 @@ class Pass {
 
 		const filteredOpts = schema.filter(options.overrides, "supportedOptions");
 
-		Object.assign(this.props, filteredOpts);
+		Object.assign(this._props, filteredOpts);
 
 		let optCertsNames = Object.keys(options.certificates);
 

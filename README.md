@@ -31,7 +31,7 @@ $ mkdir passModels && mkdir $_/myFirstModel.pass && cd $_;
 
 Follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package Structure_) to build a correct pass model. The **icon is required** in order to make the pass work. *Manifest.json* and *signature* will be automatically ignored from the model and generated in runtime.
 
-You can also create `.lproj` folders (e.g. *en.lproj* or *it.lproj*) containing localized media. To include a folder or translate texts inside the pass, please refer to the API, [.localize()](./API.md#method:localize) method.
+You can also create `.lproj` folders (e.g. *en.lproj* or *it.lproj*) containing localized media. To include a folder or translate texts inside the pass, please refer to the API, [.localize()](./API.md#method_localize) method.
 
 ##### Pass.json
 

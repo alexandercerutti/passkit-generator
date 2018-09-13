@@ -118,3 +118,5 @@ pass.generate()
 If you developed any projects using this library, open an issue topic and link it inside if open to all or just tell it. 😊 You'll make me feel like my time hasn't been wasted (it had not anyway, I learnt a lot of things by doing this).
 Be sure to not include the certificates if you publish your project open to everybody.
 Any contribution is welcome ❤️
+
+A big thanks to all the people and friends in the Apple Developer Academy that pushed me and helped me into realizing something like this and a big thanks to the ones that helped me to make technical choices.

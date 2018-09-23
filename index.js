@@ -613,13 +613,17 @@ class Pass {
 					let pem = parsePEM(file, options.certificates[certName].passphrase);
 
 					if (!pem) {
-						return reject(errors.INVALID_CERTS)
+						throw new Error(errors.INVALID_CERTS.replace("%s", optCertsNames[index]));
 					}
 
 					this.Certificates[certName] = pem;
 				});
 			}).catch(err => {
-				throw new Error(errors.INVALID_CERTS);
+				if (!err.path) {
+					throw err;
+				} else {
+					throw new Error(errors.INVALID_CERT_PATH.replace("%s", path.parse(err.path).base));
+				}
 			});
 	}
 

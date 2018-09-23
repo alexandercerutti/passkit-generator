@@ -5,7 +5,8 @@ let errors = {
 	REQS_NOT_MET: "The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.",
 	MODEL_NOT_STRING: "A string model name must be provided in order to continue.",
 	MODEL_NOT_FOUND: "Model %s not found. Provide a valid one to continue",
-	INVALID_CERTS: "Invalid certificates got loaded. Please provide WWDR certificates and developer signer certificate and key (with passphrase)."
+	INVALID_CERTS: "Invalid certificate(s) loaded: %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase). Refer to docs to obtain them.",
+	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist."
 };
 
 module.exports = errors;

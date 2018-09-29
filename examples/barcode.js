@@ -68,8 +68,8 @@ app.all(function manageRequest(request, response) {
 		bc.autocomplete();
 	}
 
-	console.log("Barcode property is now:", pass.props["barcode"]);
-	console.log("Barcodes support is autocompleted:", pass.props["barcodes"]);
+	console.log("Barcode property is now:", pass._props["barcode"]);
+	console.log("Barcodes support is autocompleted:", pass._props["barcodes"]);
 
 	pass.generate().then(function(stream) {
 		response.set({

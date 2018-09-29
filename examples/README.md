@@ -1,8 +1,7 @@
 # Examples
 
-This is examples folder. Each example is linked to webserver.js, which **requires express.js** to run.
-
-Since just examples, Express.js was not inserted as dipendency. Therefore install it to test.
+This is examples folder. Each example is linked to webserver.js, which *requires* express.js to run.
+Express.js **was not** inserted as dipendency.
 
 ```sh
 git clone https://github.com/alexandercerutti/passkit-generator.git;

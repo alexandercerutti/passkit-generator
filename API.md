@@ -9,7 +9,7 @@ The flow of execution is really easy (once setted-up everything):
 
 Some details:
 
-* Every schema the properties will be checked against, is built to reflect Apple's specifications, that can be found on Apple Developer Portal, at [PassKit Package Format Reference](https://apple.co/2MUHsm0).
+* Properties will be checked against schemas, which are built to reflect Apple's specifications, that can be found on Apple Developer Portal, at [PassKit Package Format Reference](https://apple.co/2MUHsm0).
 
 * Here below are listed all the available methods that library will let you use.
 
@@ -69,10 +69,10 @@ var pass = new Pass(options);
 
 **Arguments**:
 
-| Key | Type | Description | Optional | Default Value | 
+| Key | Type | Description | Optional | Default Value |
 |-----|------|---------------|:-------------:|:-----------:|
 | options | Object | The options to create the pass | false | -
-| options.model | String/Path | The model path to be used to generate a new model. | false | - 
+| options.model | String/Path | The model path to be used to generate a new model. | false | -
 | options.certificates | Object | The certificate object containing the paths to certs files. | false | -
 | options.certificates.wwdr | String/Path | The path to Apple WWDR certificate. | false | -
 | options.certificates.signerCert | String/Path | The path to Developer certificate file. | false | -
@@ -176,17 +176,17 @@ To support versions prior to iOS 9, `barcode` key is automatically supported as 
 
 ```javascript
 	pass.barcode("11424771526");
-	
+
 	// or
-	
+
 	pass.barcode({
 		message: "11424771526",
 		format: "PKBarcodeFormatCode128"
 		altText: "11424771526"
 	});
-	
+
 	// or
-	
+
 	pass.barcode([{
 		message: "11424771526",
 		format: "PKBarcodeFormatCode128"
@@ -218,8 +218,8 @@ pass.barcode(data).backward(format);
 
 **Description**:
 
-Will let you choose the format to be used in barcode property as backward compatibility.
-Also will only work if `data` is provided to `barcode()` method and will fail if the selected format is not found among barcodes dictionaries array.
+It will let you choose the format to be used in barcode property as backward compatibility.
+Also it will work only if `data` is provided to `barcode()` method and will fail if the selected format is not found among barcodes dictionaries array.
 
 **Arguments**:
 
@@ -256,7 +256,7 @@ pass.barcode(data).autocomplete();
 
 **Description**:
 
-Will generate all the barcodes fallback starting from the first dictionary in `barcodes`.
+It will generate all the barcodes fallback starting from the first dictionary in `barcodes`.
 
 <br><br>
 ___
@@ -309,7 +309,7 @@ pass.void();
 
 **Description**:
 
-Sets directly the pass as voided (void: true).
+It sets directly the pass as voided (void: true).
 
 <br><br>
 ___
@@ -331,7 +331,7 @@ pass.relevance(key, value [, relevanceDateFormat]);
 
 **Description**:
 
-It sets the relevance key in the pass among four: **beacons**, **locations**, **relevantDate** and **maxDistance**. 
+It sets the relevance key in the pass among four: **beacons**, **locations**, **relevantDate** and **maxDistance**.
 See [Apple Documentation dedicated page](https://apple.co/2QiE9Ds) for more.
 
 For the first two keys, the argument 'value' (which will be of type **Array\<Object>**) will be checked and filtered against a schema (one for type).
@@ -345,7 +345,7 @@ For *relevantDate*, the date is parsed in the same formats of [#expiration()](#m
 |-----|------|-------------|----------|:-------------:|
 | key | String | The relevance key to be set, among **beacons**, **locations**, **relevantDate** and **maxDistance** | false | -
 | value | String \| Number \| Array\<Object> | Type depends on the key. Please refer to the description above for more details | false | -
-| relevanceDateFormat | String | Custom date format. Will be only used when using `relevanceDate` key | true | undefined 
+| relevanceDateFormat | String | Custom date format. Will be only used when using `relevanceDate` key | true | undefined
 
 **Example**:
 

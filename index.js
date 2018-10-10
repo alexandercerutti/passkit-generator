@@ -9,8 +9,8 @@ const barcodeDebug = require("debug")("passkit:barcode");
 const genericDebug = require("debug")("passkit:generic");
 
 const schema = require("./schema");
-const { areas: fieldsName, FieldsContainer } = require("./fields");
 const errors = require("./messages");
+const FieldsContainer = require("./fields");
 
 const readdir = util.promisify(fs.readdir);
 const readFile = util.promisify(fs.readFile);
@@ -24,7 +24,9 @@ class Pass {
 		this._props = {};
 		this.shouldOverwrite = !(this.options.hasOwnProperty("shouldOverwrite") && !this.options.shouldOverwrite);
 
-		fieldsName.forEach(a => this[a] = new FieldsContainer());
+		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
+
+		this._fields.forEach(a => this[a] = new FieldsContainer());
 		this._transitType = "";
 	}
 
@@ -43,7 +45,7 @@ class Pass {
 			.catch((err) => {
 				// May have not used this catch but ENOENT error is not enough self-explanatory in the case of external usage
 				if (err.code && err.code === "ENOENT") {
-					throw new Error(errors.MODEL_NOT_FOUND.replace("%s", (this.model ? this.model+" " : "")));
+					throw new Error(errors.MODEL_NOT_FOUND.replace("%s", (this.model ? this.model + " " : "")));
 				}
 
 				throw new Error(err);
@@ -227,12 +229,12 @@ class Pass {
 			}, this);
 		}
 
-		if (type === "beacons" || type === "locations") {
+		if (type === "beacons" || type === "locations") {
 			if (!(data instanceof Array)) {
 				data = [data];
 			}
 
-			let valid = data.filter(d => schema.isValid(d, type+"Dict"));
+			let valid = data.filter(d => schema.isValid(d, type + "Dict"));
 
 			this._props[type] = valid.length ? valid : undefined;
 
@@ -281,8 +283,8 @@ class Pass {
 		if (!data) {
 			return Object.assign({
 				length: 0,
-				autocomplete: () => {},
-				backward: () => {}
+				autocomplete: () => { },
+				backward: () => { }
 			}, this);
 		}
 
@@ -294,7 +296,7 @@ class Pass {
 
 			return Object.assign({
 				length: 4,
-				autocomplete: () => {},
+				autocomplete: () => { },
 				backward: this.__barcodeChooseBackward.bind(this)
 			}, this);
 		}
@@ -553,7 +555,7 @@ class Pass {
 			}
 		}
 
-		fieldsName.forEach(area => {
+		this._fields.forEach(area => {
 			if (this[area].fields.length) {
 				if (this.shouldOverwrite) {
 					passFile[this.type][area] = this[area].fields;
@@ -652,7 +654,7 @@ class Pass {
 function parsePEM(element, passphrase) {
 	if (element.includes("PRIVATE KEY") && passphrase) {
 		return forge.pki.decryptRsaPrivateKey(element, String(passphrase));
-	} else if (element.includes("CERTIFICATE")) {
+	} else if (element.includes("CERTIFICATE")) {
 		return forge.pki.certificateFromPem(element);
 	} else {
 		return null;
@@ -678,7 +680,7 @@ function isValidRGB(value) {
 		return false;
 	}
 
-	return rgb.slice(1,4).every(v => Math.abs(Number(v)) <= 255);
+	return rgb.slice(1, 4).every(v => Math.abs(Number(v)) <= 255);
 }
 
 /**

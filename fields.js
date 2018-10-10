@@ -1,8 +1,8 @@
 const schema = require("./schema");
 
 /**
- * Pass fields area to be used as pass lower level keys
- * @see https://apple.co/2wkUBd
+ * Class to represent lower-level keys pass fields
+ * @see https://apple.co/2wkUBdh
  */
 
 class FieldsContainer {
@@ -17,7 +17,7 @@ class FieldsContainer {
 	 *
 	 * @method push
 	 * @params {Object[]} fields - the fields to be checked and pushed
-	 * @params {schema.constants.field} fields[].* - each key must be compliant with schema.constants.field structure
+	 * @params {schema.field} fields[].* - each key must be compliant with schema.field structure
 	 * @returns {Number} - the amount of pushed elements (for checks)
 	 */
 
@@ -68,7 +68,4 @@ class FieldsContainer {
 	}
 }
 
-module.exports = {
-	areas: ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"],
-	FieldsContainer
-};
+module.exports = FieldsContainer;

@@ -8,7 +8,7 @@ export declare class Pass {
 	public primaryFields: FieldContainer;
 	public secondaryFields: FieldContainer;
 	public auxiliaryFields: FieldContainer;
-	public backFields: FieldContainer
+	public backFields: FieldContainer;
 
 	/**
 	 * Generates a Stream of a zip file using the infos passed through overrides or methods.

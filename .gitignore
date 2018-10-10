@@ -4,3 +4,4 @@ passModels/
 certificates/
 output/
 develop.sh
+*.code-workspace

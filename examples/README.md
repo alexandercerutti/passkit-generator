@@ -11,6 +11,10 @@ cd examples;
 node <the-example-you-want-to-execute>.js
 ```
 
+Certificates paths in examples are linked to a folder `certificates` in the root of this project which is not provided.
+To make them work, you'll have to edit both certificates and model path.
+
+Generates pass will be generated at address [http://localhost:3000/gen/examplePass](http://localhost:3000/gen/examplePass);
 ___
 
 Every contribution is really appreciated. ❤️ Thank you!

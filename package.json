@@ -23,6 +23,9 @@
 		"moment": "^2.22.2",
 		"node-forge": "^0.7.6"
 	},
+	"engines": {
+		"node": ">=8.1.0"
+	},
 	"devDependencies": {
 		"express": "^4.16.3",
 		"jasmine": "^3.2.0"

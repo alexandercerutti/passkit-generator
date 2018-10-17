@@ -1,13 +1,15 @@
 const schema = require("./schema");
+const debug = require("debug")("passkit:fields");
 
 /**
  * Class to represent lower-level keys pass fields
  * @see https://apple.co/2wkUBdh
  */
 
+let uniqueKeys = [];
+
 class FieldsContainer {
 	constructor() {
-		this._uniqueKeys = [];
 		this.fields = [];
 	}
 
@@ -26,16 +28,21 @@ class FieldsContainer {
 			fieldsData = fieldsData[0];
 		}
 
-		let validFields = fieldsData.filter(f => {
-			if (this._uniqueKeys.includes(f.key)) {
-				return false;
+		let validFields = fieldsData.reduce((acc, current) => {
+			if (!(typeof current === "object") || !schema.isValid(current, "field")) {
+				return acc;
 			}
 
-			this._uniqueKeys.push(f.key);
+			if (acc.some(e => e.key === current.key) || uniqueKeys.includes(current.key)) {
+				debug(`UNIQUE field key CONSTRAINT VIOLATED. Fields keys must be unique in pass scope. Field key: "${current.key}"`);
+				return acc;
+			}
 
-			return typeof f === "object" && schema.isValid(f, "field");
-		});
+			acc.push(current);
+			return acc;
+		}, []);
 
+		uniqueKeys.push(...validFields.map(v => v.key));
 		this.fields.push(...validFields);
 
 		return validFields.length;
@@ -65,6 +72,10 @@ class FieldsContainer {
 
 		this._uniqueKeys.pop();
 		return this.fields.pop();
+	}
+
+	static emptyUnique() {
+		uniqueKeys = [];
 	}
 }
 

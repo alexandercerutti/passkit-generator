@@ -149,6 +149,8 @@ class Pass {
 
 				archive.pipe(passStream);
 
+				FieldsContainer.emptyUnique();
+
 				return archive.finalize().then(() => passStream);
 			});
 	}

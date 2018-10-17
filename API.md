@@ -16,7 +16,6 @@ Some details:
 * In case of troubleshooting, you can start your project with "debug flag" as follows:
 
 ```sh
-$ # Bash terminal
 $ DEBUG=* node index.js
 ```
 
@@ -32,7 +31,7 @@ ___
 ### Index:
 
 * [Instance](#method_constructor)
-	* Localize the pass
+	* [Localizing Passes](#localizing_passes)
 		* [.localize()](#method_localize)
 	* Setting barcode
 		* [.barcode()](#method_barcode)
@@ -45,7 +44,7 @@ ___
 		* [.relevance()](#method_relevance)
 	* Setting NFC
 		* [.nfc()](#method_nfc)
-	* Setting Pass Structure Keys (primaryFields, secondaryFields, ...)
+	* [Setting Pass Structure Keys (primaryFields, secondaryFields, ...)](#prop_fields)
 		* [<field>.push()](#prop_fields-push)
 		* [<field>.pop()](#prop_fields-pop)
 		* [TransitType](#prop_transitType)
@@ -83,9 +82,10 @@ var pass = new Pass(options);
 | options.shouldOverwrite | Boolean | Setting this property to false, will make properties in `overrides` and fields to be pushed along with the ones added through methods to the existing ones in pass.json. | true | true
 
 <br><br>
+<a name="localizing_passes"></a>
 ___
 
-**Localize the pass**:
+**Localizing Passes**:
 ___
 
 Following Apple Developer Documentation, localization (L10N) is done by creating a `.lproj` folder for each language you want to translate your pass, each named with the relative [ISO-3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code (e.g. `en.lproj`).
@@ -334,7 +334,7 @@ pass.relevance(key, value [, relevanceDateFormat]);
 It sets the relevance key in the pass among four: **beacons**, **locations**, **relevantDate** and **maxDistance**.
 See [Apple Documentation dedicated page](https://apple.co/2QiE9Ds) for more.
 
-For the first two keys, the argument 'value' (which will be of type **Array\<Object>**) will be checked and filtered against a schema (one for type).
+For the first two keys, the argument 'value' (which will be of type **Array\<Object>**) will be checked and filtered against dedicated schema.
 
 For *relevantDate*, the date is parsed in the same formats of [#expiration()](#method_expiration). For *maxDistance*, the value is simply converted as Number and pushed only with successful conversion.
 
@@ -398,6 +398,7 @@ An Object as argument will be treated as one-element array.
 **See**: [PassKit Package Format Reference # NFC](https://apple.co/2wTxiaC)
 <br>
 <br>
+<a name="prop_fields"></a>
 ___
 
 **Setting Pass Structure Keys (primaryFields, secondaryFields, ...)**:
@@ -434,15 +435,15 @@ Fields are filtered against a schema.
 
 ```javascript
 pass.headerFields.push({
-	"key": "header1",
-	"label": "Data",
-	"value": "25 mag",
-	"textAlignment": "PKTextAlignmentCenter"
+	key: "header1",
+	label: "Data",
+	value: "25 mag",
+	textAlignment: "PKTextAlignmentCenter"
 }, {
-	"key": "header2",
-	"label": "Volo",
-	"value": "EZY997",
-	"textAlignment": "PKTextAlignmentCenter"
+	key: "header2",
+	label: "Volo",
+	value: "EZY997",
+	textAlignment: "PKTextAlignmentCenter"
 });
 
 pass.primaryFields.push({
@@ -536,7 +537,6 @@ The returned Promise will contain a stream or an error.
 **Examples**:
 
 ```javascript
-...
 pass.generate()
 	.then(stream => {
 		doSomethingWithPassStream();

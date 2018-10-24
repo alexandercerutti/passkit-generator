@@ -6,7 +6,7 @@ Simple Node.js interface to generate customized [Apple Wallet Passes](https://de
 
 This package was created with a specific architecture in mind: **application** and **model**, to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...).
 
-In fact, pass template (model) creation and population doesn't happen within the application in runtime. Pass template is a folder in _your application directory_ (but nothing will stop you from putting it outside), that will contain all the needed objects (static medias) and structure to make a pass work.
+Actually, pass template (model) creation and population doesn't happen within the application in runtime. Pass template is a folder in _your application directory_ (but nothing will stop you from putting it outside), that will contain all the objects needed (static medias) and structure to make a pass work.
 
 Pass template will be read and pushed as is in the resulting .zip file, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
 

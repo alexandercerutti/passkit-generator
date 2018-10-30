@@ -9,7 +9,7 @@ const barcodeDebug = require("debug")("passkit:barcode");
 const genericDebug = require("debug")("passkit:generic");
 
 const schema = require("./schema");
-const errors = require("./messages");
+const formatError = require("./messages");
 const FieldsContainer = require("./fields");
 
 const readdir = util.promisify(fs.readdir);
@@ -45,7 +45,9 @@ class Pass {
 			.catch((err) => {
 				// May have not used this catch but ENOENT error is not enough self-explanatory in the case of external usage
 				if (err.code && err.code === "ENOENT") {
-					throw new Error(errors.MODEL_NOT_FOUND.replace("%s", (this.model ? this.model + " " : "")));
+					let eMessage = formatError("MODEL_NOT_FOUND", this.model);
+
+					throw new Error(eMessage);
 				}
 
 				throw new Error(err);
@@ -55,7 +57,8 @@ class Pass {
 				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
 
 				if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))) {
-					throw new Error(errors.UNINITIALIZED.replace("%s", path.parse(this.model).name));
+					let eMessage = formatError("MODEL_UNINITIALIZED", path.parse(this.model).name);
+					throw new Error(eMessage);
 				}
 
 				// list without localization files (they will be added later in the flow)
@@ -75,7 +78,8 @@ class Pass {
 					return readFile(path.resolve(this.model, "pass.json"))
 						.then(passStructBuffer => {
 							if (!this._validateType(passStructBuffer)) {
-								throw new Error(errors.VALIDATION_FAILED)
+								let eMessage = formatError("PASSFILE_VALIDATION_FAILED");
+								throw new Error(eMessage);
 							}
 
 							bundle.push("pass.json");
@@ -587,12 +591,15 @@ class Pass {
 	 */
 
 	_parseSettings(options) {
+		let eMessage = null;
 		if (!schema.isValid(options, "instance")) {
-			throw new Error(errors.REQS_NOT_MET);
+			eMessage = formatError("REQUIR_VALID_FAILED");
+			throw new Error(eMessage);
 		}
 
 		if (!options.model || typeof options.model !== "string") {
-			throw new Error(errors.MODEL_NOT_STRING);
+			eMessage = formatError("MODEL_NOT_STRING");
+			throw new Error(eMessage);
 		}
 
 		this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
@@ -618,7 +625,7 @@ class Pass {
 					let pem = parsePEM(file, options.certificates[certName].passphrase);
 
 					if (!pem) {
-						throw new Error(errors.INVALID_CERTS.replace("%s", optCertsNames[index]));
+						throw new Error(formatError("INVALID_CERTS", optCertsNames[index]));
 					}
 
 					this.Certificates[certName] = pem;
@@ -627,7 +634,7 @@ class Pass {
 				if (!err.path) {
 					throw err;
 				} else {
-					throw new Error(errors.INVALID_CERT_PATH.replace("%s", path.parse(err.path).base));
+					throw new Error(formatError("INVALID_CERT_PATH", path.parse(err.path).base));
 				}
 			});
 	}

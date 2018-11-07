@@ -19,9 +19,9 @@ app.all(function manageRequest(request, response) {
 		model: `./models/${request.params.modelName}`,
 		certificates: {
 			wwdr: "../certificates/WWDR.pem",
-			signerCert: "../certificates/passcertificate.pem",
+			signerCert: "../certificates/signerCert.pem",
 			signerKey: {
-				keyFile: "../certificates/passkey.pem",
+				keyFile: "../certificates/signerKey.pem",
 				passphrase: "123456"
 			}
 		},
@@ -71,7 +71,7 @@ app.all(function manageRequest(request, response) {
 	console.log("Barcode property is now:", pass._props["barcode"]);
 	console.log("Barcodes support is autocompleted:", pass._props["barcodes"]);
 
-	pass.generate().then(function(stream) {
+	pass.generate().then(function (stream) {
 		response.set({
 			"Content-type": "application/vnd.apple.pkpass",
 			"Content-disposition": `attachment; filename=${passName}.pkpass`

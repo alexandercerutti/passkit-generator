@@ -11,16 +11,16 @@ const Passkit = require("..");
  * Tests created upon Jasmine testing suite.
  */
 
-describe("Node-Passkit-generator", function() {
+describe("Node-Passkit-generator", function () {
 	let pass;
 	beforeEach(() => {
 		pass = new Passkit.Pass({
 			model: "../examples/examplePass.pass",
 			certificates: {
-				wwdr: "certs/WWDR.pem",
-				signerCert: "certs/signerCert.pem",
+				wwdr: "certificates/WWDR.pem",
+				signerCert: "certificates/signerCert.pem",
 				signerKey: {
-					key: "certs/signerKey.pem",
+					keyFile: "certificates/signerKey.pem",
 					passphrase: "123456"
 				}
 			},
@@ -69,17 +69,17 @@ describe("Node-Passkit-generator", function() {
 
 		it("A date with defined format DD-MM-YYYY will apply changes", () => {
 			pass.expiration("10-04-2021", "DD-MM-YYYY");
-			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
+			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+01:00");
 		});
 
 		it("A date with undefined custom format, will apply changes", () => {
 			pass.expiration("10-04-2021");
-			expect(pass._props["expirationDate"]).toBe("2021-10-04T00:00:00+02:00");
+			expect(pass._props["expirationDate"]).toBe("2021-10-04T00:00:00+01:00");
 		});
 
 		it("A date with defined format but with slashes will apply changes", () => {
 			pass.expiration("10/04/2021", "DD-MM-YYYY");
-			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+02:00");
+			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+01:00");
 		});
 
 		it("An invalid date, will not apply changes", () => {
@@ -87,7 +87,7 @@ describe("Node-Passkit-generator", function() {
 			expect(pass._props["expirationDate"]).toBe(undefined);
 
 			pass.expiration("32/18/228317", "DD-MM-YYYY");
-			expect(pass._props["expirationDate"]).toBe(undefined);			
+			expect(pass._props["expirationDate"]).toBe(undefined);
 		});
 	});
 
@@ -95,17 +95,17 @@ describe("Node-Passkit-generator", function() {
 		describe("relevance('relevantDate')", () => {
 			it("A date with defined format DD-MM-YYYY will apply changes", () => {
 				pass.relevance("relevantDate", "10-04-2021", "DD-MM-YYYY");
-				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
+				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+01:00");
 			});
 
 			it("A date with undefined custom format, will apply changes", () => {
 				pass.relevance("relevantDate", "10-04-2021");
-				expect(pass._props["relevantDate"]).toBe("2021-10-04T00:00:00+02:00");
+				expect(pass._props["relevantDate"]).toBe("2021-10-04T00:00:00+01:00");
 			});
 
 			it("A date with defined format but with slashes will apply changes", () => {
 				pass.relevance("relevantDate", "10/04/2021", "DD-MM-YYYY");
-				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+02:00");
+				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+01:00");
 			});
 		});
 
@@ -237,7 +237,7 @@ describe("Node-Passkit-generator", function() {
 	});
 
 	describe("barcode().backward()", () => {
-		it("Passing argument of type different from string or null, won't apply changes", function() {
+		it("Passing argument of type different from string or null, won't apply changes", function () {
 			pass
 				.barcode("Message-22645272183")
 				.backward(5);

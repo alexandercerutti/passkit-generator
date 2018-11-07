@@ -22,9 +22,9 @@ app.all(function manageRequest(request, response) {
 		model: `./models/${request.params.modelName}`,
 		certificates: {
 			wwdr: "../certificates/WWDR.pem",
-			signerCert: "../certificates/passcertificate.pem",
+			signerCert: "../certificates/signerCert.pem",
 			signerKey: {
-				keyFile: "../certificates/passkey.pem",
+				keyFile: "../certificates/signerKey.pem",
 				passphrase: "123456"
 			}
 		},
@@ -36,13 +36,13 @@ app.all(function manageRequest(request, response) {
 	} else if (request.query.fn === "expiration") {
 		// 2 minutes later...
 		let d = new Date();
-		d.setMinutes(d.getMinutes()+2);
+		d.setMinutes(d.getMinutes() + 2);
 
 		// setting the expiration
 		pass.expiration(d.toLocaleString());
 	}
 
-	pass.generate().then(function(stream) {
+	pass.generate().then(function (stream) {
 		response.set({
 			"Content-type": "application/vnd.apple.pkpass",
 			"Content-disposition": `attachment; filename=${passName}.pkpass`

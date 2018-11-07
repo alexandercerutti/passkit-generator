@@ -56,6 +56,7 @@ Create a `pass.json` by taking example from examples folder models or the one pr
   "boardingPass": {}
 }
 ```
+<a name="certificates"></a>
 
 ##### Certificates
 > Requirements: OpenSSL,
@@ -68,6 +69,13 @@ You'll need the following three elements:
 * Signer key
 
 While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certificateauthority/), to get the `signer key` and the `certificate`, you'll have to get first a `Certificate Signing Request` (`.certSigningRequest` file) from your Apple Developers Portal page, at [Pass Types Identifiers](https://developer.apple.com/account/ios/identifier/passTypeId) (open it, it worth the pain).
+
+<br>
+<hr>
+
+> **If you don't have access to macOS** (or you are a terminal enthusiast), **follow [these steps](./non-macOS-steps.md) instead.**
+<hr>
+
 
 1. Create a new pass type identifier and provide it with a Name and a reverse-domain bundle id (starting with "pass."). You will put this identifier as value for `passTypeIdentifier` in `pass.json` file.
 2. Confirm and register the new identifier.

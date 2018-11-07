@@ -643,7 +643,7 @@ class Pass {
 			.then(contents => {
 				contents.forEach((file, index) => {
 					let certName = optCertsNames[index];
-					let pem = parsePEM(file, this.Certificates._raw[certName].passphrase);
+					let pem = parsePEM(certName, file, this.Certificates._raw[certName].passphrase);
 
 					if (!pem) {
 						throw new Error(formatError("INVALID_CERTS", optCertsNames[index]));
@@ -682,13 +682,11 @@ class Pass {
  * @returns {Object} The parsed certificate or key in node forge format
  */
 
-function parsePEM(element, passphrase) {
-	if (element.includes("PRIVATE KEY") && passphrase) {
+function parsePEM(pemName, element, passphrase) {
+	if (pemName === "signerKey" && passphrase) {
 		return forge.pki.decryptRsaPrivateKey(element, String(passphrase));
-	} else if (element.includes("CERTIFICATE")) {
-		return forge.pki.certificateFromPem(element);
 	} else {
-		return null;
+		return forge.pki.certificateFromPem(element);
 	}
 }
 

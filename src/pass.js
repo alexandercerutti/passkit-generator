@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const util = require("util");
+const { promisify } = require("util");
 const stream = require("stream");
 const moment = require("moment");
 const forge = require("node-forge");
@@ -12,22 +12,27 @@ const schema = require("./schema");
 const formatError = require("./messages");
 const FieldsContainer = require("./fields");
 
-const readdir = util.promisify(fs.readdir);
-const readFile = util.promisify(fs.readFile);
+const readdir = promisify(fs.readdir);
+const readFile = promisify(fs.readFile);
 
 class Pass {
 	constructor(options) {
-		this.options = options;
-		this.Certificates = {};
-		this.model = "";
+		this.Certificates = {
+			// Even if this assigning will fail, it will be captured below
+			// in _parseSettings, since this won't match with the schema.
+			_raw: options.certificates || {},
+		};
+
 		this.l10n = {};
-		this._props = {};
-		this.shouldOverwrite = !(this.options.hasOwnProperty("shouldOverwrite") && !this.options.shouldOverwrite);
+		this.shouldOverwrite = !(options.hasOwnProperty("shouldOverwrite") && !options.shouldOverwrite);
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 
 		this._fields.forEach(a => this[a] = new FieldsContainer());
 		this._transitType = "";
+
+		// Assigning model and _props to this
+		Object.assign(this, this._parseSettings(options));
 	}
 
 	/**
@@ -40,10 +45,11 @@ class Pass {
 
 	generate() {
 		let archive = archiver("zip");
-		return this._parseSettings(this.options)
+		return this._parseCertificates(this.Certificates._raw)
 			.then(() => readdir(this.model))
 			.catch((err) => {
-				// May have not used this catch but ENOENT error is not enough self-explanatory in the case of external usage
+				// May have not used this catch but ENOENT error is not enough self-explanatory
+				// in the case of internal usage ()
 				if (err.code && err.code === "ENOENT") {
 					let eMessage = formatError("MODEL_NOT_FOUND", this.model);
 
@@ -582,12 +588,11 @@ class Pass {
 	}
 
 	/**
-	 * Validates the contents of the passed options and assigns the contents to the right properties
+	 * Validates the contents of the passed options and handle them
 	 *
-	 * @async
 	 * @method _parseSettings
 	 * @params {Object} options - the options passed to be parsed
-	 * @returns {Promise}
+	 * @returns {Object} - model path and filtered options
 	 */
 
 	_parseSettings(options) {
@@ -602,16 +607,32 @@ class Pass {
 			throw new Error(eMessage);
 		}
 
-		this.model = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
+		let modelPath = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
 
 		const filteredOpts = schema.filter(options.overrides, "supportedOptions");
 
-		Object.assign(this._props, filteredOpts);
+		return {
+			model: modelPath,
+			_props: filteredOpts
+		};
+	}
 
-		let optCertsNames = Object.keys(options.certificates);
+	/**
+	 * Validates the contents of the passed options and handle them
+	 *
+	 * @method _parseSettings
+	 * @params {Object} options - the options passed to be parsed
+	 * @returns {Object} - model path and filtered options
+	 */
 
+	_parseCertificates(certificates) {
+		if (this.Certificates.wwdr && this.Certificates.signerCert && typeof this.Certificates.signerKey === "object") {
+			return Promise.resolve();
+		}
+
+		let optCertsNames = Object.keys(this.Certificates._raw);
 		let certPaths = optCertsNames.map((val) => {
-			const cert = options.certificates[val];
+			const cert = this.Certificates._raw[val];
 			const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];
 			const resolvedPath = path.resolve(filePath);
 
@@ -622,7 +643,7 @@ class Pass {
 			.then(contents => {
 				contents.forEach((file, index) => {
 					let certName = optCertsNames[index];
-					let pem = parsePEM(file, options.certificates[certName].passphrase);
+					let pem = parsePEM(file, this.Certificates._raw[certName].passphrase);
 
 					if (!pem) {
 						throw new Error(formatError("INVALID_CERTS", optCertsNames[index]));

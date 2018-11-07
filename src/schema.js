@@ -132,7 +132,7 @@ let filter = (opts, schemaName) => {
 
 	return list.reduce((acc, current, index) => {
 		let ref = isObject ? current : index;
-		let check = isObject ? { [current] : opts[current] } : [ opts[index] ];
+		let check = isObject ? { [current]: opts[current] } : [opts[index]];
 
 		if (isValid(check, schemaName)) {
 			acc[ref] = opts[ref];

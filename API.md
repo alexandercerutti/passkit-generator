@@ -44,6 +44,8 @@ ___
 		* [.relevance()](#method_relevance)
 	* Setting NFC
 		* [.nfc()](#method_nfc)
+	* Getting remote resources
+		* [.load()](#method_load)
 	* [Setting Pass Structure Keys (primaryFields, secondaryFields, ...)](#prop_fields)
 		* [<field>.push()](#prop_fields-push)
 		* [<field>.pop()](#prop_fields-pop)
@@ -396,8 +398,51 @@ An Object as argument will be treated as one-element array.
 | data | Array\<Object> \| Object | The data regarding to be used for nfc | false | -
 
 **See**: [PassKit Package Format Reference # NFC](https://apple.co/2wTxiaC)
+<br><br>
+___
+
+**Getting remote resources**:
+___
+
+<a name="method_load"></a>
+
+#### .load()
+
+```javascript
+pass.load(resource, name);
+```
+
+**Returns**:
+
+`Object<Pass> (this)`
+
+**Description**:
+
+Sets the resources to be downloaded in runtime to be pushed in the pass.
+
+Give `name` param a name for your file or the folder path it will be pushed into (with the name, _obv._) - see the examples.
+
+Requests are not cached and load method can only load pictures right now (no other types should be required.);
+
+When in debug mode, file header is shown.
+
+**Arguments**:
+
+| Key | Type | Description | Optional | Default Value |
+|-----|------|-------------|----------|:-------------:|
+| resource | String | The URL where to fetch the picture | false | -
+| name | String | The name / path to be used to call this | false | -
+
+**Example**:
+
+```javascript
+pass.load("http://...", "icon.png");
+pass.load("http://...", "en.lproj/icon.png");
+```
+
 <br>
 <br>
+
 <a name="prop_fields"></a>
 ___
 

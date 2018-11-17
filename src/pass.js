@@ -5,8 +5,11 @@ const stream = require("stream");
 const moment = require("moment");
 const forge = require("node-forge");
 const archiver = require("archiver");
-const barcodeDebug = require("debug")("passkit:barcode");
-const genericDebug = require("debug")("passkit:generic");
+const debug = require("debug");
+const got = require("got");
+const barcodeDebug = debug("passkit:barcode");
+const genericDebug = debug("passkit:generic");
+const loadDebug = debug("passkit:load");
 
 const schema = require("./schema");
 const formatError = require("./messages");
@@ -24,6 +27,7 @@ class Pass {
 		};
 
 		this.l10n = {};
+		this._remoteResources = [];
 		this.shouldOverwrite = !(options.hasOwnProperty("shouldOverwrite") && !options.shouldOverwrite);
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
@@ -45,6 +49,7 @@ class Pass {
 
 	generate() {
 		let archive = archiver("zip");
+
 		return this._parseCertificates(this.Certificates._raw)
 			.then(() => readdir(this.model))
 			.catch((err) => {
@@ -58,11 +63,48 @@ class Pass {
 
 				throw new Error(err);
 			})
-			.then(files => {
-				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
-				let noDynList = removeHidden(files).filter(f => !/(manifest|signature|pass)/i.test(f));
+			.then(filesList => {
+				if (!this._remoteResources.length) {
+					return [filesList, [], []];
+				}
 
-				if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))) {
+				let buffersPromise = [
+					...this._remoteResources.map((r) =>
+						got(r[0], { encoding: null })
+							.then(response => {
+								loadDebug(`Picture MIME-type: ${response.headers["content-type"]}`);
+
+								if (!Buffer.isBuffer(response.body)) {
+									throw "NOTABUFFER";
+								}
+
+								if (!response.headers["content-type"].includes("image/")) {
+									throw "NOTAPICTURE";
+								}
+
+								return response.body;
+							})
+							.catch(e => {
+								loadDebug(`Was not able to fetch resource ${r[1]}. Error: ${e}`);
+								// here we are adding undefined values, that will be removed later.
+								return undefined;
+							})
+					)
+				];
+
+				// forwarding model files list, remote files list and remote buffers.
+				return [
+					filesList,
+					buffersPromise.length ? this._remoteResources.map(r => r[1]) : [],
+					buffersPromise
+				];
+			})
+			.then(([modelFileList, remoteFilesList, remoteBuffers]) => {
+				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
+				let noDynList = removeHidden(modelFileList).filter(f => !/(manifest|signature|pass)/i.test(f));
+
+				if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))
+					|| !remoteFilesList.some(f => f.toLowerCase().includes("icon"))) {
 					let eMessage = formatError("MODEL_UNINITIALIZED", path.parse(this.model).name);
 					throw new Error(eMessage);
 				}
@@ -101,17 +143,23 @@ class Pass {
 
 				return Promise.all(L10N.map(f => readdir(path.join(this.model, f)).then(removeHidden)))
 					.then(listByFolder => {
-
-						/* Each file name is joined with its own path and pushed to the bundle files array. */
+						/* Each localization file name is joined with its own path and pushed to the bundle files array. */
 
 						listByFolder.forEach((folder, index) => bundle.push(...folder.map(f => path.join(L10N[index], f))));
 
-						/* Getting all bundle file buffers, pass.json included, and appending */
+						/* Getting all bundle file buffers, pass.json included, and appending path */
+
+						if (remoteFilesList.length) {
+							// Removing files in bundle that also exist in remoteFilesList
+							// I'm giving priority to downloaded files
+							bundle = bundle.filter(file => !remoteFilesList.includes(file));
+						}
 
 						let bundleBuffers = bundle.map(f => readFile(path.resolve(this.model, f)));
 						let passBuffer = passExtractor();
 
-						return Promise.all([...bundleBuffers, passBuffer])
+						// Resolving all the buffers promises
+						return Promise.all([...bundleBuffers, passBuffer, ...remoteBuffers])
 							.then(buffers => {
 								Object.keys(this.l10n).forEach(l => {
 									const strings = generateStringFile(this.l10n[l]);
@@ -127,7 +175,11 @@ class Pass {
 									}
 								});
 
-								return [buffers, bundle];
+								return [
+									// removing undefined values
+									buffers.filter(b => !!b),
+									[...bundle, ...remoteFilesList]
+								];
 							});
 					});
 			})
@@ -445,6 +497,23 @@ class Pass {
 		if (valid.length) {
 			this._props["nfc"] = valid;
 		}
+
+		return this;
+	}
+
+	/**
+	 * Loads a web resource (image)
+	 * @param {string} resource
+	 * @param {string} name
+	 */
+
+	load(resource, name) {
+		if (typeof resource !== "string" && typeof name !== "string") {
+			loadDebug("resource and name are not valid strings. No action will be taken.");
+			return;
+		}
+
+		this._remoteResources.push([resource, name]);
 
 		return this;
 	}

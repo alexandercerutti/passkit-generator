@@ -2,7 +2,7 @@
 
 This is a branch file that starts from the [Certificate paragraph](./README.md#certificates) and is made for developers that does not have access to macOS or are very very enthusiast of terminal (so its still valid for macOS).
 
-I have to use these steps to work under WSL (Windows Subsystem for Linux), or Bash on Windows. I've not tested them under OpenSSL for Windows, but they might work at the same way. The only thing you'll still need over the certificates, are an Wallet-ready iOS App (and so an iPhone) or a way to pass it.
+I have to use these steps to work under WSL (Windows Subsystem for Linux), or Bash on Windows. I've not tested them under OpenSSL for Windows, but they might work in the same way. The only thing you'll still need over the certificates, are an Wallet-ready iOS App (and so an iPhone) or a way to pass it.
 To test it, I use my [Passkit-sample-client](https://github.com/alexandercerutti/passkit-sample-client), an really basic iOS App which requires just few informations and will show you the generated pass. Or you can use like Telegram, save your generated pass in your "Saved Messages" and then open it from the iPhone. Your choice.
 
 But let's not talk anymore about testing and let's go with the steps to follow. **It will still require OpenSSL installed**. We are going to use it in a massive way.
@@ -25,7 +25,7 @@ But let's not talk anymore about testing and let's go with the steps to follow. 
 	$ openssl genrsa -out <your-key-name>.key 2048
 	```
 
-7. Generate a CSR using your private key. Usually it should have a `.csr` extension, but there is no difference: .csr is a ASN.1 Base64 encoded text. Therefor it can have any extension you want.
+7. Generate a CSR using your private key. Usually it should have a `.csr` extension, but there is no difference: .csr is a ASN.1 Base64 encoded text. Therefore it can have any extension you want.
 
 	```sh
 	# Create a signing request

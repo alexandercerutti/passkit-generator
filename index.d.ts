@@ -55,6 +55,16 @@ export declare class Pass {
 	 * @see https://apple.co/2wTxiaC
 	 */
 	nfc(...data: Schema.NFC[]): this;
+
+	/**
+	 * Sets resources to be downloaded right inside
+	 * the pass archive.
+	 * @param resource - url
+	 * @param name - name to be used inside the archive
+	 * @returns this;
+	 */
+
+	load(resource, name): this;
 }
 
 declare class FieldContainer {

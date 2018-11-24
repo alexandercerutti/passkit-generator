@@ -17,10 +17,10 @@
 		"Pass"
 	],
 	"dependencies": {
-		"archiver": "^2.1.1",
-		"debug": "^3.1.0",
-		"got": "^9.3.1",
-		"joi": "^13.6.0",
+		"archiver": "^3.0.0",
+		"debug": "^3.2.6",
+		"got": "^9.3.2",
+		"joi": "^13.7.0",
 		"moment": "^2.22.2",
 		"node-forge": "^0.7.6"
 	},
@@ -28,6 +28,6 @@
 		"node": ">=8.1.0"
 	},
 	"devDependencies": {
-		"jasmine": "^3.2.0"
+		"jasmine": "^3.3.0"
 	}
 }

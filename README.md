@@ -1,6 +1,12 @@
-# Node PassKit Generator
-
-Simple Node.js interface to generate customized [Apple Wallet Passes](https://developer.apple.com/wallet/) for iOS.
+<div align="center">
+	<br>
+	<br>
+	<img width="600" src="assets/logo.svg" alt="Node Passkit Generator logo">
+	<br>
+	<br>
+	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS.</p>
+</div>
+<br>
 
 ### Architecture
 

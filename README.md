@@ -14,7 +14,7 @@ This package was created with a specific architecture in mind: **application** a
 
 Actually, pass template (model) creation and population doesn't happen within the application in runtime. Pass template is a folder in _your application directory_ (but nothing will stop you from putting it outside), that will contain all the objects needed (static medias) and structure to make a pass work.
 
-Pass template will be read and pushed as is in the resulting .zip file, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
+Pass template will be read and pushed as is in the resulting .zip file along with web-fetched medias, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
 
 This package comes with an [API documentation](./API.md), that makes available a series of methods to customize passes.
 
@@ -33,11 +33,15 @@ ___
 ##### Model
 
 The first thing you'll have to do, is to start creating a model. A model is a folder in your project directory, with inside the basic pass infos, like the thumbnails, the icon, and the background and **pass.json** containing all the static infos about the pass, like Team identifier, Pass type identifier, colors, etc.
+___
 
 > Using the .pass extension is a best practice, showing that the directory is a pass package.
 > ([Build your first pass - Apple Developer Portal](https://apple.co/2LYXWo3)).
 
-Following to this suggestion, each model is required to have a **.pass** extension.
+Following to this best practice, the package is set to require each model to have a **_.pass_** extension.
+If the extension is not specified in the configuration (as in [Usage Example](#usage_example), at "model" key), it will be added forcefully.
+
+___
 
 ```bash
 $ cd yourProjectDir;
@@ -65,16 +69,17 @@ Create a `pass.json` by taking example from examples folder models or the one pr
 <a name="certificates"></a>
 
 ##### Certificates
-> Requirements: OpenSSL,
 
-The third step is about the developer and WWDR certificates. I suggest you to create a certificate-dedicated folder inside your working directory (e.g. `./certs`) to contain everything concerning the certificates. This is a standard procedure: you would have to do it also without using this library.
+The third step is about the developer and WWDR certificates. I suggest you to create a certificate-dedicated folder inside your working directory (e.g. `./certs`) to contain everything concerning the certificates.
+
+This is a standard procedure: you would have to do it also without using this library. We'll use OpenSSL to complete our work (or to do it entirely, if only on terminal), so be sure to have it installed.
 You'll need the following three elements:
 
 * Apple WWDR (_Worldwide Developer Relationship_) certificate
 * Signer certificate
 * Signer key
 
-While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certificateauthority/), to get the `signer key` and the `certificate`, you'll have to get first a `Certificate Signing Request` (`.certSigningRequest` file) from your Apple Developers Portal page, at [Pass Types Identifiers](https://developer.apple.com/account/ios/identifier/passTypeId) (open it, it worth the pain).
+While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certificateauthority/), to get the `signer key` and the `certificate`, you'll have to get first a `Certificate Signing Request` (`.certSigningRequest` file) and upload it to Apple Developers Portal, at [Pass Types Identifiers](https://developer.apple.com/account/ios/identifier/passTypeId) (open it, it's worth it 😜).
 
 <br>
 <hr>
@@ -85,13 +90,15 @@ While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certifi
 
 1. Create a new pass type identifier and provide it with a Name and a reverse-domain bundle id (starting with "pass."). You will put this identifier as value for `passTypeIdentifier` in `pass.json` file.
 2. Confirm and register the new identifier.
-3. Go back to the pass type identifiers, click on your new pass id and Edit it.
-4. Click "Create Certificate" button and follow the instructions until you won't download a certificate like `pass.cer`.
+3. Go back to the pass type identifiers, click on your new pass id and edit it.
+4. Click "Create Certificate" button and follow the instructions until you won't download a certificate like `pass.cer`. (here you'll generate the `.certSigningRequest` file to be uploaded).
 5. Open the downloaded certificate. Go in "Certificates" on left in macOS Keychain access and `right-click > Export "\<certname\>"`. Choose a password (and write it down) and you will get a PKCS#12 file (`.p12`).
-6. Open terminal, place where you want to save the files and insert the following commands changing the contents between angular brackets. You'll have to choose a secret passphrase (and write it down) that you'll use also in the application.
+6. Open terminal, place where you want to save the files and insert the following OpenSSL commands changing the contents between angular brackets. You'll have to choose a secret passphrase (and write it down) that you'll use also in the application.
 
     ```sh
+	# Creating and changing dir
     $ mkdir "certs" && cd $_
+	# Extracting key and cert from pkcs12
     $ openssl pkcs12 -in <cert-name>.p12 -clcerts -nokeys -out signerCert.pem -passin pass:<your-password>
     $ openssl pkcs12 -in <cert-name>.p12 -nocerts -out signerKey.pem -passin pass:<your-password> -passout pass:<secret-passphrase>
     ```
@@ -99,12 +106,14 @@ While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certifi
 
 ___
 
+<a name="usage_example"></a>
+
 ## Usage example
 
 ```javascript
-const Passkit = require("passkit-generator");
+const { Pass } = require("passkit-generator");
 
-let pass = new Passkit.Pass({
+let examplePass = new Pass({
 	model: "./passModels/myFirstModel",
 	certificates: {
 		wwdr: "./certs/wwdr.pem",
@@ -125,7 +134,7 @@ let pass = new Passkit.Pass({
 
 // Adding some settings to be written inside pass.json
 pass.localize("en", { ... });
-pass.barcode("12345");
+pass.barcode("36478105430"); // Random value
 
 // Generate the stream, which gets returned through a Promise
 pass.generate()
@@ -141,11 +150,11 @@ ___
 
 ## Other
 
-If you developed any public projects using this library, open a topic in issues and link it inside if open to all or just tell it. 😊 You'll make me feel like my time hasn't been wasted (it had not anyway, I learnt a lot of things by doing this).
-Be sure to not include the certificates if you publish your project open to everybody.
-
-Any contribution is welcome. ❤️
+If you used this package in any of your projects, feel free to open a topic in issues to tell me and include a project description or link (for companies). 😊 You'll make me feel like my time hasn't been wasted, even if it had not anyway because I learnt a lot of things by creating this.
 
 The idea to develop this package, was born during the Apple Developer Academy 17/18, in Naples, Italy, driven by the need to create an iOS app component regarding passes generation for events.
 
 A big thanks to all the people and friends in the Apple Developer Academy (and not) that pushed me and helped me into realizing something like this and a big thanks to the ones that helped me to make technical choices.
+
+Any contribution, is welcome.
+Made with ❤️ in Italy.

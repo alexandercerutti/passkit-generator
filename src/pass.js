@@ -103,8 +103,7 @@ class Pass {
 				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
 				let noDynList = removeHidden(modelFileList).filter(f => !/(manifest|signature|pass)/i.test(f));
 
-				if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))
-					|| !remoteFilesList.some(f => f.toLowerCase().includes("icon"))) {
+				if (!noDynList.length || ![...noDynList, ...remoteFilesList].some(f => f.toLowerCase().includes("icon"))) {
 					let eMessage = formatError("MODEL_UNINITIALIZED", path.parse(this.model).name);
 					throw new Error(eMessage);
 				}

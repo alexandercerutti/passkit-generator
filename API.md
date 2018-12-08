@@ -419,10 +419,9 @@ pass.load(resource, name);
 **Description**:
 
 Sets the resources to be downloaded in runtime to be pushed in the pass.
+Use `name` param to give your downloaded file a name or to provide the folder path it will be pushed into (with the name, _obv._).
 
-Give `name` param a name for your file or the folder path it will be pushed into (with the name, _obv._) - see the examples.
-
-Requests are not cached and load method can only load pictures right now (no other types should be required.);
+Requests are not cached and load method can only load pictures right now (no other types should be required). In case of conflict between downloaded files and model files, downloaded files will have the priority and will be putted in the zip file.
 
 When in debug mode, file header is shown.
 

@@ -88,6 +88,6 @@ But let's not talk anymore about testing and let's go with the steps to follow. 
 	$ openssl rsa -in <your-key-name>.key -outform PEM -out passkey.pem
 	```
 
-12. Execute Step 10 also for `AppleWWDRCA.cer` you've download from [Apple PKI](https://www.apple.com/certificateauthority/) and save it somewhere (over the rainbow... 🌈).
+12. Execute Step 9 also for `AppleWWDRCA.cer` you've download from [Apple PKI](https://www.apple.com/certificateauthority/) and save it somewhere (over the rainbow... 🌈).
 
 13. And you are done. 🎉 Now try to create your first pass! My suggestion is to keep anyway the `.key` file somewhere as backup (this time not over the rainbow). You can always download `.cer` file from APP, but you cannot generate back your private key.

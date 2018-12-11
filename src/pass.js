@@ -721,10 +721,12 @@ class Pass {
 				});
 			}).catch(err => {
 				if (!err.path) {
+					// Catching error from '.then()';
+					console.log("Got an error");
 					throw err;
-				} else {
-					throw new Error(formatError("INVALID_CERT_PATH", path.parse(err.path).base));
 				}
+
+				throw new Error(formatError("INVALID_CERT_PATH", path.parse(err.path).base));
 			});
 	}
 

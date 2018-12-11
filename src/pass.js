@@ -7,6 +7,7 @@ const forge = require("node-forge");
 const archiver = require("archiver");
 const debug = require("debug");
 const got = require("got");
+
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
 const loadDebug = debug("passkit:load");
@@ -741,7 +742,6 @@ function readCertificates(certificates) {
 		}).catch(err => {
 			if (!err.path) {
 				// Catching error from '.then()';
-				console.log("Got an error");
 				throw err;
 			}
 

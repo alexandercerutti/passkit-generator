@@ -50,7 +50,8 @@ class Pass {
 	generate() {
 		let archive = archiver("zip");
 
-		return this._parseCertificates(this.Certificates._raw)
+		return readCertificates(this.Certificates)
+			.then((certs) => Object.assign(this.Certificates, certs))
 			.then(() => readdir(this.model))
 			.catch((err) => {
 				// May have not used this catch but ENOENT error is not enough self-explanatory
@@ -685,51 +686,6 @@ class Pass {
 		};
 	}
 
-	/**
-	 * Validates the contents of the passed options and handle them
-	 *
-	 * @method _parseSettings
-	 * @params {Object} options - the options passed to be parsed
-	 * @returns {Object} - model path and filtered options
-	 */
-
-	_parseCertificates(certificates) {
-		if (this.Certificates.wwdr && this.Certificates.signerCert && typeof this.Certificates.signerKey === "object") {
-			return Promise.resolve();
-		}
-
-		let optCertsNames = Object.keys(this.Certificates._raw);
-		let certPaths = optCertsNames.map((val) => {
-			const cert = this.Certificates._raw[val];
-			const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];
-			const resolvedPath = path.resolve(filePath);
-
-			return readFile(resolvedPath);
-		});
-
-		return Promise.all(certPaths)
-			.then(contents => {
-				contents.forEach((file, index) => {
-					let certName = optCertsNames[index];
-					let pem = parsePEM(certName, file, this.Certificates._raw[certName].passphrase);
-
-					if (!pem) {
-						throw new Error(formatError("INVALID_CERTS", optCertsNames[index]));
-					}
-
-					this.Certificates[certName] = pem;
-				});
-			}).catch(err => {
-				if (!err.path) {
-					// Catching error from '.then()';
-					console.log("Got an error");
-					throw err;
-				}
-
-				throw new Error(formatError("INVALID_CERT_PATH", path.parse(err.path).base));
-			});
-	}
-
 	set transitType(v) {
 		if (schema.isValid(v, "transitType")) {
 			this._transitType = v;
@@ -741,6 +697,56 @@ class Pass {
 	get transitType() {
 		return this._transitType;
 	}
+}
+
+/**
+ * Validates the contents of the passed options and handle them
+ *
+ * @function readCertificates
+ * @params {Object} certificates - certificates object with raw content and, optionally,
+ * the already parsed certificates
+ * @returns {Object} - parsed certificates to be pushed to Pass.Certificates.
+ */
+
+function readCertificates(certificates) {
+	if (certificates.wwdr && certificates.signerCert && typeof certificates.signerKey === "object") {
+		// Nothing must be added. Void object is returned.
+		return Promise.resolve({});
+	}
+
+	const raw = certificates._raw;
+	const optCertsNames = Object.keys(raw);
+	const certPaths = optCertsNames.map((val) => {
+		const cert = raw[val];
+		const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];
+		const resolvedPath = path.resolve(filePath);
+
+		return readFile(resolvedPath);
+	});
+
+	return Promise.all(certPaths)
+		.then(contents => {
+			return Object.assign(
+				...contents.map((file, index) => {
+					const certName = optCertsNames[index];
+					const pem = parsePEM(certName, file, raw[certName].passphrase);
+
+					if (!pem) {
+						throw new Error(formatError("INVALID_CERTS", certName));
+					}
+
+					return { [certName]: pem };
+				}, [])
+			);
+		}).catch(err => {
+			if (!err.path) {
+				// Catching error from '.then()';
+				console.log("Got an error");
+				throw err;
+			}
+
+			throw new Error(formatError("INVALID_CERT_PATH", path.parse(err.path).base));
+		});
 }
 
 /**

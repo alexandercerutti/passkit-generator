@@ -58,9 +58,7 @@ class Pass {
 				// May have not used this catch but ENOENT error is not enough self-explanatory
 				// in the case of internal usage ()
 				if (err.code && err.code === "ENOENT") {
-					let eMessage = formatError("MODEL_NOT_FOUND", this.model);
-
-					throw new Error(eMessage);
+					throw new Error(formatError("MODEL_NOT_FOUND", this.model));
 				}
 
 				throw new Error(err);
@@ -70,29 +68,27 @@ class Pass {
 					return [filesList, [], []];
 				}
 
-				let buffersPromise = [
-					...this._remoteResources.map((r) =>
-						got(r[0], { encoding: null })
-							.then(response => {
-								loadDebug(`Picture MIME-type: ${response.headers["content-type"]}`);
+				let buffersPromise = this._remoteResources.map((r) => {
+					return got(r[0], { encoding: null })
+						.then(response => {
+							loadDebug(`Picture MIME-type: ${response.headers["content-type"]}`);
 
-								if (!Buffer.isBuffer(response.body)) {
-									throw "NOTABUFFER";
-								}
+							if (!Buffer.isBuffer(response.body)) {
+								throw "NOTABUFFER";
+							}
 
-								if (!response.headers["content-type"].includes("image/")) {
-									throw "NOTAPICTURE";
-								}
+							if (!response.headers["content-type"].includes("image/")) {
+								throw "NOTAPICTURE";
+							}
 
-								return response.body;
-							})
-							.catch(e => {
-								loadDebug(`Was not able to fetch resource ${r[1]}. Error: ${e}`);
-								// here we are adding undefined values, that will be removed later.
-								return undefined;
-							})
-					)
-				];
+							return response.body;
+						})
+						.catch(e => {
+							loadDebug(`Was not able to fetch resource ${r[1]}. Error: ${e}`);
+							// here we are adding undefined values, that will be removed later.
+							return undefined;
+						});
+				});
 
 				// forwarding model files list, remote files list and remote buffers.
 				return [

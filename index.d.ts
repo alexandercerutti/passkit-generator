@@ -60,11 +60,11 @@ export declare class Pass {
 	 * Sets resources to be downloaded right inside
 	 * the pass archive.
 	 * @param resource - url
-	 * @param name - name to be used inside the archive
+	 * @param name - name (or path) to be used inside the archive
 	 * @returns this;
 	 */
 
-	load(resource, name): this;
+	load(resource: string, name: string): this;
 }
 
 declare class FieldContainer {

@@ -1,28 +1,51 @@
-let errors = {
+const errors = {
 	PASSFILE_VALIDATION_FAILED: "Validation of pass type failed. Pass file is not a valid buffer or (more probabily) does not respect the schema. Refer to https://apple.co/2Nvshvn to build a correct pass.",
 	REQUIR_VALID_FAILED: "The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.",
 	MODEL_UNINITIALIZED: "Provided model ( %s ) matched but unitialized or may not contain icon. Refer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
 	MODEL_NOT_STRING: "A string model name must be provided in order to continue.",
 	MODEL_NOT_FOUND: "Model %s not found. Provide a valid one to continue.",
 	INVALID_CERTS: "Invalid certificate(s) loaded: %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase). Refer to docs to obtain them.",
-	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist."
+	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist.",
+	TRSTYPE_REQUIRED: "Cannot proceed with pass creation. transitType field is required for boardingPasses.",
 };
 
-function format(errorName, ...values) {
+const debugMessages = {
+	TRSTYPE_NOT_VALID: "Transit type changing rejected as not compliant with Apple Specifications. Transit type would become \"%s\" but should be in [PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain]",
+	BRC_NOT_SUPPORTED: "Format not found among barcodes. Cannot set backward compatibility.",
+	BRC_FORMATTYPE_UNMATCH: "Format must be a string or null. Cannot set backward compatibility.",
+	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not an object or has not message field.",
+	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format.",
+	LOAD_TYPES_UNMATCH: "Resource and name are not valid strings. No action will be taken for the specified medias.",
+	LOAD_MIME: "Picture MIME-type: %s",
+	LOAD_NORES: "Was not able to fetch resource %s. Error: %s"
+};
+
+/**
+ * Creates a message with replaced values
+ * @param {string} messageName
+ * @param  {any[]} values
+ */
+
+function format(messageName, ...values) {
 	// reversing because it is better popping than shifting.
 	let replaceValues = values.reverse();
-	return resolveErrorName(errorName).replace(/%s/, () => {
+	return resolveMessageName(messageName).replace(/%s/g, () => {
 		let next = replaceValues.pop();
 		return next !== undefined ? next : "<passedValueIsUndefined>";
 	});
 }
 
-function resolveErrorName(name) {
-	if (!errors[name]) {
-		return `<ErrorName ${name} is not linked to any error messages>`;
+/**
+ * Looks among errors and debugMessages for the specified message name
+ * @param {string} name
+ */
+
+function resolveMessageName(name) {
+	if (!errors[name] && !debugMessages[name]) {
+		return `<ErrorName "${name}" is not linked to any error messages>`;
 	}
 
-	return errors[name];
+	return errors[name] || debugMessages[name];
 }
 
 module.exports = format;

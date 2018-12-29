@@ -13,7 +13,7 @@ const genericDebug = debug("passkit:generic");
 const loadDebug = debug("passkit:load");
 
 const schema = require("./schema");
-const formatError = require("./messages");
+const formatMessage = require("./messages");
 const FieldsContainer = require("./fields");
 
 const readdir = promisify(fs.readdir);
@@ -58,7 +58,7 @@ class Pass {
 				// May have not used this catch but ENOENT error is not enough self-explanatory
 				// in the case of internal usage ()
 				if (err.code && err.code === "ENOENT") {
-					throw new Error(formatError("MODEL_NOT_FOUND", this.model));
+					throw new Error(formatMessage("MODEL_NOT_FOUND", this.model));
 				}
 
 				throw new Error(err);
@@ -71,20 +71,20 @@ class Pass {
 				let buffersPromise = this._remoteResources.map((r) => {
 					return got(r[0], { encoding: null })
 						.then(response => {
-							loadDebug(`Picture MIME-type: ${response.headers["content-type"]}`);
+							loadDebug(formatMessage("LOAD_MIME", response.headers["content-type"]));
 
 							if (!Buffer.isBuffer(response.body)) {
-								throw "NOTABUFFER";
+								throw "LOADED_RESOURCE_NOT_A_BUFFER";
 							}
 
 							if (!response.headers["content-type"].includes("image/")) {
-								throw "NOTAPICTURE";
+								throw "LOADED_RESOURCE_NOT_A_PICTURE";
 							}
 
 							return response.body;
 						})
 						.catch(e => {
-							loadDebug(`Was not able to fetch resource ${r[1]}. Error: ${e}`);
+							loadDebug(formatMessage("LOAD_NORES", r[1], e));
 							// here we are adding undefined values, that will be removed later.
 							return undefined;
 						});
@@ -102,7 +102,7 @@ class Pass {
 				let noDynList = removeHidden(modelFileList).filter(f => !/(manifest|signature|pass)/i.test(f));
 
 				if (!noDynList.length || ![...noDynList, ...remoteFilesList].some(f => f.toLowerCase().includes("icon"))) {
-					let eMessage = formatError("MODEL_UNINITIALIZED", path.parse(this.model).name);
+					let eMessage = formatMessage("MODEL_UNINITIALIZED", path.parse(this.model).name);
 					throw new Error(eMessage);
 				}
 
@@ -123,7 +123,7 @@ class Pass {
 					return readFile(path.resolve(this.model, "pass.json"))
 						.then(passStructBuffer => {
 							if (!this._validateType(passStructBuffer)) {
-								let eMessage = formatError("PASSFILE_VALIDATION_FAILED");
+								let eMessage = formatMessage("PASSFILE_VALIDATION_FAILED");
 								throw new Error(eMessage);
 							}
 
@@ -251,7 +251,7 @@ class Pass {
 		let dateParse = dateToW3CString(date, format);
 
 		if (!dateParse) {
-			genericDebug("Expiration Date was not set due to invalid format.");
+			genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Expiration date"));
 		} else {
 			this._props.expirationDate = dateParse;
 		}
@@ -320,7 +320,7 @@ class Pass {
 			let dateParse = dateToW3CString(data, relevanceDateFormat);
 
 			if (!dateParse) {
-				genericDebug("Relevant Date was not set due to incorrect date format.");
+				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
 			} else {
 				this._props[type] = dateParse;
 			}
@@ -402,7 +402,7 @@ class Pass {
 
 	__barcodeAutogen(data) {
 		if (!data || !(data instanceof Object) || !data.message) {
-			barcodeDebug("Unable to autogenerate barcodes. Data is not an object or has not message field.");
+			barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
 			return [];
 		}
 
@@ -459,7 +459,7 @@ class Pass {
 		}
 
 		if (typeof format !== "string") {
-			barcodeDebug("format must be a string or null. Cannot set backward compatibility.");
+			barcodeDebug(formatMessage("BRC_FORMAT_UNMATCH"));
 			return this;
 		}
 
@@ -467,7 +467,7 @@ class Pass {
 		let index = this._props["barcodes"].findIndex(b => b.format.toLowerCase().includes(format.toLowerCase()));
 
 		if (index === -1) {
-			barcodeDebug("format not found among barcodes. Cannot set backward compatibility.");
+			barcodeDebug(formatMessage("BRC_NOT_SUPPORTED"));
 			return this;
 		}
 
@@ -506,7 +506,7 @@ class Pass {
 
 	load(resource, name) {
 		if (typeof resource !== "string" && typeof name !== "string") {
-			loadDebug("resource and name are not valid strings. No action will be taken.");
+			loadDebug(formatMessage("LOAD_TYPES_UNMATCH"));
 			return;
 		}
 
@@ -644,8 +644,8 @@ class Pass {
 			}
 		});
 
-		if (!this.transitType && this.type === "boardingPass") {
-			throw new Error("Cannot proceed with pass creation. transitType field is required for boardingPasses.");
+		if (this.type === "boardingPass" && !this.transitType) {
+			throw new Error(formatMessage("TRSTYPE_REQUIRED"));
 		}
 
 		passFile[this.type]["transitType"] = this.transitType;
@@ -662,15 +662,12 @@ class Pass {
 	 */
 
 	_parseSettings(options) {
-		let eMessage = null;
 		if (!schema.isValid(options, "instance")) {
-			eMessage = formatError("REQUIR_VALID_FAILED");
-			throw new Error(eMessage);
+			throw new Error(formatMessage("REQUIR_VALID_FAILED"));
 		}
 
 		if (!options.model || typeof options.model !== "string") {
-			eMessage = formatError("MODEL_NOT_STRING");
-			throw new Error(eMessage);
+			throw new Error(formatMessage("MODEL_NOT_STRING"));
 		}
 
 		let modelPath = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
@@ -687,6 +684,7 @@ class Pass {
 		if (schema.isValid(v, "transitType")) {
 			this._transitType = v;
 		} else {
+			genericDebug(formatMessage("TRSTYPE_NOT_VALID", v));
 			this._transitType = this._transitType || "";
 		}
 	}
@@ -723,13 +721,16 @@ function readCertificates(certificates) {
 
 	return Promise.all(certPaths)
 		.then(contents => {
+			// Mapping each file content to a PEM structure, returned in form of one-key-object
+			// which is conjoint later with the other pems
+
 			return Object.assign(
 				...contents.map((file, index) => {
 					const certName = optCertsNames[index];
 					const pem = parsePEM(certName, file, raw[certName].passphrase);
 
 					if (!pem) {
-						throw new Error(formatError("INVALID_CERTS", certName));
+						throw new Error(formatMessage("INVALID_CERTS", certName));
 					}
 
 					return { [certName]: pem };
@@ -741,7 +742,7 @@ function readCertificates(certificates) {
 				throw err;
 			}
 
-			throw new Error(formatError("INVALID_CERT_PATH", path.parse(err.path).base));
+			throw new Error(formatMessage("INVALID_CERT_PATH", path.parse(err.path).base));
 		});
 }
 

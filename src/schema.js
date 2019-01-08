@@ -23,6 +23,7 @@ let supportedOptions = Joi.object().keys({
 		is: Joi.exist(),
 		then: Joi.required()
 	}),
+	sharingProhibited: Joi.boolean(),
 	backgroundColor: Joi.string().min(10).max(16),
 	foregroundColor: Joi.string().min(10).max(16),
 	labelColor: Joi.string().min(10).max(16),

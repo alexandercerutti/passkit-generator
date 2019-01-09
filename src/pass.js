@@ -27,6 +27,8 @@ class Pass {
 			_raw: options.certificates || {},
 		};
 
+		options.overrides = options.overrides || {};
+
 		this.l10n = {};
 		this._remoteResources = [];
 		this.shouldOverwrite = !(options.hasOwnProperty("shouldOverwrite") && !options.shouldOverwrite);

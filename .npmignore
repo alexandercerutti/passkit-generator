@@ -1,0 +1,4 @@
+passModels/
+certificates/
+*.code-workspace
+examples/

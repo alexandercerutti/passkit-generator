@@ -106,11 +106,18 @@ let schemas = {
 	supportedOptions
 };
 
-let resolveSchemaName = (name) => {
+function resolveSchemaName(name) {
 	return schemas[name] || "";
-};
+}
 
-let isValid = (opts, schemaName) => {
+/**
+ * Checks if the passed options are compliant with the indicated schema
+ * @param {any} opts - options to be checks
+ * @param {string} schemaName - the indicated schema (will be converted)
+ * @returns {boolean} - result of the check
+ */
+
+function isValid(opts, schemaName) {
 	let resolvedSchema = resolveSchemaName(schemaName);
 
 	if (!resolvedSchema) {
@@ -125,25 +132,36 @@ let isValid = (opts, schemaName) => {
 	}
 
 	return !validation.error;
-};
+}
 
-let filter = (opts, schemaName) => {
-	let isObject = opts instanceof Object;
-	let list = isObject ? Object.keys(opts) : opts;
+/**
+ * Keeps only the opts elements that are compliant with the selected schema.
+ * @param {object} opts
+ * @param {string} schemaName - the selected schema.
+ */
 
-	return list.reduce((acc, current, index) => {
-		let ref = isObject ? current : index;
-		let check = isObject ? { [current]: opts[current] } : [opts[index]];
+function filter(opts, schemaName) {
+	let list = Object.keys(opts);
+
+	return list.reduce((acc, current) => {
+		let check = { [current]: opts[current] };
 
 		if (isValid(check, schemaName)) {
-			acc[ref] = opts[ref];
+			acc[current] = opts[current];
 		}
 
 		return acc;
-	}, isObject ? {} : []);
+	}, {});
 };
 
-let getValidated = (opts, schemaName) => {
+/**
+ * Executes the validation in verbose mode, exposing the value or
+ * @param {object} opts - to be validated
+ * @param {*} schemaName - selected schema
+ * @returns {any} false or the returned value
+ */
+
+function getValidated(opts, schemaName) {
 	let resolvedSchema = resolveSchemaName(schemaName);
 	let validation = Joi.validate(opts, resolvedSchema);
 

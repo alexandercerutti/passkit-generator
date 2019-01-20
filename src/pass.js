@@ -528,16 +528,13 @@ class Pass {
 		let passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 
 		let passFile = JSON.parse(passBuffer.toString("utf8"));
-		let index = passTypes.findIndex(passType => passFile.hasOwnProperty(passType));
+		this.type = passTypes.find(type => passFile.hasOwnProperty(type));
 
-		if (index == -1) {
+		if (!this.type) {
 			return false;
 		}
 
-		let type = passTypes[index];
-
-		this.type = type;
-		return schema.isValid(passFile[type], "passDict");
+		return schema.isValid(passFile[this.type], "passDict");
 	}
 
 	/**

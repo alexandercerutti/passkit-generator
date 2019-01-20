@@ -289,9 +289,7 @@ class Pass {
 		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
 
 		if (!type || !data || !types.includes(type)) {
-			return Object.assign({
-				length: 0
-			}, this);
+			return assignLength(0, this);
 		}
 
 		if (type === "beacons" || type === "locations") {
@@ -303,9 +301,7 @@ class Pass {
 
 			this._props[type] = valid.length ? valid : undefined;
 
-			return Object.assign({
-				length: valid.length
-			}, this);
+			return assignLength(valid.length, this);
 		}
 
 		if (type === "maxDistance" && (typeof data === "string" || typeof data === "number")) {
@@ -317,9 +313,7 @@ class Pass {
 				this._props[type] = conv;
 			}
 
-			return Object.assign({
-				length: Number(!cond)
-			}, this);
+			return assignLength(Number(!cond), this);
 		} else if (type === "relevantDate") {
 			let dateParse = dateToW3CString(data, relevanceDateFormat);
 
@@ -329,9 +323,7 @@ class Pass {
 				this._props[type] = dateParse;
 			}
 
-			return Object.assign({
-				length: Number(!!dateParse)
-			}, this);
+			return assignLength(Number(!!dateParse), this);
 		}
 	}
 
@@ -346,11 +338,10 @@ class Pass {
 
 	barcode(data) {
 		if (!data) {
-			return Object.assign({
-				length: 0,
+			return assignLength(0, this, {
 				autocomplete: noop,
-				backward: noop
-			}, this);
+				backward: noop,
+			});
 		}
 
 		if (typeof data === "string" || (data instanceof Object && !data.format && data.message)) {
@@ -359,11 +350,13 @@ class Pass {
 			this._props["barcode"] = autogen[0] || {};
 			this._props["barcodes"] = autogen || [];
 
-			return Object.assign({
-				length: 4,
+			// I bind "this" to get a clean context (without these two methods)
+			// when returning from the methods
+
+			return assignLength(4, this, {
 				autocomplete: noop,
 				backward: this.__barcodeChooseBackward.bind(this)
-			}, this);
+			});
 		}
 
 		if (!(data instanceof Array)) {
@@ -384,13 +377,13 @@ class Pass {
 			this._props["barcodes"] = valid;
 		}
 
-		// I bind "this" to get a clean context (without these two methods) when returning from the methods
+		// I bind "this" to get a clean context (without these two methods)
+		// when returning from the methods
 
-		return Object.assign({
-			length: valid.length,
+		return assignLength(valid.length, this, {
 			autocomplete: this.__barcodeAutocomplete.bind(this),
 			backward: this.__barcodeChooseBackward.bind(this)
-		}, this);
+		});
 	}
 
 	/**
@@ -432,18 +425,22 @@ class Pass {
 		let props = this._props["barcodes"];
 
 		if (props.length === 4 || !props.length) {
-			return Object.assign({
-				length: 0,
+			// I bind "this" to get a clean context (without these two methods)
+			// when returning from the methods
+
+			return assignLength(0, this, {
 				backward: this.__barcodeChooseBackward.bind(this)
-			}, this);
+			});
 		}
 
 		this._props["barcodes"] = this.__barcodeAutogen(props[0]);
 
-		return Object.assign({
-			length: 4 - props.length,
+		// I bind "this" to get a clean context (without these two methods)
+		// when returning from the methods
+
+		return assignLength(4 - props.length, this, {
 			backward: this.__barcodeChooseBackward.bind(this)
-		}, this);
+		});
 	}
 
 	/**
@@ -846,6 +843,16 @@ function generateStringFile(lang) {
 		.map(key => `"${key}" = "${lang[key].replace(/"/g, /\\"/)}";`);
 
 	return Buffer.from(strings.join("\n"), "utf8");
+}
+
+/**
+ * Creates a new object with custom length property
+ * @param {number} value - the length
+ * @param {Array<Object<string, any>>} source - the main sources of properties
+ */
+
+function assignLength(value, ...sources) {
+	return Object.assign({ length: value }, ...sources);
 }
 
 module.exports = { Pass };

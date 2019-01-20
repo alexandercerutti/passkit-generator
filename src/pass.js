@@ -19,6 +19,8 @@ const FieldsContainer = require("./fields");
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
 
+const noop = () => { };
+
 class Pass {
 	constructor(options) {
 		this.Certificates = {
@@ -346,8 +348,8 @@ class Pass {
 		if (!data) {
 			return Object.assign({
 				length: 0,
-				autocomplete: () => { },
-				backward: () => { }
+				autocomplete: noop,
+				backward: noop
 			}, this);
 		}
 
@@ -359,7 +361,7 @@ class Pass {
 
 			return Object.assign({
 				length: 4,
-				autocomplete: () => { },
+				autocomplete: noop,
 				backward: this.__barcodeChooseBackward.bind(this)
 			}, this);
 		}
@@ -736,7 +738,7 @@ function readCertificates(certificates) {
 					}
 
 					return { [certName]: pem };
-				}, [])
+				})
 			);
 		}).catch(err => {
 			if (!err.path) {

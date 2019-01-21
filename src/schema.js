@@ -135,45 +135,25 @@ function isValid(opts, schemaName) {
 }
 
 /**
- * Keeps only the opts elements that are compliant with the selected schema.
- * @param {object} opts
- * @param {string} schemaName - the selected schema.
- */
-
-function filter(opts, schemaName) {
-	let list = Object.keys(opts);
-
-	return list.reduce((acc, current) => {
-		let check = { [current]: opts[current] };
-
-		if (isValid(check, schemaName)) {
-			acc[current] = opts[current];
-		}
-
-		return acc;
-	}, {});
-};
-
-/**
- * Executes the validation in verbose mode, exposing the value or
+ * Executes the validation in verbose mode, exposing the value or an empty object
  * @param {object} opts - to be validated
  * @param {*} schemaName - selected schema
- * @returns {any} false or the returned value
+ * @returns {object} the filtered value or empty object
  */
 
 function getValidated(opts, schemaName) {
 	let resolvedSchema = resolveSchemaName(schemaName);
-	let validation = Joi.validate(opts, resolvedSchema);
+	let validation = Joi.validate(opts, resolvedSchema, { stripUnknown: true });
 
 	if (validation.error) {
-		return !validation.error;
+		debug(`Validation failed in getValidated due to error: ${validation.error.message}`);
+		return {};
 	}
 
 	return validation.value;
-};
+}
 
 module.exports = {
 	isValid,
-	filter,
 	getValidated
 };

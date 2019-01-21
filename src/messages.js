@@ -7,6 +7,7 @@ const errors = {
 	INVALID_CERTS: "Invalid certificate(s) loaded: %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase). Refer to docs to obtain them.",
 	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist.",
 	TRSTYPE_REQUIRED: "Cannot proceed with pass creation. transitType field is required for boardingPasses.",
+	OVV_KEYS_BADFORMAT: "Cannot proceed with pass creation due to bad keys format in overrides. Debug the app through `DEBUG=* node yourapp.js` to get more information about the error."
 };
 
 const debugMessages = {

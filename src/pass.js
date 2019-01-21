@@ -370,7 +370,7 @@ class Pass {
 
 		let valid = data
 			.map(o => schema.getValidated(o, "barcode"))
-			.filter(o => o instanceof Object);
+			.filter(o => !!Object.keys(o).length);
 
 		if (valid.length) {
 			this._props["barcode"] = valid[0];
@@ -669,8 +669,11 @@ class Pass {
 		}
 
 		let modelPath = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
+		const filteredOpts = schema.getValidated(options.overrides, "supportedOptions");
 
-		const filteredOpts = schema.filter(options.overrides, "supportedOptions");
+		if (!Object.keys(filteredOpts).length) {
+			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
+		}
 
 		return {
 			model: modelPath,

@@ -18,18 +18,16 @@ let instance = Joi.object().keys({
 let supportedOptions = Joi.object().keys({
 	serialNumber: Joi.string(),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
-	webServiceURL: Joi.string().regex(/^https?:\/\/(?:[a-z0-9]+\.[a-z0-9]+\.[a-z]+(?:\.[a-z]+)?|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/?(?:[a-z\/_%0-9A-Z.]+)?/),
-	authenticationToken: Joi.string().token().min(16).when("webServiceURL", {
-		is: Joi.exist(),
-		then: Joi.required()
-	}),
+	// parsing url as set of words and nums followed by dots, optional port and any possible path after
+	webServiceURL: Joi.string().regex(/https?:\/\/(?:(?:[a-z0-9]+\.?)+(?::\d)?(?:\/[\S]+)*)*/),
+	authenticationToken: Joi.string().token().min(16),
 	sharingProhibited: Joi.boolean(),
 	backgroundColor: Joi.string().min(10).max(16),
 	foregroundColor: Joi.string().min(10).max(16),
 	labelColor: Joi.string().min(10).max(16),
 	groupingIdentifier: Joi.string(),
 	suppressStripShine: Joi.boolean()
-});
+}).with("webServiceURL", "authenticationToken");
 
 let barcode = Joi.object().keys({
 	altText: Joi.string(),

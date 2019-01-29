@@ -5,6 +5,8 @@
 	<br>
 	<br>
 	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS.</p>
+
+![](https://img.shields.io/npm/v/passkit-generator.svg?label=passkit-generator)
 </div>
 <br>
 

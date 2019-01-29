@@ -76,9 +76,9 @@ var pass = new Pass(options);
 | options.model | String/Path | The model path to be used to generate a new model. | false | -
 | options.certificates | Object | The certificate object containing the paths to certs files. | false | -
 | options.certificates.wwdr | String/Path | The path to Apple WWDR certificate. | false | -
-| options.certificates.signerCert | String/Path | The path to Developer certificate file. | false | -
-| options.certificates.signerKey | Object | The object containing developer certificate's key and passphrase. | false | -
-| options.certificates.signerKey.keyFile | String/Path | The path to developer certificate key. | false | -
+| options.certificates.signerCert | String/Path | The path to Developer certificate file or its content. | false | -
+| options.certificates.signerKey | Object/String | The object containing developer certificate's key and passphrase. If string can be the path to the key or its content. If object, must have `keyFile` key and might need `passphrase`. | false | -
+| options.certificates.signerKey.keyFile | String/Path | The path to developer certificate key or its content. | false | -
 | options.certificates.signerKey.passphrase | String \| Number | The passphrase to use to unlock the key. | false | -
 | options.overrides | Object | Dictionary containing all the keys you can override in the pass.json file and does not have a method to get overridden. | true | { }
 | options.shouldOverwrite | Boolean | Setting this property to false, will make properties in `overrides` and fields to be pushed along with the ones added through methods to the existing ones in pass.json. | true | true

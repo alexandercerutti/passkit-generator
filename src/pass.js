@@ -671,7 +671,7 @@ class Pass {
 		let modelPath = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
 		const filteredOpts = schema.getValidated(options.overrides, "supportedOptions");
 
-		if (!Object.keys(filteredOpts).length) {
+		if (!filteredOpts) {
 			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
 		}
 
@@ -714,10 +714,16 @@ function readCertificates(certificates) {
 	const optCertsNames = Object.keys(raw);
 	const certPaths = optCertsNames.map((val) => {
 		const cert = raw[val];
-		const filePath = !(cert instanceof Object) ? cert : cert["keyFile"];
-		const resolvedPath = path.resolve(filePath);
+		// realRawValue exists as signerKey might be an object
+		const realRawValue = !(cert instanceof Object) ? cert : cert["keyFile"];
 
-		return readFile(resolvedPath);
+		// We are checking if the string is a path or a content
+		if (!!path.parse(realRawValue).ext) {
+			const resolvedPath = path.resolve(realRawValue);
+			return readFile(resolvedPath);
+		} else {
+			return Promise.resolve(realRawValue);
+		}
 	});
 
 	return Promise.all(certPaths)

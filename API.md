@@ -47,8 +47,6 @@ ___
 	* Getting remote resources
 		* [.load()](#method_load)
 	* [Setting Pass Structure Keys (primaryFields, secondaryFields, ...)](#prop_fields)
-		* [<field>.push()](#prop_fields-push)
-		* [<field>.pop()](#prop_fields-pop)
 		* [TransitType](#prop_transitType)
 	* Generating the compiled pass.
 		* [.generate()](#method_generate)
@@ -448,34 +446,9 @@ ___
 **Setting Pass Structure Keys (primaryFields, secondaryFields, ...)**:
 ___
 
-Unlike method-set properties or overrides, to set fields inside areas (*primaryFields*, *secondaryFields*, *auxiliaryFields*, *headerFields*, *backFields*), this library make available a dedicated array-like interface, with just the essential methods: `push()` and `pop()`.
+Unlike method-set properties or overrides, to set fields inside areas (*primaryFields*, *secondaryFields*, *auxiliaryFields*, *headerFields*, *backFields*), this library make available a dedicated interface that extends native Array, to let you perform all the operations you need on the fields. Still, **shouldOverride** option, will determine whether default inserted fields should be kept or not.
 
-<br>
-
-<a name="prop_fields-push"></a>
-
-#### <field>.push()
-
-```javascript
-pass.<field>.push(...fields);
-```
-
-**Returns**:
-
-`Number - the amount of valid fields added to area`
-
-**Description**:
-
-An argument of type "object" is considered as one-element array.
-Fields are filtered against a schema.
-
-**Arguments**:
-
-| Key | Type | Description | Optional | Default Value |
-|-----|------|-------------|----------|:-------------:|
-| fields | Array\<Object> \| Object | Field to be added to an area | false | -
-
-**Examples**:
+**Examples:**
 
 ```javascript
 pass.headerFields.push({
@@ -490,55 +463,12 @@ pass.headerFields.push({
 	textAlignment: "PKTextAlignmentCenter"
 });
 
-pass.primaryFields.push({
-	key: "IATA-source",
-	value: "NAP",
-	label: "Napoli",
-	textAlignment: "PKTextAlignmentLeft"
-}, {
-	key: "IATA-destination",
-	value: "VCE",
-	label: "Venezia Marco Polo",
-	textAlignment: "PKTextAlignmentRight"
-});
+pass.primaryFields.pop();
 ```
 
 **See**: [Passkit Package Format Reference # Field Dictionary Keys](https://apple.co/2NuDrUM)
 
-<br>
-
-<a name="prop_fields-pop"></a>
-
-#### <field>.pop()
-
-```javascript
-pass.<field>.pop(amount);
-```
-
-**Returns**:
-
-`Number - the amount of fields removed.`
-
-**Description**:
-
-This method is a mix between `Array.prototype.pop` and `Array.prototype.slice`.
-In fact, passing this method an amount as parameter, will make it act as `slice`. Otherwise it will act as `pop`.
-
-**Arguments**:
-
-| Key | Type | Description | Optional | Default Value |
-|-----|------|-------------|----------|:-------------:|
-| amount | Number | Amount of fields to be removed from that area | true | -1
-
-**Examples**:
-
-```javascript
-pass.secondaryFields.pop(); // last element is popped out.
-
-pass.backFields.pop(5); // last five elements are popped out.
-```
-
-<br>
+<hr>
 
 <a name="prop_transitType"></a>
 

@@ -108,6 +108,7 @@ declare namespace Schema {
 
 	interface SupportedOptions {
 		serialNumber?: string,
+		description?: string,
 		userInfo?: Object | any[],
 		webServiceURL?: string,
 		authenticationToken?: string,

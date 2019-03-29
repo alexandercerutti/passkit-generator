@@ -699,8 +699,8 @@ class Pass {
  * Validates the contents of the passed options and handle them
  *
  * @function readCertificates
- * @params {Object} certificates - certificates object with raw content and, optionally,
- * the already parsed certificates
+ * @params {Object} certificates - certificates object with raw content
+ * 	and, optionally, the already parsed certificates
  * @returns {Object} - parsed certificates to be pushed to Pass.Certificates.
  */
 
@@ -817,11 +817,11 @@ function dateToW3CString(date, format) {
 }
 
 /**
- *	Apply a filter to arg0 to remove hidden files names (starting with dot)
+ * Apply a filter to arg0 to remove hidden files names (starting with dot)
  *
- *	@function removeHidden
- *	@params {String[]} from - list of file names
- *	@return {String[]}
+ * @function removeHidden
+ * @params {String[]} from - list of file names
+ * @return {String[]}
  */
 
 function removeHidden(from) {

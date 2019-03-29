@@ -14,7 +14,7 @@ const loadDebug = debug("passkit:load");
 
 const schema = require("./schema");
 const formatMessage = require("./messages");
-const FieldsContainer = require("./fields");
+const FieldsArray = require("./fieldsArray");
 
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
@@ -37,7 +37,7 @@ class Pass {
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 
-		this._fields.forEach(a => this[a] = new FieldsContainer());
+		this._fields.forEach(a => this[a] = new FieldsArray());
 		this._transitType = "";
 
 		// Assigning model and _props to this
@@ -212,7 +212,7 @@ class Pass {
 
 				archive.pipe(passStream);
 
-				FieldsContainer.emptyUnique();
+				FieldsArray.emptyUnique();
 
 				return archive.finalize().then(() => passStream);
 			});
@@ -633,11 +633,11 @@ class Pass {
 		}
 
 		this._fields.forEach(area => {
-			if (this[area].fields.length) {
+			if (this[area].length) {
 				if (this.shouldOverwrite) {
-					passFile[this.type][area] = this[area].fields;
+					passFile[this.type][area] = [...this[area]];
 				} else {
-					passFile[this.type][area].push(...this[area].fields);
+					passFile[this.type][area].push(...this[area]);
 				}
 			}
 		});

@@ -17,6 +17,7 @@ let instance = Joi.object().keys({
 
 let supportedOptions = Joi.object().keys({
 	serialNumber: Joi.string(),
+	description: Joi.string(),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
 	// parsing url as set of words and nums followed by dots, optional port and any possible path after
 	webServiceURL: Joi.string().regex(/https?:\/\/(?:(?:[a-z0-9]+\.?)+(?::\d)?(?:\/[\S]+)*)*/),

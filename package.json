@@ -4,7 +4,7 @@
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
 	"main": "index.js",
 	"scripts": {
-		"test": "jasmine tests/index.js"
+		"test": "jasmine spec/index.js"
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",

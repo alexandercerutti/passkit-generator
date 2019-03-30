@@ -20,6 +20,7 @@ const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
 
 const noop = () => { };
+const transitType = Symbol("transitType");
 
 class Pass {
 	constructor(options) {
@@ -38,7 +39,7 @@ class Pass {
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 
 		this._fields.forEach(a => this[a] = new FieldsArray());
-		this._transitType = "";
+		this[transitType] = "";
 
 		// Assigning model and _props to this
 		Object.assign(this, this._parseSettings(options));
@@ -692,15 +693,15 @@ class Pass {
 
 	set transitType(v) {
 		if (schema.isValid(v, "transitType")) {
-			this._transitType = v;
+			this[transitType] = v;
 		} else {
 			genericDebug(formatMessage("TRSTYPE_NOT_VALID", v));
-			this._transitType = this._transitType || "";
+			this[transitType] = this[transitType] || "";
 		}
 	}
 
 	get transitType() {
-		return this._transitType;
+		return this[transitType];
 	}
 }
 

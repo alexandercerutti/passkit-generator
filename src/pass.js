@@ -363,14 +363,23 @@ class Pass {
 			data = [data];
 		}
 
-		// messageEncoding is required but has a default value.
-		// Therefore I assign a validated version of the object with the default value
-		// to the ones that doesn't have messageEncoding.
-		// if o is not a valid object, false is returned and then filtered later
+		// Stripping from the array not-object elements, objects with no message
+		// and the ones that does not pass validation.
+		// Validation assign default value to missing parameters (if any).
 
-		let valid = data
-			.map(o => schema.getValidated(o, "barcode"))
-			.filter(o => !!Object.keys(o).length);
+		let valid = data.reduce((acc, current) => {
+			if (!(current && current instanceof Object && current.hasOwnProperty("message"))) {
+				return acc;
+			}
+
+			let validated = schema.getValidated(current, "barcode");
+
+			if (!(validated && validated instanceof Object && Object.keys(validated).length)) {
+				return acc;
+			}
+
+			return [...acc, validated];
+		}, []);
 
 		if (valid.length) {
 			this._props["barcode"] = valid[0];

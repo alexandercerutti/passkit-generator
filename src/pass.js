@@ -866,8 +866,8 @@ function generateStringFile(lang) {
  * @param {Array<Object<string, any>>} source - the main sources of properties
  */
 
-function assignLength(value, ...sources) {
-	return Object.assign({ length: value }, ...sources);
+function assignLength(length, ...sources) {
+	return Object.assign({ length }, ...sources);
 }
 
 module.exports = { Pass };

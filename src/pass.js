@@ -21,6 +21,8 @@ const readFile = promisify(fs.readFile);
 
 const noop = () => { };
 const transitType = Symbol("transitType");
+const barcodesFillMissing = Symbol("bfm");
+const barcodesSetBackward = Symbol("bsb");
 
 class Pass {
 	constructor(options) {
@@ -345,18 +347,22 @@ class Pass {
 			});
 		}
 
-		if (typeof data === "string" || (data instanceof Object && !data.format && data.message)) {
-			let autogen = this.__barcodeAutogen(data instanceof Object ? data : { message: data });
+		if (typeof data === "string" || (data instanceof Object && !Array.isArray(data) && !data.format && data.message)) {
+			const autogen = barcodesFromUncompleteData(data instanceof Object ? data : { message: data });
 
-			this._props["barcode"] = autogen[0] || {};
-			this._props["barcodes"] = autogen || [];
+			if (!autogen.length) {
+				return assignLength(0, this, {
+					autocomplete: noop,
+					backward: noop
+				});
+			}
 
-			// I bind "this" to get a clean context (without these two methods)
-			// when returning from the methods
+			this._props["barcode"] = autogen[0];
+			this._props["barcodes"] = autogen;
 
-			return assignLength(4, this, {
+			return assignLength(autogen.length, this, {
 				autocomplete: noop,
-				backward: this.__barcodeChooseBackward.bind(this)
+				backward: (format) => this[barcodesSetBackward](format)
 			});
 		}
 
@@ -387,39 +393,10 @@ class Pass {
 			this._props["barcodes"] = valid;
 		}
 
-		// I bind "this" to get a clean context (without these two methods)
-		// when returning from the methods
-
 		return assignLength(valid.length, this, {
-			autocomplete: this.__barcodeAutocomplete.bind(this),
-			backward: this.__barcodeChooseBackward.bind(this)
+			autocomplete: () => this[barcodesFillMissing](),
+			backward: (format) => this[barcodesSetBackward](format),
 		});
-	}
-
-	/**
-	 * Automatically generates barcodes for all the types given common info
-	 *
-	 * @method __barcodeAutogen
-	 * @params {Object} data - common info, may be object or the message itself
-	 * @params {String} data.message - the content to be placed inside "message" field
-	 * @params {String} [data.altText=data.message] - alternativeText, is message content if not overwritten
-	 * @params {String} [data.messageEncoding=iso-8859-1] - the encoding
-	 * @return {Object[]} Object array barcodeDict compliant
-	 */
-
-	__barcodeAutogen(data) {
-		if (!data || !(data instanceof Object) || !data.message) {
-			barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
-			return [];
-		}
-
-		let types = ["PKBarcodeFormatQR", "PKBarcodeFormatPDF417", "PKBarcodeFormatAztec", "PKBarcodeFormatCode128"];
-
-		data.altText = data.altText || data.message;
-		data.messageEncoding = data.messageEncoding || "iso-8859-1";
-		delete data.format;
-
-		return types.map(T => Object.assign({ format: T }, data));
 	}
 
 	/**
@@ -427,29 +404,25 @@ class Pass {
 	 * (less than 4), takes infos from the first object and replicate them
 	 * in the missing structures.
 	 *
-	 * @method __barcodeAutocomplete
+	 * @method Symbol/barcodesFillMissing
 	 * @returns {this} Improved this, with length property and retroCompatibility method.
 	 */
 
-	__barcodeAutocomplete() {
+	[barcodesFillMissing]() {
 		let props = this._props["barcodes"];
 
 		if (props.length === 4 || !props.length) {
-			// I bind "this" to get a clean context (without these two methods)
-			// when returning from the methods
-
 			return assignLength(0, this, {
-				backward: this.__barcodeChooseBackward.bind(this)
+				autocomplete: noop,
+				backward: (format) => this[barcodesSetBackward](format)
 			});
 		}
 
-		this._props["barcodes"] = this.__barcodeAutogen(props[0]);
-
-		// I bind "this" to get a clean context (without these two methods)
-		// when returning from the methods
+		this._props["barcodes"] = barcodesFromUncompleteData(props[0]);
 
 		return assignLength(4 - props.length, this, {
-			backward: this.__barcodeChooseBackward.bind(this)
+			autocomplete: noop,
+			backward: (format) => this[barcodesSetBackward](format)
 		});
 	}
 
@@ -458,12 +431,12 @@ class Pass {
 	 * this let you choose which structure to use for retrocompatibility
 	 * property "barcode".
 	 *
-	 * @method __barcodeChooseBackward
+	 * @method Symbol/barcodesSetBackward
 	 * @params {String} format - the format, or part of it, to be used
 	 * @return {this}
 	 */
 
-	__barcodeChooseBackward(format) {
+	[barcodesSetBackward](format) {
 		if (format === null) {
 			this._props["barcode"] = undefined;
 			return this;
@@ -483,7 +456,6 @@ class Pass {
 		}
 
 		this._props["barcode"] = this._props["barcodes"][index];
-
 		return this;
 	}
 
@@ -869,6 +841,37 @@ function generateStringFile(lang) {
 
 function assignLength(length, ...sources) {
 	return Object.assign({ length }, ...sources);
+}
+
+
+/**
+ * Automatically generates barcodes for all the types given common info
+ *
+ * @method barcodesFromMessage
+ * @params {Object} data - common info, may be object or the message itself
+ * @params {String} data.message - the content to be placed inside "message" field
+ * @params {String} [data.altText=data.message] - alternativeText, is message content if not overwritten
+ * @params {String} [data.messageEncoding=iso-8859-1] - the encoding
+ * @return {Object[]} Object array barcodeDict compliant
+ */
+
+function barcodesFromUncompleteData(origin) {
+	if (!(origin.message && typeof origin.message === "string")) {
+		barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
+		return [];
+	}
+
+	return [
+		"PKBarcodeFormatQR",
+		"PKBarcodeFormatPDF417",
+		"PKBarcodeFormatAztec",
+		"PKBarcodeFormatCode128"
+	].map(format =>
+		schema.getValidated(
+			Object.assign(origin, { format }),
+			"barcode"
+		)
+	);
 }
 
 module.exports = { Pass };

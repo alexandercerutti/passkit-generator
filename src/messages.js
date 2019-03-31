@@ -14,7 +14,7 @@ const debugMessages = {
 	TRSTYPE_NOT_VALID: "Transit type changing rejected as not compliant with Apple Specifications. Transit type would become \"%s\" but should be in [PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain]",
 	BRC_NOT_SUPPORTED: "Format not found among barcodes. Cannot set backward compatibility.",
 	BRC_FORMATTYPE_UNMATCH: "Format must be a string or null. Cannot set backward compatibility.",
-	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not an object or has not message field.",
+	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not a string or an object with no message field",
 	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format.",
 	LOAD_TYPES_UNMATCH: "Resource and name are not valid strings. No action will be taken for the specified medias.",
 	LOAD_MIME: "Picture MIME-type: %s",

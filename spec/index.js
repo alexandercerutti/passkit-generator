@@ -69,17 +69,26 @@ describe("Node-Passkit-generator", function () {
 
 		it("A date with defined format DD-MM-YYYY will apply changes", () => {
 			pass.expiration("10-04-2021", "DD-MM-YYYY");
-			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+01:00");
+			// this is made to avoid problems with winter and summer time:
+			// we focus only on the date and time for the tests.
+			let noTimeZoneDateTime = pass._props["expirationDate"].split("+")[0];
+			expect(noTimeZoneDateTime).toBe("2021-04-10T00:00:00");
 		});
 
 		it("A date with undefined custom format, will apply changes", () => {
 			pass.expiration("10-04-2021");
-			expect(pass._props["expirationDate"]).toBe("2021-10-04T00:00:00+01:00");
+			// this is made to avoid problems with winter and summer time:
+			// we focus only on the date and time for the tests.
+			let noTimeZoneDateTime = pass._props["expirationDate"].split("+")[0];
+			expect(noTimeZoneDateTime).toBe("2021-10-04T00:00:00");
 		});
 
 		it("A date with defined format but with slashes will apply changes", () => {
 			pass.expiration("10/04/2021", "DD-MM-YYYY");
-			expect(pass._props["expirationDate"]).toBe("2021-04-10T00:00:00+01:00");
+			// this is made to avoid problems with winter and summer time:
+			// we focus only on the date and time for the tests.
+			let noTimeZoneDateTime = pass._props["expirationDate"].split("+")[0];
+			expect(noTimeZoneDateTime).toBe("2021-04-10T00:00:00");
 		});
 
 		it("An invalid date, will not apply changes", () => {
@@ -95,17 +104,26 @@ describe("Node-Passkit-generator", function () {
 		describe("relevance('relevantDate')", () => {
 			it("A date with defined format DD-MM-YYYY will apply changes", () => {
 				pass.relevance("relevantDate", "10-04-2021", "DD-MM-YYYY");
-				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+01:00");
+				// this is made to avoid problems with winter and summer time:
+				// we focus only on the date and time for the tests.
+				let noTimeZoneDateTime = pass._props["relevantDate"].split("+")[0];
+				expect(noTimeZoneDateTime).toBe("2021-04-10T00:00:00");
 			});
 
 			it("A date with undefined custom format, will apply changes", () => {
 				pass.relevance("relevantDate", "10-04-2021");
-				expect(pass._props["relevantDate"]).toBe("2021-10-04T00:00:00+01:00");
+				// this is made to avoid problems with winter and summer time:
+				// we focus only on the date and time for the tests.
+				let noTimeZoneDateTime = pass._props["relevantDate"].split("+")[0];
+				expect(noTimeZoneDateTime).toBe("2021-10-04T00:00:00");
 			});
 
 			it("A date with defined format but with slashes will apply changes", () => {
 				pass.relevance("relevantDate", "10/04/2021", "DD-MM-YYYY");
-				expect(pass._props["relevantDate"]).toBe("2021-04-10T00:00:00+01:00");
+				// this is made to avoid problems with winter and summer time:
+				// we focus only on the date and time for the tests.
+				let noTimeZoneDateTime = pass._props["relevantDate"].split("+")[0];
+				expect(noTimeZoneDateTime).toBe("2021-04-10T00:00:00");
 			});
 		});
 

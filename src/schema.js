@@ -80,7 +80,9 @@ const locationsDict = Joi.object().keys({
 });
 
 const passDict = Joi.object().keys({
-	auxiliaryFields: Joi.array().items(field),
+	auxiliaryFields: Joi.array().items(Joi.object().keys({
+		row: Joi.number().max(1).min(0)
+	}).append(field)),
 	backFields: Joi.array().items(field),
 	headerFields: Joi.array().items(field),
 	primaryFields: Joi.array().items(field),

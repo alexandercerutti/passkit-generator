@@ -107,8 +107,9 @@ class Pass {
 			.then(([modelFileList, remoteFilesList, remoteBuffers]) => {
 				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
 				let noDynList = removeHidden(modelFileList).filter(f => !/(manifest|signature|pass)/i.test(f));
+				const hasAssets = noDynList.length || remoteFilesList.length;
 
-				if (!noDynList.length || ![...noDynList, ...remoteFilesList].some(f => f.toLowerCase().includes("icon"))) {
+				if (!hasAssets || ![...noDynList, ...remoteFilesList].some(f => f.toLowerCase().includes("icon"))) {
 					let eMessage = formatMessage("MODEL_UNINITIALIZED", path.parse(this.model).name);
 					throw new Error(eMessage);
 				}

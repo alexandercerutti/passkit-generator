@@ -15,6 +15,7 @@ const debugMessages = {
 	BRC_NOT_SUPPORTED: "Format not found among barcodes. Cannot set backward compatibility.",
 	BRC_FORMATTYPE_UNMATCH: "Format must be a string or null. Cannot set backward compatibility.",
 	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not a string or an object with no message field",
+	BRC_BW_FORMAT_UNSUPPORTED: "This format is not supported (by Apple) for backward support. Please choose another one.",
 	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format.",
 	LOAD_TYPES_UNMATCH: "Resource and name are not valid strings. No action will be taken for the specified medias.",
 	LOAD_MIME: "Picture MIME-type: %s",

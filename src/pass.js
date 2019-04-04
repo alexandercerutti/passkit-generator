@@ -411,7 +411,16 @@ class Pass {
 		}, []);
 
 		if (valid.length) {
-			this._props["barcode"] = valid[0];
+			// With this check, we want to avoid that
+			// PKBarcodeFormatCode128 gets chosen automatically
+			// if it is the first. If true, we'll get 1
+			// (so not the first index)
+			let barcodeFirstValidIndex = Number(valid[0].format === "PKBarcodeFormatCode128");
+
+			if (valid.length > 1) {
+				this._props["barcode"] = valid[barcodeFirstValidIndex];
+			}
+
 			this._props["barcodes"] = valid;
 		}
 
@@ -466,6 +475,11 @@ class Pass {
 
 		if (typeof format !== "string") {
 			barcodeDebug(formatMessage("BRC_FORMAT_UNMATCH"));
+			return this;
+		}
+
+		if (format === "PKBarcodeFormatCode128") {
+			barcodeDebug(formatMessage("BRC_BW_FORMAT_UNSUPPORTED"));
 			return this;
 		}
 

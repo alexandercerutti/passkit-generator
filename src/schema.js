@@ -189,8 +189,8 @@ const seat = Joi.object().keys({
 });
 
 const location = Joi.object().keys({
-	latitude: Joi.number(),
-	longitude: Joi.number()
+	latitude: Joi.number().required(),
+	longitude: Joi.number().required()
 });
 
 // --------- UTILITIES ---------- //

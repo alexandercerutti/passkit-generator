@@ -4,11 +4,11 @@ export declare class Pass {
 	constructor(options: Schema.Instance);
 
 	public transitType: "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";
-	public headerFields: Field[];
-	public primaryFields: Field[];
-	public secondaryFields: Field[];
-	public auxiliaryFields: (Field & { row: number })[];
-	public backFields: Field[];
+	public headerFields: Schema.Field[];
+	public primaryFields: Schema.Field[];
+	public secondaryFields: Schema.Field[];
+	public auxiliaryFields: (Schema.Field & { row: number })[];
+	public backFields: Schema.Field[];
 
 	/**
 	 * Generates a Stream of a zip file using the infos passed through overrides or methods.
@@ -163,7 +163,7 @@ declare namespace Schema {
 		totalPrice?: SemanticsCurrencyAmount;
 		// boarding Passes and Events
 		duration?: number;
-		seats?: Seat[];
+		seats?: SemanticsSeat[];
 		silenceRequested?: boolean;
 		// all boarding passes
 		departureLocation?: SemanticsLocation;
@@ -227,12 +227,12 @@ declare namespace Schema {
 		sportName?: string;
 		// Store Card Passes
 		balance?: SemanticsCurrencyAmount;
-	};
+	}
 
 	interface SemanticsCurrencyAmount {
 		currencyCode: string;
 		amount: string;
-	};
+	}
 
 	interface SemanticsPersonNameComponents {
 		givenName: string;

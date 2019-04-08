@@ -135,11 +135,11 @@ let examplePass = new Pass({
 });
 
 // Adding some settings to be written inside pass.json
-pass.localize("en", { ... });
-pass.barcode("36478105430"); // Random value
+examplePass.localize("en", { ... });
+examplePass.barcode("36478105430"); // Random value
 
 // Generate the stream, which gets returned through a Promise
-pass.generate()
+examplePass.generate()
 	.then(stream => {
 		doSomethingWithTheStream(stream);
 	})

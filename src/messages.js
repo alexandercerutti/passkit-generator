@@ -1,13 +1,13 @@
 const errors = {
-	PASSFILE_VALIDATION_FAILED: "Validation of pass type failed. Pass file is not a valid buffer or (more probabily) does not respect the schema. Refer to https://apple.co/2Nvshvn to build a correct pass.",
-	REQUIR_VALID_FAILED: "The options passed to Pass constructor does not meet the requirements. Refer to the documentation to compile them correctly.",
-	MODEL_UNINITIALIZED: "Provided model ( %s ) matched but unitialized or may not contain icon. Refer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
+	PASSFILE_VALIDATION_FAILED: "Validation of pass type failed. Pass file is not a valid buffer or (more probably) does not respect the schema. \nRefer to https://apple.co/2Nvshvn to build a correct pass.\nDebug through `DEBUG=* node yourapp.js` to get more information about the error.",
+	REQUIR_VALID_FAILED: "The options passed to Pass constructor does not meet the requirements. \nRefer to the documentation to compile them correctly.",
+	MODEL_UNINITIALIZED: "Provided model ( %s ) matched but unitialized or may not contain icon. \nRefer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
 	MODEL_NOT_STRING: "A string model name must be provided in order to continue.",
 	MODEL_NOT_FOUND: "Model %s not found. Provide a valid one to continue.",
-	INVALID_CERTS: "Invalid certificate(s) loaded: %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase). Refer to docs to obtain them.",
+	INVALID_CERTS: "Invalid certificate(s) loaded: %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase). \nRefer to docs to obtain them.",
 	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist.",
 	TRSTYPE_REQUIRED: "Cannot proceed with pass creation. transitType field is required for boardingPasses.",
-	OVV_KEYS_BADFORMAT: "Cannot proceed with pass creation due to bad keys format in overrides. Debug the app through `DEBUG=* node yourapp.js` to get more information about the error."
+	OVV_KEYS_BADFORMAT: "Cannot proceed with pass creation due to bad keys format in overrides. \nDebug the app through `DEBUG=* node yourapp.js` to get more information about the error."
 };
 
 const debugMessages = {

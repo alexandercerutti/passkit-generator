@@ -150,6 +150,12 @@ examplePass.generate()
 
 ___
 
+## Debug
+
+In case of errors, more information about the nature of the error can be obtained by adding  `DEBUG=*` before invoking Node.
+
+E.g. `DEBUG=* node yourapp.js`
+
 ## Other
 
 If you used this package in any of your projects, feel free to open a topic in issues to tell me and include a project description or link (for companies). 😊 You'll make me feel like my time hasn't been wasted, even if it had not anyway because I learnt a lot of things by creating this.

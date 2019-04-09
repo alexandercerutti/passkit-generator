@@ -5,6 +5,7 @@ Express.js **was not** inserted as dipendency.
 
 ```sh
 git clone https://github.com/alexandercerutti/passkit-generator.git;
+cd passkit-generator;
 npm install;
 npm install -g express;
 cd examples;
@@ -14,7 +15,8 @@ node <the-example-you-want-to-execute>.js
 Certificates paths in examples are linked to a folder `certificates` in the root of this project which is not provided.
 To make them work, you'll have to edit both certificates and model path.
 
-Generates pass will be generated at address [http://localhost:3000/gen/examplePass](http://localhost:3000/gen/examplePass);
+Visit [http://localhost:8080/gen/examplePass](http://localhost:8080/gen/examplePass) to get the pass. Replace "examplePass" with the pass name in models folder.
+Please note that `field.js` example will force you to download `exampleBooking.pass`, no matter what.
 ___
 
 Every contribution is really appreciated. ❤️ Thank you!

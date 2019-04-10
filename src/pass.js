@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
+const { EOL } = require("os");
 const stream = require("stream");
 const moment = require("moment");
 const forge = require("node-forge");
@@ -169,14 +170,33 @@ class Pass {
 								Object.keys(this.l10n).forEach(l => {
 									const strings = generateStringFile(this.l10n[l]);
 
-									/*
+									/**
 									 * if .string file buffer is empty, no translations were added
 									 * but still wanted to include the language
 									 */
 
-									if (strings.length) {
+									if (!strings.length) {
+										return;
+									}
+
+									/**
+									 * if there's already a buffer of the same folder and called
+									 * `pass.strings`, we'll merge the two buffers. We'll create
+									 * it otherwise.
+									 */
+
+									const stringFilePath = path.join(`${l}.lproj`, "pass.strings");
+									const stringFileIndex = bundle.findIndex(file => file === stringFilePath);
+
+									if (stringFileIndex > -1) {
+										buffers[stringFileIndex] = Buffer.concat([
+											buffers[stringFileIndex],
+											Buffer.from(EOL),
+											strings
+										]);
+									} else {
 										buffers.push(strings);
-										bundle.push(path.join(`${l}.lproj`, `pass.strings`));
+										bundle.push(stringFilePath);
 									}
 								});
 
@@ -831,7 +851,7 @@ function generateStringFile(lang) {
 	let strings = Object.keys(lang)
 		.map(key => `"${key}" = "${lang[key].replace(/"/g, /\\"/)}";`);
 
-	return Buffer.from(strings.join("\n"), "utf8");
+	return Buffer.from(strings.join(EOL), "utf8");
 }
 
 /**

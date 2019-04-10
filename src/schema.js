@@ -39,7 +39,7 @@ let barcode = Joi.object().keys({
 
 let field = Joi.object().keys({
 	attributedValue: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()),
-	changeMessage: Joi.string().allow("").regex(/%@/),
+	changeMessage: Joi.string(),
 	dataDetectorType: Joi.array().items(Joi.string().regex(/(PKDataDetectorTypePhoneNumber|PKDataDetectorTypeLink|PKDataDetectorTypeAddress|PKDataDetectorTypeCalendarEvent)/, "dataDetectorType")),
 	label: Joi.string().allow(""),
 	textAlignment: Joi.string().regex(/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/, "graphic-alignment"),

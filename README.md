@@ -20,6 +20,8 @@ Pass template will be read and pushed as is in the resulting .zip file along wit
 
 This package comes with an [API documentation](./API.md), that makes available a series of methods to customize passes.
 
+> ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
+
 ### Install
 ```sh
 $ npm install passkit-generator --save

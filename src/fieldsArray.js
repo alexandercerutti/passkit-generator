@@ -2,11 +2,16 @@ const schema = require("./schema");
 const debug = require("debug")("passkit:fields");
 
 /**
+ * Pass fields must be unique (for key) in its scope.
+ * Therefore we use a Set to keep them tracked.
+ */
+
+const fieldsKeys = new Set();
+
+/**
  * Class to represent lower-level keys pass fields
  * @see https://apple.co/2wkUBdh
  */
-
-const uniqueKeys = new Set();
 
 class FieldsArray extends Array {
 	constructor(...items) {
@@ -19,15 +24,15 @@ class FieldsArray extends Array {
 	 */
 
 	push(...fieldsData) {
-		let validFields = fieldsData.reduce((acc, current) => {
+		const validFields = fieldsData.reduce((acc, current) => {
 			if (!(typeof current === "object") || !schema.isValid(current, "field")) {
 				return acc;
 			}
 
-			if (acc.some(e => e.key === current.key) || uniqueKeys.has(current.key)) {
-				debug(`UNIQUE field key CONSTRAINT VIOLATED. Fields keys must be unique in pass scope. Field key: "${current.key}"`);
+			if (acc.some(e => e.key === current.key) || fieldsKeys.has(current.key)) {
+				debug(`Field with key "${current.key}" discarded: fields must be unique in pass scope.`);
 			} else {
-				uniqueKeys.add(current.key);
+				fieldsKeys.add(current.key);
 				acc.push(current);
 			}
 
@@ -44,7 +49,7 @@ class FieldsArray extends Array {
 
 	pop() {
 		const element = Array.prototype.pop.call(this);
-		uniqueKeys.delete(element.key);
+		fieldsKeys.delete(element.key);
 		return element;
 	}
 
@@ -54,8 +59,8 @@ class FieldsArray extends Array {
 	 */
 
 	splice(start, deleteCount, ...items) {
-		let removeList = this.slice(start, deleteCount+start);
-		removeList.forEach(item => uniqueKeys.delete(item.key));
+		const removeList = this.slice(start, deleteCount+start);
+		removeList.forEach(item => fieldsKeys.delete(item.key));
 
 		return Array.prototype.splice.call(this, start, deleteCount, items);
 	}
@@ -65,7 +70,7 @@ class FieldsArray extends Array {
 	}
 
 	static emptyUnique() {
-		uniqueKeys.clear();
+		fieldsKeys.clear();
 	}
 }
 

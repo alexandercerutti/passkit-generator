@@ -603,7 +603,7 @@ class Pass {
 		/**
 		 * Signature here is an ASN.1 valid structure (DER-compliant).
 		 * Generating a non-detached signature, would have pushed inside signature.contentInfo
-		 * (which has type 16, or "SEQUENCE", and is an array) a Context-Specific element, with the signed
+		 * (which has type 16, or "SEQUENCE", and is an array) a Context-Specific element, with the
 		 * signed content as value.
 		 *
 		 * In fact the previous approach was to generating a detached signature and the pull away the generated

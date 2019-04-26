@@ -102,26 +102,6 @@ class Pass {
 			// Localization folders only
 			const L10N = noDynList.filter(f => f.includes(".lproj") && Object.keys(this.l10n).includes(path.parse(f).name));
 
-			/**
-			 * Reads pass.json file and apply patches on it
-			 * @function
-			 * @name passExtractor
-			 * @return {Promise<Buffer>} The patched pass.json buffer
-			 */
-
-			const passExtractor = async () => {
-				const passStructBuffer = await readFile(path.resolve(this.model, "pass.json"))
-
-				if (!this._validateType(passStructBuffer)) {
-					const eMessage = formatMessage("PASSFILE_VALIDATION_FAILED");
-					throw new Error(eMessage);
-				}
-
-				bundle.push("pass.json");
-
-				return this._patch(passStructBuffer);
-			};
-
 			/*
 			 * Reading all the localization selected folders and removing hidden files (the ones that starts with ".")
 			 * from the list.
@@ -151,8 +131,12 @@ class Pass {
 				bundle = bundle.filter(file => !remoteFilesList.includes(file));
 			}
 
+			// Reading bundle files to buffers without pass.json - it gets read below
+			// to use a different parsing process
+
 			const bundleBuffers = bundle.map(f => readFile(path.resolve(this.model, f)));
-			const passBuffer = passExtractor();
+			const passBuffer = this._extractPassDefinition();
+			bundle.push("pass.json");
 
 			const buffers = await Promise.all([...bundleBuffers, passBuffer, ...buffersPromise]);
 
@@ -534,17 +518,36 @@ class Pass {
 	 * @returns {Boolean} true if type is supported, false otherwise.
 	 */
 
-	_validateType(passBuffer) {
+	_validateType(passFile) {
 		let passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 
-		let passFile = JSON.parse(passBuffer.toString("utf8"));
 		this.type = passTypes.find(type => passFile.hasOwnProperty(type));
 
 		if (!this.type) {
+			genericDebug(formatMessage("NO_PASS_TYPE"));
 			return false;
 		}
 
 		return schema.isValid(passFile[this.type], "passDict");
+	}
+
+	/**
+	 * Reads pass.json file and returns the patched version
+	 * @function
+	 * @name passExtractor
+	 * @return {Promise<Buffer>} The patched pass.json buffer
+	 */
+
+	async _extractPassDefinition() {
+		const passStructBuffer = await readFile(path.resolve(this.model, "pass.json"))
+		const parsedPassDefinition = JSON.parse(passStructBuffer.toString("utf8"));
+
+		if (!this._validateType(parsedPassDefinition)) {
+			const eMessage = formatMessage("PASSFILE_VALIDATION_FAILED");
+			throw new Error(eMessage);
+		}
+
+		return this._patch(parsedPassDefinition);
 	}
 
 	/**
@@ -617,9 +620,7 @@ class Pass {
 	 * @returns {Promise<Buffer>} Edited pass.json buffer or Object containing error.
 	 */
 
-	_patch(passBuffer) {
-		let passFile = JSON.parse(passBuffer.toString("utf8"));
-
+	_patch(passFile) {
 		if (Object.keys(this._props).length) {
 			const rgbValues = ["backgroundColor", "foregroundColor", "labelColor"];
 

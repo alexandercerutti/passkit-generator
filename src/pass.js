@@ -56,190 +56,182 @@ class Pass {
 	 * @return {Promise<Stream>} A Promise containing the stream of the generated pass.
 	*/
 
-	generate() {
-		let archive = archiver("zip");
+	async generate() {
+		try {
+			// Reading the model
+			const modelFilesList = await readdir(this.model);
 
-		return readCertificates(this.Certificates)
-			.then((certs) => Object.assign(this.Certificates, certs))
-			.then(() => readdir(this.model))
-			.catch((err) => {
-				// May have not used this catch but ENOENT error is not enough self-explanatory
-				// in the case of internal usage ()
-				if (err.code && err.code === "ENOENT") {
-					throw new Error(formatMessage("MODEL_NOT_FOUND", this.model));
+			/**
+			 * Getting the buffers for remote files
+			 */
+
+			const buffersPromise = this._remoteResources.reduce(async (acc, current) => {
+				try {
+					const response = await got(current[0], { encoding: null });
+					loadDebug(formatMessage("LOAD_MIME", response.headers["content-type"]));
+
+					if (!Buffer.isBuffer(response.body)) {
+						throw "LOADED_RESOURCE_NOT_A_BUFFER";
+					}
+
+					if (!response.headers["content-type"].includes("image/")) {
+						throw "LOADED_RESOURCE_NOT_A_PICTURE";
+					}
+
+					return [...acc, response.body];
+				} catch (err) {
+					loadDebug(formatMessage("LOAD_NORES", current[1], err));
+					return acc;
 				}
+			}, []);
 
-				throw new Error(err);
-			})
-			.then(filesList => {
-				if (!this._remoteResources.length) {
-					return [filesList, [], []];
-				}
+			const remoteFilesList = buffersPromise.length ? this._remoteResources.map(r => r[1]): [];
 
-				let buffersPromise = this._remoteResources.map((r) => {
-					return got(r[0], { encoding: null })
-						.then(response => {
-							loadDebug(formatMessage("LOAD_MIME", response.headers["content-type"]));
+			// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
+			const noDynList = removeHidden(modelFilesList).filter(f => !/(manifest|signature|pass)/i.test(f));
+			const hasAssets = noDynList.length || remoteFilesList.length;
 
-							if (!Buffer.isBuffer(response.body)) {
-								throw "LOADED_RESOURCE_NOT_A_BUFFER";
-							}
+			if (!hasAssets || ![...noDynList, ...remoteFilesList].some(f => f.toLowerCase().includes("icon"))) {
+				let eMessage = formatMessage("MODEL_UNINITIALIZED", path.parse(this.model).name);
+				throw new Error(eMessage);
+			}
 
-							if (!response.headers["content-type"].includes("image/")) {
-								throw "LOADED_RESOURCE_NOT_A_PICTURE";
-							}
+			// list without localization files (they will be added later in the flow)
+			const bundle = noDynList.filter(f => !f.includes(".lproj"));
 
-							return response.body;
-						})
-						.catch(e => {
-							loadDebug(formatMessage("LOAD_NORES", r[1], e));
-							// here we are adding undefined values, that will be removed later.
-							return undefined;
-						});
-				});
+			// Localization folders only
+			const L10N = noDynList.filter(f => f.includes(".lproj") && Object.keys(this.l10n).includes(path.parse(f).name));
 
-				// forwarding model files list, remote files list and remote buffers.
-				return [
-					filesList,
-					buffersPromise.length ? this._remoteResources.map(r => r[1]) : [],
-					buffersPromise
-				];
-			})
-			.then(([modelFileList, remoteFilesList, remoteBuffers]) => {
-				// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
-				let noDynList = removeHidden(modelFileList).filter(f => !/(manifest|signature|pass)/i.test(f));
-				const hasAssets = noDynList.length || remoteFilesList.length;
+			/**
+			 * Reads pass.json file and apply patches on it
+			 * @function
+			 * @name passExtractor
+			 * @return {Promise<Buffer>} The patched pass.json buffer
+			 */
 
-				if (!hasAssets || ![...noDynList, ...remoteFilesList].some(f => f.toLowerCase().includes("icon"))) {
-					let eMessage = formatMessage("MODEL_UNINITIALIZED", path.parse(this.model).name);
+			const passExtractor = async () => {
+				const passStructBuffer = await readFile(path.resolve(this.model, "pass.json"))
+
+				if (!this._validateType(passStructBuffer)) {
+					const eMessage = formatMessage("PASSFILE_VALIDATION_FAILED");
 					throw new Error(eMessage);
 				}
 
-				// list without localization files (they will be added later in the flow)
-				let bundle = noDynList.filter(f => !f.includes(".lproj"));
+				bundle.push("pass.json");
 
-				// Localization folders only
-				const L10N = noDynList.filter(f => f.includes(".lproj") && Object.keys(this.l10n).includes(path.parse(f).name));
+				return this._patch(passStructBuffer);
+			};
+
+			/*
+			 * Reading all the localization selected folders and removing hidden files (the ones that starts with ".")
+			 * from the list.
+			 */
+
+			const listByFolder = await Promise.all(
+				L10N.map(async f =>
+					removeHidden(await readdir(
+						path.join(this.model, f)
+					))
+				)
+			);
+
+			// Pushing into the bundle the composed paths for localization files
+
+			listByFolder.forEach((folder, index) =>
+				bundle.push(
+					...folder.map(f => path.join(L10N[index], f))
+				)
+			);
+
+			/* Getting all bundle file buffers, pass.json included, and appending path */
+
+			if (remoteFilesList.length) {
+				// Removing files in bundle that also exist in remoteFilesList
+				// I'm giving priority to downloaded files
+				bundle = bundle.filter(file => !remoteFilesList.includes(file));
+			}
+
+			const bundleBuffers = bundle.map(f => readFile(path.resolve(this.model, f)));
+			const passBuffer = passExtractor();
+
+			const buffers = await Promise.all([...bundleBuffers, passBuffer, ...buffersPromise]);
+
+			Object.keys(this.l10n).forEach(l => {
+				const strings = generateStringFile(this.l10n[l]);
 
 				/**
-				 * Reads pass.json file and apply patches on it
-				 * @function
-				 * @name passExtractor
-				 * @return {Promise<Buffer>} The patched pass.json buffer
+				 * if .string file buffer is empty, no translations were added
+				 * but still wanted to include the language
 				 */
 
-				let passExtractor = (() => {
-					return readFile(path.resolve(this.model, "pass.json"))
-						.then(passStructBuffer => {
-							if (!this._validateType(passStructBuffer)) {
-								let eMessage = formatMessage("PASSFILE_VALIDATION_FAILED");
-								throw new Error(eMessage);
-							}
+				if (!strings.length) {
+					return;
+				}
 
-							bundle.push("pass.json");
-
-							return this._patch(passStructBuffer);
-						});
-				});
-
-				/*
-				 * Reading all the localization selected folders and removing hidden files (the ones that starts with ".")
-				 * from the list. Returning a Promise containing all those files
+				/**
+				 * if there's already a buffer of the same folder and called
+				 * `pass.strings`, we'll merge the two buffers. We'll create
+				 * it otherwise.
 				 */
 
-				return Promise.all(L10N.map(f => readdir(path.join(this.model, f)).then(removeHidden)))
-					.then(listByFolder => {
-						/* Each localization file name is joined with its own path and pushed to the bundle files array. */
+				const stringFilePath = path.join(`${l}.lproj`, "pass.strings");
+				const stringFileIndex = bundle.findIndex(file => file === stringFilePath);
 
-						listByFolder.forEach((folder, index) => bundle.push(...folder.map(f => path.join(L10N[index], f))));
-
-						/* Getting all bundle file buffers, pass.json included, and appending path */
-
-						if (remoteFilesList.length) {
-							// Removing files in bundle that also exist in remoteFilesList
-							// I'm giving priority to downloaded files
-							bundle = bundle.filter(file => !remoteFilesList.includes(file));
-						}
-
-						let bundleBuffers = bundle.map(f => readFile(path.resolve(this.model, f)));
-						let passBuffer = passExtractor();
-
-						// Resolving all the buffers promises
-						return Promise.all([...bundleBuffers, passBuffer, ...remoteBuffers])
-							.then(buffers => {
-								Object.keys(this.l10n).forEach(l => {
-									const strings = generateStringFile(this.l10n[l]);
-
-									/**
-									 * if .string file buffer is empty, no translations were added
-									 * but still wanted to include the language
-									 */
-
-									if (!strings.length) {
-										return;
-									}
-
-									/**
-									 * if there's already a buffer of the same folder and called
-									 * `pass.strings`, we'll merge the two buffers. We'll create
-									 * it otherwise.
-									 */
-
-									const stringFilePath = path.join(`${l}.lproj`, "pass.strings");
-									const stringFileIndex = bundle.findIndex(file => file === stringFilePath);
-
-									if (stringFileIndex > -1) {
-										buffers[stringFileIndex] = Buffer.concat([
-											buffers[stringFileIndex],
-											Buffer.from(EOL),
-											strings
-										]);
-									} else {
-										buffers.push(strings);
-										bundle.push(stringFilePath);
-									}
-								});
-
-								return [
-									// removing undefined values
-									buffers.filter(b => !!b),
-									[...bundle, ...remoteFilesList]
-								];
-							});
-					});
-			})
-			.then(([buffers, bundle]) => {
-				/*
-				 * Parsing the buffers, pushing them into the archive
-				 * and returning the compiled manifest
-				 */
-
-				return buffers.reduce((acc, current, index) => {
-					let filename = bundle[index];
-					let hashFlow = forge.md.sha1.create();
-
-					hashFlow.update(current.toString("binary"));
-					archive.append(current, { name: filename });
-
-					acc[filename] = hashFlow.digest().toHex();
-
-					return acc;
-				}, {});
-			})
-			.then((manifest) => {
-				let signatureBuffer = this._sign(manifest);
-
-				archive.append(signatureBuffer, { name: "signature" });
-				archive.append(JSON.stringify(manifest), { name: "manifest.json" });
-
-				let passStream = new stream.PassThrough();
-
-				archive.pipe(passStream);
-
-				FieldsArray.emptyUnique();
-
-				return archive.finalize().then(() => passStream);
+				if (stringFileIndex > -1) {
+					buffers[stringFileIndex] = Buffer.concat([
+						buffers[stringFileIndex],
+						strings
+					]);
+				} else {
+					buffers.push(strings);
+					bundle.push(stringFilePath);
+				}
 			});
+
+			// Pushing the remote files into the bundle
+			bundle.push(...remoteFilesList);
+
+			/*
+			 * Parsing the buffers, pushing them into the archive
+			 * and returning the compiled manifest
+			 */
+			const archive = archiver("zip");
+			const manifest = buffers.reduce((acc, current, index) => {
+				let filename = bundle[index];
+				let hashFlow = forge.md.sha1.create();
+
+				hashFlow.update(current.toString("binary"));
+				archive.append(current, { name: filename });
+
+				acc[filename] = hashFlow.digest().toHex();
+
+				return acc;
+			}, {});
+
+			// Reading the certificates,
+			// signing the manifest, appending signature an manifest to the archive
+			// and returning the generated pass stream.
+
+			Object.assign(this.Certificates, await readCertificates(this.Certificates));
+
+			const signatureBuffer = this._sign(manifest);
+
+			archive.append(signatureBuffer, { name: "signature" });
+			archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+
+			const passStream = new stream.PassThrough();
+
+			archive.pipe(passStream);
+
+			FieldsArray.emptyUnique();
+
+			return archive.finalize().then(() => passStream);
+		} catch (err) {
+			if (err.code && err.code === "ENOENT") {
+				// No model available at this path - renaming the error
+				throw new Error(formatMessage("MODEL_NOT_FOUND", this.model));
+			}
+		}
 	}
 
 	/**
@@ -763,7 +755,6 @@ function readCertificates(certificates) {
 			);
 		}).catch(err => {
 			if (!err.path) {
-				// Catching error from '.then()';
 				throw err;
 			}
 

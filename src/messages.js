@@ -8,6 +8,7 @@ const errors = {
 	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist.",
 	TRSTYPE_REQUIRED: "Cannot proceed with pass creation. transitType field is required for boardingPasses.",
 	OVV_KEYS_BADFORMAT: "Cannot proceed with pass creation due to bad keys format in overrides.",
+	NO_PASS_TYPE: "Cannot proceed with pass creation. Model definition (pass.json) has no valid type in it.\nRefer to https://apple.co/2wzyL5J to choose a valid pass type."
 };
 
 const debugMessages = {

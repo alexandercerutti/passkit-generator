@@ -372,12 +372,12 @@ class Pass {
 		// and the ones that does not pass validation.
 		// Validation assign default value to missing parameters (if any).
 
-		let valid = data.reduce((acc, current) => {
+		const valid = data.reduce((acc, current) => {
 			if (!(current && current instanceof Object && current.hasOwnProperty("message"))) {
 				return acc;
 			}
 
-			let validated = schema.getValidated(current, "barcode");
+			const validated = schema.getValidated(current, "barcode");
 
 			if (!(validated && validated instanceof Object && Object.keys(validated).length)) {
 				return acc;
@@ -679,7 +679,7 @@ class Pass {
 			throw new Error(formatMessage("MODEL_NOT_STRING"));
 		}
 
-		let modelPath = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
+		const modelPath = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
 		const filteredOpts = schema.getValidated(options.overrides, "supportedOptions");
 
 		if (!filteredOpts) {
@@ -793,7 +793,7 @@ function isValidRGB(value) {
 		return false;
 	}
 
-	let rgb = value.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/);
+	const rgb = value.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/);
 
 	if (!rgb) {
 		return false;
@@ -817,7 +817,7 @@ function dateToW3CString(date, format) {
 		return "";
 	}
 
-	let parsedDate = moment(date.replace(/\//g, "-"), format || ["MM-DD-YYYY hh:mm:ss", "DD-MM-YYYY hh:mm:ss"]).format();
+	const parsedDate = moment(date.replace(/\//g, "-"), format || ["MM-DD-YYYY hh:mm:ss", "DD-MM-YYYY hh:mm:ss"]).format();
 
 	if (parsedDate === "Invalid date") {
 		return undefined;
@@ -855,7 +855,7 @@ function generateStringFile(lang) {
 	// Pass.strings format is the following one for each row:
 	// "key" = "value";
 
-	let strings = Object.keys(lang)
+	const strings = Object.keys(lang)
 		.map(key => `"${key}" = "${lang[key].replace(/"/g, /\\"/)}";`);
 
 	return Buffer.from(strings.join(EOL), "utf8");

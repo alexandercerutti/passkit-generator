@@ -2,3 +2,4 @@ passModels/
 certificates/
 *.code-workspace
 examples/
+.vscode/

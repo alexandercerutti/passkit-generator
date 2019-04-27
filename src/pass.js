@@ -391,9 +391,9 @@ class Pass {
 			// PKBarcodeFormatCode128 gets chosen automatically
 			// if it is the first. If true, we'll get 1
 			// (so not the first index)
-			let barcodeFirstValidIndex = Number(valid[0].format === "PKBarcodeFormatCode128");
+			const barcodeFirstValidIndex = Number(valid[0].format === "PKBarcodeFormatCode128");
 
-			if (valid.length > 1) {
+			if (valid.length > 0) {
 				this._props["barcode"] = valid[barcodeFirstValidIndex];
 			}
 

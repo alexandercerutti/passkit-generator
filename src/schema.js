@@ -30,73 +30,32 @@ const supportedOptions = Joi.object().keys({
 	suppressStripShine: Joi.boolean()
 }).with("webServiceURL", "authenticationToken");
 
-const barcode = Joi.object().keys({
-	altText: Joi.string(),
-	messageEncoding: Joi.string().default("iso-8859-1"),
-	format: Joi.string().required().regex(/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/, "barcodeType"),
-	message: Joi.string().required()
-});
-
-const field = Joi.object().keys({
-	attributedValue: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()),
-	changeMessage: Joi.string(),
-	dataDetectorType: Joi.array().items(Joi.string().regex(/(PKDataDetectorTypePhoneNumber|PKDataDetectorTypeLink|PKDataDetectorTypeAddress|PKDataDetectorTypeCalendarEvent)/, "dataDetectorType")),
-	label: Joi.string().allow(""),
-	textAlignment: Joi.string().regex(/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/, "graphic-alignment"),
-	key: Joi.string().required(),
-	value: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()).required(),
-	semantics,
-	// date fields formatters, all optionals
-	dateStyle: Joi.string().regex(/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/, "date style"),
-	ignoreTimeZone: Joi.boolean(),
-	isRelative: Joi.boolean(),
-	timeStyle: Joi.string().regex(/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/, "date style"),
-	// number fields formatters, all optionals
-	currencyCode: Joi.string()
-		.when("value", {
-			is: Joi.number(),
-			otherwise: Joi.string().forbidden()
-		}),
-	numberStyle: Joi.string()
-		.regex(/(PKNumberStyleDecimal|PKNumberStylePercent|PKNumberStyleScientific|PKNumberStyleSpellOut)/)
-		.when("value", {
-			is: Joi.number(),
-			otherwise: Joi.string().forbidden()
-		}),
-});
-
-const beaconsDict = Joi.object().keys({
-	major: Joi.number().integer().positive().max(65535).greater(Joi.ref("minor")),
-	minor: Joi.number().integer().positive().max(65535).less(Joi.ref("major")),
-	proximityUUID: Joi.string().required(),
-	relevantText: Joi.string()
-});
-
-const locationsDict = Joi.object().keys({
-	altitude: Joi.number(),
-	latitude: Joi.number().required(),
-	longitude: Joi.number().required(),
-	relevantText: Joi.string()
-});
-
-const passDict = Joi.object().keys({
-	auxiliaryFields: Joi.array().items(Joi.object().keys({
-		row: Joi.number().max(1).min(0)
-	}).append(field)),
-	backFields: Joi.array().items(field),
-	headerFields: Joi.array().items(field),
-	primaryFields: Joi.array().items(field),
-	secondaryFields: Joi.array().items(field)
-});
-
-const transitType = Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/);
-
-const nfcDict = Joi.object().keys({
-	message: Joi.string().required().max(64),
-	encryptionPublicKey: Joi.string()
-});
 
 /* For a correct usage of semantics, please refer to https://apple.co/2I66Phk */
+
+const currencyAmount = Joi.object().keys({
+	currencyCode: Joi.string().required(),
+	amount: Joi.string().required(),
+});
+
+const personNameComponents = Joi.object().keys({
+	givenName: Joi.string().required(),
+	familyName: Joi.string().required()
+});
+
+const seat = Joi.object().keys({
+	seatSection: Joi.string(),
+	seatRow: Joi.string(),
+	seatNumber: Joi.string(),
+	seatIdentifier: Joi.string(),
+	seatType: Joi.string(),
+	seatDescription: Joi.string()
+});
+
+const location = Joi.object().keys({
+	latitude: Joi.number().required(),
+	longitude: Joi.number().required()
+});
 
 const semantics = Joi.object().keys({
 	// All
@@ -169,28 +128,70 @@ const semantics = Joi.object().keys({
 	balance: currencyAmount
 });
 
-const currencyAmount = Joi.object().keys({
-	currencyCode: Joi.string().required(),
-	amount: Joi.string().required(),
+const barcode = Joi.object().keys({
+	altText: Joi.string(),
+	messageEncoding: Joi.string().default("iso-8859-1"),
+	format: Joi.string().required().regex(/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/, "barcodeType"),
+	message: Joi.string().required()
 });
 
-const personNameComponents = Joi.object().keys({
-	givenName: Joi.string().required(),
-	familyName: Joi.string().required()
+const field = Joi.object().keys({
+	attributedValue: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()),
+	changeMessage: Joi.string(),
+	dataDetectorType: Joi.array().items(Joi.string().regex(/(PKDataDetectorTypePhoneNumber|PKDataDetectorTypeLink|PKDataDetectorTypeAddress|PKDataDetectorTypeCalendarEvent)/, "dataDetectorType")),
+	label: Joi.string().allow(""),
+	textAlignment: Joi.string().regex(/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/, "graphic-alignment"),
+	key: Joi.string().required(),
+	value: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()).required(),
+	semantics,
+	// date fields formatters, all optionals
+	dateStyle: Joi.string().regex(/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/, "date style"),
+	ignoreTimeZone: Joi.boolean(),
+	isRelative: Joi.boolean(),
+	timeStyle: Joi.string().regex(/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/, "date style"),
+	// number fields formatters, all optionals
+	currencyCode: Joi.string()
+		.when("value", {
+			is: Joi.number(),
+			otherwise: Joi.string().forbidden()
+		}),
+	numberStyle: Joi.string()
+		.regex(/(PKNumberStyleDecimal|PKNumberStylePercent|PKNumberStyleScientific|PKNumberStyleSpellOut)/)
+		.when("value", {
+			is: Joi.number(),
+			otherwise: Joi.string().forbidden()
+		}),
 });
 
-const seat = Joi.object().keys({
-	seatSection: Joi.string(),
-	seatRow: Joi.string(),
-	seatNumber: Joi.string(),
-	seatIdentifier: Joi.string(),
-	seatType: Joi.string(),
-	seatDescription: Joi.string()
+const beaconsDict = Joi.object().keys({
+	major: Joi.number().integer().positive().max(65535).greater(Joi.ref("minor")),
+	minor: Joi.number().integer().positive().max(65535).less(Joi.ref("major")),
+	proximityUUID: Joi.string().required(),
+	relevantText: Joi.string()
 });
 
-const location = Joi.object().keys({
+const locationsDict = Joi.object().keys({
+	altitude: Joi.number(),
 	latitude: Joi.number().required(),
-	longitude: Joi.number().required()
+	longitude: Joi.number().required(),
+	relevantText: Joi.string()
+});
+
+const passDict = Joi.object().keys({
+	auxiliaryFields: Joi.array().items(Joi.object().keys({
+		row: Joi.number().max(1).min(0)
+	}).concat(field)),
+	backFields: Joi.array().items(field),
+	headerFields: Joi.array().items(field),
+	primaryFields: Joi.array().items(field),
+	secondaryFields: Joi.array().items(field)
+});
+
+const transitType = Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/);
+
+const nfcDict = Joi.object().keys({
+	message: Joi.string().required().max(64),
+	encryptionPublicKey: Joi.string()
 });
 
 // --------- UTILITIES ---------- //

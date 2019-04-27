@@ -513,12 +513,12 @@ class Pass {
 	/**
 	 * Checks if pass model type is one of the supported ones
 	 *
-	 * @method _validateType
-	 * @params {Buffer} passBuffer - buffer of the pass structure content
+	 * @method _hasValidType
+	 * @params {string} passFile - parsed pass structure content
 	 * @returns {Boolean} true if type is supported, false otherwise.
 	 */
 
-	_validateType(passFile) {
+	_hasValidType(passFile) {
 		let passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 
 		this.type = passTypes.find(type => passFile.hasOwnProperty(type));
@@ -542,7 +542,7 @@ class Pass {
 		const passStructBuffer = await readFile(path.resolve(this.model, "pass.json"))
 		const parsedPassDefinition = JSON.parse(passStructBuffer.toString("utf8"));
 
-		if (!this._validateType(parsedPassDefinition)) {
+		if (!this._hasValidType(parsedPassDefinition)) {
 			const eMessage = formatMessage("PASSFILE_VALIDATION_FAILED");
 			throw new Error(eMessage);
 		}

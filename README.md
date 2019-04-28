@@ -7,6 +7,8 @@
 	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS.</p>
 
 ![](https://img.shields.io/npm/v/passkit-generator.svg?label=passkit-generator)
+![](https://img.shields.io/node/v/passkit-generator.svg)
+
 </div>
 <br>
 
@@ -26,9 +28,6 @@ This package comes with an [API documentation](./API.md), that makes available a
 ```sh
 $ npm install passkit-generator --save
 ```
-
-### Compatibility
-This package is compatible starting with Node v8.1.0+.
 
 ___
 

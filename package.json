@@ -1,6 +1,6 @@
 {
 	"name": "passkit-generator",
-	"version": "1.6.0",
+	"version": "1.6.1",
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
 	"main": "index.js",
 	"scripts": {

@@ -622,9 +622,12 @@ class Pass {
 
 	_patch(passFile) {
 		if (Object.keys(this._props).length) {
-			const rgbValues = ["backgroundColor", "foregroundColor", "labelColor"];
-
-			rgbValues.filter(v => this._props[v] && !isValidRGB(this._props[v])).forEach(v => delete this._props[v]);
+			// We filter the existing (in passFile) and non-valid keys from
+			// the below array keys that accept rgb values
+			// and then delete it from the passFile.
+			["backgroundColor", "foregroundColor", "labelColor"]
+				.filter(v => this._props[v] && !isValidRGB(this._props[v]))
+				.forEach(v => delete this._props[v]);
 
 			if (this.shouldOverwrite) {
 				Object.assign(passFile, this._props);

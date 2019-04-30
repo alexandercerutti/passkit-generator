@@ -2,23 +2,6 @@ const moment = require("moment");
 const { EOL } = require("os");
 
 /**
- * Parses the PEM-formatted passed text (certificates)
- *
- * @function parsePEM
- * @params {String} element - Text content of .pem files
- * @params {String=} passphrase - passphrase for the key
- * @returns {Object} The parsed certificate or key in node forge format
- */
-
-function parsePEM(pemName, element, passphrase) {
-	if (pemName === "signerKey" && passphrase) {
-		return forge.pki.decryptRsaPrivateKey(element, String(passphrase));
-	} else {
-		return forge.pki.certificateFromPem(element);
-	}
-}
-
-/**
  * Checks if an rgb value is compliant with CSS-like syntax
  *
  * @function isValidRGB
@@ -114,6 +97,5 @@ module.exports = {
 	generateStringFile,
 	removeHidden,
 	dateToW3CString,
-	isValidRGB,
-	parsePEM
+	isValidRGB
 };

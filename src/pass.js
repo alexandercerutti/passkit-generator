@@ -17,7 +17,7 @@ const FieldsArray = require("./fieldsArray");
 const {
 	assignLength, generateStringFile,
 	removeHidden, dateToW3CString,
-	isValidRGB, parsePEM
+	isValidRGB
 } = require("./utils");
 
 const readdir = promisify(fs.readdir);
@@ -218,6 +218,8 @@ class Pass {
 				// No model available at this path - renaming the error
 				throw new Error(formatMessage("MODEL_NOT_FOUND", this.model));
 			}
+
+			throw new Error(err);
 		}
 	}
 
@@ -767,6 +769,23 @@ function readCertificates(certificates) {
 
 			throw new Error(formatMessage("INVALID_CERT_PATH", path.parse(err.path).base));
 		});
+}
+
+/**
+ * Parses the PEM-formatted passed text (certificates)
+ *
+ * @function parsePEM
+ * @params {String} element - Text content of .pem files
+ * @params {String=} passphrase - passphrase for the key
+ * @returns {Object} The parsed certificate or key in node forge format
+ */
+
+function parsePEM(pemName, element, passphrase) {
+	if (pemName === "signerKey" && passphrase) {
+		return forge.pki.decryptRsaPrivateKey(element, String(passphrase));
+	} else {
+		return forge.pki.certificateFromPem(element);
+	}
 }
 
 /**

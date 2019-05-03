@@ -68,7 +68,7 @@ class Pass {
 			 * Getting the buffers for remote files
 			 */
 
-			const buffersPromise = this._remoteResources.reduce(async (acc, current) => {
+			const buffersPromise = await this._remoteResources.reduce(async (acc, current) => {
 				try {
 					const response = await got(current[0], { encoding: null });
 					loadDebug(formatMessage("LOAD_MIME", response.headers["content-type"]));
@@ -100,7 +100,7 @@ class Pass {
 			}
 
 			// list without localization files (they will be added later in the flow)
-			const bundle = noDynList.filter(f => !f.includes(".lproj"));
+			let bundle = noDynList.filter(f => !f.includes(".lproj"));
 
 			// Localization folders only
 			const L10N = noDynList.filter(f => f.includes(".lproj") && Object.keys(this.l10n).includes(path.parse(f).name));

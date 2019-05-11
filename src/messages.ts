@@ -1,4 +1,8 @@
-const errors = {
+interface MessageGroup {
+	[key: string]: string;
+}
+
+const errors: MessageGroup = {
 	PASSFILE_VALIDATION_FAILED: "Validation of pass type failed. Pass file is not a valid buffer or (more probably) does not respect the schema.\nRefer to https://apple.co/2Nvshvn to build a correct pass.",
 	REQUIR_VALID_FAILED: "The options passed to Pass constructor does not meet the requirements.\nRefer to the documentation to compile them correctly.",
 	MODEL_UNINITIALIZED: "Provided model ( %s ) matched but unitialized or may not contain icon.\nRefer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
@@ -11,7 +15,7 @@ const errors = {
 	NO_PASS_TYPE: "Cannot proceed with pass creation. Model definition (pass.json) has no valid type in it.\nRefer to https://apple.co/2wzyL5J to choose a valid pass type."
 };
 
-const debugMessages = {
+const debugMessages: MessageGroup = {
 	TRSTYPE_NOT_VALID: "Transit type changing rejected as not compliant with Apple Specifications. Transit type would become \"%s\" but should be in [PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain]",
 	BRC_NOT_SUPPORTED: "Format not found among barcodes. Cannot set backward compatibility.",
 	BRC_FORMATTYPE_UNMATCH: "Format must be a string or null. Cannot set backward compatibility.",
@@ -29,7 +33,7 @@ const debugMessages = {
  * @param  {any[]} values
  */
 
-function format(messageName, ...values) {
+export default function format(messageName: string, ...values: any[]) {
 	// reversing because it is better popping than shifting.
 	let replaceValues = values.reverse();
 	return resolveMessageName(messageName).replace(/%s/g, () => {
@@ -43,12 +47,10 @@ function format(messageName, ...values) {
  * @param {string} name
  */
 
-function resolveMessageName(name) {
+function resolveMessageName(name: string): string {
 	if (!errors[name] && !debugMessages[name]) {
 		return `<ErrorName "${name}" is not linked to any error messages>`;
 	}
 
 	return errors[name] || debugMessages[name];
 }
-
-module.exports = format;

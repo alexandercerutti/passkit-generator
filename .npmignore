@@ -3,3 +3,5 @@ certificates/
 *.code-workspace
 examples/
 .vscode/
+*.ts
+!*.d.ts

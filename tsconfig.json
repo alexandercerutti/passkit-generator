@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"outDir": "dist",
+		"target": "es2018",
+		"esModuleInterop": true,
+		"newLine": "LF",
+		"noImplicitAny": true,
+		"noUnusedLocals": true,
+	}
+}

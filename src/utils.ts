@@ -1,5 +1,5 @@
-const moment = require("moment");
-const { EOL } = require("os");
+import moment from "moment";
+import { EOL } from "os";
 
 /**
  * Checks if an rgb value is compliant with CSS-like syntax
@@ -9,7 +9,7 @@ const { EOL } = require("os");
  * @returns {Boolean} True if valid rgb, false otherwise
  */
 
-function isValidRGB(value) {
+export function isValidRGB(value: string): boolean {
 	if (!value || typeof value !== "string") {
 		return false;
 	}
@@ -33,7 +33,7 @@ function isValidRGB(value) {
  * 	 undefined otherwise
  */
 
-function dateToW3CString(date, format) {
+export function dateToW3CString(date: string | Date, format?: string) {
 	if (typeof date !== "string" && !(date instanceof Date)) {
 		return "";
 	}
@@ -55,7 +55,7 @@ function dateToW3CString(date, format) {
  * @return {String[]}
  */
 
-function removeHidden(from) {
+export function removeHidden(from: Array<string>): Array<string> {
 	return from.filter(e => e.charAt(0) !== ".");
 }
 
@@ -68,7 +68,7 @@ function removeHidden(from) {
  * @see https://apple.co/2M9LWVu - String Resources
  */
 
-function generateStringFile(lang) {
+export function generateStringFile(lang: { [index: string]: string }): Buffer {
 	if (!Object.keys(lang).length) {
 		return Buffer.from("", "utf8");
 	}
@@ -77,7 +77,7 @@ function generateStringFile(lang) {
 	// "key" = "value";
 
 	const strings = Object.keys(lang)
-		.map(key => `"${key}" = "${lang[key].replace(/"/g, /\\"/)}";`);
+		.map(key => `"${key}" = "${lang[key].replace(/"/g, '\"')}";`);
 
 	return Buffer.from(strings.join(EOL), "utf8");
 }
@@ -88,14 +88,6 @@ function generateStringFile(lang) {
  * @param {Array<Object<string, any>>} source - the main sources of properties
  */
 
-function assignLength(length, ...sources) {
+export function assignLength(length: number, ...sources: Array<{ [key: string]: any }>): Array<{ [key: string]: any }> {
 	return Object.assign({ length }, ...sources);
 }
-
-module.exports = {
-	assignLength,
-	generateStringFile,
-	removeHidden,
-	dateToW3CString,
-	isValidRGB
-};

@@ -30,6 +30,13 @@
 		"node": ">=8.1.0"
 	},
 	"devDependencies": {
-		"jasmine": "^3.4.0"
+		"@types/archiver": "^2.1.3",
+		"@types/debug": "^4.1.4",
+		"@types/got": "^9.4.4",
+		"@types/joi": "^14.3.3",
+		"@types/node": "^12.0.0",
+		"@types/node-forge": "^0.8.2",
+		"jasmine": "^3.4.0",
+		"typescript": "^3.4.5"
 	}
 }

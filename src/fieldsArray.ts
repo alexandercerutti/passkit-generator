@@ -1,5 +1,7 @@
-const schema = require("./schema");
-const debug = require("debug")("passkit:fields");
+import * as schema from "./schema";
+import debug from "debug";
+
+const fieldsDebug = debug("passkit:fields");
 
 /**
  * Class to represent lower-level keys pass fields
@@ -8,9 +10,8 @@ const debug = require("debug")("passkit:fields");
 
 const poolSymbol = Symbol("pool");
 
-class FieldsArray extends Array {
-	
-	constructor(pool,...args) {
+export default class FieldsArray extends Array {
+	constructor(pool: Set<string>, ...args: any[]) {
 		super(...args);
 		this[poolSymbol] = pool;
 	}
@@ -20,18 +21,18 @@ class FieldsArray extends Array {
 	 * also uniqueKeys set.
 	 */
 
-	push(...fieldsData) {
-		const validFields = fieldsData.reduce((acc, current) => {
+	push(...fieldsData: schema.Field[]): number {
+		const validFields = fieldsData.reduce((acc: schema.Field[], current: schema.Field) => {
 			if (!(typeof current === "object") || !schema.isValid(current, "field")) {
 				return acc;
 			}
 
 			if (acc.some(e => e.key === current.key) || this[poolSymbol].has(current.key)) {
-				debug(`Field with key "${key}" discarded: fields must be unique in pass scope.`);
-			} 
-
-			this[poolSymbol].add(current.key)
-			acc.push(current)
+				fieldsDebug(`Field with key "${current.key}" discarded: fields must be unique in pass scope.`);
+			} else {
+				this[poolSymbol].add(current.key);
+				acc.push(current);
+			}
 
 			return acc;
 		}, []);
@@ -44,9 +45,9 @@ class FieldsArray extends Array {
 	 * also uniqueKeys set
 	 */
 
-	pop() {
-	 	const element = Array.prototype.pop.call(this);
-		this[poolSymbol].delete(element.key)
+	pop(): schema.Field {
+	 	const element: schema.Field = Array.prototype.pop.call(this);
+		this[poolSymbol].delete(element.key);
 		return element;
 	}
 
@@ -55,16 +56,14 @@ class FieldsArray extends Array {
 	 * also uniqueKeys set
 	 */
 
-	splice(start, deleteCount, ...items) {
+	splice(start: number, deleteCount: number, ...items: schema.Field[]): schema.Field[] {
 		const removeList = this.slice(start, deleteCount+start);
 		removeList.forEach(item => this[poolSymbol].delete(item.key));
 
 		return Array.prototype.splice.call(this, start, deleteCount, items);
 	}
 
-	get length() {
+	get length(): number {
 		return this.length;
 	}
 }
-
-module.exports = FieldsArray;

@@ -3,16 +3,19 @@ import debug from "debug";
 
 const schemaDebug = debug("Schema");
 
+export interface Certificates {
+	wwdr?: string;
+	signerCert?: string;
+	signerKey?: {
+		keyFile: string;
+		passphrase?: string;
+	};
+	_raw?: Certificates;
+}
+
 export interface FactoryOptions {
 	model: { [key: string]: Buffer } | string;
-	certificates: {
-		wwdr: string;
-		signerCert: string;
-		signerKey: {
-			keyFile: string;
-			passphrase?: string;
-		};
-	};
+	certificates: Certificates;
 	overrides?: Object;
 	shouldOverwrite?: boolean;
 }

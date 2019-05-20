@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
-import stream from "stream";
+import stream, { Stream } from "stream";
 import forge from "node-forge";
 import archiver from "archiver";
 import debug from "debug";
@@ -75,7 +75,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {Promise<Stream>} A Promise containing the stream of the generated pass.
 	*/
 
-	async generate() {
+	async generate(): Promise<Stream> {
 		try {
 			// Reading the model
 			const modelFilesList = await readdir(this.model);
@@ -216,7 +216,7 @@ export class Pass implements PassIndexSignature {
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 
-	localize(lang, translations) {
+	localize(lang: string, translations?: { [key: string]: string }) {
 		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
 			this.l10n[lang] = translations || {};
 		}
@@ -233,7 +233,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	expiration(date, format) {
+	expiration(date: string | Date, format?: string) {
 		if (typeof date !== "string" && !(date instanceof Date)) {
 			return this;
 		}
@@ -257,7 +257,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {this}
 	 */
 
-	void() {
+	void(): this {
 		this._props.voided = true;
 		return this;
 	}
@@ -272,7 +272,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {Number} The quantity of data pushed
 	 */
 
-	relevance(type, data, relevanceDateFormat) {
+	relevance(type: string, data: any, relevanceDateFormat?: string) {
 		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
 
 		if (!type || !data || !types.includes(type)) {
@@ -470,7 +470,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	nfc(data) {
+	nfc(data: schema.NFC) {
 		if (!(typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
 			genericDebug("Invalid NFC data provided");
 			return this;
@@ -489,7 +489,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Boolean} true if type is supported, false otherwise.
 	 */
 
-	_hasValidType(passFile) {
+	_hasValidType(passFile: schema.Pass): boolean {
 		let passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
 
 		this.type = passTypes.find(type => passFile.hasOwnProperty(type));
@@ -509,7 +509,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {Promise<Buffer>} The patched pass.json buffer
 	 */
 
-	async _extractPassDefinition() {
+	async _extractPassDefinition(): Promise<Buffer> {
 		const passStructBuffer = await readFile(path.resolve(this.model, "pass.json"))
 		const parsedPassDefinition = JSON.parse(passStructBuffer.toString("utf8"));
 
@@ -529,7 +529,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Buffer}
 	 */
 
-	_sign(manifest) {
+	_sign(manifest: { [key: string]: string }): Buffer {
 		let signature = forge.pkcs7.createSignedData();
 
 		signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8");
@@ -592,7 +592,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Promise<Buffer>} Edited pass.json buffer or Object containing error.
 	 */
 
-	_patch(passFile) {
+	_patch(passFile: schema.Pass): Buffer {
 		if (Object.keys(this._props).length) {
 			// We filter the existing (in passFile) and non-valid keys from
 			// the below array keys that accept rgb values
@@ -645,7 +645,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Object} - model path and filtered options
 	 */
 
-	_parseSettings(options) {
+	_parseSettings(options: schema.PassInstance): { model: string, _props: Object } {
 		if (!schema.isValid(options, "instance")) {
 			throw new Error(formatMessage("REQUIR_VALID_FAILED"));
 		}
@@ -667,7 +667,7 @@ export class Pass implements PassIndexSignature {
 		};
 	}
 
-	set transitType(v) {
+	set transitType(v: string) {
 		if (schema.isValid(v, "transitType")) {
 			this[transitType] = v;
 		} else {
@@ -676,7 +676,7 @@ export class Pass implements PassIndexSignature {
 		}
 	}
 
-	get transitType() {
+	get transitType(): string {
 		return this[transitType];
 	}
 }
@@ -767,7 +767,7 @@ function parsePEM(pemName, element, passphrase) {
  * @return {Object[]} Object array barcodeDict compliant
  */
 
-function barcodesFromUncompleteData(origin) {
+function barcodesFromUncompleteData(origin: schema.Barcode): schema.Barcode[] {
 	if (!(origin.message && typeof origin.message === "string")) {
 		barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
 		return [];
@@ -780,7 +780,7 @@ function barcodesFromUncompleteData(origin) {
 		"PKBarcodeFormatCode128"
 	].map(format =>
 		schema.getValidated(
-			Object.assign(origin, { format }),
+			Object.assign({}, origin, { format }),
 			"barcode"
 		)
 	);

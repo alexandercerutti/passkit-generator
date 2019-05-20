@@ -430,7 +430,7 @@ export function isValid(opts: any, schemaName: keyof Schemas): boolean {
  * @returns {object} the filtered value or empty object
  */
 
-export function getValidated(opts: any, schemaName: keyof Schemas): Object {
+export function getValidated<T extends Object>(opts: any, schemaName: keyof Schemas): T {
 	let resolvedSchema = resolveSchemaName(schemaName);
 	let validation = Joi.validate(opts, resolvedSchema, { stripUnknown: true });
 

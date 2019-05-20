@@ -18,7 +18,7 @@ This package was created with a specific architecture in mind: **application** a
 
 Actually, pass creation and population doesn't fully happen within the application in runtime. Pass template is a folder in, for example, _your application directory_ (but nothing will stop you from putting it outside), that will contain all the objects needed (static medias) and structure to make a pass work.
 
-Pass template will be read and pushed as is in the resulting .zip file along with web-fetched medias (also considered dynamic objects), while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
+Pass template will be read and pushed as is in the resulting .zip file, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
 
 This package comes with an [API documentation](./API.md), that makes available a series of methods to customize passes.
 

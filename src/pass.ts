@@ -1,24 +1,22 @@
-const fs = require("fs");
-const path = require("path");
-const { promisify } = require("util");
-const stream = require("stream");
-const forge = require("node-forge");
-const archiver = require("archiver");
-const debug = require("debug");
-const got = require("got");
+import fs from "fs";
+import path from "path";
+import { promisify } from "util";
+import stream from "stream";
+import forge from "node-forge";
+import archiver from "archiver";
+import debug from "debug";
 
-const barcodeDebug = debug("passkit:barcode");
-const genericDebug = debug("passkit:generic");
-const loadDebug = debug("passkit:load");
-
-const schema = require("./schema");
-const formatMessage = require("./messages");
-const FieldsArray = require("./fieldsArray");
-const {
+import * as schema from "./schema";
+import formatMessage from "./messages";
+import FieldsArray from "./fieldsArray";
+import {
 	assignLength, generateStringFile,
 	removeHidden, dateToW3CString,
 	isValidRGB
-} = require("./utils");
+} from "./utils";
+
+const barcodeDebug = debug("passkit:barcode");
+const genericDebug = debug("passkit:generic");
 
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
@@ -28,8 +26,23 @@ const transitType = Symbol("transitType");
 const barcodesFillMissing = Symbol("bfm");
 const barcodesSetBackward = Symbol("bsb");
 
-class Pass {
-	constructor(options) {
+interface PassIndexSignature {
+	[key: string]: any;
+}
+
+export class Pass implements PassIndexSignature {
+	private model: string;
+	private _fields: string[];
+	private _props: { [key: string]: any };
+	private type: string;
+	private fieldsKeys: Set<string>;
+
+	Certificates: schema.Certificates;
+	l10n: { [key: string]: { [key: string]: string } } = {};
+	shouldOverwrite: boolean;
+	[transitType]: string = "";
+
+	constructor(options: schema.PassInstance) {
 		this.Certificates = {
 			// Even if this assigning will fail, it will be captured below
 			// in _parseSettings, since this won't match with the schema.
@@ -38,8 +51,6 @@ class Pass {
 
 		options.overrides = options.overrides || {};
 
-		this.l10n = {};
-		this._remoteResources = [];
 		this.shouldOverwrite = !(options.hasOwnProperty("shouldOverwrite") && !options.shouldOverwrite);
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
@@ -69,37 +80,10 @@ class Pass {
 			// Reading the model
 			const modelFilesList = await readdir(this.model);
 
-			/**
-			 * Getting the buffers for remote files
-			 */
-
-			const buffersPromise = await this._remoteResources.reduce(async (acc, current) => {
-				try {
-					const response = await got(current[0], { encoding: null });
-					loadDebug(formatMessage("LOAD_MIME", response.headers["content-type"]));
-
-					if (!Buffer.isBuffer(response.body)) {
-						throw "LOADED_RESOURCE_NOT_A_BUFFER";
-					}
-
-					if (!response.headers["content-type"].includes("image/")) {
-						throw "LOADED_RESOURCE_NOT_A_PICTURE";
-					}
-
-					return [...acc, response.body];
-				} catch (err) {
-					loadDebug(formatMessage("LOAD_NORES", current[1], err));
-					return acc;
-				}
-			}, []);
-
-			const remoteFilesList = buffersPromise.length ? this._remoteResources.map(r => r[1]): [];
-
 			// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
 			const noDynList = removeHidden(modelFilesList).filter(f => !/(manifest|signature|pass)/i.test(f));
-			const hasAssets = noDynList.length || remoteFilesList.length;
 
-			if (!hasAssets || ![...noDynList, ...remoteFilesList].some(f => f.toLowerCase().includes("icon"))) {
+			if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))) {
 				let eMessage = formatMessage("MODEL_UNINITIALIZED", path.parse(this.model).name);
 				throw new Error(eMessage);
 			}
@@ -132,12 +116,6 @@ class Pass {
 
 			/* Getting all bundle file buffers, pass.json included, and appending path */
 
-			if (remoteFilesList.length) {
-				// Removing files in bundle that also exist in remoteFilesList
-				// I'm giving priority to downloaded files
-				bundle = bundle.filter(file => !remoteFilesList.includes(file));
-			}
-
 			// Reading bundle files to buffers without pass.json - it gets read below
 			// to use a different parsing process
 
@@ -145,7 +123,7 @@ class Pass {
 			const passBuffer = this._extractPassDefinition();
 			bundle.push("pass.json");
 
-			const buffers = await Promise.all([...bundleBuffers, passBuffer, ...buffersPromise]);
+			const buffers = await Promise.all([...bundleBuffers, passBuffer]);
 
 			Object.keys(this.l10n).forEach(lang => {
 				const strings = generateStringFile(this.l10n[lang]);
@@ -182,9 +160,6 @@ class Pass {
 					bundle.push(stringFilePath);
 				}
 			});
-
-			// Pushing the remote files into the bundle
-			bundle.push(...remoteFilesList);
 
 			/*
 			 * Parsing the buffers, pushing them into the archive
@@ -331,7 +306,7 @@ class Pass {
 				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
 				return this;
 			}
-			
+
 			let dateParse = dateToW3CString(data, relevanceDateFormat);
 
 			if (!dateParse) {
@@ -507,23 +482,6 @@ class Pass {
 	}
 
 	/**
-	 * Loads a web resource (image)
-	 * @param {string} resource
-	 * @param {string} name
-	 */
-
-	load(resource, name) {
-		if (typeof resource !== "string" && typeof name !== "string") {
-			loadDebug(formatMessage("LOAD_TYPES_UNMATCH"));
-			return;
-		}
-
-		this._remoteResources.push([resource, name]);
-
-		return this;
-	}
-
-	/**
 	 * Checks if pass model type is one of the supported ones
 	 *
 	 * @method _hasValidType
@@ -589,8 +547,9 @@ class Pass {
 		 */
 
 		signature.addSigner({
-			key: this.Certificates.signerKey,
+			key: this.Certificates.signerKey.keyFile,
 			certificate: this.Certificates.signerCert,
+			digestAlgorithm: forge.pki.oids.sha1,
 			authenticatedAttributes: [{
 				type: forge.pki.oids.contentType,
 				value: forge.pki.oids.data
@@ -731,7 +690,7 @@ class Pass {
  * @returns {Object} - parsed certificates to be pushed to Pass.Certificates.
  */
 
-function readCertificates(certificates) {
+function readCertificates(certificates: schema.Certificates) {
 	if (certificates.wwdr && certificates.signerCert && typeof certificates.signerKey === "object") {
 		// Nothing must be added. Void object is returned.
 		return Promise.resolve({});
@@ -740,14 +699,14 @@ function readCertificates(certificates) {
 	const raw = certificates._raw;
 	const optCertsNames = Object.keys(raw);
 	const certPaths = optCertsNames.map((val) => {
-		const cert = raw[val];
+		const cert: string | typeof certificates.signerKey = raw[val];
 		// realRawValue exists as signerKey might be an object
 		const realRawValue = !(cert instanceof Object) ? cert : cert["keyFile"];
 
 		// We are checking if the string is a path or a content
 		if (!!path.parse(realRawValue).ext) {
 			const resolvedPath = path.resolve(realRawValue);
-			return readFile(resolvedPath);
+			return readFile(resolvedPath, { encoding: "utf8" });
 		} else {
 			return Promise.resolve(realRawValue);
 		}
@@ -759,6 +718,7 @@ function readCertificates(certificates) {
 			// which is conjoint later with the other pems
 
 			return Object.assign(
+				{},
 				...contents.map((file, index) => {
 					const certName = optCertsNames[index];
 					const pem = parsePEM(certName, file, raw[certName].passphrase);
@@ -825,5 +785,3 @@ function barcodesFromUncompleteData(origin) {
 		)
 	);
 }
-
-module.exports = { Pass };

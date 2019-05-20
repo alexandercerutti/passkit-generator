@@ -44,8 +44,6 @@ ___
 		* [.relevance()](#method_relevance)
 	* Setting NFC
 		* [.nfc()](#method_nfc)
-	* Getting remote resources
-		* [.load()](#method_load)
 	* [Setting Pass Structure Keys (primaryFields, secondaryFields, ...)](#prop_fields)
 		* [TransitType](#prop_transitType)
 	* Generating the compiled pass.
@@ -401,44 +399,6 @@ ___
 
 **Getting remote resources**:
 ___
-
-<a name="method_load"></a>
-
-#### .load()
-
-```javascript
-pass.load(resource, name);
-```
-
-**Returns**:
-
-`Object<Pass> (this)`
-
-**Description**:
-
-Sets the resources to be downloaded in runtime to be pushed in the pass.
-Use `name` param to give your downloaded file a name or to provide the folder path it will be pushed into (with the name, _obv._).
-
-Requests are not cached and load method can only load pictures right now (no other types should be required). In case of conflict between downloaded files and model files, downloaded files will have the priority and will be putted in the zip file.
-
-When in debug mode, file header is shown.
-
-**Arguments**:
-
-| Key | Type | Description | Optional | Default Value |
-|-----|------|-------------|----------|:-------------:|
-| resource | String | The URL where to fetch the picture | false | -
-| name | String | The name / path to be used to call this | false | -
-
-**Example**:
-
-```javascript
-pass.load("http://...", "icon.png");
-pass.load("http://...", "en.lproj/icon.png");
-```
-
-<br>
-<br>
 
 <a name="prop_fields"></a>
 ___

@@ -110,19 +110,18 @@ class Pass {
 			 * from the list.
 			 */
 
-			const listByFolder = await Promise.all(
-				L10N.map(async f =>
-					removeHidden(await readdir(
-						path.join(this.model, f)
-					))
-				)
+			const L10N_FilesListByFolder = await Promise.all(
+				L10N.map(async folderPath => {
+					const list = await readdir(path.join(this.model, folderPath))
+					return removeHidden(list);
+				})
 			);
 
 			// Pushing into the bundle the composed paths for localization files
 
-			listByFolder.forEach((folder, index) =>
+			L10N_FilesListByFolder.forEach((filesList, index) =>
 				bundle.push(
-					...folder.map(f => path.join(L10N[index], f))
+					...filesList.map(file => path.join(L10N[index], file))
 				)
 			);
 
@@ -137,14 +136,14 @@ class Pass {
 			// Reading bundle files to buffers without pass.json - it gets read below
 			// to use a different parsing process
 
-			const bundleBuffers = bundle.map(f => readFile(path.resolve(this.model, f)));
+			const bundleBuffers = bundle.map(file => readFile(path.resolve(this.model, file)));
 			const passBuffer = this._extractPassDefinition();
 			bundle.push("pass.json");
 
 			const buffers = await Promise.all([...bundleBuffers, passBuffer, ...buffersPromise]);
 
-			Object.keys(this.l10n).forEach(l => {
-				const strings = generateStringFile(this.l10n[l]);
+			Object.keys(this.l10n).forEach(lang => {
+				const strings = generateStringFile(this.l10n[lang]);
 
 				/**
 				 * if .string file buffer is empty, no translations were added
@@ -164,7 +163,7 @@ class Pass {
 				 * composition.
 				 */
 
-				const stringFilePath = path.join(`${l}.lproj`, "pass.strings").replace(/\\/, "/");
+				const stringFilePath = path.join(`${lang}.lproj`, "pass.strings").replace(/\\/, "/");
 
 				const stringFileIndex = bundle.findIndex(file => file === stringFilePath);
 

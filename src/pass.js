@@ -159,9 +159,13 @@ class Pass {
 				 * if there's already a buffer of the same folder and called
 				 * `pass.strings`, we'll merge the two buffers. We'll create
 				 * it otherwise.
+				 *
+				 * We are replacing the slashes to avoid Windows slashes
+				 * composition.
 				 */
 
-				const stringFilePath = path.join(`${l}.lproj`, "pass.strings");
+				const stringFilePath = path.join(`${l}.lproj`, "pass.strings").replace(/\\/, "/");
+
 				const stringFileIndex = bundle.findIndex(file => file === stringFilePath);
 
 				if (stringFileIndex > -1) {

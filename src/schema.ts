@@ -34,16 +34,21 @@ export interface PassInstance {
 	shouldOverwrite?: boolean;
 }
 
-const instance = Joi.object().keys({
-	model: Joi.string().required(),
-	certificates: Joi.object().keys({
-		wwdr: Joi.string().required(),
-		signerCert: Joi.string().required(),
-		signerKey: Joi.object().keys({
+const certificatesSchema = Joi.object().keys({
+	wwdr: Joi.string().required(),
+	signerCert: Joi.string().required(),
+	signerKey: Joi.alternatives().try(
+		Joi.object().keys({
 			keyFile: Joi.string().required(),
 			passphrase: Joi.string().required(),
-		}).required()
-	}).required(),
+		}),
+		Joi.string()
+	).required()
+}).required();
+
+const instance = Joi.object().keys({
+	model: Joi.string().required(),
+	certificates: certificatesSchema,
 	overrides: Joi.object(),
 	shouldOverwrite: Joi.boolean()
 });
@@ -385,6 +390,7 @@ type Schemas = {
 };
 const schemas: Schemas = {
 	instance,
+	certificatesSchema,
 	barcode,
 	field,
 	passDict,

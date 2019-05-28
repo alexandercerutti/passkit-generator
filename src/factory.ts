@@ -11,7 +11,9 @@ const readDir = promisify(_readdir);
 const readFile = promisify(_readFile);
 
 interface FactoryOptions {
-	model: string | { [key: string]: Buffer },
+	model: string | {
+		[key: string]: Buffer
+	},
 	certificates: Certificates;
 	overrides?: Object;
 }

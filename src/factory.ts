@@ -6,6 +6,7 @@ import { readFile as _readFile, readdir as _readdir } from "fs";
 import * as path from "path";
 import forge from "node-forge";
 import formatMessage from "./messages";
+import { removeHidden } from "./utils";
 
 const readDir = promisify(_readdir);
 const readFile = promisify(_readFile);
@@ -33,7 +34,7 @@ interface FactoryOptions {
 	overrides?: Object;
 }
 
-async function createPass(options: FactoryOptions) {
+export async function createPass(options: FactoryOptions) {
 	if (!(options && Object.keys(options).length)) {
 		throw new Error("Unable to create Pass: no options were passed");
 	}

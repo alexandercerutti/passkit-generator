@@ -284,6 +284,16 @@ class Pass {
 		return this;
 	}
 
+  logoText(text) {
+    this._props.logoText = text;
+    return this;
+  }
+
+  backgroundColor(colour) {
+    this._props.backgroundColor = colour;
+    return this;
+  }
+
 	/**
 	 * Checks and sets data for "beacons", "locations", "maxDistance" and "relevantDate" keys
 	 *

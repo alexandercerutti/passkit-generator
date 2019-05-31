@@ -41,25 +41,14 @@ async function createPass(options: FactoryOptions) {
 	// Voglio leggere i certificati
 	// Voglio leggere il model (se non è un oggetto)
 
-	/* Model checks */
-
-	if (!options.model) {
-		throw new Error("Unable to create Pass: no model passed");
-	}
-
-	if (typeof options.model !== "string" && typeof options.model !== "object") {
-		throw new Error("Unable to create Pass: unsupported type");
-	}
-
-	if (typeof options.model === "object" && !Object.keys(options.model).length) {
-		throw new Error("Unable to create Pass: object model has no content");
-	}
-
-	/* Certificates checks */
-
-	const { certificates } = await Promise.all([
+	try {
+		const [model, certificates] = await Promise.all([
+			getModelContents(options.model),
 		readCertificatesFromOptions(options.certificates)
 	]);
+	} catch (err) {
+		// @TODO: analyze the error and stop the execution somehow
+	}
 
 	// Controllo se il model è un oggetto o una stringa
 	// Se è un oggetto passo avanti

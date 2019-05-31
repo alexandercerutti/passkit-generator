@@ -268,8 +268,6 @@ class Pass {
 			return this;
 		}
 
-console.log(dateParse)
-
 		this._props.expirationDate = dateParse;
 
 		return this;

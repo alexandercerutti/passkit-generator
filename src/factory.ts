@@ -151,11 +151,15 @@ async function getModelFolderContents(model: string): Promise<PartitionedBundle>
 		})
 	);
 
+	const l10nBundle: PartitionedBundle["l10nBundle"] = Object.assign(
+		{},
+		...L10N_FilesListByFolder
+			.map((folder, index) => ({ [l10nFolders[index]]: folder }))
+	);
+
 	return {
 		bundle: bundleMap,
-		l10nBundle: Object.assign({}, ...L10N_FilesListByFolder
-			.map((folder, index) => ({ [l10nFolders[index]]: folder }))
-		) as PartitionedBundle["l10nBundle"]
+		l10nBundle
 	};
 }
 
@@ -190,11 +194,11 @@ function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 		)
 	);
 
-	const unLocalizedBundle = Object.assign({},
+	const unLocalizedBundle: BundleUnit = Object.assign({},
 		...bundleKeys
 			.filter(file => !file.includes(".lproj"))
 			.map(file => ({ [file]: bundle[file] }))
-	) as BundleUnit;
+	);
 
 	return {
 		bundle: unLocalizedBundle,

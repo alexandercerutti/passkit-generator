@@ -256,7 +256,8 @@ class Pass {
 	 */
 
 	expiration(date, format) {
-		if (typeof date !== "string") {
+
+		if (typeof date !== "string" && !date instanceof Date) {
 			return this;
 		}
 
@@ -266,6 +267,8 @@ class Pass {
 			genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Expiration date"));
 			return this;
 		}
+
+console.log(dateParse)
 
 		this._props.expirationDate = dateParse;
 
@@ -324,6 +327,11 @@ class Pass {
 
 			return assignLength(Number(!cond), this);
 		} else if (type === "relevantDate") {
+
+      if (typeof data !== "string" && !data instanceof Date) {
+        return this;
+      }
+
 			let dateParse = dateToW3CString(data, relevanceDateFormat);
 
 			if (!dateParse) {

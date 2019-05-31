@@ -184,7 +184,7 @@ function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 
 	// separing localization folders
 	const l10nFolders = bundleKeys.filter(file => file.includes(".lproj"));
-	const l10nBundle: { [key: string]: BundleUnit } = Object.assign({},
+	const l10nBundle: PartitionedBundle["l10nBundle"] = Object.assign({},
 		...l10nFolders.map(folder =>
 			({ [folder]: bundle[folder] }) as BundleUnit
 		)

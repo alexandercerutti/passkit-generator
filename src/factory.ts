@@ -10,10 +10,25 @@ import formatMessage from "./messages";
 const readDir = promisify(_readdir);
 const readFile = promisify(_readFile);
 
+interface BundleUnit {
+	[key: string]: Buffer;
+}
+
+interface PartitionedBundle {
+	bundle: BundleUnit;
+	l10nBundle: {
+		[key: string]: BundleUnit
+	};
+}
+
+interface FinalCertificates {
+	wwdr: forge.pki.Certificate;
+	signerCert: forge.pki.Certificate;
+	signerKey: forge.pki.PrivateKey;
+}
+
 interface FactoryOptions {
-	model: string | {
-		[key: string]: Buffer
-	},
+	model: string | BundleUnit,
 	certificates: Certificates;
 	overrides?: Object;
 }
@@ -59,21 +74,12 @@ async function createPass(options: FactoryOptions) {
 	return new Pass();
 }
 
-interface BundleUnit {
-	[key: string]: Buffer;
-}
-
 async function getModelContents(model: FactoryOptions["model"]) {
 	if (!(model && (typeof model === "string" || (typeof model === "object" && Object.keys(model).length)))) {
 		throw new Error("Unable to create Pass: invalid model provided");
 	}
 
-	let modelContents: {
-		bundle: BundleUnit,
-		l10nBundle: {
-			[key: string]: BundleUnit
-		},
-	};
+	let modelContents: PartitionedBundle;
 
 	if (typeof model === "string") {
 		modelContents = await getModelFolderContents(model);
@@ -149,7 +155,7 @@ async function getModelFolderContents(model: string): Promise<PartitionedBundle>
 		bundle: bundleMap,
 		l10nBundle: Object.assign({}, ...L10N_FilesListByFolder
 			.map((folder, index) => ({ [l10nFolders[index]]: folder }))
-		) as { [key: string]: BundleUnit }
+		) as PartitionedBundle["l10nBundle"]
 	};
 }
 
@@ -201,12 +207,6 @@ function getModelBufferContents(model: BundleUnit): PartitionedBundle {
  * and parses them as a PEM.
  * @param options
  */
-
-interface FinalCertificates {
-	wwdr: forge.pki.Certificate;
-	signerCert: forge.pki.Certificate;
-	signerKey: forge.pki.PrivateKey;
-}
 
 async function readCertificatesFromOptions(options: Certificates): Promise<FinalCertificates> {
 	if (!isValid(options, "certificatesSchema")) {

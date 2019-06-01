@@ -130,12 +130,18 @@ async function getModelFolderContents(model: string): Promise<PartitionedBundle>
 
 					// Getting all the buffers from file paths
 					return Promise.all([
-						...validFiles.map(file => readFile(file))
+						...validFiles.map(file =>
+							readFile(file).catch(() => Buffer.alloc(0))
+						)
 					]).then(buffers =>
 						// Assigning each file path to its buffer
-						Object.assign({}, ...validFiles.map((file, index) =>
-							({ [file]: buffers[index] })
-						)) as BundleUnit
+						validFiles.reduce<BundleUnit>((acc, file, index) => {
+							if (!buffers[index].length) {
+								return acc;
+							}
+
+							return { ...acc, [file]: buffers[index] };
+						}, {})
 					);
 				});
 		})

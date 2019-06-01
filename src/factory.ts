@@ -209,7 +209,7 @@ function getModelBufferContents(model: BundleUnit): PartitionedBundle {
  */
 
 async function readCertificatesFromOptions(options: Certificates): Promise<FinalCertificates> {
-	if (!isValid(options, "certificatesSchema")) {
+	if (!(options && Object.keys(options).length && isValid(options, "certificatesSchema"))) {
 		throw new Error("Unable to create Pass: certificates schema validation failed.");
 	}
 

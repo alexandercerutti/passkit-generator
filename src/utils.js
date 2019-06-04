@@ -34,9 +34,9 @@ function isValidRGB(value) {
  */
 
 function dateToW3CString(date, format) {
-  if (typeof date !== "string" && !date instanceof Date) {
-    return "";
-  }
+	if (typeof date !== "string" && !date instanceof Date) {
+		return "";
+	}
 
 	const parsedDate = date instanceof Date ? moment(date).format() : moment(date.replace(/\//g, "-"), format || ["MM-DD-YYYY hh:mm:ss", "DD-MM-YYYY hh:mm:ss"]).format();
 

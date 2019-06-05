@@ -483,20 +483,17 @@ class Pass {
 	 * Sets nfc fields in properties
 	 *
 	 * @method nfc
-	 * @params {Array<Object>} data - the data to be pushed in the pass
+	 * @params {Object} data - the data to be pushed in the pass
 	 * @returns {this}
 	 */
 
-	nfc(...data) {
-		if (data.length === 1 && data[0] instanceof Array) {
-			data = data[0];
+	nfc(data) {
+		if (!(typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
+			genericDebug("Invalid NFC data provided");
+			return this;
 		}
 
-		let valid = data.filter(d => d instanceof Object && schema.isValid(d, "nfcDict"));
-
-		if (valid.length) {
-			this._props["nfc"] = valid;
-		}
+		this._props["nfc"] = data;
 
 		return this;
 	}

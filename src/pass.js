@@ -256,7 +256,7 @@ class Pass {
 	 */
 
 	expiration(date, format) {
-		if (typeof date !== "string") {
+		if (typeof date !== "string" && !date instanceof Date) {
 			return this;
 		}
 
@@ -324,6 +324,11 @@ class Pass {
 
 			return assignLength(Number(!cond), this);
 		} else if (type === "relevantDate") {
+			if (typeof data !== "string" && !data instanceof Date) {
+				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
+				return this;
+			}
+			
 			let dateParse = dateToW3CString(data, relevanceDateFormat);
 
 			if (!dateParse) {

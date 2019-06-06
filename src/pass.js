@@ -216,8 +216,6 @@ class Pass {
 
 			archive.pipe(passStream);
 
-			FieldsArray.emptyUnique();
-
 			return archive.finalize().then(() => passStream);
 		} catch (err) {
 			if (err.code && err.code === "ENOENT") {

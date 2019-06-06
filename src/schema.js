@@ -27,7 +27,8 @@ const supportedOptions = Joi.object().keys({
 	foregroundColor: Joi.string().min(10).max(16),
 	labelColor: Joi.string().min(10).max(16),
 	groupingIdentifier: Joi.string(),
-	suppressStripShine: Joi.boolean()
+	suppressStripShine: Joi.boolean(),
+	logoText: Joi.string(),
 }).with("webServiceURL", "authenticationToken");
 
 

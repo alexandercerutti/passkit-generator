@@ -44,7 +44,10 @@ class Pass {
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 
-		this._fields.forEach(a => this[a] = new FieldsArray());
+		let _emptyFieldArrays = new FieldsArray(this._fields);
+
+		Object.keys(_emptyFieldArrays).filter(f => f !== "fieldsKeys").map(f => this[f] = _emptyFieldArrays[f]);
+
 		this[transitType] = "";
 
 		// Assigning model and _props to this

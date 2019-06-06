@@ -6,16 +6,44 @@ const debug = require("debug")("passkit:fields");
  * Therefore we use a Set to keep them tracked.
  */
 
-const fieldsKeys = new Set();
-
 /**
  * Class to represent lower-level keys pass fields
  * @see https://apple.co/2wkUBdh
  */
 
-class FieldsArray extends Array {
-	constructor(...items) {
-		super(...items);
+class FieldsArray extends Object {
+	constructor(fields) {
+		super();
+
+		/**
+		 * Pass fields must be unique (for key) in its scope.
+		 * Therefore we use a Set to keep them tracked.
+		*/
+
+		this.fieldsKeys = new Set();
+		fields.forEach(a => this[a] = new ItemsArray(this));
+	}
+
+	addFieldKey(key) {
+		if (this.fieldsKeys.has(key)) {
+			debug(`Field with key "${key}" discarded: fields must be unique in pass scope.`);
+		} else {
+			this.fieldsKeys.add(key);
+		}
+	}
+
+	deleteFieldKey(key) {
+		this.fieldsKeys.delete(key);
+	}
+
+	emptyUnique() {
+		this.fieldsKeys.clear();
+	}
+}
+
+class ItemsArray extends Array {
+	constructor(owner) {
+		super();
 	}
 
 	/**
@@ -67,10 +95,6 @@ class FieldsArray extends Array {
 
 	get length() {
 		return this.length;
-	}
-
-	static emptyUnique() {
-		fieldsKeys.clear();
 	}
 }
 

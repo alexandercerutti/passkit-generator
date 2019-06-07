@@ -6,98 +6,65 @@ const debug = require("debug")("passkit:fields");
  * @see https://apple.co/2wkUBdh
  */
 
-class FieldsArray extends Set {
-  constructor(fields) {
-    super();
+const poolSymbol = Symbol("pool");
 
-    /**
-     * Pass fields must be unique (for key) in its scope.
-     * Therefore we use a Set to keep them tracked.
-     */
+class FieldsArray extends Array {
+	
+	constructor(pool,...args) {
+    	super(...args);
+    	this[poolSymbol] = pool;
+	}
 
-    this.fieldsKeys = new Set();
-    fields.forEach(a => this[a] = new ItemsArray(this));
-  }
+	/**
+	 * Like `Array.prototype.push` but will alter
+	 * also uniqueKeys set.
+	 */
 
-  addFieldKey(key) {
+	push(...fieldsData) {
+		const validFields = fieldsData.reduce((acc, current) => {
+			if (!(typeof current === "object") || !schema.isValid(current, "field")) {
+				return acc;
+			}
 
-    if (this.fieldsKeys.has(key)) {
-      debug(`Field with key "${key}" discarded: fields must be unique in pass scope.`);
-    } else {
-      this.fieldsKeys.add(key);
-    }
-  }
+			if (acc.some(e => e.key === current.key) || this[poolSymbol].has(current.key)) {
+				debug(`Field with key "${key}" discarded: fields must be unique in pass scope.`);
+			} 
 
-  deleteFieldKey(key) {
-    this.fieldsKeys.delete(key);
-  }
+			this[poolSymbol].add(current.key)
+			acc.push(current)
 
-  emptyUnique() {
-    this.fieldsKeys.clear();
-  }
+			return acc;
+		}, []);
+
+		return Array.prototype.push.call(this, ...validFields);
+	}
+
+	/**
+	 * Like `Array.prototype.pop`, but will alter
+	 * also uniqueKeys set
+	 */
+
+	pop() {
+	 	const element = Array.prototype.pop.call(this);
+		this[poolSymbol].delete(element.key)
+    	return element;
+  	}
+
+	/**
+	 * Like `Array.prototype.splice` but will alter
+	 * also uniqueKeys set
+	 */
+
+	splice(start, deleteCount, ...items) {
+		const removeList = this.slice(start, deleteCount+start);
+		removeList.forEach(item => this[poolSymbol].delete(item.key));
+
+		return Array.prototype.splice.call(this, start, deleteCount, items);
+	}
+
+	get length() {
+		return this.length;
+	}
 }
-
-
-class ItemsArray extends Array {
-  constructor(owner) {
-    super();
-
-    this.owner = owner;
-  }
-
-  /**
-   * Like `Array.prototype.push` but will alter
-   * also uniqueKeys set.
-   */
-
-  push(...fieldsData) {
-    const validFields = fieldsData.reduce((acc, current) => {
-      if (!(typeof current === "object") || !schema.isValid(current, "field")) {
-        return acc;
-      }
-
-      if (acc.some(e => e.key === current.key)) {
-        debug(`Field with key "${key}" discarded: fields must be unique in pass scope.`);
-      } 
-
-      this.owner.addFieldKey(current.key)
-      acc.push(current)
-
-      return acc;
-    }, []);
-
-    return Array.prototype.push.call(this, ...validFields);
-  }
-
-  /**
-   * Like `Array.prototype.pop`, but will alter
-   * also uniqueKeys set
-   */
-
-  pop() {
-    const element = Array.prototype.pop.call(this);
-
-    this.owner.deleteFieldKey(element.key)
-    return element;
-  }
-
-  /**
-   * Like `Array.prototype.splice` but will alter
-   * also uniqueKeys set
-   */
-
-  splice(start, deleteCount, ...items) {
-    const removeList = this.slice(start, deleteCount+start);
-
-    removeList.forEach(item => this.owner.deleteFieldKey(item.key));
-
-    return Array.prototype.splice.call(this, start, deleteCount, items);
-  }
-
-  get length() {
-    return this.length;
-  }
-}
-
 
 module.exports = FieldsArray;

@@ -44,9 +44,11 @@ class Pass {
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 
-		let _emptyFieldArrays = new FieldsArray(this._fields);
+		this.fieldsKeys = new Set();
 
-		Object.keys(_emptyFieldArrays).filter(f => f !== "fieldsKeys").map(f => this[f] = _emptyFieldArrays[f]);
+		this._fields.forEach(name => {
+		    this[name] = new FieldsArray(this.fieldsKeys);
+		});
 
 		this[transitType] = "";
 

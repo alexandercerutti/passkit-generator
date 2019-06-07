@@ -91,6 +91,14 @@ describe("Node-Passkit-generator", function () {
 			expect(noTimeZoneDateTime).toBe("2021-04-10T00:00:00");
 		});
 
+		it("A date as a Date object will apply changes", () => {
+			pass.expiration(new Date(2020,5,1,0,0,0));
+			// this is made to avoid problems with winter and summer time:
+			// we focus only on the date and time for the tests.
+			let noTimeZoneDateTime = pass._props["expirationDate"].split("+")[0];
+			expect(noTimeZoneDateTime).toBe("2020-06-01T00:00:00");
+		});
+
 		it("An invalid date, will not apply changes", () => {
 			pass.expiration("32/18/228317");
 			expect(pass._props["expirationDate"]).toBe(undefined);
@@ -125,6 +133,14 @@ describe("Node-Passkit-generator", function () {
 				let noTimeZoneDateTime = pass._props["relevantDate"].split("+")[0];
 				expect(noTimeZoneDateTime).toBe("2021-04-10T00:00:00");
 			});
+
+			it("A date as a Date object will apply changes", () => {
+				pass.relevance("relevantDate",new Date(2020,5,1,0,0,0));
+				// this is made to avoid problems with winter and summer time:
+				// we focus only on the date and time for the tests.
+				let noTimeZoneDateTime = pass._props["relevantDate"].split("+")[0];
+				expect(noTimeZoneDateTime).toBe("2020-06-01T00:00:00");
+			});			
 		});
 
 		describe("relevance('maxDistance')", () => {

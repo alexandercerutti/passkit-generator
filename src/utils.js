@@ -34,7 +34,7 @@ function isValidRGB(value) {
  */
 
 function dateToW3CString(date, format) {
-	if (typeof date !== "string" && !date instanceof Date) {
+	if (typeof date !== "string" && !(date instanceof Date)) {
 		return "";
 	}
 

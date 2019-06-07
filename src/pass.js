@@ -44,7 +44,12 @@ class Pass {
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 
-		this._fields.forEach(a => this[a] = new FieldsArray());
+		this.fieldsKeys = new Set();
+
+		this._fields.forEach(name => {
+		    this[name] = new FieldsArray(this.fieldsKeys);
+		});
+
 		this[transitType] = "";
 
 		// Assigning model and _props to this
@@ -212,8 +217,6 @@ class Pass {
 			const passStream = new stream.PassThrough();
 
 			archive.pipe(passStream);
-
-			FieldsArray.emptyUnique();
 
 			return archive.finalize().then(() => passStream);
 		} catch (err) {

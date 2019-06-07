@@ -2,20 +2,17 @@ const schema = require("./schema");
 const debug = require("debug")("passkit:fields");
 
 /**
- * Pass fields must be unique (for key) in its scope.
- * Therefore we use a Set to keep them tracked.
- */
-
-const fieldsKeys = new Set();
-
-/**
  * Class to represent lower-level keys pass fields
  * @see https://apple.co/2wkUBdh
  */
 
+const poolSymbol = Symbol("pool");
+
 class FieldsArray extends Array {
-	constructor(...items) {
-		super(...items);
+	
+	constructor(pool,...args) {
+		super(...args);
+		this[poolSymbol] = pool;
 	}
 
 	/**
@@ -29,12 +26,12 @@ class FieldsArray extends Array {
 				return acc;
 			}
 
-			if (acc.some(e => e.key === current.key) || fieldsKeys.has(current.key)) {
-				debug(`Field with key "${current.key}" discarded: fields must be unique in pass scope.`);
-			} else {
-				fieldsKeys.add(current.key);
-				acc.push(current);
-			}
+			if (acc.some(e => e.key === current.key) || this[poolSymbol].has(current.key)) {
+				debug(`Field with key "${key}" discarded: fields must be unique in pass scope.`);
+			} 
+
+			this[poolSymbol].add(current.key)
+			acc.push(current)
 
 			return acc;
 		}, []);
@@ -48,8 +45,8 @@ class FieldsArray extends Array {
 	 */
 
 	pop() {
-		const element = Array.prototype.pop.call(this);
-		fieldsKeys.delete(element.key);
+	 	const element = Array.prototype.pop.call(this);
+		this[poolSymbol].delete(element.key)
 		return element;
 	}
 
@@ -60,17 +57,13 @@ class FieldsArray extends Array {
 
 	splice(start, deleteCount, ...items) {
 		const removeList = this.slice(start, deleteCount+start);
-		removeList.forEach(item => fieldsKeys.delete(item.key));
+		removeList.forEach(item => this[poolSymbol].delete(item.key));
 
 		return Array.prototype.splice.call(this, start, deleteCount, items);
 	}
 
 	get length() {
 		return this.length;
-	}
-
-	static emptyUnique() {
-		fieldsKeys.clear();
 	}
 }
 

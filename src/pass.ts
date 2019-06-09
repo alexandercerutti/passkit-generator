@@ -439,46 +439,6 @@ export class Pass implements PassIndexSignature {
 	}
 
 	/**
-	 * Checks if pass model type is one of the supported ones
-	 *
-	 * @method _hasValidType
-	 * @params {string} passFile - parsed pass structure content
-	 * @returns {Boolean} true if type is supported, false otherwise.
-	 */
-
-	_hasValidType(passFile: schema.Pass): boolean {
-		let passTypes = ["boardingPass", "eventTicket", "coupon", "generic", "storeCard"];
-
-		this.type = passTypes.find(type => passFile.hasOwnProperty(type));
-
-		if (!this.type) {
-			genericDebug(formatMessage("NO_PASS_TYPE"));
-			return false;
-		}
-
-		return schema.isValid(passFile[this.type], "passDict");
-	}
-
-	/**
-	 * Reads pass.json file and returns the patched version
-	 * @function
-	 * @name passExtractor
-	 * @return {Promise<Buffer>} The patched pass.json buffer
-	 */
-
-	async _extractPassDefinition(): Promise<Buffer> {
-		const passStructBuffer = await readFile(path.resolve(this.model, "pass.json"))
-		const parsedPassDefinition = JSON.parse(passStructBuffer.toString("utf8"));
-
-		if (!this._hasValidType(parsedPassDefinition)) {
-			const eMessage = formatMessage("PASSFILE_VALIDATION_FAILED");
-			throw new Error(eMessage);
-		}
-
-		return this._patch(parsedPassDefinition);
-	}
-
-	/**
 	 * Generates the PKCS #7 cryptografic signature for the manifest file.
 	 *
 	 * @method _sign
@@ -594,36 +554,6 @@ export class Pass implements PassIndexSignature {
 		return Buffer.from(JSON.stringify(passFile));
 	}
 
-	/**
-	 * Validates the contents of the passed options and handle them
-	 *
-	 * @method _parseSettings
-	 * @params {Object} options - the options passed to be parsed
-	 * @returns {Object} - model path and filtered options
-	 */
-
-	_parseSettings(options: schema.PassInstance): { model: string, _props: Object } {
-		if (!schema.isValid(options, "instance")) {
-			throw new Error(formatMessage("REQUIR_VALID_FAILED"));
-		}
-
-		if (!options.model || typeof options.model !== "string") {
-			throw new Error(formatMessage("MODEL_NOT_STRING"));
-		}
-
-		const modelPath = path.resolve(options.model) + (!!options.model && !path.extname(options.model) ? ".pass" : "");
-		const filteredOpts = schema.getValidated(options.overrides, "supportedOptions");
-
-		if (!filteredOpts) {
-			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
-		}
-
-		return {
-			model: modelPath,
-			_props: filteredOpts
-		};
-	}
-
 	set transitType(v: string) {
 		if (schema.isValid(v, "transitType")) {
 			this[transitType] = v;
@@ -635,81 +565,6 @@ export class Pass implements PassIndexSignature {
 
 	get transitType(): string {
 		return this[transitType];
-	}
-}
-
-/**
- * Validates the contents of the passed options and handle them
- *
- * @function readCertificates
- * @params {Object} certificates - certificates object with raw content
- * 	and, optionally, the already parsed certificates
- * @returns {Object} - parsed certificates to be pushed to Pass.Certificates.
- */
-
-function readCertificates(certificates: schema.Certificates) {
-	if (certificates.wwdr && certificates.signerCert && typeof certificates.signerKey === "object") {
-		// Nothing must be added. Void object is returned.
-		return Promise.resolve({});
-	}
-
-	const raw = certificates._raw;
-	const optCertsNames = Object.keys(raw);
-	const certPaths = optCertsNames.map((val) => {
-		const cert: string | typeof certificates.signerKey = raw[val];
-		// realRawValue exists as signerKey might be an object
-		const realRawValue = !(cert instanceof Object) ? cert : cert["keyFile"];
-
-		// We are checking if the string is a path or a content
-		if (!!path.parse(realRawValue).ext) {
-			const resolvedPath = path.resolve(realRawValue);
-			return readFile(resolvedPath, { encoding: "utf8" });
-		} else {
-			return Promise.resolve(realRawValue);
-		}
-	});
-
-	return Promise.all(certPaths)
-		.then(contents => {
-			// Mapping each file content to a PEM structure, returned in form of one-key-object
-			// which is conjoint later with the other pems
-
-			return Object.assign(
-				{},
-				...contents.map((file, index) => {
-					const certName = optCertsNames[index];
-					const pem = parsePEM(certName, file, raw[certName].passphrase);
-
-					if (!pem) {
-						throw new Error(formatMessage("INVALID_CERTS", certName));
-					}
-
-					return { [certName]: pem };
-				})
-			);
-		}).catch(err => {
-			if (!err.path) {
-				throw err;
-			}
-
-			throw new Error(formatMessage("INVALID_CERT_PATH", path.parse(err.path).base));
-		});
-}
-
-/**
- * Parses the PEM-formatted passed text (certificates)
- *
- * @function parsePEM
- * @params {String} element - Text content of .pem files
- * @params {String=} passphrase - passphrase for the key
- * @returns {Object} The parsed certificate or key in node forge format
- */
-
-function parsePEM(pemName, element, passphrase) {
-	if (pemName === "signerKey" && passphrase) {
-		return forge.pki.decryptRsaPrivateKey(element, String(passphrase));
-	} else {
-		return forge.pki.certificateFromPem(element);
 	}
 }
 

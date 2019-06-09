@@ -88,89 +88,49 @@ export class Pass implements PassIndexSignature {
 	*/
 
 	async generate(): Promise<Stream> {
-		try {
-			// Reading the model
-			const modelFilesList = await readdir(this.model);
+		// Editing Pass.json
 
-			// list without dynamic components like manifest, signature or pass files (will be added later in the flow) and hidden files.
-			const noDynList = removeHidden(modelFilesList).filter(f => !/(manifest|signature|pass)/i.test(f));
+		this.bundle["pass.json"] = this._patch(this.bundle["pass.json"]);
 
-			if (!noDynList.length || !noDynList.some(f => f.toLowerCase().includes("icon"))) {
-				let eMessage = formatMessage("MODEL_UNINITIALIZED", path.parse(this.model).name);
-				throw new Error(eMessage);
-			}
+		const finalBundle = { ...this.bundle } as schema.BundleUnit;
 
-			// list without localization files (they will be added later in the flow)
-			let bundle = noDynList.filter(f => !f.includes(".lproj"));
+		Object.keys(this.l10nTranslations).forEach(lang => {
+			const strings = generateStringFile(this.l10nTranslations[lang]);
 
-			// Localization folders only
-			const L10N = noDynList.filter(f => f.includes(".lproj") && Object.keys(this.l10n).includes(path.parse(f).name));
-
-			/*
-			 * Reading all the localization selected folders and removing hidden files (the ones that starts with ".")
-			 * from the list.
-			 */
-
-			const L10N_FilesListByFolder = await Promise.all(
-				L10N.map(async folderPath => {
-					const list = await readdir(path.join(this.model, folderPath))
-					return removeHidden(list);
-				})
-			);
-
-			// Pushing into the bundle the composed paths for localization files
-
-			L10N_FilesListByFolder.forEach((filesList, index) =>
-				bundle.push(
-					...filesList.map(file => path.join(L10N[index], file))
-				)
-			);
-
-			/* Getting all bundle file buffers, pass.json included, and appending path */
-
-			// Reading bundle files to buffers without pass.json - it gets read below
-			// to use a different parsing process
-
-			const bundleBuffers = bundle.map(file => readFile(path.resolve(this.model, file)));
-			const passBuffer = this._extractPassDefinition();
-			bundle.push("pass.json");
-
-			const buffers = await Promise.all([...bundleBuffers, passBuffer]);
-
-			Object.keys(this.l10n).forEach(lang => {
-				const strings = generateStringFile(this.l10n[lang]);
-
-				/**
-				 * if .string file buffer is empty, no translations were added
-				 * but still wanted to include the language
-				 */
-
-				if (!strings.length) {
-					return;
-				}
-
+			if (strings.length) {
 				/**
 				 * if there's already a buffer of the same folder and called
 				 * `pass.strings`, we'll merge the two buffers. We'll create
 				 * it otherwise.
+			 */
+
+				if (!this.l10nBundles[lang]) {
+					this.l10nBundles[lang] = {};
+				}
+
+				this.l10nBundles[lang]["pass.strings"] = Buffer.concat([
+					this.l10nBundles[lang]["pass.strings"] || Buffer.from("", "utf8"),
+					strings
+				]);
+			}
+
+			if (!(this.l10nBundles[lang] && Object.keys(this.l10nBundles[lang]).length)) {
+					return;
+				}
+
+				/**
+			 * Assigning all the localization files to the final bundle
+			 * by mapping the buffer to the pass-relative file path;
 				 *
 				 * We are replacing the slashes to avoid Windows slashes
 				 * composition.
 				 */
-
-				const stringFilePath = path.join(`${lang}.lproj`, "pass.strings").replace(/\\/, "/");
-
-				const stringFileIndex = bundle.findIndex(file => file === stringFilePath);
-
-				if (stringFileIndex > -1) {
-					buffers[stringFileIndex] = Buffer.concat([
-						buffers[stringFileIndex],
-						strings
-					]);
-				} else {
-					buffers.push(strings);
-					bundle.push(stringFilePath);
-				}
+			Object.assign(finalBundle, ...Object.keys(this.l10nBundles[lang])
+				.map(fileName => {
+					const fullPath = path.join(`${lang}.lproj`, fileName).replace(/\\/, "/");
+					return { [fullPath]: this.l10nBundles[lang][fileName] };
+				})
+			);
 			});
 
 			/*
@@ -178,23 +138,16 @@ export class Pass implements PassIndexSignature {
 			 * and returning the compiled manifest
 			 */
 			const archive = archiver("zip");
-			const manifest = buffers.reduce((acc, current, index) => {
-				let filename = bundle[index];
+		const manifest = Object.keys(finalBundle).reduce((acc, current) => {
 				let hashFlow = forge.md.sha1.create();
 
-				hashFlow.update(current.toString("binary"));
-				archive.append(current, { name: filename });
+			hashFlow.update(finalBundle[current].toString("binary"));
+			archive.append(current, { name: current });
 
-				acc[filename] = hashFlow.digest().toHex();
+			acc[current] = hashFlow.digest().toHex();
 
 				return acc;
 			}, {});
-
-			// Reading the certificates,
-			// signing the manifest, appending signature an manifest to the archive
-			// and returning the generated pass stream.
-
-			Object.assign(this.Certificates, await readCertificates(this.Certificates));
 
 			const signatureBuffer = this._sign(manifest);
 
@@ -206,14 +159,6 @@ export class Pass implements PassIndexSignature {
 			archive.pipe(passStream);
 
 			return archive.finalize().then(() => passStream);
-		} catch (err) {
-			if (err.code && err.code === "ENOENT") {
-				// No model available at this path - renaming the error
-				throw new Error(formatMessage("MODEL_NOT_FOUND", this.model));
-			}
-
-			throw new Error(err);
-		}
 	}
 
 	/**
@@ -230,7 +175,7 @@ export class Pass implements PassIndexSignature {
 
 	localize(lang: string, translations?: { [key: string]: string }) {
 		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
-			this.l10n[lang] = translations || {};
+			this.l10nTranslations[lang] = translations || {};
 		}
 
 		return this;

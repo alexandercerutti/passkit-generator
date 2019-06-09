@@ -65,7 +65,7 @@ async function getModelFolderContents(model: string): Promise<PartitionedBundle>
 	const modelFilesList = await readDir(modelPath);
 
 	// No dot-starting files, manifest and signature
-	const filteredFiles = removeHidden(modelFilesList).filter(f => !/(manifest|signature|pass)/i.test(f));
+	const filteredFiles = removeHidden(modelFilesList).filter(f => !/(manifest|signature)/i.test(f));
 
 	// Icon is required to proceed
 	if (!(filteredFiles.length && filteredFiles.some(file => file.toLowerCase().includes("icon")))) {
@@ -77,7 +77,7 @@ async function getModelFolderContents(model: string): Promise<PartitionedBundle>
 	const rawBundle = filteredFiles.filter(entry => !entry.includes(".lproj"));
 	const l10nFolders = filteredFiles.filter(entry => entry.includes(".lproj"));
 
-	const bundleBuffers = rawBundle.map(file => readFile(path.resolve(model, file)));
+	const bundleBuffers = rawBundle.map(file => readFile(path.resolve(modelPath, file)));
 	const buffers = await Promise.all(bundleBuffers);
 
 	const bundle: BundleUnit = Object.assign({},
@@ -89,7 +89,7 @@ async function getModelFolderContents(model: string): Promise<PartitionedBundle>
 	const L10N_FilesListByFolder: Array<BundleUnit> = await Promise.all(
 		l10nFolders.map(folderPath => {
 			// Reading current folder
-			const currentLangPath = path.join(model, folderPath);
+			const currentLangPath = path.join(modelPath, folderPath);
 			return readDir(currentLangPath)
 				.then(files => {
 					// Transforming files path to a model-relative path
@@ -193,7 +193,9 @@ async function readCertificatesFromOptions(options: Certificates): Promise<Final
 
 	// We read the contents
 	const rawContentsPromises = Object.keys(flattenedDocs)
-		.map(content => {
+		.map(key => {
+			const content = flattenedDocs[key];
+
 			if (!!path.parse(content).ext) {
 				// The content is a path to the document
 				return readFile(path.resolve(content), { encoding: "utf8"});

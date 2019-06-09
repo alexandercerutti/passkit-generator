@@ -30,10 +30,10 @@ export class Pass implements PassIndexSignature {
 	private bundle: schema.BundleUnit;
 	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
 	private _fields: string[];
-	private _props: schema.ValidPass;
-	private type: string;
-	private fieldsKeys: Set<string>;
-	private passCore: schema.ValidPass;
+	private _props: schema.ValidPass = {};
+	private type: string = "";
+	private fieldsKeys: Set<string> = new Set<string>();
+	private passCore: schema.ValidPass = {};
 
 	Certificates: schema.FinalCertificates;
 	l10nTranslations: { [key: string]: { [key: string]: string } } = {};
@@ -60,8 +60,6 @@ export class Pass implements PassIndexSignature {
 			// in the code the transit type but right in the model;
 			this[transitType] = this.passCore[this.type]["transitType"];
 		}
-
-		this.fieldsKeys = new Set();
 
 		const typeFields = Object.keys(this.passCore[this.type]);
 
@@ -142,7 +140,7 @@ export class Pass implements PassIndexSignature {
 				let hashFlow = forge.md.sha1.create();
 
 			hashFlow.update(finalBundle[current].toString("binary"));
-			archive.append(current, { name: current });
+			archive.append(finalBundle[current], { name: current });
 
 			acc[current] = hashFlow.digest().toHex();
 

@@ -20,19 +20,32 @@ export interface FactoryOptions {
 	shouldOverwrite?: boolean;
 }
 
-export interface PassInstance {
-	model: { [key: string]: Buffer };
-	certificates: {
+export interface BundleUnit {
+	[key: string]: Buffer;
+}
+
+export interface PartitionedBundle {
+	bundle: BundleUnit;
+	l10nBundle: {
+		[key: string]: BundleUnit
+	};
+}
+
+export interface FinalCertificates {
 		wwdr: string;
 		signerCert: string;
-		signerKey: {
-			keyFile: string;
-			passphrase?: string;
-		};
-	};
-	overrides?: OverridesSupportedOptions;
-	shouldOverwrite?: boolean;
+	signerKey: string;
 }
+
+export interface PassInstance {
+	model: PartitionedBundle;
+	certificates: FinalCertificates;
+	overrides?: OverridesSupportedOptions;
+}
+
+// ************************************ //
+// * JOI Schemas + Related Interfaces * //
+// ************************************ //
 
 const certificatesSchema = Joi.object().keys({
 	wwdr: Joi.string().required(),

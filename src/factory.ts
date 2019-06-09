@@ -11,30 +11,7 @@ import { removeHidden } from "./utils";
 const readDir = promisify(_readdir);
 const readFile = promisify(_readFile);
 
-interface BundleUnit {
-	[key: string]: Buffer;
-}
-
-interface PartitionedBundle {
-	bundle: BundleUnit;
-	l10nBundle: {
-		[key: string]: BundleUnit
-	};
-}
-
-interface FinalCertificates {
-	wwdr: forge.pki.Certificate;
-	signerCert: forge.pki.Certificate;
-	signerKey: forge.pki.PrivateKey;
-}
-
-interface FactoryOptions {
-	model: string | BundleUnit,
-	certificates: Certificates;
-	overrides?: Object;
-}
-
-export async function createPass(options: FactoryOptions) {
+export async function createPass(options: FactoryOptions): Promise<Pass> {
 	if (!(options && Object.keys(options).length)) {
 		throw new Error("Unable to create Pass: no options were passed");
 	}

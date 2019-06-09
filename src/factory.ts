@@ -54,9 +54,9 @@ async function getModelContents(model: FactoryOptions["model"]) {
 		modelContents = getModelBufferContents(model);
 	}
 
-	const modelFiles = Object.keys(modelContents);
+	const modelFiles = Object.keys(modelContents.bundle);
 
-	if (!(modelFiles.includes("pass.json") && modelFiles.some(file => file.includes("icon")))) {
+	if (!(modelFiles.includes("pass.json") && modelContents.bundle["pass.json"].length && modelFiles.some(file => Boolean(file.includes("icon") && modelContents.bundle[file].length)))) {
 		throw new Error("missing icon or pass.json");
 	}
 
@@ -156,7 +156,7 @@ function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 	const bundleKeys = Object.keys(rawBundle);
 
 	if (!bundleKeys.length) {
-		throw new Error("Cannot proceed with pass creation: bundle initialized")
+		throw new Error("Cannot proceed with pass creation: bundle not initialized")
 	}
 
 	// separing localization folders

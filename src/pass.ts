@@ -509,7 +509,9 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Promise<Buffer>} Edited pass.json buffer or Object containing error.
 	 */
 
-	_patch(passFile: schema.Pass): Buffer {
+	_patch(passCoreBuffer: Buffer): Buffer {
+		const passFile = JSON.parse(passCoreBuffer.toString());
+
 		if (Object.keys(this._props).length) {
 			// We filter the existing (in passFile) and non-valid keys from
 			// the below array keys that accept rgb values
@@ -518,38 +520,26 @@ export class Pass implements PassIndexSignature {
 				.filter(v => this._props[v] && !isValidRGB(this._props[v]))
 				.forEach(v => delete this._props[v]);
 
-			if (this.shouldOverwrite) {
-				Object.assign(passFile, this._props);
-			} else {
 				Object.keys(this._props).forEach(prop => {
-					if (passFile[prop]) {
 						if (passFile[prop] instanceof Array) {
 							passFile[prop].push(...this._props[prop]);
 						} else if (passFile[prop] instanceof Object) {
 							Object.assign(passFile[prop], this._props[prop]);
-						}
 					} else {
 						passFile[prop] = this._props[prop];
 					}
 				});
 			}
-		}
 
-		this._fields.forEach(area => {
-			if (this[area].length) {
-				if (this.shouldOverwrite) {
-					passFile[this.type][area] = [...this[area]];
-				} else {
-					passFile[this.type][area].push(...this[area]);
-				}
-			}
+		this._fields.forEach(field => {
+			passFile[this.type][field] = this[field];
 		});
 
-		if (this.type === "boardingPass" && !this.transitType) {
+		if (this.type === "boardingPass" && !this[transitType]) {
 			throw new Error(formatMessage("TRSTYPE_REQUIRED"));
 		}
 
-		passFile[this.type]["transitType"] = this.transitType;
+		passFile[this.type]["transitType"] = this[transitType];
 
 		return Buffer.from(JSON.stringify(passFile));
 	}

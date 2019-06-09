@@ -10,14 +10,12 @@ export interface Certificates {
 		keyFile: string;
 		passphrase?: string;
 	};
-	_raw?: Certificates;
 }
 
 export interface FactoryOptions {
 	model: { [key: string]: Buffer } | string;
 	certificates: Certificates;
 	overrides?: Object;
-	shouldOverwrite?: boolean;
 }
 
 export interface BundleUnit {
@@ -32,8 +30,8 @@ export interface PartitionedBundle {
 }
 
 export interface FinalCertificates {
-		wwdr: string;
-		signerCert: string;
+	wwdr: string;
+	signerCert: string;
 	signerKey: string;
 }
 
@@ -276,6 +274,26 @@ const semantics = Joi.object().keys({
 	balance: currencyAmount
 });
 
+interface ValidPassType {
+	boardingPass?: PassFields & { transitType: TransitType };
+	eventTicket?: PassFields;
+	coupon?: PassFields;
+	generic?: PassFields;
+	storeCard?: PassFields;
+}
+
+export interface ValidPass extends OverridesSupportedOptions, ValidPassType {
+	barcode?: Barcode;
+	barcodes?: Barcode[];
+	beacons?: Beacon[];
+	locations?: Location[];
+	maxDistance?: number;
+	relevantDate?: string;
+	nfc?: NFC;
+	expirationDate?: string;
+	voided?: boolean;
+}
+
 export interface Barcode {
 	altText?: string;
 	messageEncoding?: string;
@@ -364,7 +382,7 @@ const locationsDict = Joi.object().keys({
 	relevantText: Joi.string()
 });
 
-export interface Pass {
+export interface PassFields {
 	auxiliaryFields: Field[];
 	backFields: Field[];
 	headerFields: Field[];

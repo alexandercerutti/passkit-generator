@@ -21,21 +21,15 @@ export async function createPass(options: FactoryOptions): Promise<Pass> {
 			getModelContents(options.model),
 		readCertificatesFromOptions(options.certificates)
 	]);
+
+		return new Pass({
+			model: bundle,
+			certificates,
+			overrides: options.overrides
+		});
 	} catch (err) {
 		// @TODO: analyze the error and stop the execution somehow
 	}
-
-	// Controllo se il model è un oggetto o una stringa
-	// Se è un oggetto passo avanti
-	// Se è una stringa controllo se è un path. Se è un path
-	// faccio readdir
-	// altrimenti throw
-
-	// Creare una funzione che possa controllare ed estrarre i certificati
-	// Creare una funzione che possa controllare ed estrarre i file
-	// Entrambe devono ritornare Promise, così faccio await Promise.all
-
-	return new Pass();
 }
 
 async function getModelContents(model: FactoryOptions["model"]) {

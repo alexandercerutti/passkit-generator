@@ -31,40 +31,57 @@ interface PassIndexSignature {
 }
 
 export class Pass implements PassIndexSignature {
-	private model: string;
+	// private model: string;
+	private bundle: schema.BundleUnit;
+	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
 	private _fields: string[];
-	private _props: { [key: string]: any };
+	private _props: schema.ValidPass;
 	private type: string;
 	private fieldsKeys: Set<string>;
+	private passCore: schema.ValidPass;
 
-	Certificates: schema.Certificates;
-	l10n: { [key: string]: { [key: string]: string } } = {};
-	shouldOverwrite: boolean;
+	Certificates: schema.FinalCertificates;
+	l10nTranslations: { [key: string]: { [key: string]: string } } = {};
 	[transitType]: string = "";
 
 	constructor(options: schema.PassInstance) {
-		this.Certificates = {
-			// Even if this assigning will fail, it will be captured below
-			// in _parseSettings, since this won't match with the schema.
-			_raw: options.certificates || {},
-		};
+		this.Certificates = options.certificates;
+		this.l10nBundles = options.model.l10nBundle;
+		this.bundle = { ...options.model.bundle };
 
 		options.overrides = options.overrides || {};
 
-		this.shouldOverwrite = !(options.hasOwnProperty("shouldOverwrite") && !options.shouldOverwrite);
+		// getting pass.json
+		this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
 
-		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
+		this.type = Object.keys(this.passCore).find(key => /(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key));
+
+		if (!this.type) {
+			throw new Error("Missing type in model");
+		}
+
+		if (this.type === "boardingPass" && this.passCore[this.type]["transitType"]) {
+			// We might want to generate a boarding pass without setting manually
+			// in the code the transit type but right in the model;
+			this[transitType] = this.passCore[this.type]["transitType"];
+		}
 
 		this.fieldsKeys = new Set();
 
-		this._fields.forEach(name => {
-		    this[name] = new FieldsArray(this.fieldsKeys);
+		const typeFields = Object.keys(this.passCore[this.type]);
+
+		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
+		this._fields.forEach(fieldName => {
+			if (typeFields.includes(fieldName)) {
+				this[fieldName] = new FieldsArray(
+					this.fieldsKeys,
+					...this.passCore[this.type][fieldName]
+						.filter((field: schema.Field) => schema.isValid(field, "field"))
+				);
+			} else {
+				this[fieldName] = new FieldsArray(this.fieldsKeys);
+			}
 		});
-
-		this[transitType] = "";
-
-		// Assigning model and _props to this
-		Object.assign(this, this._parseSettings(options));
 	}
 
 	/**

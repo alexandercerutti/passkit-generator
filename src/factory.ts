@@ -16,11 +16,8 @@ export async function createPass(options: FactoryOptions): Promise<Pass> {
 		throw new Error("Unable to create Pass: no options were passed");
 	}
 
-	// Voglio leggere i certificati
-	// Voglio leggere il model (se non è un oggetto)
-
 	try {
-		const [model, certificates] = await Promise.all([
+		const [bundle, certificates] = await Promise.all([
 			getModelContents(options.model),
 		readCertificatesFromOptions(options.certificates)
 	]);

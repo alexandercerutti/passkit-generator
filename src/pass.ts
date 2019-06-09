@@ -464,7 +464,7 @@ export class Pass implements PassIndexSignature {
 		 */
 
 		signature.addSigner({
-			key: this.Certificates.signerKey.keyFile,
+			key: this.Certificates.signerKey,
 			certificate: this.Certificates.signerCert,
 			digestAlgorithm: forge.pki.oids.sha1,
 			authenticatedAttributes: [{

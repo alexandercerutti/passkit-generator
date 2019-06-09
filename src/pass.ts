@@ -1,6 +1,4 @@
-import fs from "fs";
 import path from "path";
-import { promisify } from "util";
 import stream, { Stream } from "stream";
 import forge from "node-forge";
 import archiver from "archiver";
@@ -11,15 +9,12 @@ import formatMessage from "./messages";
 import FieldsArray from "./fieldsArray";
 import {
 	assignLength, generateStringFile,
-	removeHidden, dateToW3CString,
-	isValidRGB
+	dateToW3CString, isValidRGB
 } from "./utils";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
 
-const readdir = promisify(fs.readdir);
-const readFile = promisify(fs.readFile);
 
 const noop = () => {};
 const transitType = Symbol("transitType");

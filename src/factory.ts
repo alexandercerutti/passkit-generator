@@ -1,5 +1,5 @@
 import { Pass } from "./pass";
-import { Certificates, isValid } from "./schema";
+import { Certificates, isValid, FactoryOptions, PartitionedBundle, BundleUnit, FinalCertificates } from "./schema";
 
 import { promisify } from "util";
 import { readFile as _readFile, readdir as _readdir } from "fs";

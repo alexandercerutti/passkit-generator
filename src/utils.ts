@@ -27,18 +27,17 @@ export function isValidRGB(value: string): boolean {
  * Converts a date to W3C Standard format
  *
  * @function dateToW3Cstring
- * @params {String} date - The date to be parsed
- * @params {String} [format] - a custom format
- * @returns {String|undefined} The parsed string if the parameter is valid,
+ * @params date - The date to be parsed
+ * @returns - The parsed string if the parameter is valid,
  * 	 undefined otherwise
  */
 
-export function dateToW3CString(date: string | Date, format?: string) {
-	if (typeof date !== "string" && !(date instanceof Date)) {
+export function dateToW3CString(date: Date) {
+	if (!(date instanceof Date)) {
 		return "";
 	}
 
-	const parsedDate = date instanceof Date ? moment(date).format() : moment(date.replace(/\//g, "-"), format || ["MM-DD-YYYY hh:mm:ss", "DD-MM-YYYY hh:mm:ss"]).format();
+	const parsedDate = moment(date).format();
 
 	if (parsedDate === "Invalid date") {
 		return undefined;

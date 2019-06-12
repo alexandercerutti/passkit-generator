@@ -183,17 +183,16 @@ export class Pass implements PassIndexSignature {
 	 * Sets expirationDate property to the W3C date
 	 *
 	 * @method expiration
-	 * @params {String} date - the date in string
-	 * @params {String} format - a custom format for the date
+	 * @params date
 	 * @returns {this}
 	 */
 
-	expiration(date: string | Date, format?: string) {
-		if (typeof date !== "string" && !(date instanceof Date)) {
+	expiration(date: Date) {
+		if (!(date instanceof Date)) {
 			return this;
 		}
 
-		let dateParse = dateToW3CString(date, format);
+		const dateParse = dateToW3CString(date);
 
 		if (!dateParse) {
 			genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Expiration date"));
@@ -221,13 +220,12 @@ export class Pass implements PassIndexSignature {
 	 * Checks and sets data for "beacons", "locations", "maxDistance" and "relevantDate" keys
 	 *
 	 * @method relevance
-	 * @params {String} type - one of the key above
-	 * @params {Any[]} data - the data to be pushed to the property
-	 * @params {String} [relevanceDateFormat] - A custom format for the date
+	 * @params type - one of the key above
+	 * @params data - the data to be pushed to the property
 	 * @return {Number} The quantity of data pushed
 	 */
 
-	relevance(type: string, data: any, relevanceDateFormat?: string) {
+	relevance(type: string, data: any) {
 		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
 
 		if (!type || !data || !types.includes(type)) {
@@ -257,12 +255,12 @@ export class Pass implements PassIndexSignature {
 
 			return assignLength(Number(!cond), this);
 		} else if (type === "relevantDate") {
-			if (typeof data !== "string" && !(data instanceof Date)) {
+			if (!(data instanceof Date)) {
 				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
 				return this;
 			}
 
-			let dateParse = dateToW3CString(data, relevanceDateFormat);
+			let dateParse = dateToW3CString(data);
 
 			if (!dateParse) {
 				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));

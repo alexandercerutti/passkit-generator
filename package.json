@@ -31,6 +31,7 @@
 	"devDependencies": {
 		"@types/archiver": "^3.0.0",
 		"@types/debug": "^4.1.4",
+		"@types/jasmine": "^3.3.13",
 		"@types/joi": "^14.3.3",
 		"@types/node": "^12.0.0",
 		"@types/node-forge": "^0.8.3",

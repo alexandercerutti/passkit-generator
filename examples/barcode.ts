@@ -8,14 +8,14 @@
  * by a string
  */
 
-const app = require("./webserver");
-const { Pass } = require("..");
+import app from "./webserver";
+import { createPass } from "..";
 
-app.all(function manageRequest(request, response) {
+app.all(async function manageRequest(request, response) {
 
-	let passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
+	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 
-	let pass = new Pass({
+	let pass = await createPass({
 		model: `./models/${request.params.modelName}`,
 		certificates: {
 			wwdr: "../certificates/WWDR.pem",
@@ -68,7 +68,9 @@ app.all(function manageRequest(request, response) {
 		bc.autocomplete();
 	}
 
+	// @ts-ignore - ignoring for logging purposes
 	console.log("Barcode property is now:", pass._props["barcode"]);
+	// @ts-ignore - ignoring for logging purposes
 	console.log("Barcodes support is autocompleted:", pass._props["barcodes"]);
 
 	pass.generate().then(function (stream) {

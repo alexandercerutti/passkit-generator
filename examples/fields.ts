@@ -9,13 +9,13 @@
  * @Author: Alexander P. Cerutti
  */
 
-const app = require("./webserver");
-const { Pass } = require("..");
+import app from "./webserver";
+import { createPass } from "..";
 
-app.all(function manageRequest(request, response) {
+app.all(async function manageRequest(request, response) {
 	let passName = "exampleBooking" + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 
-	let pass = new Pass({
+	let pass = await createPass({
 		model: `./models/exampleBooking`,
 		certificates: {
 			wwdr: "../certificates/WWDR.pem",

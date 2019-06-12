@@ -4,14 +4,13 @@
  * .pkpass file and check for .lproj folders
  */
 
-const app = require("./webserver");
-const { Pass } = require("..");
+import app from "./webserver";
+import { createPass } from "..";
 
-app.all(function manageRequest(request, response) {
+app.all(async function manageRequest(request, response) {
+	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 
-	let passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
-
-	let pass = new Pass({
+	const pass = await createPass({
 		model: `./models/${request.params.modelName}`,
 		certificates: {
 			wwdr: "../certificates/WWDR.pem",
@@ -21,7 +20,7 @@ app.all(function manageRequest(request, response) {
 				passphrase: "123456"
 			}
 		},
-		overrides: request.body || request.params || request.query,
+		overrides: request.body || request.params || request.query
 	});
 
 	// For each language you include, an .lproj folder in pass bundle
@@ -50,8 +49,8 @@ app.all(function manageRequest(request, response) {
 
 	// This language does not exist but is still added as .lproj folder
 	pass.localize("zu", {});
-
-	console.log("Added languages", Object.keys(pass.l10n).join(", "))
+	// @ts-ignore - ignoring for logging purposes. Do not replicate
+	console.log("Added languages", Object.keys(pass.l10nBundles).join(", "))
 
 	pass.generate().then(function (stream) {
 		response.set({

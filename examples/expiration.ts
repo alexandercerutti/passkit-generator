@@ -5,12 +5,13 @@
  *
  * To check if a ticket has an expiration date, you'll
  * have to wait two minutes.
+ *
  */
 
-const app = require("./webserver");
-const { Pass } = require("..");
+import app from "./webserver";
+import { createPass } from "..";
 
-app.all(function manageRequest(request, response) {
+app.all(async function manageRequest(request, response) {
 	if (!request.query.fn) {
 		response.send("<a href='?fn=void'>Generate a voided pass.</a><br><a href='?fn=expiration'>Generate a pass with expiration date</a>");
 		return;
@@ -18,7 +19,7 @@ app.all(function manageRequest(request, response) {
 
 	let passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 
-	let pass = new Pass({
+	let pass = await createPass({
 		model: `./models/${request.params.modelName}`,
 		certificates: {
 			wwdr: "../certificates/WWDR.pem",
@@ -35,11 +36,11 @@ app.all(function manageRequest(request, response) {
 		pass.void();
 	} else if (request.query.fn === "expiration") {
 		// 2 minutes later...
-		let d = new Date();
+		const d = new Date();
 		d.setMinutes(d.getMinutes() + 2);
 
 		// setting the expiration
-		pass.expiration(d.toLocaleString());
+		pass.expiration(d);
 	}
 
 	pass.generate().then(function (stream) {

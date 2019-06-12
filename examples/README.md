@@ -7,7 +7,7 @@ Express.js **was not** inserted as dipendency.
 git clone https://github.com/alexandercerutti/passkit-generator.git;
 cd passkit-generator;
 npm install;
-npm install -g express;
+npm install --no-save express;
 cd examples;
 node <the-example-you-want-to-execute>.js
 ```

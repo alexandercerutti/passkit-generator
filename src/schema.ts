@@ -316,7 +316,7 @@ export interface Field {
 	textAlignment?: string;
 	key: string;
 	value: string | number | Date;
-	semantics: Semantics;
+	semantics?: Semantics;
 	dateStyle?: string;
 	ignoreTimeZone?: boolean;
 	isRelative?: boolean;

@@ -517,9 +517,9 @@ export class Pass implements PassIndexSignature {
 				.forEach(v => delete this._props[v]);
 
 				Object.keys(this._props).forEach(prop => {
-						if (passFile[prop] instanceof Array) {
+				if (passFile[prop] && passFile[prop] instanceof Array) {
 							passFile[prop].push(...this._props[prop]);
-						} else if (passFile[prop] instanceof Object) {
+				} else if (passFile[prop] && passFile[prop] instanceof Object) {
 							Object.assign(passFile[prop], this._props[prop]);
 					} else {
 						passFile[prop] = this._props[prop];

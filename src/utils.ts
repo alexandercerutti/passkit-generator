@@ -87,6 +87,6 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
  * @param {Array<Object<string, any>>} source - the main sources of properties
  */
 
-export function assignLength(length: number, ...sources: Array<{ [key: string]: any }>): Array<{ [key: string]: any }> {
+export function assignLength<T>(length: number, ...sources: Array<{ [key: string]: any }>): { [key: string]: any } & T {
 	return Object.assign({ length }, ...sources);
 }

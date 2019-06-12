@@ -35,6 +35,12 @@ export class Pass implements PassIndexSignature {
 	private fieldsKeys: Set<string> = new Set<string>();
 	private passCore: schema.ValidPass = {};
 
+	public headerFields: FieldsArray;
+	public primaryFields: FieldsArray;
+	public secondaryFields: FieldsArray;
+	public auxiliaryFields: FieldsArray;
+	public backFields: FieldsArray;
+
 	Certificates: schema.FinalCertificates;
 	l10nTranslations: { [key: string]: { [key: string]: string } } = {};
 	[transitType]: string = "";

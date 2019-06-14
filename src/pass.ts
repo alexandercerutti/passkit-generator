@@ -280,28 +280,38 @@ export class Pass implements PassIndexSignature {
 
 	/**
 	 * Adds barcodes to "barcode" and "barcodes" properties.
-	 * It will let later to add the missing versions
+	 * It will let to add the missing versions later.
 	 *
 	 * @method barcode
-	 * @params {Object|String} data - the data to be added
+	 * @params data - the data to be added
 	 * @return {this} Improved this with length property and other methods
 	 */
 
-	barcode(data) {
-		if (!data) {
+	barcode(first: string | schema.Barcode, ...data: schema.Barcode[]): this {
+		const isFirstParameterValid = (
+			first && (
+				typeof first === "string" && first.length || (
+					typeof first === "object" &&
+					first.hasOwnProperty("message")
+				)
+			)
+		);
+
+		if (!isFirstParameterValid) {
 			return assignLength(0, this, {
 				autocomplete: noop,
 				backward: noop,
 			});
 		}
 
-		if (typeof data === "string" || (data instanceof Object && !Array.isArray(data) && !data.format && data.message)) {
-			const autogen = barcodesFromUncompleteData(data instanceof Object ? data : { message: data });
+		if (typeof first === "string") {
+			const autogen = barcodesFromUncompleteData(first);
 
 			if (!autogen.length) {
+				barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
 				return assignLength(0, this, {
 					autocomplete: noop,
-					backward: noop
+					backward: noop,
 				});
 			}
 
@@ -310,50 +320,48 @@ export class Pass implements PassIndexSignature {
 
 			return assignLength(autogen.length, this, {
 				autocomplete: noop,
-				backward: (format) => this[barcodesSetBackward](format)
+				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
+			});
+		} else {
+			const barcodes = [first, ...(data || [])];
+
+			// Stripping from the array not-object elements
+			// and the ones that does not pass validation.
+			// Validation assign default value to missing parameters (if any).
+
+			const valid = barcodes.reduce<schema.Barcode[]>((acc, current) => {
+				if (!(current && current instanceof Object)) {
+					return acc;
+				}
+
+				const validated = schema.getValidated(current, "barcode");
+
+				if (!(validated && validated instanceof Object && Object.keys(validated).length)) {
+					return acc;
+				}
+
+				return [...acc, validated] as schema.Barcode[];
+			}, []);
+
+			if (valid.length) {
+				// With this check, we want to avoid that
+				// PKBarcodeFormatCode128 gets chosen automatically
+				// if it is the first. If true, we'll get 1
+				// (so not the first index)
+				const barcodeFirstValidIndex = Number(valid[0].format === "PKBarcodeFormatCode128");
+
+				if (valid.length > 0 && valid[barcodeFirstValidIndex]) {
+					this._props["barcode"] = valid[barcodeFirstValidIndex];
+				}
+
+				this._props["barcodes"] = valid;
+			}
+
+			return assignLength(valid.length, this, {
+				autocomplete: () => this[barcodesFillMissing](),
+				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format),
 			});
 		}
-
-		if (!(data instanceof Array)) {
-			data = [data];
-		}
-
-		// Stripping from the array not-object elements, objects with no message
-		// and the ones that does not pass validation.
-		// Validation assign default value to missing parameters (if any).
-
-		const valid = data.reduce((acc, current) => {
-			if (!(current && current instanceof Object && current.hasOwnProperty("message"))) {
-				return acc;
-			}
-
-			const validated = schema.getValidated(current, "barcode");
-
-			if (!(validated && validated instanceof Object && Object.keys(validated).length)) {
-				return acc;
-			}
-
-			return [...acc, validated];
-		}, []);
-
-		if (valid.length) {
-			// With this check, we want to avoid that
-			// PKBarcodeFormatCode128 gets chosen automatically
-			// if it is the first. If true, we'll get 1
-			// (so not the first index)
-			const barcodeFirstValidIndex = Number(valid[0].format === "PKBarcodeFormatCode128");
-
-			if (valid.length > 0) {
-				this._props["barcode"] = valid[barcodeFirstValidIndex];
-			}
-
-			this._props["barcodes"] = valid;
-		}
-
-		return assignLength(valid.length, this, {
-			autocomplete: () => this[barcodesFillMissing](),
-			backward: (format) => this[barcodesSetBackward](format),
-		});
 	}
 
 	/**
@@ -366,20 +374,20 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	[barcodesFillMissing]() {
-		let props = this._props["barcodes"];
+		const props = this._props["barcodes"];
 
 		if (props.length === 4 || !props.length) {
 			return assignLength(0, this, {
 				autocomplete: noop,
-				backward: (format) => this[barcodesSetBackward](format)
+				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
 			});
 		}
 
-		this._props["barcodes"] = barcodesFromUncompleteData(props[0]);
+		this._props["barcodes"] = barcodesFromUncompleteData(props[0].message);
 
 		return assignLength(4 - props.length, this, {
 			autocomplete: noop,
-			backward: (format) => this[barcodesSetBackward](format)
+			backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
 		});
 	}
 
@@ -389,11 +397,11 @@ export class Pass implements PassIndexSignature {
 	 * property "barcode".
 	 *
 	 * @method Symbol/barcodesSetBackward
-	 * @params {String} format - the format, or part of it, to be used
+	 * @params format - the format to be used
 	 * @return {this}
 	 */
 
-	[barcodesSetBackward](format) {
+	[barcodesSetBackward](format: schema.BarcodeFormat | null): this {
 		if (format === null) {
 			this._props["barcode"] = undefined;
 			return this;
@@ -564,16 +572,15 @@ export class Pass implements PassIndexSignature {
  * Automatically generates barcodes for all the types given common info
  *
  * @method barcodesFromMessage
- * @params {Object} data - common info, may be object or the message itself
- * @params {String} data.message - the content to be placed inside "message" field
- * @params {String} [data.altText=data.message] - alternativeText, is message content if not overwritten
- * @params {String} [data.messageEncoding=iso-8859-1] - the encoding
- * @return {Object[]} Object array barcodeDict compliant
+ * @params data - common info, may be object or the message itself
+ * @params data.message - the content to be placed inside "message" field
+ * @params [data.altText=data.message] - alternativeText, is message content if not overwritten
+ * @params [data.messageEncoding=iso-8859-1] - the encoding
+ * @return Object array barcodeDict compliant
  */
 
-function barcodesFromUncompleteData(origin: schema.Barcode): schema.Barcode[] {
-	if (!(origin.message && typeof origin.message === "string")) {
-		barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
+function barcodesFromUncompleteData(message: string): schema.Barcode[] {
+	if (!(message && typeof message === "string")) {
 		return [];
 	}
 
@@ -582,10 +589,5 @@ function barcodesFromUncompleteData(origin: schema.Barcode): schema.Barcode[] {
 		"PKBarcodeFormatPDF417",
 		"PKBarcodeFormatAztec",
 		"PKBarcodeFormatCode128"
-	].map(format =>
-		schema.getValidated(
-			Object.assign({}, origin, { format }),
-			"barcode"
-		)
-	);
+	].map(format => schema.getValidated({ format, message }, "barcode"));
 }

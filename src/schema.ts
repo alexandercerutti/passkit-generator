@@ -301,6 +301,8 @@ export interface Barcode {
 	message: string;
 }
 
+export type BarcodeFormat = "PKBarcodeFormatQR" | "PKBarcodeFormatPDF417" | "PKBarcodeFormatAztec" | "PKBarcodeFormatCode128";
+
 const barcode = Joi.object().keys({
 	altText: Joi.string(),
 	messageEncoding: Joi.string().default("iso-8859-1"),

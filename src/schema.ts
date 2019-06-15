@@ -76,6 +76,7 @@ interface OverridesSupportedOptions {
 	labelColor?: string;
 	groupingIdentifier?: string;
 	suppressStripShine?: boolean;
+	maxDistance?: number;
 }
 
 const supportedOptions = Joi.object().keys({
@@ -92,6 +93,7 @@ const supportedOptions = Joi.object().keys({
 	groupingIdentifier: Joi.string(),
 	suppressStripShine: Joi.boolean(),
 	logoText: Joi.string(),
+	maxDistance: Joi.number().positive(),
 }).with("webServiceURL", "authenticationToken");
 
 

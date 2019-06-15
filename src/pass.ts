@@ -233,59 +233,82 @@ export class Pass implements PassIndexSignature {
 	}
 
 	/**
-	 * Checks and sets data for "beacons", "locations", "maxDistance" and "relevantDate" keys
-	 *
-	 * @method relevance
-	 * @params type - one of the key above
-	 * @params data - the data to be pushed to the property
-	 * @return {Number} The quantity of data pushed
+	 * Sets current pass' relevancy through beacons
+	 * @param data
+	 * @returns {Pass}
 	 */
 
-	relevance(type: string, data: any) {
-		let types = ["beacons", "locations", "maxDistance", "relevantDate"];
-
-		if (!type || !data || !types.includes(type)) {
+	beacons(...data: schema.Beacon[]): this {
+		if (!data.length) {
 			return assignLength(0, this);
 		}
 
-		if (type === "beacons" || type === "locations") {
-			if (!(data instanceof Array)) {
-				data = [data];
+		const validBeacons = data.reduce<schema.Beacon[]>((acc, current) => {
+			if (!(Object.keys(current).length && schema.isValid(current, "locations"))) {
+				return acc;
 			}
 
-			let valid = data.filter(d => schema.isValid(d, type + "Dict"));
+			return [...acc, current];
+		}, []);
 
-			this._props[type] = valid.length ? valid : undefined;
-
-			return assignLength(valid.length, this);
+		if (!validBeacons.length) {
+			return assignLength(0, this);
 		}
 
-		if (type === "maxDistance" && (typeof data === "string" || typeof data === "number")) {
-			let conv = Number(data);
-			// condition to proceed
-			let cond = isNaN(conv);
+		this._props["beacons"] = validBeacons;
 
-			if (!cond) {
-				this._props[type] = conv;
+		return assignLength(validBeacons.length, this);
+	}
+
+	/**
+	 * Sets current pass' relevancy through locations
+	 * @param data
+	 * @returns {Pass}
+	 */
+
+	locations(...data: schema.Location[]): this {
+		if (!data.length) {
+			return assignLength(0, this);
 			}
 
-			return assignLength(Number(!cond), this);
-		} else if (type === "relevantDate") {
-			if (!(data instanceof Date)) {
+		const validLocations = data.reduce<schema.Location[]>((acc, current) => {
+			if (!(Object.keys(current).length && schema.isValid(current, "locations"))) {
+				return acc;
+			}
+
+			return [...acc, current];
+		}, []);
+
+		if (!validLocations.length) {
+			return assignLength(0, this);
+		}
+
+		this._props["locations"] = validLocations;
+
+		return assignLength(validLocations.length, this);
+			}
+
+	/**
+	 * Sets current pass' relevancy through a date
+	 * @param data
+	 * @returns {Pass}
+	 */
+
+	relevantDate(date: Date): this {
+		if (!(date instanceof Date)) {
 				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
 				return this;
 			}
 
-			let dateParse = dateToW3CString(data);
+		const parsedDate = dateToW3CString(date);
 
-			if (!dateParse) {
-				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
-			} else {
-				this._props[type] = dateParse;
+		if (!parsedDate) {
+			// @TODO: create message "Unable to format date"
+			return this;
 			}
 
-			return assignLength(Number(!!dateParse), this);
-		}
+		this._props["relevantDate"] = parsedDate;
+		return this;
 	}
 
 	/**

@@ -244,7 +244,7 @@ export class Pass implements PassIndexSignature {
 		}
 
 		const validBeacons = data.reduce<schema.Beacon[]>((acc, current) => {
-			if (!(Object.keys(current).length && schema.isValid(current, "locations"))) {
+			if (!(Object.keys(current).length && schema.isValid(current, "beaconsDict"))) {
 				return acc;
 			}
 
@@ -269,10 +269,10 @@ export class Pass implements PassIndexSignature {
 	locations(...data: schema.Location[]): this {
 		if (!data.length) {
 			return assignLength(0, this);
-			}
+		}
 
 		const validLocations = data.reduce<schema.Location[]>((acc, current) => {
-			if (!(Object.keys(current).length && schema.isValid(current, "locations"))) {
+			if (!(Object.keys(current).length && schema.isValid(current, "locationsDict"))) {
 				return acc;
 			}
 
@@ -286,7 +286,7 @@ export class Pass implements PassIndexSignature {
 		this._props["locations"] = validLocations;
 
 		return assignLength(validLocations.length, this);
-			}
+	}
 
 	/**
 	 * Sets current pass' relevancy through a date

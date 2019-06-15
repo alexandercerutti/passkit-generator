@@ -27,7 +27,7 @@ export default class FieldsArray extends Array {
 				return acc;
 			}
 
-			if (acc.some(e => e.key === current.key) || this[poolSymbol].has(current.key)) {
+			if (this[poolSymbol].has(current.key)) {
 				fieldsDebug(`Field with key "${current.key}" discarded: fields must be unique in pass scope.`);
 			} else {
 				this[poolSymbol].add(current.key);

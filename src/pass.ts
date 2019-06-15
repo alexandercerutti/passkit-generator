@@ -25,7 +25,11 @@ interface PassIndexSignature {
 	[key: string]: any;
 }
 
-export interface PassWithBarcodeMethods extends Pass {
+export interface PassWithLengthField extends Pass {
+	length: number;
+}
+
+export interface PassWithBarcodeMethods extends PassWithLengthField {
 	backward: (format: schema.BarcodeFormat) => Pass;
 	autocomplete: () => Pass;
 }

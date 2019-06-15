@@ -19,7 +19,7 @@ const debugMessages: MessageGroup = {
 	TRSTYPE_NOT_VALID: "Transit type changing rejected as not compliant with Apple Specifications. Transit type would become \"%s\" but should be in [PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain]",
 	BRC_NOT_SUPPORTED: "Format not found among barcodes. Cannot set backward compatibility.",
 	BRC_FORMATTYPE_UNMATCH: "Format must be a string or null. Cannot set backward compatibility.",
-	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not a string or an object with no message field",
+	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not a string.",
 	BRC_BW_FORMAT_UNSUPPORTED: "This format is not supported (by Apple) for backward support. Please choose another one.",
 	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format."
 };

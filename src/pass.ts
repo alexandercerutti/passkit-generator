@@ -25,6 +25,11 @@ interface PassIndexSignature {
 	[key: string]: any;
 }
 
+export interface PassWithBarcodeMethods extends Pass {
+	backward: (format: schema.BarcodeFormat) => Pass;
+	autocomplete: () => Pass;
+}
+
 export class Pass implements PassIndexSignature {
 	// private model: string;
 	private bundle: schema.BundleUnit;
@@ -193,7 +198,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	expiration(date: Date) {
+	expiration(date: Date): this {
 		if (!(date instanceof Date)) {
 			return this;
 		}
@@ -287,7 +292,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {this} Improved this with length property and other methods
 	 */
 
-	barcode(first: string | schema.Barcode, ...data: schema.Barcode[]): this {
+	barcode(first: string | schema.Barcode, ...data: schema.Barcode[]): PassWithBarcodeMethods {
 		const isFirstParameterValid = (
 			first && (
 				typeof first === "string" && first.length || (
@@ -373,7 +378,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this} Improved this, with length property and retroCompatibility method.
 	 */
 
-	[barcodesFillMissing]() {
+	[barcodesFillMissing](): this {
 		const props = this._props["barcodes"];
 
 		if (props.length === 4 || !props.length) {
@@ -433,11 +438,11 @@ export class Pass implements PassIndexSignature {
 	 * Sets nfc fields in properties
 	 *
 	 * @method nfc
-	 * @params {Object} data - the data to be pushed in the pass
+	 * @params data - the data to be pushed in the pass
 	 * @returns {this}
 	 */
 
-	nfc(data: schema.NFC) {
+	nfc(data: schema.NFC): this {
 		if (!(typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
 			genericDebug("Invalid NFC data provided");
 			return this;

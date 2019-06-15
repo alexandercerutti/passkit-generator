@@ -179,15 +179,15 @@ export class Pass implements PassIndexSignature {
 	 * Adds traslated strings object to the list of translation to be inserted into the pass
 	 *
 	 * @method localize
-	 * @params {String} lang - the ISO 3166 alpha-2 code for the language
-	 * @params {Object} translations - key/value pairs where key is the
+	 * @params lang - the ISO 3166 alpha-2 code for the language
+	 * @params translations - key/value pairs where key is the
 	 * 		string appearing in pass.json and value the translated string
 	 * @returns {this}
 	 *
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 
-	localize(lang: string, translations?: { [key: string]: string }) {
+	localize(lang: string, translations?: { [key: string]: string }): this {
 		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
 			this.l10nTranslations[lang] = translations || {};
 		}

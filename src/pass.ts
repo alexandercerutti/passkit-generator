@@ -111,7 +111,7 @@ export class Pass implements PassIndexSignature {
 				 * if there's already a buffer of the same folder and called
 				 * `pass.strings`, we'll merge the two buffers. We'll create
 				 * it otherwise.
-			 */
+				 */
 
 				if (!this.l10nBundles[lang]) {
 					this.l10nBundles[lang] = {};
@@ -124,50 +124,51 @@ export class Pass implements PassIndexSignature {
 			}
 
 			if (!(this.l10nBundles[lang] && Object.keys(this.l10nBundles[lang]).length)) {
-					return;
-				}
+				return;
+			}
 
-				/**
+			/**
 			 * Assigning all the localization files to the final bundle
 			 * by mapping the buffer to the pass-relative file path;
-				 *
-				 * We are replacing the slashes to avoid Windows slashes
-				 * composition.
-				 */
+			 *
+			 * We are replacing the slashes to avoid Windows slashes
+			 * composition.
+			 */
+
 			Object.assign(finalBundle, ...Object.keys(this.l10nBundles[lang])
 				.map(fileName => {
 					const fullPath = path.join(`${lang}.lproj`, fileName).replace(/\\/, "/");
 					return { [fullPath]: this.l10nBundles[lang][fileName] };
 				})
 			);
-			});
+		});
 
-			/*
-			 * Parsing the buffers, pushing them into the archive
-			 * and returning the compiled manifest
-			 */
-			const archive = archiver("zip");
+		/*
+		 * Parsing the buffers, pushing them into the archive
+		 * and returning the compiled manifest
+		 */
+		const archive = archiver("zip");
 		const manifest = Object.keys(finalBundle).reduce((acc, current) => {
-				let hashFlow = forge.md.sha1.create();
+			let hashFlow = forge.md.sha1.create();
 
 			hashFlow.update(finalBundle[current].toString("binary"));
 			archive.append(finalBundle[current], { name: current });
 
 			acc[current] = hashFlow.digest().toHex();
 
-				return acc;
-			}, {});
+			return acc;
+		}, {});
 
-			const signatureBuffer = this._sign(manifest);
+		const signatureBuffer = this._sign(manifest);
 
-			archive.append(signatureBuffer, { name: "signature" });
-			archive.append(JSON.stringify(manifest), { name: "manifest.json" });
+		archive.append(signatureBuffer, { name: "signature" });
+		archive.append(JSON.stringify(manifest), { name: "manifest.json" });
 
-			const passStream = new stream.PassThrough();
+		const passStream = new stream.PassThrough();
 
-			archive.pipe(passStream);
+		archive.pipe(passStream);
 
-			return archive.finalize().then(() => passStream);
+		return archive.finalize().then(() => passStream);
 	}
 
 	/**
@@ -535,16 +536,16 @@ export class Pass implements PassIndexSignature {
 				.filter(v => this._props[v] && !isValidRGB(this._props[v]))
 				.forEach(v => delete this._props[v]);
 
-				Object.keys(this._props).forEach(prop => {
+			Object.keys(this._props).forEach(prop => {
 				if (passFile[prop] && passFile[prop] instanceof Array) {
-							passFile[prop].push(...this._props[prop]);
+					passFile[prop].push(...this._props[prop]);
 				} else if (passFile[prop] && passFile[prop] instanceof Object) {
-							Object.assign(passFile[prop], this._props[prop]);
-					} else {
-						passFile[prop] = this._props[prop];
-					}
-				});
-			}
+					Object.assign(passFile[prop], this._props[prop]);
+				} else {
+					passFile[prop] = this._props[prop];
+				}
+			});
+		}
 
 		this._fields.forEach(field => {
 			passFile[this.type][field] = this[field];

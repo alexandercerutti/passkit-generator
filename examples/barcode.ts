@@ -10,6 +10,7 @@
 
 import app from "./webserver";
 import { createPass } from "..";
+import { PassWithBarcodeMethods } from "../src/pass";
 
 app.all(async function manageRequest(request, response) {
 
@@ -28,7 +29,7 @@ app.all(async function manageRequest(request, response) {
 		overrides: request.body || request.params || request.query,
 	});
 
-	let bc;
+	let bc: PassWithBarcodeMethods;
 
 	if (request.query.alt === true) {
 		// After this, pass.props["barcodes"] will have support for all the formats
@@ -40,7 +41,7 @@ app.all(async function manageRequest(request, response) {
 		// of the passed format (the valid ones) and pass.props["barcode"] the first of barcodes.
 		// if not specified, altText is automatically the message
 
-		bc = pass.barcode([{
+		bc = pass.barcode({
 			message: "Thank you for using this package <3",
 			format: "PKBarcodeFormatCode128"
 		}, {
@@ -49,7 +50,7 @@ app.all(async function manageRequest(request, response) {
 		}, {
 			message: "Thank you for using this package <3",
 			format: "PKBarcodeFormatMock44617"
-		}]);
+		});
 	}
 
 	// You can change the format chosen for barcode prop support by calling .backward()

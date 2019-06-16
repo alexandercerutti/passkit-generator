@@ -38,9 +38,9 @@ export class Pass implements PassIndexSignature {
 	// private model: string;
 	private bundle: schema.BundleUnit;
 	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
-	private _fields: string[];
+	private _fields: (keyof schema.PassFields)[];
 	private _props: schema.ValidPass = {};
-	private type: string = "";
+	private type: keyof schema.ValidPassType;
 	private fieldsKeys: Set<string> = new Set<string>();
 	private passCore: schema.ValidPass = {};
 
@@ -64,7 +64,8 @@ export class Pass implements PassIndexSignature {
 		// getting pass.json
 		this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
 
-		this.type = Object.keys(this.passCore).find(key => /(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key));
+		this.type = Object.keys(this.passCore)
+			.find(key => /(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key)) as keyof schema.ValidPassType;
 
 		if (!this.type) {
 			throw new Error("Missing type in model");
@@ -76,7 +77,7 @@ export class Pass implements PassIndexSignature {
 			this[transitType] = this.passCore[this.type]["transitType"];
 		}
 
-		const typeFields = Object.keys(this.passCore[this.type]);
+		const typeFields = Object.keys(this.passCore[this.type]) as (keyof schema.PassFields)[];
 
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 		this._fields.forEach(fieldName => {
@@ -84,7 +85,7 @@ export class Pass implements PassIndexSignature {
 				this[fieldName] = new FieldsArray(
 					this.fieldsKeys,
 					...this.passCore[this.type][fieldName]
-						.filter((field: schema.Field) => schema.isValid(field, "field"))
+						.filter(field => schema.isValid(field, "field"))
 				);
 			} else {
 				this[fieldName] = new FieldsArray(this.fieldsKeys);
@@ -238,7 +239,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	beacons(...data: schema.Beacon[]): this {
+	beacons(...data: schema.Beacon[]): PassWithLengthField {
 		if (!data.length) {
 			return assignLength(0, this);
 		}
@@ -266,7 +267,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	locations(...data: schema.Location[]): this {
+	locations(...data: schema.Location[]): PassWithLengthField {
 		if (!data.length) {
 			return assignLength(0, this);
 		}

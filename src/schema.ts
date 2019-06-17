@@ -367,7 +367,7 @@ export interface Beacon {
 
 const beaconsDict = Joi.object().keys({
 	major: Joi.number().integer().positive().max(65535).greater(Joi.ref("minor")),
-	minor: Joi.number().integer().positive().max(65535).less(Joi.ref("major")),
+	minor: Joi.number().integer().min(0).max(65535).less(Joi.ref("major")),
 	proximityUUID: Joi.string().required(),
 	relevantText: Joi.string()
 });

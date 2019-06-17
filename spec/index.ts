@@ -97,60 +97,74 @@ describe("Node-Passkit-generator", function () {
 		});
 	});
 
-	describe("relevance()", () => {
-		describe("relevance('relevantDate')", () => {
+	describe("Relevancy:", () => {
+		describe("Relevant Date", () => {
 			it("A date object will apply changes", () => {
-				pass.relevance("relevantDate", new Date("10-04-2021"));
+				pass.relevantDate(new Date("10-04-2021"));
 				// this is made to avoid problems with winter and summer time:
 				// we focus only on the date and time for the tests.
 				// @ts-ignore -- Ignoring for test purposes
 				let noTimeZoneDateTime = pass._props["relevantDate"].split("+")[0];
-				expect(noTimeZoneDateTime).toBe("2021-04-10T00:00:00");
+				expect(noTimeZoneDateTime).toBe("2021-10-04T00:00:00");
 			});
 		});
 
-		describe("relevance('maxDistance')", () => {
-			it("A string is accepted and converted to Number", () => {
-				pass.relevance("maxDistance", "150");
-				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["maxDistance"]).toBe(150);
-			});
-
-			it("A number is accepeted and will apply changes", () => {
-				pass.relevance("maxDistance", 150);
-				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["maxDistance"]).toBe(150);
-			});
-
-			it("Passing NaN value won't apply changes", () => {
-				pass.relevance("maxDistance", NaN);
-				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["maxDistance"]).toBe(undefined);
-			});
-		});
-
-		describe("relevance('locations') && relevance('beacons')", () => {
-			it("A one-Invalid-schema location won't apply changes", () => {
-				pass.relevance("locations", [{
+		describe("locations :: ", () => {
+			it("One-Invalid-schema location won't apply changes", () => {
+				pass.locations({
+					// @ts-ignore
 					"ibrupofene": "no",
 					"longitude": 0.00000000
-				}]);
+				});
 
 				// @ts-ignore -- Ignoring for test purposes
 				expect(pass._props["locations"]).toBe(undefined);
 			});
 
-			it("A two locations, with one invalid, will be filtered", () => {
-				pass.relevance("locations", [{
+			it("Two locations, with one invalid, will be filtered", () => {
+				pass.locations({
+					//@ts-ignore
 					"ibrupofene": "no",
 					"longitude": 0.00000000
 				}, {
 					"longitude": 4.42634523,
 					"latitude": 5.344233323352
-				}]);
+				});
 
 				// @ts-ignore -- Ignoring for test purposes
 				expect(pass._props["locations"].length).toBe(1);
+			});
+		});
+
+		describe("Beacons :: ", () => {
+			it("One-Invalid-schema beacon data won't apply changes", () => {
+				pass.beacons({
+					// @ts-ignore
+					"ibrupofene": "no",
+					"major": 55,
+					"minor": 0,
+					"proximityUUID": "2707c5f4-deb9-48ff-b760-671bc885b6a7"
+				});
+
+				// @ts-ignore -- Ignoring for test purposes
+				expect(pass._props["beacons"]).toBe(undefined);
+			});
+
+			it("Two beacons sets, with one invalid, will be filtered", () => {
+				pass.beacons({
+					"major": 55,
+					"minor": 0,
+					"proximityUUID": "59da0f96-3fb5-43aa-9028-2bc796c3d0c5"
+				}, {
+					"major": 55,
+					"minor": 0,
+					"proximityUUID": "fdcbbf48-a4ae-4ffb-9200-f8a373c5c18e",
+					// @ts-ignore
+					"animal": "Monkey"
+				});
+
+				// @ts-ignore -- Ignoring for test purposes
+				expect(pass._props["beacons"].length).toBe(1);
 			});
 		});
 	});
@@ -167,6 +181,7 @@ describe("Node-Passkit-generator", function () {
 		});
 
 		it("Boolean parameter won't apply changes", () => {
+			// @ts-ignore -- Ignoring for test purposes
 			pass.barcode(true);
 
 			// @ts-ignore -- Ignoring for test purposes
@@ -176,6 +191,7 @@ describe("Node-Passkit-generator", function () {
 		});
 
 		it("Numeric parameter won't apply changes", () => {
+			// @ts-ignore -- Ignoring for test purposes
 			pass.barcode(42);
 
 			// @ts-ignore -- Ignoring for test purposes
@@ -226,10 +242,10 @@ describe("Node-Passkit-generator", function () {
 		});
 
 		it("Missing messageEncoding gets automatically added.", () => {
-			pass.barcode([{
+			pass.barcode({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
-			}]);
+			});
 
 			// @ts-ignore -- Ignoring for test purposes
 			expect(pass._props["barcode"] instanceof Object).toBe(true);
@@ -240,9 +256,10 @@ describe("Node-Passkit-generator", function () {
 		});
 
 		it("Object without message property, will be filtered out", () => {
-			pass.barcode([{
+			// @ts-ignore -- Ignoring for test purposes
+			pass.barcode({
 				format: "PKBarcodeFormatPDF417",
-			}]);
+			});
 
 			// @ts-ignore -- Ignoring for test purposes
 			expect(pass._props["barcode"]).toBe(undefined);
@@ -250,18 +267,17 @@ describe("Node-Passkit-generator", function () {
 			expect(pass._props["barcodes"]).toBe(undefined);
 		});
 
-		it("Array containing non-object elements will be filtered out", () => {
-			pass.barcode([5, 10, 15, {
+		it("Array containing non-object elements will be rejected", () => {
+			// @ts-ignore -- Ignoring for test purposes
+			pass.barcode(5, 10, 15, {
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417"
-			}, 7, 1]);
+			}, 7, 1);
 
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"] instanceof Object).toBe(true);
+			expect(pass._props["barcode"] instanceof Object).toBe(false);
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"].length).toBe(1);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"][0] instanceof Object).toBe(true);
+			expect(pass._props["barcodes"]).toBeUndefined();
 		});
 	});
 
@@ -269,6 +285,7 @@ describe("Node-Passkit-generator", function () {
 		it("Passing argument of type different from string or null, won't apply changes", function () {
 			pass
 				.barcode("Message-22645272183")
+				// @ts-ignore -- Ignoring for test purposes
 				.backward(5);
 
 			// unchanged
@@ -288,6 +305,7 @@ describe("Node-Passkit-generator", function () {
 		it("Unknown format won't apply changes", () => {
 			pass
 				.barcode("Message-22645272183")
+				// @ts-ignore -- Ignoring for test purposes
 				.backward("PKBingoBongoFormat");
 
 			// @ts-ignore -- Ignoring for test purposes

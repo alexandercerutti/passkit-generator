@@ -276,7 +276,7 @@ const semantics = Joi.object().keys({
 	balance: currencyAmount
 });
 
-interface ValidPassType {
+export interface ValidPassType {
 	boardingPass?: PassFields & { transitType: TransitType };
 	eventTicket?: PassFields;
 	coupon?: PassFields;

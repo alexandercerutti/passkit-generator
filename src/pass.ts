@@ -15,7 +15,6 @@ import {
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
 
-
 const noop = () => {};
 const transitType = Symbol("transitType");
 const barcodesFillMissing = Symbol("bfm");
@@ -35,7 +34,6 @@ export interface PassWithBarcodeMethods extends PassWithLengthField {
 }
 
 export class Pass implements PassIndexSignature {
-	// private model: string;
 	private bundle: schema.BundleUnit;
 	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
 	private _fields: (keyof schema.PassFields)[];
@@ -214,7 +212,7 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
-		this._props.expirationDate = dateParse;
+		this._props["expirationDate"] = dateParse;
 
 		return this;
 	}
@@ -227,7 +225,7 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	void(): this {
-		this._props.voided = true;
+		this._props["voided"] = true;
 		return this;
 	}
 
@@ -295,16 +293,16 @@ export class Pass implements PassIndexSignature {
 
 	relevantDate(date: Date): this {
 		if (!(date instanceof Date)) {
-				genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
-				return this;
-			}
+			genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
+			return this;
+		}
 
 		const parsedDate = dateToW3CString(date);
 
 		if (!parsedDate) {
 			// @TODO: create message "Unable to format date"
 			return this;
-			}
+		}
 
 		this._props["relevantDate"] = parsedDate;
 		return this;
@@ -405,7 +403,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this} Improved this, with length property and retroCompatibility method.
 	 */
 
-	[barcodesFillMissing](): this {
+	private [barcodesFillMissing](): this {
 		const props = this._props["barcodes"];
 
 		if (props.length === 4 || !props.length) {
@@ -433,7 +431,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {this}
 	 */
 
-	[barcodesSetBackward](format: schema.BarcodeFormat | null): this {
+	private [barcodesSetBackward](format: schema.BarcodeFormat | null): this {
 		if (format === null) {
 			this._props["barcode"] = undefined;
 			return this;
@@ -488,7 +486,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Buffer}
 	 */
 
-	_sign(manifest: { [key: string]: string }): Buffer {
+	private _sign(manifest: { [key: string]: string }): Buffer {
 		let signature = forge.pkcs7.createSignedData();
 
 		signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8");
@@ -551,7 +549,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Promise<Buffer>} Edited pass.json buffer or Object containing error.
 	 */
 
-	_patch(passCoreBuffer: Buffer): Buffer {
+	private _patch(passCoreBuffer: Buffer): Buffer {
 		const passFile = JSON.parse(passCoreBuffer.toString());
 
 		if (Object.keys(this._props).length) {
@@ -564,9 +562,9 @@ export class Pass implements PassIndexSignature {
 
 			Object.keys(this._props).forEach(prop => {
 				if (passFile[prop] && passFile[prop] instanceof Array) {
-					passFile[prop].push(...this._props[prop]);
+					passFile[prop] = [ ...passFile[prop], ...this._props[prop] ];
 				} else if (passFile[prop] && passFile[prop] instanceof Object) {
-					Object.assign(passFile[prop], this._props[prop]);
+					passFile[prop] = { ...passFile[prop], ...this._props[prop] };
 				} else {
 					passFile[prop] = this._props[prop];
 				}

@@ -103,6 +103,7 @@ async function getModelFolderContents(model: string): Promise<PartitionedBundle>
 						)
 					]).then(buffers =>
 						// Assigning each file path to its buffer
+						// and discarding the empty ones
 						validFiles.reduce<BundleUnit>((acc, file, index) => {
 							if (!buffers[index].length) {
 								return acc;

@@ -1,7 +1,7 @@
 import path from "path";
 import stream, { Stream } from "stream";
 import forge from "node-forge";
-import archiver from "archiver";
+import { ZipFile } from "yazl";
 import debug from "debug";
 
 import * as schema from "./schema";
@@ -101,9 +101,8 @@ export class Pass implements PassIndexSignature {
 	 * @return {Promise<Stream>} A Promise containing the stream of the generated pass.
 	*/
 
-	async generate(): Promise<Stream> {
+	generate(): Stream {
 		// Editing Pass.json
-
 		this.bundle["pass.json"] = this._patch(this.bundle["pass.json"]);
 
 		const finalBundle = { ...this.bundle } as schema.BundleUnit;
@@ -149,16 +148,15 @@ export class Pass implements PassIndexSignature {
 		});
 
 		/*
-		 * Parsing the buffers, pushing them into the archive
-		 * and returning the compiled manifest
-		 */
-		const archive = archiver("zip");
+		* Parsing the buffers, pushing them into the archive
+		* and returning the compiled manifest
+		*/
+		const archive = new ZipFile();
 		const manifest = Object.keys(finalBundle).reduce((acc, current) => {
 			let hashFlow = forge.md.sha1.create();
 
 			hashFlow.update(finalBundle[current].toString("binary"));
-			archive.append(finalBundle[current], { name: current });
-
+			archive.addBuffer(finalBundle[current], current);
 			acc[current] = hashFlow.digest().toHex();
 
 			return acc;
@@ -166,14 +164,14 @@ export class Pass implements PassIndexSignature {
 
 		const signatureBuffer = this._sign(manifest);
 
-		archive.append(signatureBuffer, { name: "signature" });
-		archive.append(JSON.stringify(manifest), { name: "manifest.json" });
-
+		archive.addBuffer(signatureBuffer, "signature");
+		archive.addBuffer(Buffer.from(JSON.stringify(manifest)), "manifest.json");
 		const passStream = new stream.PassThrough();
 
-		archive.pipe(passStream);
+		archive.outputStream.pipe(passStream);
+		archive.end();
 
-		return archive.finalize().then(() => passStream);
+		return passStream;
 	}
 
 	/**

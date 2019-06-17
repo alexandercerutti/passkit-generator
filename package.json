@@ -19,22 +19,22 @@
 		"Pass"
 	],
 	"dependencies": {
-		"archiver": "^3.0.0",
 		"debug": "^3.2.6",
 		"joi": "^13.7.0",
 		"moment": "^2.24.0",
-		"node-forge": "^0.7.6"
+		"node-forge": "^0.7.6",
+		"yazl": "^2.5.1"
 	},
 	"engines": {
 		"node": ">=8.1.0"
 	},
 	"devDependencies": {
-		"@types/archiver": "^3.0.0",
 		"@types/debug": "^4.1.4",
 		"@types/jasmine": "^3.3.13",
 		"@types/joi": "^14.3.3",
 		"@types/node": "^12.0.0",
 		"@types/node-forge": "^0.8.3",
+		"@types/yazl": "^2.4.1",
 		"jasmine": "^3.4.0",
 		"typescript": "^3.4.5"
 	}

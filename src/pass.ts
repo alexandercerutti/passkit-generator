@@ -75,19 +75,13 @@ export class Pass implements PassIndexSignature {
 			this[transitType] = this.passCore[this.type]["transitType"];
 		}
 
-		const typeFields = Object.keys(this.passCore[this.type]) as (keyof schema.PassFields)[];
-
 		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
 		this._fields.forEach(fieldName => {
-			if (typeFields.includes(fieldName)) {
-				this[fieldName] = new FieldsArray(
-					this.fieldsKeys,
-					...this.passCore[this.type][fieldName]
-						.filter(field => schema.isValid(field, "field"))
-				);
-			} else {
-				this[fieldName] = new FieldsArray(this.fieldsKeys);
-			}
+			this[fieldName] = new FieldsArray(
+				this.fieldsKeys,
+				...(this.passCore[this.type][fieldName] || [])
+					.filter(field => schema.isValid(field, "field"))
+			);
 		});
 	}
 

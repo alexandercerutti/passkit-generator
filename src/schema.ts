@@ -46,25 +46,24 @@ export interface PassInstance {
 // ************************************ //
 
 const certificatesSchema = Joi.object().keys({
-	wwdr: Joi.string().required(),
-	signerCert: Joi.string().required(),
+	wwdr: Joi.alternatives(Joi.binary(), Joi.string()).required(),
+	signerCert: Joi.alternatives(Joi.binary(), Joi.string()).required(),
 	signerKey: Joi.alternatives().try(
 		Joi.object().keys({
-			keyFile: Joi.string().required(),
+			keyFile: Joi.alternatives(Joi.binary(), Joi.string()).required(),
 			passphrase: Joi.string().required(),
 		}),
-		Joi.string()
+		Joi.alternatives(Joi.binary(), Joi.string())
 	).required()
 }).required();
 
 const instance = Joi.object().keys({
-	model: Joi.string().required(),
-	certificates: certificatesSchema,
+	model: Joi.alternatives(Joi.object(), Joi.string()).required(),
+	certificates: Joi.object(),
 	overrides: Joi.object(),
-	shouldOverwrite: Joi.boolean()
 });
 
-interface OverridesSupportedOptions {
+export interface OverridesSupportedOptions {
 	serialNumber?: string;
 	description?: string;
 	userInfo?: Object | Array<any>;

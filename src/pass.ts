@@ -53,20 +53,38 @@ export class Pass implements PassIndexSignature {
 	[transitType]: string = "";
 
 	constructor(options: schema.PassInstance) {
+		if (!schema.isValid(options, "instance")) {
+			throw new Error(formatMessage("REQUIR_VALID_FAILED"));
+		}
+
 		this.Certificates = options.certificates;
 		this.l10nBundles = options.model.l10nBundle;
 		this.bundle = { ...options.model.bundle };
 
-		options.overrides = options.overrides || {};
+		// Parsing the options and extracting only the valid ones.
+		const validOvverrides = schema.getValidated(options.overrides || {}, "supportedOptions") as schema.OverridesSupportedOptions;
 
-		// getting pass.json
-		this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
+		if (validOvverrides === null) {
+			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
+		}
+
+		if (Object.keys(validOvverrides).length) {
+			this._props = { ...validOvverrides };
+		}
+
+		try {
+			// getting pass.json
+			this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
+		} catch (err) {
+			throw new Error(formatMessage("PASSFILE_VALIDATION_FAILED"));
+		}
 
 		this.type = Object.keys(this.passCore)
 			.find(key => /(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key)) as keyof schema.ValidPassType;
 
 		if (!this.type) {
-			throw new Error("Missing type in model");
+			// @TODO: change error message to say it is invalid or missing
+			throw new Error(formatMessage("NO_PASS_TYPE"));
 		}
 
 		if (this.type === "boardingPass" && this.passCore[this.type]["transitType"]) {
@@ -432,7 +450,7 @@ export class Pass implements PassIndexSignature {
 		}
 
 		if (typeof format !== "string") {
-			barcodeDebug(formatMessage("BRC_FORMAT_UNMATCH"));
+			barcodeDebug(formatMessage("BRC_FORMATTYPE_UNMATCH"));
 			return this;
 		}
 

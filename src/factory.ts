@@ -13,14 +13,14 @@ const readFile = promisify(_readFile);
 
 export async function createPass(options: FactoryOptions): Promise<Pass> {
 	if (!(options && Object.keys(options).length)) {
-		throw new Error("Unable to create Pass: no options were passed");
+		throw new Error(formatMessage("CP_NO_OPTS"));
 	}
 
 	try {
 		const [bundle, certificates] = await Promise.all([
 			getModelContents(options.model),
-		readCertificatesFromOptions(options.certificates)
-	]);
+			readCertificatesFromOptions(options.certificates)
+		]);
 
 		return new Pass({
 			model: bundle,
@@ -28,13 +28,23 @@ export async function createPass(options: FactoryOptions): Promise<Pass> {
 			overrides: options.overrides
 		});
 	} catch (err) {
-		// @TODO: analyze the error and stop the execution somehow
+		console.log(err);
+		throw new Error(formatMessage("CP_INIT_ERROR"));
 	}
 }
 
 async function getModelContents(model: FactoryOptions["model"]) {
-	if (!(model && (typeof model === "string" || (typeof model === "object" && Object.keys(model).length)))) {
-		throw new Error("Unable to create Pass: invalid model provided");
+	const isModelValid = (
+		model && (
+			typeof model === "string" || (
+				typeof model === "object" &&
+				Object.keys(model).length
+			)
+		)
+	);
+
+	if (!isModelValid) {
+		throw new Error(formatMessage("MODEL_NOT_VALID"));
 	}
 
 	let modelContents: PartitionedBundle;
@@ -61,71 +71,96 @@ async function getModelContents(model: FactoryOptions["model"]) {
  */
 
 async function getModelFolderContents(model: string): Promise<PartitionedBundle> {
-	const modelPath = path.resolve(model) + (!!model && !path.extname(model) ? ".pass" : "");
-	const modelFilesList = await readDir(modelPath);
+	try {
+		const modelPath = path.resolve(model) + (!!model && !path.extname(model) ? ".pass" : "");
+		const modelFilesList = await readDir(modelPath);
 
-	// No dot-starting files, manifest and signature
-	const filteredFiles = removeHidden(modelFilesList).filter(f => !/(manifest|signature)/i.test(f));
+		// No dot-starting files, manifest and signature
+		const filteredFiles = removeHidden(modelFilesList).filter(f => !/(manifest|signature)/i.test(f));
 
-	// Icon is required to proceed
-	if (!(filteredFiles.length && filteredFiles.some(file => file.toLowerCase().includes("icon")))) {
-		const eMessage = formatMessage("MODEL_UNINITIALIZED", path.parse(this.model).name);
-		throw new Error(eMessage);
+		const isModelInitialized = (
+			filteredFiles.length &&
+			filteredFiles.some(file => file.toLowerCase().includes("icon"))
+		);
+
+		// Icon is required to proceed
+		if (!isModelInitialized) {
+			throw new Error(formatMessage(
+				"MODEL_UNINITIALIZED",
+				path.parse(this.model).name
+			));
+		}
+
+		// Splitting files from localization folders
+		const rawBundle = filteredFiles.filter(entry => !entry.includes(".lproj"));
+		const l10nFolders = filteredFiles.filter(entry => entry.includes(".lproj"));
+
+		const bundleBuffers = rawBundle.map(file => readFile(path.resolve(modelPath, file)));
+		const buffers = await Promise.all(bundleBuffers);
+
+		const bundle: BundleUnit = Object.assign({},
+			...rawBundle.map((fileName, index) => ({ [fileName]: buffers[index] }))
+		);
+
+		// Reading concurrently localizations folder
+		// and their files and their buffers
+		const L10N_FilesListByFolder: Array<BundleUnit> = await Promise.all(
+			l10nFolders.map(folderPath => {
+				// Reading current folder
+				const currentLangPath = path.join(modelPath, folderPath);
+				return readDir(currentLangPath)
+					.then(files => {
+						// Transforming files path to a model-relative path
+						const validFiles = removeHidden(files)
+							.map(file => path.join(currentLangPath, file));
+
+						// Getting all the buffers from file paths
+						return Promise.all([
+							...validFiles.map(file =>
+								readFile(file).catch(() => Buffer.alloc(0))
+							)
+						]).then(buffers =>
+							// Assigning each file path to its buffer
+							// and discarding the empty ones
+							validFiles.reduce<BundleUnit>((acc, file, index) => {
+								if (!buffers[index].length) {
+									return acc;
+								}
+
+								return { ...acc, [file]: buffers[index] };
+							}, {})
+						);
+					});
+			})
+		);
+
+		const l10nBundle: PartitionedBundle["l10nBundle"] = Object.assign(
+			{},
+			...L10N_FilesListByFolder
+				.map((folder, index) => ({ [l10nFolders[index]]: folder }))
+		);
+
+		return {
+			bundle,
+			l10nBundle
+		};
+	} catch (err) {
+		if (err.code && err.code === "ENOENT") {
+			if (err.syscall === "open") {
+				// file opening failed
+				throw new Error(formatMessage("MODELF_NOT_FOUND", err.path))
+			} else if (err.syscall === "scandir") {
+				// directory reading failed
+				const pathContents = (err.path as string).split(/(\/|\\\?)/);
+				throw new Error(formatMessage(
+					"MODELF_FILE_NOT_FOUND",
+					pathContents[pathContents.length-1]
+				))
+			}
+		}
+
+		throw err;
 	}
-
-	// Splitting files from localization folders
-	const rawBundle = filteredFiles.filter(entry => !entry.includes(".lproj"));
-	const l10nFolders = filteredFiles.filter(entry => entry.includes(".lproj"));
-
-	const bundleBuffers = rawBundle.map(file => readFile(path.resolve(modelPath, file)));
-	const buffers = await Promise.all(bundleBuffers);
-
-	const bundle: BundleUnit = Object.assign({},
-		...rawBundle.map((fileName, index) => ({ [fileName]: buffers[index] }))
-	);
-
-	// Reading concurrently localizations folder
-	// and their files and their buffers
-	const L10N_FilesListByFolder: Array<BundleUnit> = await Promise.all(
-		l10nFolders.map(folderPath => {
-			// Reading current folder
-			const currentLangPath = path.join(modelPath, folderPath);
-			return readDir(currentLangPath)
-				.then(files => {
-					// Transforming files path to a model-relative path
-					const validFiles = removeHidden(files)
-						.map(file => path.join(currentLangPath, file));
-
-					// Getting all the buffers from file paths
-					return Promise.all([
-						...validFiles.map(file =>
-							readFile(file).catch(() => Buffer.alloc(0))
-						)
-					]).then(buffers =>
-						// Assigning each file path to its buffer
-						// and discarding the empty ones
-						validFiles.reduce<BundleUnit>((acc, file, index) => {
-							if (!buffers[index].length) {
-								return acc;
-							}
-
-							return { ...acc, [file]: buffers[index] };
-						}, {})
-					);
-				});
-		})
-	);
-
-	const l10nBundle: PartitionedBundle["l10nBundle"] = Object.assign(
-		{},
-		...L10N_FilesListByFolder
-			.map((folder, index) => ({ [l10nFolders[index]]: folder }))
-	);
-
-	return {
-		bundle,
-		l10nBundle
-	};
 }
 
 /**
@@ -147,8 +182,14 @@ function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 
 	const bundleKeys = Object.keys(rawBundle);
 
-	if (!bundleKeys.length) {
-		throw new Error("Cannot proceed with pass creation: bundle not initialized")
+	const isModelInitialized = (
+		bundleKeys.length &&
+		bundleKeys.some(file => file.toLowerCase().includes("icon"))
+	);
+
+	// Icon is required to proceed
+	if (!isModelInitialized) {
+		throw new Error(formatMessage("MODEL_UNINITIALIZED", "Buffers"))
 	}
 
 	// separing localization folders
@@ -179,7 +220,7 @@ function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 
 async function readCertificatesFromOptions(options: Certificates): Promise<FinalCertificates> {
 	if (!(options && Object.keys(options).length && isValid(options, "certificatesSchema"))) {
-		throw new Error("Unable to create Pass: certificates schema validation failed.");
+		throw new Error(formatMessage("CP_NO_CERTS"));
 	}
 
 	// if the signerKey is an object, we want to get

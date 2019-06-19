@@ -3,11 +3,15 @@ interface MessageGroup {
 }
 
 const errors: MessageGroup = {
+	CP_INIT_ERROR: "Something went really bad in the initialization, dude! Please look at the log above this message. It should contain all the infos about the problem.",
+	CP_NO_OPTS: "Cannot initialize the pass creation: no options were passed.",
+	CP_NO_CERTS: "Cannot initialize the pass creation: no valid certificates were passed.",
 	PASSFILE_VALIDATION_FAILED: "Validation of pass type failed. Pass file is not a valid buffer or (more probably) does not respect the schema.\nRefer to https://apple.co/2Nvshvn to build a correct pass.",
 	REQUIR_VALID_FAILED: "The options passed to Pass constructor does not meet the requirements.\nRefer to the documentation to compile them correctly.",
 	MODEL_UNINITIALIZED: "Provided model ( %s ) matched but unitialized or may not contain icon.\nRefer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
-	MODEL_NOT_STRING: "A string model name must be provided in order to continue.",
-	MODEL_NOT_FOUND: "Model %s not found. Provide a valid one to continue.",
+	MODEL_NOT_VALID: "A model must be provided in form of path (string) or object { 'fileName': Buffer } in order to continue.",
+	MODELF_NOT_FOUND: "Model %s not found. Provide a valid one to continue.",
+	MODELF_FILE_NOT_FOUND: "File %s not found.",
 	INVALID_CERTS: "Invalid certificate(s) loaded: %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase).\nRefer to docs to obtain them.",
 	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist.",
 	TRSTYPE_REQUIRED: "Cannot proceed with pass creation. transitType field is required for boardingPasses.",

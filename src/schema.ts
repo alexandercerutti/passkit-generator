@@ -13,7 +13,7 @@ export interface Certificates {
 }
 
 export interface FactoryOptions {
-	model: { [key: string]: Buffer } | string;
+	model: BundleUnit | string;
 	certificates: Certificates;
 	overrides?: Object;
 }

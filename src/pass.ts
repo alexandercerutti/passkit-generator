@@ -62,14 +62,14 @@ export class Pass implements PassIndexSignature {
 		this.bundle = { ...options.model.bundle };
 
 		// Parsing the options and extracting only the valid ones.
-		const validOvverrides = schema.getValidated(options.overrides || {}, "supportedOptions") as schema.OverridesSupportedOptions;
+		const validOverrides = schema.getValidated(options.overrides || {}, "supportedOptions") as schema.OverridesSupportedOptions;
 
-		if (validOvverrides === null) {
+		if (validOverrides === null) {
 			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
 		}
 
-		if (Object.keys(validOvverrides).length) {
-			this._props = { ...validOvverrides };
+		if (Object.keys(validOverrides).length) {
+			this._props = { ...validOverrides };
 		}
 
 		try {
@@ -106,16 +106,19 @@ export class Pass implements PassIndexSignature {
 	/**
 	 * Generates the pass Stream
 	 *
-	 * @async
 	 * @method generate
-	 * @return {Promise<Stream>} A Promise containing the stream of the generated pass.
-	*/
+	 * @return A Stream of the generated pass.
+	 */
 
 	generate(): Stream {
 		// Editing Pass.json
 		this.bundle["pass.json"] = this._patch(this.bundle["pass.json"]);
 
 		const finalBundle = { ...this.bundle } as schema.BundleUnit;
+
+		/**
+		 * Iterating through languages and generating pass.string file
+		 */
 
 		Object.keys(this.l10nTranslations).forEach(lang => {
 			const strings = generateStringFile(this.l10nTranslations[lang]);
@@ -132,7 +135,7 @@ export class Pass implements PassIndexSignature {
 				}
 
 				this.l10nBundles[lang]["pass.strings"] = Buffer.concat([
-					this.l10nBundles[lang]["pass.strings"] || Buffer.from("", "utf8"),
+					this.l10nBundles[lang]["pass.strings"] || Buffer.alloc(0),
 					strings
 				]);
 			}
@@ -190,7 +193,8 @@ export class Pass implements PassIndexSignature {
 	 * @method localize
 	 * @params lang - the ISO 3166 alpha-2 code for the language
 	 * @params translations - key/value pairs where key is the
-	 * 		string appearing in pass.json and value the translated string
+	 * 		placeholder in pass.json localizable strings
+	 * 		and value the real translated string.
 	 * @returns {this}
 	 *
 	 * @see https://apple.co/2KOv0OW - Passes support localization
@@ -205,7 +209,7 @@ export class Pass implements PassIndexSignature {
 	}
 
 	/**
-	 * Sets expirationDate property to the W3C date
+	 * Sets expirationDate property to a W3C-formatted date
 	 *
 	 * @method expiration
 	 * @params date
@@ -248,7 +252,7 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	beacons(...data: schema.Beacon[]): PassWithLengthField {
-		if (!data.length) {
+		if (!data || !data.length) {
 			return assignLength(0, this);
 		}
 
@@ -367,9 +371,11 @@ export class Pass implements PassIndexSignature {
 		} else {
 			const barcodes = [first, ...(data || [])];
 
-			// Stripping from the array not-object elements
-			// and the ones that does not pass validation.
-			// Validation assign default value to missing parameters (if any).
+			/**
+			 * Stripping from the array not-object elements
+			 * and the ones that does not pass validation.
+			 * Validation assign default value to missing parameters (if any).
+			 */
 
 			const valid = barcodes.reduce<schema.Barcode[]>((acc, current) => {
 				if (!(current && current instanceof Object)) {
@@ -386,10 +392,12 @@ export class Pass implements PassIndexSignature {
 			}, []);
 
 			if (valid.length) {
-				// With this check, we want to avoid that
-				// PKBarcodeFormatCode128 gets chosen automatically
-				// if it is the first. If true, we'll get 1
-				// (so not the first index)
+				/**
+				 * With this check, we want to avoid that
+				 * PKBarcodeFormatCode128 gets chosen automatically
+				 * if it is the first. If true, we'll get 1
+				 * (so not the first index)
+				 */
 				const barcodeFirstValidIndex = Number(valid[0].format === "PKBarcodeFormatCode128");
 
 				if (valid.length > 0 && valid[barcodeFirstValidIndex]) {
@@ -416,18 +424,18 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	private [barcodesFillMissing](): this {
-		const props = this._props["barcodes"];
+		const { barcodes } = this._props;
 
-		if (props.length === 4 || !props.length) {
+		if (barcodes.length === 4 || !barcodes.length) {
 			return assignLength(0, this, {
 				autocomplete: noop,
 				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
 			});
 		}
 
-		this._props["barcodes"] = barcodesFromUncompleteData(props[0].message);
+		this._props["barcodes"] = barcodesFromUncompleteData(barcodes[0].message);
 
-		return assignLength(4 - props.length, this, {
+		return assignLength(4 - barcodes.length, this, {
 			autocomplete: noop,
 			backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
 		});
@@ -443,31 +451,33 @@ export class Pass implements PassIndexSignature {
 	 * @return {this}
 	 */
 
-	private [barcodesSetBackward](format: schema.BarcodeFormat | null): this {
-		if (format === null) {
-			this._props["barcode"] = undefined;
+	private [barcodesSetBackward](chosenFormat: schema.BarcodeFormat | null): this {
+		let { barcode, barcodes } = this._props;
+
+		if (chosenFormat === null) {
+			barcode = undefined;
 			return this;
 		}
 
-		if (typeof format !== "string") {
+		if (typeof chosenFormat !== "string") {
 			barcodeDebug(formatMessage("BRC_FORMATTYPE_UNMATCH"));
 			return this;
 		}
 
-		if (format === "PKBarcodeFormatCode128") {
+		if (chosenFormat === "PKBarcodeFormatCode128") {
 			barcodeDebug(formatMessage("BRC_BW_FORMAT_UNSUPPORTED"));
 			return this;
 		}
 
 		// Checking which object among barcodes has the same format of the specified one.
-		let index = this._props["barcodes"].findIndex(b => b.format.toLowerCase().includes(format.toLowerCase()));
+		const index = barcodes.findIndex(b => b.format.toLowerCase().includes(chosenFormat.toLowerCase()));
 
 		if (index === -1) {
 			barcodeDebug(formatMessage("BRC_NOT_SUPPORTED"));
 			return this;
 		}
 
-		this._props["barcode"] = this._props["barcodes"][index];
+		barcode = barcodes[index];
 		return this;
 	}
 
@@ -499,7 +509,7 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	private _sign(manifest: { [key: string]: string }): Buffer {
-		let signature = forge.pkcs7.createSignedData();
+		const signature = forge.pkcs7.createSignedData();
 
 		signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8");
 
@@ -565,9 +575,12 @@ export class Pass implements PassIndexSignature {
 		const passFile = JSON.parse(passCoreBuffer.toString());
 
 		if (Object.keys(this._props).length) {
-			// We filter the existing (in passFile) and non-valid keys from
-			// the below array keys that accept rgb values
-			// and then delete it from the passFile.
+			/*
+			 * We filter the existing (in passFile) and non-valid keys from
+			 * the below array keys that accept rgb values
+			 * and then delete it from the passFile.
+			 */
+
 			["backgroundColor", "foregroundColor", "labelColor"]
 				.filter(v => this._props[v] && !isValidRGB(this._props[v]))
 				.forEach(v => delete this._props[v]);
@@ -596,13 +609,14 @@ export class Pass implements PassIndexSignature {
 		return Buffer.from(JSON.stringify(passFile));
 	}
 
-	set transitType(v: string) {
-		if (schema.isValid(v, "transitType")) {
-			this[transitType] = v;
-		} else {
-			genericDebug(formatMessage("TRSTYPE_NOT_VALID", v));
+	set transitType(value: string) {
+		if (!schema.isValid(value, "transitType")) {
+			genericDebug(formatMessage("TRSTYPE_NOT_VALID", value));
 			this[transitType] = this[transitType] || "";
+			return;
 		}
+
+		this[transitType] = value;
 	}
 
 	get transitType(): string {
@@ -613,12 +627,9 @@ export class Pass implements PassIndexSignature {
 /**
  * Automatically generates barcodes for all the types given common info
  *
- * @method barcodesFromMessage
- * @params data - common info, may be object or the message itself
- * @params data.message - the content to be placed inside "message" field
- * @params [data.altText=data.message] - alternativeText, is message content if not overwritten
- * @params [data.messageEncoding=iso-8859-1] - the encoding
- * @return Object array barcodeDict compliant
+ * @method barcodesFromUncompleteData
+ * @params message - the content to be placed inside "message" field
+ * @return Array of barcodeDict compliant
  */
 
 function barcodesFromUncompleteData(message: string): schema.Barcode[] {

@@ -1,7 +1,9 @@
 import { Stream } from "stream";
 
-export declare class Pass {
-	constructor(options: Schema.Instance);
+export function createPass(options: Schema.FactoryOptions): Promise<Pass>;
+
+declare class Pass {
+	constructor(options: Schema.PassInstance);
 
 	public transitType: "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";
 	public headerFields: Schema.Field[];
@@ -11,72 +13,90 @@ export declare class Pass {
 	public backFields: Schema.Field[];
 
 	/**
-	 * Generates a Stream of a zip file using the infos passed through overrides or methods.
-	 * (MIME: `application/vnd.apple.pkpass`)
+	 * Generates the pass Stream
+	 *
+	 * @method generate
+	 * @return A Stream of the generated pass.
 	 */
-	generate(): Promise<Stream>;
+	generate(): Stream;
 
 	/**
-	 * Generates pass.strings translation files in the specified language
-	 * @param lang - lang in ISO 3166 alpha-2 format (e.g. `en` or `en-US`);
-	 * @param translations - Object in format `{ "placeholder" : "translated-text" }`
-	 * @see https://apple.co/2KOv0OW
+	 * Adds traslated strings object to the list of translation to be inserted into the pass
+	 *
+	 * @method localize
+	 * @params lang - the ISO 3166 alpha-2 code for the language
+	 * @params translations - key/value pairs where key is the
+	 * 		placeholder in pass.json localizable strings
+	 * 		and value the real translated string.
+	 * @returns {this}
+	 *
+	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 	localize(lang: string, translations: Object): this;
 
 	/**
-	 * Sets pass expiration date
-	 * @param date - A date in the format you want (see "format")
-	 * @param format - A custom date format. If `undefined`, the date will be parsed in the following formats: `MM-DD-YYYY`, `MM-DD-YYYY hh:mm:ss`, `DD-MM-YYYY`, `DD-MM-YYYY hh:mm:ss`.
-	*/
-	expiration(date: string, format?: string | string[]): this;
+	 * Sets expirationDate property to a W3C-formatted date
+	 *
+	 * @method expiration
+	 * @params date
+	 * @returns {this}
+	 */
+	expiration(date: Date): this;
 
-	/** Generates a voided pass. Useful for backend pass updates. */
+	/**
+	 * Sets voided property to true
+	 *
+	 * @method void
+	 * @return {this}
+	 */
 	void(): this;
 
 	/**
-	 * Sets relevance for pass (conditions to appear in the lockscren).
-	 * @param type - must be `beacons`, `locations`, `maxDistance` or `relevantDate`
-	 * @param data - if object, will be treated as one-element array
-	 * @param relevanceDateFormat - custom format to be used in case of "relevatDate" as type. Otherwise the date will be parsed in the following formats: `MM-DD-YYYY`, `MM-DD-YYYY hh:mm:ss`, `DD-MM-YYYY`, `DD-MM-YYYY hh:mm:ss`.
+	 * Sets current pass' relevancy through beacons
+	 * @param data
+	 * @returns Pass instance with `length` property to check the
+	 * 	valid structures added
 	 */
-	relevance(type: Schema.RelevanceType, data: string | Schema.Location | Schema.Location[] | Schema.Beacon | Schema.Beacon[], relevanceDateFormat?: string): SuccessfulOperations;
+	beacons(...data: Schema.Beacon[]): PassWithLengthField;
+
+	/**
+	 * Sets current pass' relevancy through locations
+	 * @param data
+	 * @returns Pass instance with `length` property to check the
+	 * 	valid structures added
+	 */
+	locations(...data: Schema.Location[]): PassWithLengthField;
+
+	/**
+	 * Sets current pass' relevancy through a date
+	 * @param data
+	 * @returns {Pass}
+	 */
+	relevantDate(date: Date): this;
 
 	/**
 	 * Adds barcode to the pass. If data is an Object, will be treated as one-element array.
-	 * @param data - data to be used to generate a barcode. If string, Barcode will contain structures for all the supported types and `data` will be used message and altText.
+	 * @param first - data to be used to generate a barcode. If string, Barcode will contain structures for all the supported types.
+	 * @param data - the other Barcode structures to be used
 	 * @see https://apple.co/2C74kbm
 	 */
-	barcode(data: Schema.Barcode | Schema.Barcode[] | string): BarcodeInterfaces;
+	barcode(first: string | Schema.Barcode, ...data: Schema.Barcode[]): PassWithBarcodeMethods;
 
 	/**
 	 * Sets nfc infos for the pass
 	 * @param data - NFC data
 	 * @see https://apple.co/2wTxiaC
 	 */
-	nfc(...data: Schema.NFC[]): this;
-
-	/**
-	 * Sets resources to be downloaded right inside
-	 * the pass archive.
-	 * @param resource - url
-	 * @param name - name (or path) to be used inside the archive
-	 * @returns this;
-	 */
-
-	load(resource: string, name: string): this;
+	nfc(data: Schema.NFC): this;
 }
 
-interface BarcodeInterfaces extends BarcodeSuccessfulOperations {
-	autocomplete: () => void | BarcodeSuccessfulOperations
+declare interface PassWithLengthField extends Pass {
+	length: number;
 }
 
-interface BarcodeSuccessfulOperations extends SuccessfulOperations {
-	backward: (format: null | string) => void | ThisType<Pass>
-}
-
-interface SuccessfulOperations extends ThisType<Pass> {
-	length: number
+declare interface PassWithBarcodeMethods extends PassWithLengthField {
+	backward: (format: Schema.BarcodeFormat | null) => Pass;
+	autocomplete: () => Pass;
 }
 
 declare namespace Schema {
@@ -88,31 +108,57 @@ declare namespace Schema {
 	type RelevanceType = "beacons" | "locations" | "maxDistance" | "relevantDate";
 	type SemanticsEventType = "PKEventTypeGeneric" | "PKEventTypeLivePerformance" | "PKEventTypeMovie" | "PKEventTypeSports" | "PKEventTypeConference" | "PKEventTypeConvention" | "PKEventTypeWorkshop" | "PKEventTypeSocialGathering";
 
-	interface Instance {
-		model: string;
-		certificates: {
-			wwdr: string;
-			signerCert: string;
-			signerKey: {
-				keyFile: string;
-				passphrase: string;
-			}
+	interface Certificates {
+		wwdr?: string;
+		signerCert?: string;
+		signerKey?: {
+			keyFile: string;
+			passphrase?: string;
 		};
-		overrides: SupportedOptions;
-		shouldOverwrite?: boolean;
 	}
 
-	interface SupportedOptions {
+	interface FactoryOptions {
+		model: BundleUnit | string;
+		certificates: Certificates;
+		overrides?: Object;
+	}
+
+	interface BundleUnit {
+		[key: string]: Buffer;
+	}
+
+	interface PartitionedBundle {
+		bundle: BundleUnit;
+		l10nBundle: {
+			[key: string]: BundleUnit
+		};
+	}
+
+	interface FinalCertificates {
+		wwdr: string;
+		signerCert: string;
+		signerKey: string;
+	}
+
+	interface PassInstance {
+		model: PartitionedBundle;
+		certificates: FinalCertificates;
+		overrides?: OverridesSupportedOptions;
+	}
+
+	interface OverridesSupportedOptions {
 		serialNumber?: string;
 		description?: string;
-		userInfo?: Object | any[];
+		userInfo?: Object | Array<any>;
 		webServiceURL?: string;
 		authenticationToken?: string;
+		sharingProhibited?: boolean;
 		backgroundColor?: string;
 		foregroundColor?: string;
 		labelColor?: string;
 		groupingIdentifier?: string;
 		suppressStripShine?: boolean;
+		maxDistance?: number;
 	}
 
 	interface Field {

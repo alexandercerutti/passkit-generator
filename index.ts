@@ -1,1 +1,1 @@
-export { createPass } from "./src/factory";
+export { createPass, Pass } from "./src/factory";

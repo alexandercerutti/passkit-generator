@@ -11,6 +11,8 @@ import { removeHidden } from "./utils";
 const readDir = promisify(_readdir);
 const readFile = promisify(_readFile);
 
+export type Pass = InstanceType<typeof Pass>
+
 export async function createPass(options: FactoryOptions): Promise<Pass> {
 	if (!(options && Object.keys(options).length)) {
 		throw new Error(formatMessage("CP_NO_OPTS"));

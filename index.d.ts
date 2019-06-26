@@ -2,7 +2,7 @@ import { Stream } from "stream";
 
 export function createPass(options: Schema.FactoryOptions): Promise<Pass>;
 
-declare class Pass {
+export declare class Pass {
 	constructor(options: Schema.PassInstance);
 
 	public transitType: "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";

@@ -1,5 +1,5 @@
 import { createPass } from "..";
-import { Pass } from "../src/pass";
+import { Pass, PassWithBarcodeMethods } from "../src/pass";
 
 /*
  * Yes, I know that I'm checking against "private" properties
@@ -111,6 +111,8 @@ describe("Node-Passkit-generator", function () {
 
 		describe("locations :: ", () => {
 			it("One-Invalid-schema location won't apply changes", () => {
+				const oldAmountOfLocations = pass.locations().length;
+
 				pass.locations({
 					// @ts-ignore
 					"ibrupofene": "no",
@@ -118,10 +120,12 @@ describe("Node-Passkit-generator", function () {
 				});
 
 				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["locations"]).toBe(undefined);
+				expect(pass._props["locations"].length).toBe(oldAmountOfLocations);
 			});
 
 			it("Two locations, with one invalid, will be filtered", () => {
+				const oldAmountOfLocations = pass.locations().length;
+
 				pass.locations({
 					//@ts-ignore
 					"ibrupofene": "no",
@@ -132,7 +136,7 @@ describe("Node-Passkit-generator", function () {
 				});
 
 				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["locations"].length).toBe(1);
+				expect(pass._props["locations"].length).toBe(oldAmountOfLocations+1);
 			});
 		});
 
@@ -170,34 +174,31 @@ describe("Node-Passkit-generator", function () {
 	});
 
 	describe("barcode()", () => {
-		it("Missing data will won't apply changes", () => {
-			// @ts-ignore -- Ignoring for test purposes
-			pass.barcode();
+		it("Missing data will return the current data", () => {
+			const oldAmountOfBarcodes = pass.barcode().length;
 
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"]).toBe(undefined);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"]).toBe(undefined);
+			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("Boolean parameter won't apply changes", () => {
+			const oldAmountOfBarcodes = pass.barcode().length;
+
 			// @ts-ignore -- Ignoring for test purposes
 			pass.barcode(true);
 
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"]).toBe(undefined);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"]).toBe(undefined);
+			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("Numeric parameter won't apply changes", () => {
+			const oldAmountOfBarcodes = pass.barcode().length;
+
 			// @ts-ignore -- Ignoring for test purposes
 			pass.barcode(42);
 
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"]).toBe(undefined);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"]).toBe(undefined);
+			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("String parameter will autogenerate all the objects", () => {
@@ -207,11 +208,10 @@ describe("Node-Passkit-generator", function () {
 			expect(pass._props["barcode"] instanceof Object).toBe(true);
 			// @ts-ignore -- Ignoring for test purposes
 			expect(pass._props["barcode"].message).toBe("28363516282");
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"].length).toBe(4);
+			expect(pass.barcode().length).toBe(4);
 		});
 
-		it("Object parameter will be automatically converted to one-element Array", () => {
+		it("Object parameter will be accepted", () => {
 			pass.barcode({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
@@ -223,7 +223,7 @@ describe("Node-Passkit-generator", function () {
 			// @ts-ignore -- Ignoring for test purposes
 			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatPDF417");
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"].length).toBe(1);
+			expect(pass.barcode().length).toBe(1);
 		});
 
 		it("Array parameter will apply changes", () => {
@@ -256,18 +256,19 @@ describe("Node-Passkit-generator", function () {
 		});
 
 		it("Object without message property, will be filtered out", () => {
+			const oldAmountOfBarcodes = pass.barcode().length;
+
 			// @ts-ignore -- Ignoring for test purposes
 			pass.barcode({
 				format: "PKBarcodeFormatPDF417",
 			});
 
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"]).toBe(undefined);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"]).toBe(undefined);
+			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("Array containing non-object elements will be rejected", () => {
+			const oldAmountOfBarcodes = pass.barcode().length;
 			// @ts-ignore -- Ignoring for test purposes
 			pass.barcode(5, 10, 15, {
 				message: "28363516282",
@@ -275,9 +276,7 @@ describe("Node-Passkit-generator", function () {
 			}, 7, 1);
 
 			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"] instanceof Object).toBe(false);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"]).toBeUndefined();
+			expect(pass.barcode().length).toBe(1)
 		});
 	});
 
@@ -294,8 +293,7 @@ describe("Node-Passkit-generator", function () {
 		});
 
 		it("Null will delete backward support", () => {
-			pass
-				.barcode("Message-22645272183")
+			(pass.barcode("Message-22645272183") as PassWithBarcodeMethods)
 				.backward(null);
 
 			// @ts-ignore -- Ignoring for test purposes

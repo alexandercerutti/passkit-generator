@@ -35,7 +35,7 @@ app.all(async function manageRequest(request, response) {
 			// After this, pass.props["barcodes"] will have support for all the formats
 			// while pass.props["barcode"] will be the first of barcodes.
 
-			bc = pass.barcode("Thank you for using this package <3");
+			bc = pass.barcode("Thank you for using this package <3") as PassWithBarcodeMethods
 		} else {
 			// After this, pass.props["barcodes"] will have support for just two of three
 			// of the passed format (the valid ones) and pass.props["barcode"] the first of barcodes.
@@ -50,7 +50,7 @@ app.all(async function manageRequest(request, response) {
 			}, {
 				message: "Thank you for using this package <3",
 				format: "PKBarcodeFormatMock44617"
-			});
+			}) as PassWithBarcodeMethods;
 		}
 
 		// You can change the format chosen for barcode prop support by calling .backward()

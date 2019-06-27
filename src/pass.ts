@@ -61,6 +61,13 @@ export class Pass implements PassIndexSignature {
 		this.l10nBundles = options.model.l10nBundle;
 		this.bundle = { ...options.model.bundle };
 
+		try {
+			// getting pass.json
+			this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
+		} catch (err) {
+			throw new Error(formatMessage("PASSFILE_VALIDATION_FAILED"));
+		}
+
 		// Parsing the options and extracting only the valid ones.
 		const validOverrides = schema.getValidated(options.overrides || {}, "supportedOptions") as schema.OverridesSupportedOptions;
 
@@ -68,15 +75,22 @@ export class Pass implements PassIndexSignature {
 			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
 		}
 
-		if (Object.keys(validOverrides).length) {
-			this._props = { ...validOverrides };
-		}
+		this._props = [
+			"barcodes", "barcode",
+			"expirationDate", "voided",
+			"beacons", "locations",
+			"relevantDate", "nfc"
+		].reduce<schema.ValidPass>((acc, current) => {
+			if (!this.passCore[current]) {
+				return acc;
+			}
 
-		try {
-			// getting pass.json
-			this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
-		} catch (err) {
-			throw new Error(formatMessage("PASSFILE_VALIDATION_FAILED"));
+			acc[current] = this.passCore[current];
+			return acc;
+		}, {});
+
+		if (Object.keys(validOverrides).length) {
+			this._props = { ...this._props, ...validOverrides };
 		}
 
 		this.type = Object.keys(this.passCore)

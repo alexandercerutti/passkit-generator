@@ -632,7 +632,7 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	private _patch(passCoreBuffer: Buffer): Buffer {
-		const passFile = JSON.parse(passCoreBuffer.toString());
+		let passFile = JSON.parse(passCoreBuffer.toString());
 
 		if (Object.keys(this._props).length) {
 			/*
@@ -645,15 +645,7 @@ export class Pass implements PassIndexSignature {
 				.filter(v => this._props[v] && !isValidRGB(this._props[v]))
 				.forEach(v => delete this._props[v]);
 
-			Object.keys(this._props).forEach(prop => {
-				if (passFile[prop] && passFile[prop] instanceof Array) {
-					passFile[prop] = [ ...passFile[prop], ...this._props[prop] ];
-				} else if (passFile[prop] && passFile[prop] instanceof Object) {
-					passFile[prop] = { ...passFile[prop], ...this._props[prop] };
-				} else {
-					passFile[prop] = this._props[prop];
-				}
-			});
+			passFile = { ...passFile, ...this._props };
 		}
 
 		this._fields.forEach(field => {

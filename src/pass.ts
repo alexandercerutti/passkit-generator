@@ -274,13 +274,13 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	beacons(...data: schema.Beacon[]): PassWithLengthField | schema.Beacon[] {
-		if (data === undefined) {
-			return this._props["beacons"];
+		if (data === null) {
+			delete this._props["beacons"];
+			return assignLength<PassWithLengthField>(0, this);
 		}
 
 		if (!data.length) {
-			this._props["beacons"] = [];
-			return assignLength(0, this);
+			return this._props["beacons"];
 		}
 
 		const validBeacons = data.reduce<schema.Beacon[]>((acc, current) => {
@@ -307,13 +307,13 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	locations(...data: schema.Location[]): PassWithLengthField | schema.Location[] {
-		if (data === undefined) {
-			return this._props["locations"];
+		if (data === null) {
+			delete this._props["locations"];
+			return assignLength<PassWithLengthField>(0, this);
 		}
 
 		if (!data.length) {
-			this._props["locations"] = [];
-			return assignLength(0, this);
+			return this._props["locations"];
 		}
 
 		const validLocations = data.reduce<schema.Location[]>((acc, current) => {
@@ -327,8 +327,6 @@ export class Pass implements PassIndexSignature {
 		if (!validLocations.length) {
 			return assignLength(0, this);
 		}
-
-		console.log("Locations:", this._props["locations"]);
 
 		(this._props["locations"] || (this._props["locations"] = [])).push(...validLocations);
 
@@ -377,7 +375,6 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	barcode(first?: string | schema.Barcode, ...data: schema.Barcode[]): PassWithBarcodeMethods | schema.Barcode[] {
-		console.log(first, data);
 		if (first === undefined && (data === undefined || !data.length)) {
 			return this._props["barcodes"];
 		}

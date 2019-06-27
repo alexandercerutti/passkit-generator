@@ -120,7 +120,7 @@ describe("Node-Passkit-generator", function () {
 				});
 
 				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["locations"].length).toBe(oldAmountOfLocations);
+				expect(pass.locations().length).toBe(oldAmountOfLocations);
 			});
 
 			it("Two locations, with one invalid, will be filtered", () => {
@@ -136,12 +136,14 @@ describe("Node-Passkit-generator", function () {
 				});
 
 				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["locations"].length).toBe(oldAmountOfLocations+1);
+				expect(pass.locations().length).toBe(oldAmountOfLocations+1);
 			});
 		});
 
 		describe("Beacons :: ", () => {
 			it("One-Invalid-schema beacon data won't apply changes", () => {
+				const oldBeacons = pass.beacons();
+
 				pass.beacons({
 					// @ts-ignore
 					"ibrupofene": "no",
@@ -151,10 +153,12 @@ describe("Node-Passkit-generator", function () {
 				});
 
 				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["beacons"]).toBe(undefined);
+				expect(pass.beacons()).toBe(oldBeacons ? oldBeacons.length : undefined);
 			});
 
 			it("Two beacons sets, with one invalid, will be filtered", () => {
+				const oldBeacons = pass.beacons();
+
 				pass.beacons({
 					"major": 55,
 					"minor": 0,
@@ -168,7 +172,7 @@ describe("Node-Passkit-generator", function () {
 				});
 
 				// @ts-ignore -- Ignoring for test purposes
-				expect(pass._props["beacons"].length).toBe(1);
+				expect(pass.beacons().length).toBe(oldBeacons ? oldBeacons.length+1 : 1);
 			});
 		});
 	});

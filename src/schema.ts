@@ -75,6 +75,7 @@ export interface OverridesSupportedOptions {
 	labelColor?: string;
 	groupingIdentifier?: string;
 	suppressStripShine?: boolean;
+	logoText?: string;
 	maxDistance?: number;
 }
 

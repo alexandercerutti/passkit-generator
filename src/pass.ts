@@ -214,7 +214,11 @@ export class Pass implements PassIndexSignature {
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 
-	localize(lang: string, translations?: { [key: string]: string }): this {
+	localize(lang?: string, translations?: { [key: string]: string }): this | string[] {
+		if (lang === undefined && translations === undefined) {
+			return Object.keys(this.l10nTranslations);
+		}
+
 		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
 			this.l10nTranslations[lang] = translations || {};
 		}
@@ -230,7 +234,11 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	expiration(date: Date): this {
+	expiration(date?: Date): this | string {
+		if (date === undefined) {
+			return this._props["expirationDate"];
+		}
+
 		if (!(date instanceof Date)) {
 			return this;
 		}
@@ -265,8 +273,13 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	beacons(...data: schema.Beacon[]): PassWithLengthField {
-		if (!data || !data.length) {
+	beacons(...data: schema.Beacon[]): PassWithLengthField | schema.Beacon[] {
+		if (data === undefined) {
+			return this._props["beacons"];
+		}
+
+		if (!data.length) {
+			this._props["beacons"] = [];
 			return assignLength(0, this);
 		}
 
@@ -282,9 +295,9 @@ export class Pass implements PassIndexSignature {
 			return assignLength(0, this);
 		}
 
-		this._props["beacons"] = validBeacons;
+		(this._props["beacons"] || (this._props["beacons"] = [])).push(...validBeacons);
 
-		return assignLength(validBeacons.length, this);
+		return assignLength(this._props["beacons"].length, this);
 	}
 
 	/**
@@ -293,8 +306,13 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	locations(...data: schema.Location[]): PassWithLengthField {
+	locations(...data: schema.Location[]): PassWithLengthField | schema.Location[] {
+		if (data === undefined) {
+			return this._props["locations"];
+		}
+
 		if (!data.length) {
+			this._props["locations"] = [];
 			return assignLength(0, this);
 		}
 
@@ -310,9 +328,11 @@ export class Pass implements PassIndexSignature {
 			return assignLength(0, this);
 		}
 
-		this._props["locations"] = validLocations;
+		console.log("Locations:", this._props["locations"]);
 
-		return assignLength(validLocations.length, this);
+		(this._props["locations"] || (this._props["locations"] = [])).push(...validLocations);
+
+		return assignLength(this._props["locations"].length, this);
 	}
 
 	/**
@@ -321,7 +341,16 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	relevantDate(date: Date): this {
+	relevantDate(date?: Date): this | string {
+		if (date === undefined) {
+			return this._props["relevantDate"];
+		}
+
+		if (date === null) {
+			delete this._props["relevantDate"];
+			return this;
+		}
+
 		if (!(date instanceof Date)) {
 			genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
 			return this;
@@ -347,7 +376,20 @@ export class Pass implements PassIndexSignature {
 	 * @return {this} Improved this with length property and other methods
 	 */
 
-	barcode(first: string | schema.Barcode, ...data: schema.Barcode[]): PassWithBarcodeMethods {
+	barcode(first?: string | schema.Barcode, ...data: schema.Barcode[]): PassWithBarcodeMethods | schema.Barcode[] {
+		console.log(first, data);
+		if (first === undefined && (data === undefined || !data.length)) {
+			return this._props["barcodes"];
+		}
+
+		if (first === null) {
+			delete this._props["barcodes"];
+			return assignLength<PassWithBarcodeMethods>(0, this, {
+				autocomplete: noop,
+				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format),
+			});
+		}
+
 		const isFirstParameterValid = (
 			first && (
 				typeof first === "string" && first.length || (
@@ -369,7 +411,7 @@ export class Pass implements PassIndexSignature {
 
 			if (!autogen.length) {
 				barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
-				return assignLength(0, this, {
+				return assignLength<PassWithBarcodeMethods>(0, this, {
 					autocomplete: noop,
 					backward: noop,
 				});
@@ -378,7 +420,7 @@ export class Pass implements PassIndexSignature {
 			this._props["barcode"] = autogen[0];
 			this._props["barcodes"] = autogen;
 
-			return assignLength(autogen.length, this, {
+			return assignLength<PassWithBarcodeMethods>(autogen.length, this, {
 				autocomplete: noop,
 				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
 			});
@@ -421,7 +463,7 @@ export class Pass implements PassIndexSignature {
 				this._props["barcodes"] = valid;
 			}
 
-			return assignLength(valid.length, this, {
+			return assignLength<PassWithBarcodeMethods>(valid.length, this, {
 				autocomplete: () => this[barcodesFillMissing](),
 				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format),
 			});
@@ -437,7 +479,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this} Improved this, with length property and retroCompatibility method.
 	 */
 
-	private [barcodesFillMissing](): this {
+	private [barcodesFillMissing](): PassWithBarcodeMethods {
 		const { barcodes } = this._props;
 
 		if (barcodes.length === 4 || !barcodes.length) {
@@ -449,7 +491,7 @@ export class Pass implements PassIndexSignature {
 
 		this._props["barcodes"] = barcodesFromUncompleteData(barcodes[0].message);
 
-		return assignLength(4 - barcodes.length, this, {
+		return assignLength<PassWithBarcodeMethods>(4 - barcodes.length, this, {
 			autocomplete: noop,
 			backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
 		});
@@ -466,10 +508,10 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	private [barcodesSetBackward](chosenFormat: schema.BarcodeFormat | null): this {
-		let { barcode, barcodes } = this._props;
+		let { barcodes } = this._props;
 
 		if (chosenFormat === null) {
-			barcode = undefined;
+			this._props["barcode"] = undefined;
 			return this;
 		}
 
@@ -491,7 +533,7 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
-		barcode = barcodes[index];
+		this._props["barcode"] = barcodes[index];
 		return this;
 	}
 
@@ -503,7 +545,11 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	nfc(data: schema.NFC): this {
+	nfc(data?: schema.NFC): this | schema.NFC {
+		if (data === undefined) {
+			return this._props["nfc"];
+		}
+
 		if (!(typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
 			genericDebug("Invalid NFC data provided");
 			return this;

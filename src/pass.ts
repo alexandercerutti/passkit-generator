@@ -243,14 +243,11 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
-		const dateParse = dateToW3CString(date);
+		const parsedDate = processDate("expirationDate", date);
 
-		if (!dateParse) {
-			genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Expiration date"));
-			return this;
+		if (parsedDate) {
+			this._props["expirationDate"] = parsedDate;
 		}
-
-		this._props["expirationDate"] = dateParse;
 
 		return this;
 	}
@@ -349,19 +346,12 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
-		if (!(date instanceof Date)) {
-			genericDebug(formatMessage("DATE_FORMAT_UNMATCH", "Relevant Date"));
-			return this;
+		const parsedDate = processDate("relevandDate", date);
+
+		if (parsedDate) {
+			this._props["relevantDate"] = parsedDate;
 		}
 
-		const parsedDate = dateToW3CString(date);
-
-		if (!parsedDate) {
-			// @TODO: create message "Unable to format date"
-			return this;
-		}
-
-		this._props["relevantDate"] = parsedDate;
 		return this;
 	}
 
@@ -692,4 +682,19 @@ function barcodesFromUncompleteData(message: string): schema.Barcode[] {
 		"PKBarcodeFormatAztec",
 		"PKBarcodeFormatCode128"
 	].map(format => schema.getValidated({ format, message }, "barcode"));
+}
+
+function processDate(key: string, date: Date): string | null {
+	if (!(date instanceof Date)) {
+		return null;
+	}
+
+	const dateParse = dateToW3CString(date);
+
+	if (!dateParse) {
+		genericDebug(formatMessage("DATE_FORMAT_UNMATCH", key));
+		return null;
+	}
+
+	return dateParse;
 }

@@ -214,11 +214,7 @@ export class Pass implements PassIndexSignature {
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 
-	localize(lang?: string, translations?: { [key: string]: string }): this | string[] {
-		if (lang === undefined && translations === undefined) {
-			return Object.keys(this.l10nTranslations);
-		}
-
+	localize(lang?: string, translations?: { [key: string]: string }): this {
 		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
 			this.l10nTranslations[lang] = translations || {};
 		}
@@ -235,11 +231,8 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	expiration(date?: Date): this | string {
-		if (date === undefined) {
-			return this._props["expirationDate"];
-		}
-
-		if (!(date instanceof Date)) {
+		if (date === null) {
+			delete this._props["expirationDate"];
 			return this;
 		}
 
@@ -270,10 +263,10 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	beacons(...data: schema.Beacon[]): PassWithLengthField | schema.Beacon[] {
+	beacons(...data: schema.Beacon[] | null): this {
 		if (data === null) {
 			delete this._props["beacons"];
-			return assignLength<PassWithLengthField>(0, this);
+			return this;
 		}
 
 		const valid = processRelevancySet("beacons", data);
@@ -282,17 +275,8 @@ export class Pass implements PassIndexSignature {
 			this._props["beacons"] = valid;
 		}
 
-			return [...acc, current];
-		}, []);
-
-		if (!validBeacons.length) {
-			return assignLength(0, this);
+		return this;
 		}
-
-		(this._props["beacons"] || (this._props["beacons"] = [])).push(...validBeacons);
-
-		return assignLength(this._props["beacons"].length, this);
-	}
 
 	/**
 	 * Sets current pass' relevancy through locations
@@ -300,10 +284,10 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	locations(...data: schema.Location[]): PassWithLengthField | schema.Location[] {
+	locations(...data: schema.Location[]): this {
 		if (data === null) {
 			delete this._props["locations"];
-			return assignLength<PassWithLengthField>(0, this);
+			return this;
 		}
 
 		const valid = processRelevancySet("locations", data);
@@ -312,17 +296,8 @@ export class Pass implements PassIndexSignature {
 			this._props["locations"] = valid;
 		}
 
-			return [...acc, current];
-		}, []);
-
-		if (!validLocations.length) {
-			return assignLength(0, this);
+		return this;
 		}
-
-		(this._props["locations"] || (this._props["locations"] = [])).push(...validLocations);
-
-		return assignLength(this._props["locations"].length, this);
-	}
 
 	/**
 	 * Sets current pass' relevancy through a date
@@ -331,10 +306,6 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	relevantDate(date?: Date): this | string {
-		if (date === undefined) {
-			return this._props["relevantDate"];
-		}
-
 		if (date === null) {
 			delete this._props["relevantDate"];
 			return this;
@@ -358,22 +329,15 @@ export class Pass implements PassIndexSignature {
 	 * @return {this} Improved this with length property and other methods
 	 */
 
-	barcode(first?: string | schema.Barcode, ...data: schema.Barcode[]): PassWithBarcodeMethods | schema.Barcode[] {
-		if (first === undefined && (data === undefined || !data.length)) {
-			return this._props["barcodes"];
-		}
-
+	barcode(first?: string | schema.Barcode, ...data: schema.Barcode[]): this {
 		if (first === null) {
 			delete this._props["barcodes"];
-			return assignLength<PassWithBarcodeMethods>(0, this, {
-				autocomplete: noop,
-				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format),
-			});
+			return this;
 		}
 
 		const isFirstParameterValid = (
 			first && (
-				typeof first === "string" && first.length || (
+				typeof first === "string" || (
 					typeof first === "object" &&
 					first.hasOwnProperty("message")
 				)
@@ -381,10 +345,7 @@ export class Pass implements PassIndexSignature {
 		);
 
 		if (!isFirstParameterValid) {
-			return assignLength(0, this, {
-				autocomplete: noop,
-				backward: noop,
-			});
+			return this;
 		}
 
 		if (typeof first === "string") {
@@ -392,19 +353,13 @@ export class Pass implements PassIndexSignature {
 
 			if (!autogen.length) {
 				barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
-				return assignLength<PassWithBarcodeMethods>(0, this, {
-					autocomplete: noop,
-					backward: noop,
-				});
+				return this;
 			}
 
 			this._props["barcode"] = autogen[0];
 			this._props["barcodes"] = autogen;
 
-			return assignLength<PassWithBarcodeMethods>(autogen.length, this, {
-				autocomplete: noop,
-				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
-			});
+			return this;
 		} else {
 			const barcodes = [first, ...(data || [])];
 
@@ -444,10 +399,7 @@ export class Pass implements PassIndexSignature {
 				this._props["barcodes"] = valid;
 			}
 
-			return assignLength<PassWithBarcodeMethods>(valid.length, this, {
-				autocomplete: () => this[barcodesFillMissing](),
-				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format),
-			});
+			return this;
 		}
 	}
 

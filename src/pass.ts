@@ -329,7 +329,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {this} Improved this with length property and other methods
 	 */
 
-	barcode(first?: string | schema.Barcode, ...data: schema.Barcode[]): this {
+	barcodes(first?: string | schema.Barcode, ...data: schema.Barcode[]): this {
 		if (first === null) {
 			delete this._props["barcodes"];
 			return this;
@@ -356,7 +356,6 @@ export class Pass implements PassIndexSignature {
 				return this;
 			}
 
-			this._props["barcode"] = autogen[0];
 			this._props["barcodes"] = autogen;
 
 			return this;
@@ -384,18 +383,6 @@ export class Pass implements PassIndexSignature {
 			}, []);
 
 			if (valid.length) {
-				/**
-				 * With this check, we want to avoid that
-				 * PKBarcodeFormatCode128 gets chosen automatically
-				 * if it is the first. If true, we'll get 1
-				 * (so not the first index)
-				 */
-				const barcodeFirstValidIndex = Number(valid[0].format === "PKBarcodeFormatCode128");
-
-				if (valid.length > 0 && valid[barcodeFirstValidIndex]) {
-					this._props["barcode"] = valid[barcodeFirstValidIndex];
-				}
-
 				this._props["barcodes"] = valid;
 			}
 
@@ -435,16 +422,16 @@ export class Pass implements PassIndexSignature {
 	 * this let you choose which structure to use for retrocompatibility
 	 * property "barcode".
 	 *
-	 * @method Symbol/barcodesSetBackward
+	 * @method barcode
 	 * @params format - the format to be used
 	 * @return {this}
 	 */
 
-	private [barcodesSetBackward](chosenFormat: schema.BarcodeFormat | null): this {
+	barcode(chosenFormat: schema.BarcodeFormat | null): this {
 		let { barcodes } = this._props;
 
 		if (chosenFormat === null) {
-			this._props["barcode"] = undefined;
+			delete this._props["barcode"];
 			return this;
 		}
 

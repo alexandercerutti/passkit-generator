@@ -80,13 +80,3 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
 
 	return Buffer.from(strings.join(EOL), "utf8");
 }
-
-/**
- * Creates a new object with custom length property
- * @param {number} value - the length
- * @param {Array<Object<string, any>>} source - the main sources of properties
- */
-
-export function assignLength<T>(length: number, ...sources: Array<{ [key: string]: any }>): { [key: string]: any } & T {
-	return Object.assign({ length }, ...sources);
-}

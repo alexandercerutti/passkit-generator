@@ -8,17 +8,14 @@ import * as schema from "./schema";
 import formatMessage from "./messages";
 import FieldsArray from "./fieldsArray";
 import {
-	assignLength, generateStringFile,
+	generateStringFile,
 	dateToW3CString, isValidRGB
 } from "./utils";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
 
-const noop = () => {};
 const transitType = Symbol("transitType");
-const barcodesFillMissing = Symbol("bfm");
-const barcodesSetBackward = Symbol("bsb");
 
 interface PassIndexSignature {
 	[key: string]: any;
@@ -388,33 +385,6 @@ export class Pass implements PassIndexSignature {
 
 			return this;
 		}
-	}
-
-	/**
-	 * Given an already compiled props["barcodes"] with missing objects
-	 * (less than 4), takes infos from the first object and replicate them
-	 * in the missing structures.
-	 *
-	 * @method Symbol/barcodesFillMissing
-	 * @returns {this} Improved this, with length property and retroCompatibility method.
-	 */
-
-	private [barcodesFillMissing](): PassWithBarcodeMethods {
-		const { barcodes } = this._props;
-
-		if (barcodes.length === 4 || !barcodes.length) {
-			return assignLength(0, this, {
-				autocomplete: noop,
-				backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
-			});
-		}
-
-		this._props["barcodes"] = barcodesFromUncompleteData(barcodes[0].message);
-
-		return assignLength<PassWithBarcodeMethods>(4 - barcodes.length, this, {
-			autocomplete: noop,
-			backward: (format: schema.BarcodeFormat) => this[barcodesSetBackward](format)
-		});
 	}
 
 	/**

@@ -276,14 +276,11 @@ export class Pass implements PassIndexSignature {
 			return assignLength<PassWithLengthField>(0, this);
 		}
 
-		if (!data.length) {
-			return this._props["beacons"];
-		}
+		const valid = processRelevancySet("beacons", data);
 
-		const validBeacons = data.reduce<schema.Beacon[]>((acc, current) => {
-			if (!(Object.keys(current).length && schema.isValid(current, "beaconsDict"))) {
-				return acc;
-			}
+		if (valid.length) {
+			this._props["beacons"] = valid;
+		}
 
 			return [...acc, current];
 		}, []);
@@ -309,14 +306,11 @@ export class Pass implements PassIndexSignature {
 			return assignLength<PassWithLengthField>(0, this);
 		}
 
-		if (!data.length) {
-			return this._props["locations"];
-		}
+		const valid = processRelevancySet("locations", data);
 
-		const validLocations = data.reduce<schema.Location[]>((acc, current) => {
-			if (!(Object.keys(current).length && schema.isValid(current, "locationsDict"))) {
-				return acc;
-			}
+		if (valid.length) {
+			this._props["locations"] = valid;
+		}
 
 			return [...acc, current];
 		}, []);
@@ -682,6 +676,16 @@ function barcodesFromUncompleteData(message: string): schema.Barcode[] {
 		"PKBarcodeFormatAztec",
 		"PKBarcodeFormatCode128"
 	].map(format => schema.getValidated({ format, message }, "barcode"));
+}
+
+function processRelevancySet<T>(key: string, data: T[]): T[] {
+	return data.reduce<T[]>((acc, current) => {
+		if (!(Object.keys(current).length && schema.isValid(current, `${key}Dict`))) {
+			return acc;
+		}
+
+		return [...acc, current];
+	}, []);
 }
 
 function processDate(key: string, date: Date): string | null {

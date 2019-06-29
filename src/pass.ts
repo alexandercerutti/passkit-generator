@@ -16,6 +16,7 @@ const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
 
 const transitType = Symbol("transitType");
+const passProps = Symbol("_props");
 
 interface PassIndexSignature {
 	[key: string]: any;
@@ -34,7 +35,7 @@ export class Pass implements PassIndexSignature {
 	private bundle: schema.BundleUnit;
 	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
 	private _fields: (keyof schema.PassFields)[];
-	private _props: schema.ValidPass = {};
+	private [passProps]: schema.ValidPass = {};
 	private type: keyof schema.ValidPassType;
 	private fieldsKeys: Set<string> = new Set<string>();
 	private passCore: schema.ValidPass = {};
@@ -229,14 +230,14 @@ export class Pass implements PassIndexSignature {
 
 	expiration(date?: Date): this | string {
 		if (date === null) {
-			delete this._props["expirationDate"];
+			delete this[passProps]["expirationDate"];
 			return this;
 		}
 
 		const parsedDate = processDate("expirationDate", date);
 
 		if (parsedDate) {
-			this._props["expirationDate"] = parsedDate;
+			this[passProps]["expirationDate"] = parsedDate;
 		}
 
 		return this;
@@ -250,7 +251,7 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	void(): this {
-		this._props["voided"] = true;
+		this[passProps]["voided"] = true;
 		return this;
 	}
 
@@ -262,14 +263,14 @@ export class Pass implements PassIndexSignature {
 
 	beacons(...data: schema.Beacon[] | null): this {
 		if (data === null) {
-			delete this._props["beacons"];
+			delete this[passProps]["beacons"];
 			return this;
 		}
 
 		const valid = processRelevancySet("beacons", data);
 
 		if (valid.length) {
-			this._props["beacons"] = valid;
+			this[passProps]["beacons"] = valid;
 		}
 
 		return this;
@@ -283,14 +284,14 @@ export class Pass implements PassIndexSignature {
 
 	locations(...data: schema.Location[]): this {
 		if (data === null) {
-			delete this._props["locations"];
+			delete this[passProps]["locations"];
 			return this;
 		}
 
 		const valid = processRelevancySet("locations", data);
 
 		if (valid.length) {
-			this._props["locations"] = valid;
+			this[passProps]["locations"] = valid;
 		}
 
 		return this;
@@ -304,14 +305,14 @@ export class Pass implements PassIndexSignature {
 
 	relevantDate(date?: Date): this | string {
 		if (date === null) {
-			delete this._props["relevantDate"];
+			delete this[passProps]["relevantDate"];
 			return this;
 		}
 
 		const parsedDate = processDate("relevandDate", date);
 
 		if (parsedDate) {
-			this._props["relevantDate"] = parsedDate;
+			this[passProps]["relevantDate"] = parsedDate;
 		}
 
 		return this;
@@ -328,7 +329,7 @@ export class Pass implements PassIndexSignature {
 
 	barcodes(first?: string | schema.Barcode, ...data: schema.Barcode[]): this {
 		if (first === null) {
-			delete this._props["barcodes"];
+			delete this[passProps]["barcodes"];
 			return this;
 		}
 
@@ -353,7 +354,7 @@ export class Pass implements PassIndexSignature {
 				return this;
 			}
 
-			this._props["barcodes"] = autogen;
+			this[passProps]["barcodes"] = autogen;
 
 			return this;
 		} else {
@@ -380,7 +381,7 @@ export class Pass implements PassIndexSignature {
 			}, []);
 
 			if (valid.length) {
-				this._props["barcodes"] = valid;
+				this[passProps]["barcodes"] = valid;
 			}
 
 			return this;
@@ -398,10 +399,10 @@ export class Pass implements PassIndexSignature {
 	 */
 
 	barcode(chosenFormat: schema.BarcodeFormat | null): this {
-		let { barcodes } = this._props;
+		let { barcodes } = this[passProps];
 
 		if (chosenFormat === null) {
-			delete this._props["barcode"];
+			delete this[passProps]["barcode"];
 			return this;
 		}
 
@@ -423,7 +424,7 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
-		this._props["barcode"] = barcodes[index];
+		this[passProps]["barcode"] = barcodes[index];
 		return this;
 	}
 
@@ -437,7 +438,7 @@ export class Pass implements PassIndexSignature {
 
 	nfc(data?: schema.NFC): this | schema.NFC {
 		if (data === undefined) {
-			return this._props["nfc"];
+			return this[passProps]["nfc"];
 		}
 
 		if (!(typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
@@ -445,7 +446,7 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
-		this._props["nfc"] = data;
+		this[passProps]["nfc"] = data;
 
 		return this;
 	}
@@ -524,7 +525,7 @@ export class Pass implements PassIndexSignature {
 	private _patch(passCoreBuffer: Buffer): Buffer {
 		let passFile = JSON.parse(passCoreBuffer.toString());
 
-		if (Object.keys(this._props).length) {
+		if (Object.keys(this[passProps]).length) {
 			/*
 			 * We filter the existing (in passFile) and non-valid keys from
 			 * the below array keys that accept rgb values
@@ -532,10 +533,10 @@ export class Pass implements PassIndexSignature {
 			 */
 
 			["backgroundColor", "foregroundColor", "labelColor"]
-				.filter(v => this._props[v] && !isValidRGB(this._props[v]))
-				.forEach(v => delete this._props[v]);
+				.filter(v => this[passProps][v] && !isValidRGB(this[passProps][v]))
+				.forEach(v => delete this[passProps][v]);
 
-			passFile = { ...passFile, ...this._props };
+			passFile = { ...passFile, ...this[passProps] };
 		}
 
 		this._fields.forEach(field => {

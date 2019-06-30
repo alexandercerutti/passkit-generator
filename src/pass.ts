@@ -442,8 +442,8 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
-		if (!(typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
-			genericDebug("Invalid NFC data provided");
+		if (!(data && typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
+			genericDebug(formatMessage("NFC_INVALID"));
 			return this;
 		}
 

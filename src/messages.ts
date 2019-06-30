@@ -26,7 +26,8 @@ const debugMessages: MessageGroup = {
 	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not a string.",
 	BRC_BW_FORMAT_UNSUPPORTED: "This format is not supported (by Apple) for backward support. Please choose another one.",
 	BRC_NO_POOL: "Cannot set barcode: no barcodes found. Please set barcodes first. Barcode is for retrocompatibility only.",
-	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format."
+	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format.",
+	NFC_INVALID: "Unable to set NFC properties: data not compliant with schema."
 };
 
 /**

@@ -52,7 +52,7 @@ app.all(async function manageRequest(request, response) {
 		pass.localize("zu", {});
 
 		// @ts-ignore - ignoring for logging purposes. Do not replicate
-		console.log("Added languages", pass.localize().join(", "))
+		console.log("Added languages", Object.keys(pass.l10nTranslations).join(", "))
 
 		const stream = pass.generate();
 		response.set({

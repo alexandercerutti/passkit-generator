@@ -1,8 +1,8 @@
 import path from "path";
-import stream, { Stream } from "stream";
 import forge from "node-forge";
-import { ZipFile } from "yazl";
 import debug from "debug";
+import { Stream } from "stream";
+import { ZipFile } from "yazl";
 
 import * as schema from "./schema";
 import formatMessage from "./messages";
@@ -18,20 +18,7 @@ const genericDebug = debug("passkit:generic");
 const transitType = Symbol("transitType");
 const passProps = Symbol("_props");
 
-interface PassIndexSignature {
-	[key: string]: any;
-}
-
-export interface PassWithLengthField extends Pass {
-	length: number;
-}
-
-export interface PassWithBarcodeMethods extends PassWithLengthField {
-	backward: (format: schema.BarcodeFormat) => Pass;
-	autocomplete: () => Pass;
-}
-
-export class Pass implements PassIndexSignature {
+export class Pass {
 	private bundle: schema.BundleUnit;
 	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
 	private _fields: (keyof schema.PassFields)[];
@@ -186,7 +173,7 @@ export class Pass implements PassIndexSignature {
 
 		archive.addBuffer(signatureBuffer, "signature");
 		archive.addBuffer(Buffer.from(JSON.stringify(manifest)), "manifest.json");
-		const passStream = new stream.PassThrough();
+		const passStream = new Stream.PassThrough();
 
 		archive.outputStream.pipe(passStream);
 		archive.end();
@@ -223,7 +210,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	expiration(date: Date | null): this | string {
+	expiration(date: Date | null): this {
 		if (date === null) {
 			delete this[passProps]["expirationDate"];
 			return this;
@@ -298,7 +285,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	relevantDate(date: Date | null): this | string {
+	relevantDate(date: Date | null): this {
 		if (date === null) {
 			delete this[passProps]["relevantDate"];
 			return this;
@@ -314,11 +301,13 @@ export class Pass implements PassIndexSignature {
 	}
 
 	/**
-	 * Adds barcodes to "barcode" and "barcodes" properties.
-	 * It will let to add the missing versions later.
+	 * Adds barcodes "barcodes" property.
+	 * It allows to pass a string to autogenerate all the structures.
 	 *
 	 * @method barcode
-	 * @params data - the data to be added
+	 * @params first - a structure or the string (message) that will generate
+	 * 		all the barcodes
+	 * @params data - other barcodes support
 	 * @return {this} Improved this with length property and other methods
 	 */
 
@@ -412,7 +401,7 @@ export class Pass implements PassIndexSignature {
 		}
 
 		if (!(barcodes && barcodes.length)) {
-			barcodeDebug(formatMessage("BRC_NO_POOL"))
+			barcodeDebug(formatMessage("BRC_NO_POOL"));
 			return this;
 		}
 
@@ -434,9 +423,10 @@ export class Pass implements PassIndexSignature {
 	 * @method nfc
 	 * @params data - the data to be pushed in the pass
 	 * @returns {this}
+	 * @see https://apple.co/2wTxiaC
 	 */
 
-	nfc(data: schema.NFC | null): this | schema.NFC {
+	nfc(data: schema.NFC | null): this {
 		if (data === null) {
 			delete this[passProps]["nfc"];
 			return this;
@@ -452,8 +442,16 @@ export class Pass implements PassIndexSignature {
 		return this;
 	}
 
-	get props(): schema.ValidPass {
-		return deepCopy(this[passProps]);
+	/**
+	 * Allows to get the current inserted props;
+	 * will return all props from valid overrides,
+	 * template's pass.json and methods-inserted ones;
+	 *
+	 * @returns The properties will be inserted in the pass.
+	 */
+
+	get props(): Readonly<schema.ValidPass> {
+		return this[passProps];
 	}
 
 	/**

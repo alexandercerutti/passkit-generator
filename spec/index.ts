@@ -1,19 +1,15 @@
 import { createPass } from "..";
-import { Pass, PassWithBarcodeMethods } from "../src/pass";
 
-/*
- * Yes, I know that I'm checking against "private" properties
- * and that I shouldn't do that, but there's no other way to check
- * the final results for each test. The only possible way is to
- * read the generated stream of the zip file, unzip it
- * (hopefully in memory) and check each property in pass.json file
- * and .lproj directories. I hope who is reading this, will understand.
- *
+// This is used to extract the type of a Promise (like Promise<Pass> => Pass)
+// found here: https://medium.com/@curtistatewilkinson/this-can-be-done-using-conditional-types-like-so-633cf9787c8b
+type Unpacked<T> = T extends Promise<infer U> ? U : T;
+
+/**
  * Tests created upon Jasmine testing suite.
  */
 
 describe("Node-Passkit-generator", function () {
-	let pass: Pass;
+	let pass: Unpacked<ReturnType<typeof createPass>>;
 	beforeEach(async () => {
 		pass = await createPass({
 			model: "examples/models/examplePass.pass",
@@ -185,6 +181,7 @@ describe("Node-Passkit-generator", function () {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
+			// @ts-ignore - Ignoring for test purposes
 			pass.barcodes();
 			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});

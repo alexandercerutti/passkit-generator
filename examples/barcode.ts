@@ -10,7 +10,6 @@
 
 import app from "./webserver";
 import { createPass } from "..";
-import { PassWithBarcodeMethods } from "../src/pass";
 
 app.all(async function manageRequest(request, response) {
 	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");

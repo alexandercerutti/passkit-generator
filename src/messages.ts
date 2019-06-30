@@ -25,6 +25,7 @@ const debugMessages: MessageGroup = {
 	BRC_FORMATTYPE_UNMATCH: "Format must be a string or null. Cannot set backward compatibility.",
 	BRC_AUTC_MISSING_DATA: "Unable to autogenerate barcodes. Data is not a string.",
 	BRC_BW_FORMAT_UNSUPPORTED: "This format is not supported (by Apple) for backward support. Please choose another one.",
+	BRC_NO_POOL: "Cannot set barcode: no barcodes found. Please set barcodes first. Barcode is for retrocompatibility only.",
 	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format."
 };
 

@@ -415,6 +415,11 @@ export class Pass implements PassIndexSignature {
 			return this;
 		}
 
+		if (!(barcodes && barcodes.length)) {
+			barcodeDebug(formatMessage("BRC_NO_POOL"))
+			return this;
+		}
+
 		// Checking which object among barcodes has the same format of the specified one.
 		const index = barcodes.findIndex(b => b.format.toLowerCase().includes(chosenFormat.toLowerCase()));
 

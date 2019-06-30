@@ -67,33 +67,28 @@ describe("Node-Passkit-generator", function () {
 		it("Missing first argument or not a string won't apply changes", () => {
 			// @ts-ignore -- Ignoring for test purposes
 			pass.expiration();
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["expirationDate"]).toBe(undefined);
+			expect(pass.props["expirationDate"]).toBe(undefined);
 			// @ts-ignore -- Ignoring for test purposes
 			pass.expiration(42);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["expirationDate"]).toBe(undefined);
+			expect(pass.props["expirationDate"]).toBe(undefined);
 		});
 
 		it("A date as a Date object will apply changes", () => {
 			pass.expiration(new Date(2020,5,1,0,0,0));
 			// this is made to avoid problems with winter and summer time:
 			// we focus only on the date and time for the tests.
-			// @ts-ignore -- Ignoring for test purposes
-			let noTimeZoneDateTime = pass._props["expirationDate"].split("+")[0];
+			let noTimeZoneDateTime = pass.props["expirationDate"].split("+")[0];
 			expect(noTimeZoneDateTime).toBe("2020-06-01T00:00:00");
 		});
 
 		it("An invalid date, will not apply changes", () => {
 			// @ts-ignore -- Ignoring for test purposes
 			pass.expiration("32/18/228317");
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["expirationDate"]).toBe(undefined);
+			expect(pass.props["expirationDate"]).toBe(undefined);
 
 			// @ts-ignore -- Ignoring for test purposes
 			pass.expiration("32/18/228317");
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["expirationDate"]).toBe(undefined);
+			expect(pass.props["expirationDate"]).toBe(undefined);
 		});
 	});
 
@@ -103,28 +98,32 @@ describe("Node-Passkit-generator", function () {
 				pass.relevantDate(new Date("10-04-2021"));
 				// this is made to avoid problems with winter and summer time:
 				// we focus only on the date and time for the tests.
-				// @ts-ignore -- Ignoring for test purposes
-				let noTimeZoneDateTime = pass._props["relevantDate"].split("+")[0];
+				let noTimeZoneDateTime = pass.props["relevantDate"].split("+")[0];
 				expect(noTimeZoneDateTime).toBe("2021-10-04T00:00:00");
 			});
 		});
 
 		describe("locations :: ", () => {
 			it("One-Invalid-schema location won't apply changes", () => {
-				const oldAmountOfLocations = pass.locations().length;
+				const props = pass.props["locations"] || [];
+				const oldAmountOfLocations = props && props.length || 0;
 
 				pass.locations({
 					// @ts-ignore
 					"ibrupofene": "no",
 					"longitude": 0.00000000
-				});
+				}, ...props);
 
-				// @ts-ignore -- Ignoring for test purposes
-				expect(pass.locations().length).toBe(oldAmountOfLocations);
+				if (oldAmountOfLocations) {
+					expect(pass.props["locations"].length).toBe(oldAmountOfLocations);
+				} else {
+					expect(pass.props["locations"]).toBe(undefined);
+				}
 			});
 
 			it("Two locations, with one invalid, will be filtered", () => {
-				const oldAmountOfLocations = pass.locations().length;
+				const props = pass.props["locations"] || [];
+				const oldAmountOfLocations = props && props.length || 0;
 
 				pass.locations({
 					//@ts-ignore
@@ -133,16 +132,16 @@ describe("Node-Passkit-generator", function () {
 				}, {
 					"longitude": 4.42634523,
 					"latitude": 5.344233323352
-				});
+				}, ...(pass.props["locations"] || []));
 
-				// @ts-ignore -- Ignoring for test purposes
-				expect(pass.locations().length).toBe(oldAmountOfLocations+1);
+				expect(pass.props["locations"].length).toBe((oldAmountOfLocations || 0) + 1);
 			});
 		});
 
 		describe("Beacons :: ", () => {
 			it("One-Invalid-schema beacon data won't apply changes", () => {
-				const oldBeacons = pass.beacons();
+				const props = pass.props["beacons"] || [];
+				const oldAmountOfBeacons = props && props.length || 0;
 
 				pass.beacons({
 					// @ts-ignore
@@ -150,14 +149,18 @@ describe("Node-Passkit-generator", function () {
 					"major": 55,
 					"minor": 0,
 					"proximityUUID": "2707c5f4-deb9-48ff-b760-671bc885b6a7"
-				});
+				}, ...props);
 
-				// @ts-ignore -- Ignoring for test purposes
-				expect(pass.beacons()).toBe(oldBeacons ? oldBeacons.length : undefined);
+				if (oldAmountOfBeacons) {
+					expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons);
+				} else {
+					expect(pass.props["beacons"]).toBe(undefined);
+				}
 			});
 
-			it("Two beacons sets, with one invalid, will be filtered", () => {
-				const oldBeacons = pass.beacons();
+			it("Two beacons sets, with one invalid, will be filtered out", () => {
+				const props = pass.props["beacons"] || [];
+				const oldAmountOfBeacons = props && props.length || 0;
 
 				pass.beacons({
 					"major": 55,
@@ -169,149 +172,130 @@ describe("Node-Passkit-generator", function () {
 					"proximityUUID": "fdcbbf48-a4ae-4ffb-9200-f8a373c5c18e",
 					// @ts-ignore
 					"animal": "Monkey"
-				});
+				}, ...props);
 
-				// @ts-ignore -- Ignoring for test purposes
-				expect(pass.beacons().length).toBe(oldBeacons ? oldBeacons.length+1 : 1);
+
+				expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons + 1);
 			});
 		});
 	});
 
-	describe("barcode()", () => {
-		it("Missing data will return the current data", () => {
-			const oldAmountOfBarcodes = pass.barcode().length;
+	describe("barcodes()", () => {
+		it("Missing data will left situation unchanged", () => {
+			const props = pass.props["barcodes"] || [];
+			const oldAmountOfBarcodes = props && props.length || 0;
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
+			pass.barcodes();
+			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("Boolean parameter won't apply changes", () => {
-			const oldAmountOfBarcodes = pass.barcode().length;
+			const props = pass.props["barcodes"] || [];
+			const oldAmountOfBarcodes = props && props.length || 0;
 
 			// @ts-ignore -- Ignoring for test purposes
 			pass.barcode(true);
-
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
+			expect(props.length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("Numeric parameter won't apply changes", () => {
-			const oldAmountOfBarcodes = pass.barcode().length;
+			const props = pass.props["barcodes"] || [];
+			const oldAmountOfBarcodes = props && props.length || 0;
 
 			// @ts-ignore -- Ignoring for test purposes
-			pass.barcode(42);
-
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
+			pass.barcodes(42);
+			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("String parameter will autogenerate all the objects", () => {
-			pass.barcode("28363516282");
-
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"] instanceof Object).toBe(true);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"].message).toBe("28363516282");
-			expect(pass.barcode().length).toBe(4);
+			pass.barcodes("28363516282");
+			expect(pass.props["barcodes"].length).toBe(4);
 		});
 
 		it("Object parameter will be accepted", () => {
-			pass.barcode({
+			pass.barcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
 				messageEncoding: "utf8"
 			});
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"] instanceof Object).toBe(true);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatPDF417");
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass.barcode().length).toBe(1);
+			expect(pass.props["barcodes"].length).toBe(1);
 		});
 
 		it("Array parameter will apply changes", () => {
-			pass.barcode({
+			pass.barcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
 				messageEncoding: "utf8"
 			});
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"] instanceof Object).toBe(true);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatPDF417");
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"].length).toBe(1);
+			expect(pass.props["barcodes"].length).toBe(1);
 		});
 
 		it("Missing messageEncoding gets automatically added.", () => {
-			pass.barcode({
+			pass.barcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
 			});
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"] instanceof Object).toBe(true);
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"].messageEncoding).toBe("iso-8859-1");
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcodes"][0].messageEncoding).toBe("iso-8859-1");
+			expect(pass.props["barcodes"][0].messageEncoding).toBe("iso-8859-1");
 		});
 
-		it("Object without message property, will be filtered out", () => {
-			const oldAmountOfBarcodes = pass.barcode().length;
+		it("Object without message property, will be ignored", () => {
+			const props = pass.props["barcodes"] || [];
+			const oldAmountOfBarcodes = props && props.length || 0;
 
 			// @ts-ignore -- Ignoring for test purposes
-			pass.barcode({
+			pass.barcodes({
 				format: "PKBarcodeFormatPDF417",
 			});
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass.barcode().length).toBe(oldAmountOfBarcodes);
+			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
 
 		it("Array containing non-object elements will be rejected", () => {
-			const oldAmountOfBarcodes = pass.barcode().length;
 			// @ts-ignore -- Ignoring for test purposes
-			pass.barcode(5, 10, 15, {
+			pass.barcodes(5, 10, 15, {
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417"
 			}, 7, 1);
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass.barcode().length).toBe(1)
+			expect(pass.props["barcodes"].length).toBe(1)
 		});
 	});
 
-	describe("barcode().backward()", () => {
+	describe("barcode retrocompatibility", () => {
 		it("Passing argument of type different from string or null, won't apply changes", function () {
+			const oldBarcode = pass.props["barcode"] || undefined;
+
 			pass
-				.barcode("Message-22645272183")
+				.barcodes("Message-22645272183")
 				// @ts-ignore -- Ignoring for test purposes
-				.backward(5);
+				.barcode(55)
 
 			// unchanged
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatQR");
+			expect(pass.props["barcode"]).toEqual(oldBarcode);
 		});
 
 		it("Null will delete backward support", () => {
-			(pass.barcode("Message-22645272183") as PassWithBarcodeMethods)
-				.backward(null);
+			pass.barcodes("Message-22645272183")
+				.barcode("PKBarcodeFormatAztec");
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"]).toBe(undefined);
+			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatAztec");
+
+			pass.barcode(null);
+			expect(pass.props["barcode"]).toBe(undefined);
 		});
 
 		it("Unknown format won't apply changes", () => {
-			pass
-				.barcode("Message-22645272183")
-				// @ts-ignore -- Ignoring for test purposes
-				.backward("PKBingoBongoFormat");
+			const oldBarcode = pass.props["barcode"] || undefined;
 
-			// @ts-ignore -- Ignoring for test purposes
-			expect(pass._props["barcode"].format).toBe("PKBarcodeFormatQR");
+			pass
+				.barcodes("Message-22645272183")
+				// @ts-ignore -- Ignoring for test purposes
+				.barcode("PKBingoBongoFormat");
+
+			expect(pass.props["barcode"]).toEqual(oldBarcode);
 		});
 	});
 });

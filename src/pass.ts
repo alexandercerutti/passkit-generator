@@ -75,10 +75,10 @@ export class Pass implements PassIndexSignature {
 		this[passProps] = {
 			...(
 				[
-			"barcodes", "barcode",
-			"expirationDate", "voided",
-			"beacons", "locations",
-			"relevantDate", "nfc"
+					"barcodes", "barcode",
+					"expirationDate", "voided",
+					"beacons", "locations",
+					"relevantDate", "nfc"
 				].reduce<schema.ValidPass>((acc, current) =>
 					!this.passCore.hasOwnProperty(current) && acc ||
 					({ ...acc, [current]: this.passCore[current] || undefined })
@@ -207,7 +207,7 @@ export class Pass implements PassIndexSignature {
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 
-	localize(lang?: string, translations?: { [key: string]: string }): this {
+	localize(lang: string, translations?: { [key: string]: string }): this {
 		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
 			this.l10nTranslations[lang] = translations || {};
 		}
@@ -223,7 +223,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	expiration(date?: Date): this | string {
+	expiration(date: Date | null): this | string {
 		if (date === null) {
 			delete this[passProps]["expirationDate"];
 			return this;
@@ -277,7 +277,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	locations(...data: schema.Location[]): this {
+	locations(...data: schema.Location[] | null): this {
 		if (data === null) {
 			delete this[passProps]["locations"];
 			return this;
@@ -298,7 +298,7 @@ export class Pass implements PassIndexSignature {
 	 * @returns {Pass}
 	 */
 
-	relevantDate(date?: Date): this | string {
+	relevantDate(date: Date | null): this | string {
 		if (date === null) {
 			delete this[passProps]["relevantDate"];
 			return this;
@@ -322,7 +322,7 @@ export class Pass implements PassIndexSignature {
 	 * @return {this} Improved this with length property and other methods
 	 */
 
-	barcodes(first?: string | schema.Barcode, ...data: schema.Barcode[]): this {
+	barcodes(first: null | string | schema.Barcode, ...data: schema.Barcode[]): this {
 		if (first === null) {
 			delete this[passProps]["barcodes"];
 			return this;
@@ -436,9 +436,10 @@ export class Pass implements PassIndexSignature {
 	 * @returns {this}
 	 */
 
-	nfc(data?: schema.NFC): this | schema.NFC {
-		if (data === undefined) {
-			return this[passProps]["nfc"];
+	nfc(data: schema.NFC | null): this | schema.NFC {
+		if (data === null) {
+			delete this[passProps]["nfc"];
+			return this;
 		}
 
 		if (!(typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {

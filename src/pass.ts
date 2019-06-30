@@ -72,29 +72,25 @@ export class Pass implements PassIndexSignature {
 			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
 		}
 
-		this._props = [
+		this[passProps] = {
+			...(
+				[
 			"barcodes", "barcode",
 			"expirationDate", "voided",
 			"beacons", "locations",
 			"relevantDate", "nfc"
-		].reduce<schema.ValidPass>((acc, current) => {
-			if (!this.passCore[current]) {
-				return acc;
-			}
-
-			acc[current] = this.passCore[current];
-			return acc;
-		}, {});
-
-		if (Object.keys(validOverrides).length) {
-			this._props = { ...this._props, ...validOverrides };
-		}
+				].reduce<schema.ValidPass>((acc, current) =>
+					!this.passCore.hasOwnProperty(current) && acc ||
+					({ ...acc, [current]: this.passCore[current] || undefined })
+				, {})
+			),
+			...(validOverrides || {})
+		};
 
 		this.type = Object.keys(this.passCore)
 			.find(key => /(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key)) as keyof schema.ValidPassType;
 
 		if (!this.type) {
-			// @TODO: change error message to say it is invalid or missing
 			throw new Error(formatMessage("NO_PASS_TYPE"));
 		}
 

@@ -60,7 +60,6 @@ export class Pass implements PassIndexSignature {
 		this.bundle = { ...options.model.bundle };
 
 		try {
-			// getting pass.json
 			this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
 		} catch (err) {
 			throw new Error(formatMessage("PASSFILE_VALIDATION_FAILED"));
@@ -274,7 +273,7 @@ export class Pass implements PassIndexSignature {
 		}
 
 		return this;
-		}
+	}
 
 	/**
 	 * Sets current pass' relevancy through locations
@@ -295,7 +294,7 @@ export class Pass implements PassIndexSignature {
 		}
 
 		return this;
-		}
+	}
 
 	/**
 	 * Sets current pass' relevancy through a date
@@ -449,6 +448,10 @@ export class Pass implements PassIndexSignature {
 		this[passProps]["nfc"] = data;
 
 		return this;
+	}
+
+	get props(): schema.ValidPass {
+		return deepCopy(this[passProps]);
 	}
 
 	/**

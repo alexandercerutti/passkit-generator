@@ -539,7 +539,7 @@ export class Pass {
 				.filter(v => this[passProps][v] && !isValidRGB(this[passProps][v]))
 				.forEach(v => delete this[passProps][v]);
 
-			passFile = { ...passFile, ...this[passProps] };
+			Object.assign(passFile, this[passProps]);
 		}
 
 		this._fields.forEach(field => {

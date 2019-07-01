@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from "@hapi/joi";
 import debug from "debug";
 
 const schemaDebug = debug("Schema");

@@ -5,7 +5,7 @@ export function createPass(options: Schema.FactoryOptions): Promise<Pass>;
 export declare class Pass {
 	constructor(options: Schema.PassInstance);
 
-	public transitType: "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";
+	public transitType: Schema.TransitType;
 	public headerFields: Schema.Field[];
 	public primaryFields: Schema.Field[];
 	public secondaryFields: Schema.Field[];
@@ -32,7 +32,7 @@ export declare class Pass {
 	 *
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
-	localize(lang: string, translations: Object): this;
+	localize(lang: string, translations?: { [key: string]: string }): this;
 
 	/**
 	 * Sets expirationDate property to a W3C-formatted date
@@ -41,7 +41,7 @@ export declare class Pass {
 	 * @params date
 	 * @returns {this}
 	 */
-	expiration(date: Date): this;
+	expiration(date: Date | null): this;
 
 	/**
 	 * Sets voided property to true
@@ -54,49 +54,65 @@ export declare class Pass {
 	/**
 	 * Sets current pass' relevancy through beacons
 	 * @param data
-	 * @returns Pass instance with `length` property to check the
-	 * 	valid structures added
+	 * @returns {Pass}
 	 */
-	beacons(...data: Schema.Beacon[]): PassWithLengthField;
+	beacons(...data: Schema.Beacon[] | null): this;
 
 	/**
 	 * Sets current pass' relevancy through locations
 	 * @param data
-	 * @returns Pass instance with `length` property to check the
-	 * 	valid structures added
+	 * @returns {Pass}
 	 */
-	locations(...data: Schema.Location[]): PassWithLengthField;
+	locations(...data: Schema.Location[] | null): this;
 
 	/**
 	 * Sets current pass' relevancy through a date
 	 * @param data
 	 * @returns {Pass}
 	 */
-	relevantDate(date: Date): this;
+	relevantDate(date: Date | null): this;
 
 	/**
-	 * Adds barcode to the pass. If data is an Object, will be treated as one-element array.
-	 * @param first - data to be used to generate a barcode. If string, Barcode will contain structures for all the supported types.
-	 * @param data - the other Barcode structures to be used
-	 * @see https://apple.co/2C74kbm
+	 * Adds barcodes "barcodes" property.
+	 * It allows to pass a string to autogenerate all the structures.
+	 *
+	 * @method barcode
+	 * @params first - a structure or the string (message) that will generate
+	 * 		all the barcodes
+	 * @params data - other barcodes support
+	 * @return {this} Improved this with length property and other methods
 	 */
-	barcode(first: string | Schema.Barcode, ...data: Schema.Barcode[]): PassWithBarcodeMethods;
+	barcodes(first: null | string | Schema.Barcode, ...data: Schema.Barcode[]): this;
 
 	/**
-	 * Sets nfc infos for the pass
-	 * @param data - NFC data
+	 * Given an index <= the amount of already set "barcodes",
+	 * this let you choose which structure to use for retrocompatibility
+	 * property "barcode".
+	 *
+	 * @method barcode
+	 * @params format - the format to be used
+	 * @return {this}
+	 */
+	barcode(chosenFormat: Schema.BarcodeFormat | null): this;
+
+	/**
+	 * Sets nfc fields in properties
+	 *
+	 * @method nfc
+	 * @params data - the data to be pushed in the pass
+	 * @returns {this}
 	 * @see https://apple.co/2wTxiaC
 	 */
-	nfc(data: Schema.NFC): this;
-}
+	nfc(data: Schema.NFC | null): this;
 
-declare interface PassWithLengthField extends Pass {
-	length: number;
-}
-
-declare interface PassWithBarcodeMethods extends PassWithLengthField {
-	backward: (format: Schema.BarcodeFormat | null) => Pass;
-	autocomplete: () => Pass;
+	/**
+	 * Allows to get the current inserted props;
+	 * will return all props from valid overrides,
+	 * template's pass.json and methods-inserted ones;
+	 *
+	 * @returns The properties will be inserted in the pass.
+	 */
+	readonly props: Readonly<Schema.ValidPass>;
 }
 
 declare namespace Schema {
@@ -105,8 +121,8 @@ declare namespace Schema {
 	type DateTimeStyle = "PKDateStyleNone" | "PKDateStyleShort" | "PKDateStyleMedium" | "PKDateStyleLong" | "PKDateStyleFull";
 	type NumberStyle = "PKNumberStyleDecimal" | "PKNumberStylePercent" | "PKNumberStyleScientific" | "PKNumberStyleSpellOut";
 	type BarcodeFormat = "PKBarcodeFormatQR" | "PKBarcodeFormatPDF417" | "PKBarcodeFormatAztec" | "PKBarcodeFormatCode128";
-	type RelevanceType = "beacons" | "locations" | "maxDistance" | "relevantDate";
 	type SemanticsEventType = "PKEventTypeGeneric" | "PKEventTypeLivePerformance" | "PKEventTypeMovie" | "PKEventTypeSports" | "PKEventTypeConference" | "PKEventTypeConvention" | "PKEventTypeWorkshop" | "PKEventTypeSocialGathering";
+	type TransitType = "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";
 
 	interface Certificates {
 		wwdr?: string;
@@ -176,6 +192,34 @@ declare namespace Schema {
 		currencyCode?: string;
 		numberStyle?: NumberStyle;
 		semantics?: Semantics;
+	}
+
+	interface PassFields {
+		auxiliaryFields: Field[];
+		backFields: Field[];
+		headerFields: Field[];
+		primaryFields: Field[];
+		secondaryFields: Field[];
+	}
+
+	interface ValidPassType {
+		boardingPass?: PassFields & { transitType: TransitType };
+		eventTicket?: PassFields;
+		coupon?: PassFields;
+		generic?: PassFields;
+		storeCard?: PassFields;
+	}
+
+	interface ValidPass extends OverridesSupportedOptions, ValidPassType {
+		barcode?: Barcode;
+		barcodes?: Barcode[];
+		beacons?: Beacon[];
+		locations?: Location[];
+		maxDistance?: number;
+		relevantDate?: string;
+		nfc?: NFC;
+		expirationDate?: string;
+		voided?: boolean;
 	}
 
 	interface Beacon {

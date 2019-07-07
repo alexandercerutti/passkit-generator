@@ -26,12 +26,12 @@ class FieldsArray extends Array {
 				return acc;
 			}
 
-			if (acc.some(e => e.key === current.key) || this[poolSymbol].has(current.key)) {
-				debug(`Field with key "${key}" discarded: fields must be unique in pass scope.`);
-			} 
-
-			this[poolSymbol].add(current.key)
-			acc.push(current)
+			if (this[poolSymbol].has(current.key)) {
+				debug(`Field with key "${current.key}" discarded: fields must be unique in pass scope.`);
+			} else {
+				this[poolSymbol].add(current.key);
+				acc.push(current);
+			}
 
 			return acc;
 		}, []);

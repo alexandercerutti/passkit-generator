@@ -25,6 +25,16 @@ This package comes with an [API documentation](./API.md), that makes available a
 
 > ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
 
+<hr>
+
+> ⚠⚠ Please notice this is a beta. It is not yet available publicly on NPM. Therefore you'll have to build through **typescript** it before using it:
+
+<hr>
+
+```sh
+$ npm run build
+```
+
 ### Install
 ```sh
 $ npm install passkit-generator --save

@@ -42,7 +42,7 @@ ___
 	* Setting relevance
 		* [.beacons()](#method_beacons)
 		* [.locations()](#method_locations)
-		* [.relevantDate()][#method_revdate]
+		* [.relevantDate()](#method_revdate)
 	* Setting NFC
 		* [.nfc()](#method_nfc)
 	* Getting the current information
@@ -204,7 +204,7 @@ pass.barcodes({
 #### .barcode()
 
 ```javascript
-pass.barcode(data: string);
+pass.barcode(chosenFormat: string): this;
 ```
 
 **Returns**:
@@ -498,7 +498,7 @@ pass.primaryFields.pop();
 
 #### .transitType
 
-```javascript
+```typescript
 pass.transitType = "PKTransitTypeAir";
 ```
 
@@ -522,26 +522,21 @@ As you can see in [examples folder](/examples), to send a .pkpass file, a basic 
 
 #### .generate()
 
-```javascript
-pass.generate();
+```typescript
+pass.generate(): Stream;
 ```
 
-**Returns**: `Promise`
+**Returns**: `Stream`
 
 **Description**:
 
-The returned Promise will contain a stream or an error.
+Creates a pass zip as Stream.
 
 **Examples**:
 
-```javascript
-pass.generate()
-	.then(stream => {
-		doSomethingWithPassStream();
-	})
-	.catch(error => {
-		doSomethingWithThrownError();
-	});
+```typescript
+const passStream = pass.generate();
+doSomethingWithPassStream(stream);
 ```
 ___
 

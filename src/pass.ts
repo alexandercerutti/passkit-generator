@@ -18,6 +18,14 @@ const genericDebug = debug("passkit:generic");
 const transitType = Symbol("transitType");
 const passProps = Symbol("_props");
 
+const propsSchemaMap = new Map([
+	["barcodes", "barcode"],
+	["barcode", "barcode"],
+	["beacons", "beaconsDict"],
+	["locations", "locationsDict"],
+	["nfc", "nfcDict"]
+]);
+
 export class Pass {
 	private bundle: schema.BundleUnit;
 	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
@@ -59,27 +67,48 @@ export class Pass {
 			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
 		}
 
-		this[passProps] = {
-			...(
-				[
-					"barcodes", "barcode",
-					"expirationDate", "voided",
-					"beacons", "locations",
-					"relevantDate", "nfc"
-				].reduce<schema.ValidPass>((acc, current) =>
-					!this.passCore.hasOwnProperty(current) && acc ||
-					({ ...acc, [current]: this.passCore[current] || undefined })
-				, {})
-			),
-			...(validOverrides || {})
-		};
-
 		this.type = Object.keys(this.passCore)
 			.find(key => /(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key)) as keyof schema.ValidPassType;
 
 		if (!this.type) {
 			throw new Error(formatMessage("NO_PASS_TYPE"));
 		}
+
+		// Parsing and validating pass.json keys
+		const validatedPassKeys = Object.keys(this.passCore).reduce((acc, current) => {
+			if (this.type === current) {
+				// We want to exclude type keys (eventTicket,
+				// boardingPass, ecc.) and their content
+				return acc;
+			}
+
+			if (!propsSchemaMap.has(current)) {
+				// If the property is unknown (we don't care if
+				// it is valid or not for Wallet), we return
+				// directly the content
+				return { ...acc, [current]: this.passCore[current] };
+			}
+
+			const currentSchema = propsSchemaMap.get(current);
+
+			if (Array.isArray(this.passCore[current])) {
+				const valid = getValidInArray(currentSchema, this.passCore[current]);
+				return { ...acc, [current]: valid };
+			} else {
+				return {
+					...acc,
+					[current]: schema.isValid(
+						this.passCore[current],
+						currentSchema
+					) && this.passCore[current] || undefined
+				};
+			}
+		}, {});
+
+		this[passProps] = {
+			...(validatedPassKeys || {}),
+			...(validOverrides || {})
+		};
 
 		if (this.type === "boardingPass" && this.passCore[this.type]["transitType"]) {
 			// We might want to generate a boarding pass without setting manually
@@ -592,13 +621,11 @@ function barcodesFromUncompleteData(message: string): schema.Barcode[] {
 }
 
 function processRelevancySet<T>(key: string, data: T[]): T[] {
-	return data.reduce<T[]>((acc, current) => {
-		if (!(Object.keys(current).length && schema.isValid(current, `${key}Dict`))) {
-			return acc;
-		}
+	return getValidInArray(`${key}Dict`, data);
+}
 
-		return [...acc, current];
-	}, []);
+function getValidInArray<T>(schemaName: string, contents: T[]): T[] {
+	return contents.filter(current => Object.keys(current).length && schema.isValid(current, schemaName));
 }
 
 function processDate(key: string, date: Date): string | null {

@@ -60,7 +60,7 @@ ___
 #### constructor()
 
 ```typescript
-const pass = await createPass({ ... });
+const pass = await createPass({ ... }, Buffer.from([ ... ]));
 ```
 
 **Returns**:
@@ -71,15 +71,16 @@ const pass = await createPass({ ... });
 
 | Key | Type | Description | Optional | Default Value |
 |-----|------|---------------|:-------------:|:-----------:|
-| options | Object | The options to create the pass | false | -
-| options.model | String/Path/Buffer Object | The model path or a Buffer Object with path as key and Buffer as content | false | -
-| options.certificates | Object | The certificate object containing the paths to certs files. | false | -
-| options.certificates.wwdr | String/Path | The path to Apple WWDR certificate or its content. | false | -
-| options.certificates.signerCert | String/Path | The path to Developer certificate file or its content. | false | -
-| options.certificates.signerKey | Object/String | The object containing developer certificate's key and passphrase. If string, it can be the path to the key file or its content. If object, must have `keyFile` key and might need `passphrase`. | false | -
-| options.certificates.signerKey.keyFile | String/Path | The path to developer certificate key or its content. | false | -
-| options.certificates.signerKey.passphrase | String \| Number | The passphrase to use to unlock the key. | false | -
-| options.overrides | Object | Dictionary containing all the keys you can override in the pass.json file and does not have a method to get overridden. | true | { }
+| options | Object | The options to create the pass | `false` | -
+| options.model | String \| Path \| Buffer Object | The model path or a Buffer Object with path as key and Buffer as content | `false` | -
+| options.certificates | Object | The certificate object containing the paths to certs files. | `false` | -
+| options.certificates.wwdr | String \| Path | The path to Apple WWDR certificate or its content. | `false` | -
+| options.certificates.signerCert | String \| Path | The path to Developer certificate file or its content. | `false` | -
+| options.certificates.signerKey | Object/String | The object containing developer certificate's key and passphrase. If string, it can be the path to the key file or its content. If object, must have `keyFile` key and might need `passphrase`. | `false` | -
+| options.certificates.signerKey.keyFile | String \| Path | The path to developer certificate key or its content. | `false` | -
+| options.certificates.signerKey.passphrase | String \| Number | The passphrase to use to unlock the key. | `false` | -
+| options.overrides | Object | Dictionary containing all the keys you can override in the pass.json file and does not have a method to get overridden. | `true` | `{ }`
+| additionalBuffers | Buffer Object | Dictionary with path as key and Buffer as a content. Each will represent a file to be added to the final model. These will have priority on model ones | `true` | `{ }`
 
 <br><br>
 <a name="localizing_passes"></a>

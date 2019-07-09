@@ -1,5 +1,6 @@
 import moment from "moment";
 import { EOL } from "os";
+import { BundleUnit } from "./schema";
 
 /**
  * Checks if an rgb value is compliant with CSS-like syntax
@@ -79,4 +80,19 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
 		.map(key => `"${key}" = "${lang[key].replace(/"/g, '\"')}";`);
 
 	return Buffer.from(strings.join(EOL), "utf8");
+}
+
+/**
+ * Applies a partition to split one bundle
+ * to two
+ * @param origin
+ */
+
+export function splitBundle(origin: Object): [BundleUnit, BundleUnit] {
+	const keys = Object.keys(origin);
+	return keys.reduce(([ l10n, bundle ], current) =>
+		current.includes(".lproj") &&
+		[ { ...l10n, [current]: origin[current] }, bundle] ||
+		[ l10n, {...bundle, [current]: origin[current] }]
+	, [{},{}]);
 }

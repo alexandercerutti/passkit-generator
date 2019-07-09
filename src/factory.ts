@@ -2,10 +2,11 @@ import { Pass } from "./pass";
 import { FactoryOptions, BundleUnit } from "./schema";
 import formatMessage from "./messages";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
+import { splitBundle } from "./utils";
 
 export type Pass = InstanceType<typeof Pass>
 
-export async function createPass(options: FactoryOptions, additionalBuffers: BundleUnit): Promise<Pass> {
+export async function createPass(options: FactoryOptions, additionalBuffers?: BundleUnit): Promise<Pass> {
 	if (!(options && Object.keys(options).length)) {
 		throw new Error(formatMessage("CP_NO_OPTS"));
 	}
@@ -28,21 +29,6 @@ export async function createPass(options: FactoryOptions, additionalBuffers: Bun
 			overrides: options.overrides
 		});
 	} catch (err) {
-		throw new Error(formatMessage("CP_INIT_ERROR"));
+		throw new Error(formatMessage("CP_INIT_ERROR", err));
 	}
-}
-
-/**
- * Applies a partition to split one bundle
- * to two
- * @param origin
- */
-
-function splitBundle(origin: Object): [BundleUnit, BundleUnit] {
-	const keys = Object.keys(origin);
-	return keys.reduce(([ l10n, bundle ], current) =>
-		current.includes(".lproj") &&
-		[ { ...l10n, [current]: origin[current] }, bundle] ||
-		[ l10n, {...bundle, [current]: origin[current] }]
-	, [{},{}]);
 }

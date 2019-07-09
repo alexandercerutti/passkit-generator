@@ -3,7 +3,7 @@ interface MessageGroup {
 }
 
 const errors: MessageGroup = {
-	CP_INIT_ERROR: "Something went really bad in the initialization, dude! Please look at the log above this message. It should contain all the infos about the problem.",
+	CP_INIT_ERROR: "Something went really bad in the initialization, dude! Please look at the log below this message. It should contain all the infos about the problem: \n%s",
 	CP_NO_OPTS: "Cannot initialize the pass creation: no options were passed.",
 	CP_NO_CERTS: "Cannot initialize the pass creation: no valid certificates were passed.",
 	PASSFILE_VALIDATION_FAILED: "Validation of pass type failed. Pass file is not a valid buffer or (more probably) does not respect the schema.\nRefer to https://apple.co/2Nvshvn to build a correct pass.",

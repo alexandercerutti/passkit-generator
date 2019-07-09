@@ -28,7 +28,6 @@ export async function createPass(options: FactoryOptions, additionalBuffers: Bun
 			overrides: options.overrides
 		});
 	} catch (err) {
-		console.log(err);
 		throw new Error(formatMessage("CP_INIT_ERROR"));
 	}
 }

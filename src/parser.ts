@@ -2,7 +2,7 @@ import * as path from "path";
 import forge from "node-forge";
 import formatMessage from "./messages";
 import { FactoryOptions, PartitionedBundle, BundleUnit, Certificates, FinalCertificates, isValid } from "./schema";
-import { removeHidden } from "./utils";
+import { removeHidden, splitBufferBundle } from "./utils";
 import { promisify } from "util";
 import { readFile as _readFile, readdir as _readdir } from "fs";
 
@@ -169,19 +169,8 @@ export function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 		throw new Error(formatMessage("MODEL_UNINITIALIZED", "Buffers"))
 	}
 
-	// separing localization folders
-	const l10nFolders = bundleKeys.filter(file => file.includes(".lproj"));
-	const l10nBundle: PartitionedBundle["l10nBundle"] = Object.assign({},
-		...l10nFolders.map<BundleUnit>(folder =>
-			({ [folder]: rawBundle[folder] })
-		)
-	);
-
-	const bundle: BundleUnit = Object.assign({},
-		...bundleKeys
-			.filter(file => !file.includes(".lproj"))
-			.map(file => ({ [file]: rawBundle[file] }))
-	);
+	// separing localization folders from bundle files
+	const [ l10nBundle, bundle ] = splitBufferBundle(rawBundle);
 
 	return {
 		bundle,

@@ -48,11 +48,12 @@ export async function getModelContents(model: FactoryOptions["model"]) {
 
 export async function getModelFolderContents(model: string): Promise<PartitionedBundle> {
 	try {
-		const modelPath = path.resolve(model) + (!!model && !path.extname(model) ? ".pass" : "");
+		const modelPath = model + (!path.extname(model) && ".pass");
 		const modelFilesList = await readDir(modelPath);
 
 		// No dot-starting files, manifest and signature
-		const filteredFiles = removeHidden(modelFilesList).filter(f => !/(manifest|signature)/i.test(f));
+		const filteredFiles = removeHidden(modelFilesList)
+			.filter(f => !/(manifest|signature)/i.test(f) && /.+$/.test(path.parse(f).ext));
 
 		const isModelInitialized = (
 			filteredFiles.length &&
@@ -103,7 +104,10 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 									return acc;
 								}
 
-								return { ...acc, [file]: buffers[index] };
+								const fileComponents = file.split(path.sep);
+								const fileName = fileComponents[fileComponents.length-1];
+
+								return { ...acc, [fileName]: buffers[index] };
 							}, {})
 						);
 					});

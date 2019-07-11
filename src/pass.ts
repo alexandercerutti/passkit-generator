@@ -145,6 +145,7 @@ export class Pass {
 
 		Object.keys(this.l10nTranslations).forEach(lang => {
 			const strings = generateStringFile(this.l10nTranslations[lang]);
+			const langInBundles = `${lang}.lproj`;
 
 			if (strings.length) {
 				/**
@@ -153,17 +154,17 @@ export class Pass {
 				 * it otherwise.
 				 */
 
-				if (!this.l10nBundles[lang]) {
-					this.l10nBundles[lang] = {};
+				if (!this.l10nBundles[langInBundles]) {
+					this.l10nBundles[langInBundles] = {};
 				}
 
-				this.l10nBundles[lang]["pass.strings"] = Buffer.concat([
-					this.l10nBundles[lang]["pass.strings"] || Buffer.alloc(0),
+				this.l10nBundles[langInBundles]["pass.strings"] = Buffer.concat([
+					this.l10nBundles[langInBundles]["pass.strings"] || Buffer.alloc(0),
 					strings
 				]);
 			}
 
-			if (!(this.l10nBundles[lang] && Object.keys(this.l10nBundles[lang]).length)) {
+			if (!(this.l10nBundles[langInBundles] && Object.keys(this.l10nBundles[langInBundles]).length)) {
 				return;
 			}
 
@@ -175,10 +176,10 @@ export class Pass {
 			 * composition.
 			 */
 
-			Object.assign(finalBundle, ...Object.keys(this.l10nBundles[lang])
+			Object.assign(finalBundle, ...Object.keys(this.l10nBundles[langInBundles])
 				.map(fileName => {
-					const fullPath = path.join(`${lang}.lproj`, fileName).replace(/\\/, "/");
-					return { [fullPath]: this.l10nBundles[lang][fileName] };
+					const fullPath = path.join(langInBundles, fileName).replace(/\\/, "/");
+					return { [fullPath]: this.l10nBundles[langInBundles][fileName] };
 				})
 			);
 		});

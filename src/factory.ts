@@ -2,7 +2,7 @@ import { Pass } from "./pass";
 import { FactoryOptions, BundleUnit } from "./schema";
 import formatMessage from "./messages";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
-import { splitBundle } from "./utils";
+import { splitBufferBundle } from "./utils";
 
 export type Pass = InstanceType<typeof Pass>
 
@@ -18,7 +18,7 @@ export async function createPass(options: FactoryOptions, additionalBuffers?: Bu
 		]);
 
 		if (additionalBuffers) {
-			const [ additionalL10n, additionalBundle ] = splitBundle(additionalBuffers);
+			const [ additionalL10n, additionalBundle ] = splitBufferBundle(additionalBuffers);
 			Object.assign(bundle["l10nBundle"], additionalL10n);
 			Object.assign(bundle["bundle"], additionalBundle);
 		}

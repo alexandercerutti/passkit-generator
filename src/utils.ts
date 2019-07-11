@@ -1,6 +1,7 @@
 import moment from "moment";
 import { EOL } from "os";
-import { BundleUnit } from "./schema";
+import { PartitionedBundle } from "./schema";
+import { sep } from "path";
 
 /**
  * Checks if an rgb value is compliant with CSS-like syntax
@@ -88,11 +89,19 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
  * @param origin
  */
 
-export function splitBundle(origin: Object): [BundleUnit, BundleUnit] {
+export function splitBufferBundle(origin: Object): [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]] {
 	const keys = Object.keys(origin);
-	return keys.reduce(([ l10n, bundle ], current) =>
-		current.includes(".lproj") &&
-		[ { ...l10n, [current]: origin[current] }, bundle] ||
-		[ l10n, {...bundle, [current]: origin[current] }]
-	, [{},{}]);
+	return keys.reduce(([ l10n, bundle ], current) => {
+		if (current.includes(".lproj")) {
+			const pathComponents = current.split(sep);
+			const lang = pathComponents[0];
+			const file = pathComponents.slice(1).join("/");
+
+			(l10n[lang] || (l10n[lang] = {}))[file] = origin[current];
+
+			return [ l10n, bundle ];
+		} else {
+			return [ l10n, { ...bundle, [current]: origin[current] }];
+		}
+	}, [{},{}]);
 }

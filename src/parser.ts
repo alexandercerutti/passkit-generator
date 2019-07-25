@@ -54,7 +54,7 @@ export async function getModelContents(model: FactoryOptions["model"]) {
 
 export async function getModelFolderContents(model: string): Promise<PartitionedBundle> {
 	try {
-		const modelPath = model + (!path.extname(model) && ".pass");
+		const modelPath = `${model}${!path.extname(model) && ".pass" || ""}`;
 		const modelFilesList = await readDir(modelPath);
 
 		// No dot-starting files, manifest and signature

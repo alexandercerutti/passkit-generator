@@ -15,7 +15,7 @@ export interface Certificates {
 export interface FactoryOptions {
 	model: BundleUnit | string;
 	certificates: Certificates;
-	overrides?: Object;
+	overrides?: OverridesSupportedOptions;
 }
 
 export interface BundleUnit {

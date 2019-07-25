@@ -11,20 +11,10 @@ Some details:
 
 * Properties will be checked against schemas, which are built to reflect Apple's specifications, that can be found on Apple Developer Portal, at [PassKit Package Format Reference](https://apple.co/2MUHsm0).
 
-* Here below are listed all the available methods that library will let you use.
-
-* In case of troubleshooting, you can start your project with "debug flag" as follows:
-
-```sh
-$ DEBUG=* node index.js
-```
-
-For other OSs, see [Debug Documentation](https://www.npmjs.com/package/debug).
-
-* Keep this as always valid for the reference:
+* In case of troubleshooting, you can refer to the [Self-help](https://github.com/alexandercerutti/passkit-generator/wiki/Self-help) guide in Wiki or open an issue.
 
 ```javascript
-const { Pass } = require("passkit-generator");
+const { createPass } = require("passkit-generator");
 ```
 ___
 

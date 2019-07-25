@@ -30,7 +30,7 @@ ___
 
 ### Index:
 
-* [Instance](#method_constructor)
+* [Create a Pass](#pass_class_constructor)
 	* [Localizing Passes](#localizing_passes)
 		* [.localize()](#method_localize)
 	* Setting barcode
@@ -51,16 +51,23 @@ ___
 		* [TransitType](#prop_transitType)
 	* Generating the compiled pass.
 		* [.generate()](#method_generate)
+* [Create an Abstract Models](#abs_class_constructor)
+	* [.bundle](#getter_abmbundle)
+	* [.certificates](#getter_abmcertificates)
+	* [.overrides](#getter_abmoverrides)
 
 <br><br>
 ___
 
-<a name="method_constructor"></a>
+## Create a Pass
+___
+
+<a name="pass_class_constructor"></a>
 
 #### constructor()
 
 ```typescript
-const pass = await createPass({ ... }, Buffer.from([ ... ]));
+const pass = await createPass({ ... }, Buffer.from([ ... ], { ... }));
 ```
 
 **Returns**:
@@ -71,16 +78,19 @@ const pass = await createPass({ ... }, Buffer.from([ ... ]));
 
 | Key | Type | Description | Optional | Default Value |
 |-----|------|---------------|:-------------:|:-----------:|
-| options | Object | The options to create the pass | `false` | -
-| options.model | String \| Path \| Buffer Object | The model path or a Buffer Object with path as key and Buffer as content | `false` | -
-| options.certificates | Object | The certificate object containing the paths to certs files. | `false` | -
-| options.certificates.wwdr | String \| Path | The path to Apple WWDR certificate or its content. | `false` | -
-| options.certificates.signerCert | String \| Path | The path to Developer certificate file or its content. | `false` | -
-| options.certificates.signerKey | Object/String | The object containing developer certificate's key and passphrase. If string, it can be the path to the key file or its content. If object, must have `keyFile` key and might need `passphrase`. | `false` | -
-| options.certificates.signerKey.keyFile | String \| Path | The path to developer certificate key or its content. | `false` | -
-| options.certificates.signerKey.passphrase | String \| Number | The passphrase to use to unlock the key. | `false` | -
-| options.overrides | Object | Dictionary containing all the keys you can override in the pass.json file and does not have a method to get overridden. | `true` | `{ }`
-| additionalBuffers | Buffer Object | Dictionary with path as key and Buffer as a content. Each will represent a file to be added to the final model. These will have priority on model ones | `true` | `{ }`
+| options | Object \| [Abstract Model](#abs_class_constructor) | The options to create the pass. It can also be an instance of an [Abstract Model](#abs_class_constructor). If instance, below `options` keys are not valid (obv.) and both `abstractMissingData` and `additionalBuffers` can be used. `additionalBuffers` usage is **NOT** restricted to Abstract Models. | false | -
+| options.model | String \| Path \| Buffer Object | The model path or a Buffer Object with path as key and Buffer as content | false | -
+| options.certificates | Object | The certificate object containing the paths to certs files. | false | -
+| options.certificates.wwdr | String \| Path | The path to Apple WWDR certificate or its content. | false | -
+| options.certificates.signerCert | String \| Path | The path to Developer certificate file or its content. | false | -
+| options.certificates.signerKey | Object/String | The object containing developer certificate's key and passphrase. If string, it can be the path to the key file or its content. If object, must have `keyFile` key and might need `passphrase`. | false | -
+| options.certificates.signerKey.keyFile | String \| Path | The path to developer certificate key or its content. | false | -
+| options.certificates.signerKey.passphrase | String \| Number | The passphrase to use to unlock the key. | false | -
+| options.overrides | Object | Dictionary containing all the keys you can override in the pass.json file and does not have a method to get overridden. | true | `{ }`
+| additionalBuffers | Buffer Object | Dictionary with path as key and Buffer as a content. Each will represent a file to be added to the final model. These will have priority on model ones | true | -
+| abstractMissingData | Object | An object containing missing datas. It will be used only if `options` is an [Abstract Model](#abs_class_constructor). | true | -
+| abstractMissingData.certificates | Object | The same as `options.certificates` and its keys. | true | -
+| abstractMissingData.overrides | Object | The same as `options.overrides`. | true | -
 
 <br><br>
 <a name="localizing_passes"></a>
@@ -433,7 +443,7 @@ It sets NFC info for the current pass. Passing `null` as parameter, will remove 
 
 <a name="getter_props"></a>
 
-#### .props()
+#### [Getter] .props()
 
 ```typescript
 pass.props;
@@ -539,6 +549,76 @@ Creates a pass zip as Stream.
 const passStream = pass.generate();
 doSomethingWithPassStream(stream);
 ```
+
+<br><br>
+
+___
+
+## Create an Abstract Model
+___
+
+<a name="#abs_class_constructor"></a>
+
+#### constructor()
+
+```typescript
+const abstractModel = await createAbstractModel({ ... });
+```
+
+**Returns**:
+
+`Promise<AbstractModel>`
+
+**Description**:
+
+The purpose of this class, is to create a model to be kept in memory during the application runtime. It contains a processed version of the passed `model` (already read and splitted) and, if passed, a processed version of the `certificates`, along with the chosen overrides.
+Since `certificates` and `overrides` might differ time to time or not available at the moment of the abstract model creation, an additional attribute has been added to [`createPass`](#pass_class_constructor) function. It is an object that accepts `overrides` and raw `certificates`
+
+**Arguments**:
+
+It accepts only one argument: an `options` object, which is identical to the first parameter of [`createPass`](#pass_class_constructor). You can refer to that method to compile it correctly.
+
+<br>
+<hr>
+
+<a name="getter_abmbundle"></a>
+
+#### [Getter] .bundle()
+
+```typescript
+abstractModel.bundle
+```
+
+**Returns**:
+
+An object containing processed model.
+
+<hr>
+<a name="getter_abmcertificates"></a>
+
+#### [Getter] .certificates()
+
+```typescript
+abstractModel.certificates
+```
+
+**Returns**:
+
+An object containing processed certificates.
+
+<hr>
+<a name="getter_abmoverrides"></a>
+
+#### [Getter] .overrides()
+
+```typescript
+abstractModel.overrides
+```
+
+**Returns**:
+
+An object containing passed overrides.
+
 ___
 
 Thanks for using this library. ❤️ Every contribution is welcome.

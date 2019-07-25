@@ -13,6 +13,8 @@ Some details:
 
 * In case of troubleshooting, you can refer to the [Self-help](https://github.com/alexandercerutti/passkit-generator/wiki/Self-help) guide in Wiki or open an issue.
 
+* Keep this as always valid for the reference:
+
 ```javascript
 const { createPass } = require("passkit-generator");
 ```

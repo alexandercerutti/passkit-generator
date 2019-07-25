@@ -7,10 +7,7 @@ import { ZipFile } from "yazl";
 import * as schema from "./schema";
 import formatMessage from "./messages";
 import FieldsArray from "./fieldsArray";
-import {
-	generateStringFile,
-	dateToW3CString, isValidRGB
-} from "./utils";
+import { generateStringFile, dateToW3CString, isValidRGB } from "./utils";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
@@ -321,7 +318,7 @@ export class Pass {
 			return this;
 		}
 
-		const parsedDate = processDate("relevandDate", date);
+		const parsedDate = processDate("relevantDate", date);
 
 		if (parsedDate) {
 			this[passProps]["relevantDate"] = parsedDate;

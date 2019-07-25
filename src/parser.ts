@@ -9,6 +9,12 @@ import { readFile as _readFile, readdir as _readdir } from "fs";
 const readDir = promisify(_readdir);
 const readFile = promisify(_readFile);
 
+/**
+ * Performs checks on the passed model to
+ * determine how to parse it
+ * @param model
+ */
+
 export async function getModelContents(model: FactoryOptions["model"]) {
 	const isModelValid = (
 		model && (

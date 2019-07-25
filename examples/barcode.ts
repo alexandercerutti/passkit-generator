@@ -1,5 +1,5 @@
 /**
- * .barcode(), autocomplete and backward() methods example
+ * .barcode() and .barcodes() methods example
  * Here we set the barcode. To see all the results, you can
  * both unzip .pkpass file or check the properties before
  * generating the whole bundle

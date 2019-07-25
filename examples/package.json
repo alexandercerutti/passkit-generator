@@ -4,7 +4,11 @@
   "description": "Passkit-generator examples",
   "author": "Alexander P. Cerutti <cerutti.alexander@gmail.com>",
   "license": "ISC",
+  "scripts": {
+    "build": "cd ..; npm run build; cd examples"
+  },
   "dependencies": {
+    "@types/express": "^4.17.0",
     "express": "^4.17.1"
   }
 }

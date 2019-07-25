@@ -167,6 +167,8 @@ try {
 }
 ```
 
+For more complex usage examples, please refer to [examples](https://github.com/alexandercerutti/passkit-generator/tree/master/examples) folder.
+
 ___
 
 ## Other

@@ -420,8 +420,6 @@ pass.nfc(data: schema.NFC): this
 
 It sets NFC info for the current pass. Passing `null` as parameter, will remove its value.
 
->*Notice*: **I had the possibility to test in no way this pass feature and, therefore, the implementation. If you need it and this won't work, feel free to contact me and we will investigate together 😄**
-
 **Arguments**:
 
 | Key | Type | Description | Optional |

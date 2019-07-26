@@ -46,7 +46,6 @@ export async function getModelContents(model: FactoryOptions["model"]) {
 	);
 
 	if (!isModelInitialized) {
-		// @TODO: set a good error message
 		throw new Error(formatMessage("MODEL_UNINITIALIZED", "parse result"));
 	}
 

@@ -37,6 +37,7 @@ ___
 		* [.relevantDate()](#method_revdate)
 	* Setting NFC
 		* [.nfc()](#method_nfc)
+		* [Personalization](#personalization)
 	* Getting the current information
 		* [.props](#getter_props)
 	* [Setting Pass Structure Keys (primaryFields, secondaryFields, ...)](#prop_fields)
@@ -427,6 +428,18 @@ It sets NFC info for the current pass. Passing `null` as parameter, will remove 
 | data | [schema.NFC](https://apple.co/2XrXwMr) \| `null` | NFC structure | false
 
 **See**: [PassKit Package Format Reference # NFC](https://apple.co/2wTxiaC)
+
+<br>
+<hr>
+
+<a name="personalization"></a>
+
+#### Personalization / Reward Enrollment passes
+
+Personalization (or [Reward Enrollment](https://apple.co/2YkS12N) passes) is supported only if `personalization.json` is available and it's a valid json file (checked against a schema), `personalizationLogo@XX.png` (with 'XX' => x2, x3) is available and NFC is setted.
+If these conditions are not met, the personalization gets removed from the output pass.
+
+>*Notice*: **I had the possibility to test in no way this feature on any real pass. If you need it and this won't work, feel free to contact me and we will investigate together 😄**
 
 <br><br>
 <hr>

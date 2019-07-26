@@ -12,7 +12,7 @@
 </div>
 <br>
 
-> **v2.0.0 beta** is now available! It introduces a lot of changes. Check it out in its [new branch](https://github.com/alexandercerutti/passkit-generator/tree/v2.0.0-beta). Also, a [migration guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2) has been made available. Any suggestion is well-accepted. Thank you!
+> ⚠ You are in the v1.6.7 branch. This is kept for reference only and its code is not supported anymore. You can move to the [latest release](https://github.com/alexandercerutti/passkit-generator/tree/master) (currently v2.0). Trust me, it introduces plenty of new features and changes. Also, it has an interesting [Migration guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2). Check it out!
 
 ### Architecture
 
@@ -23,6 +23,8 @@ Actually, pass creation and population doesn't fully happen within the applicati
 Pass template will be read and pushed as is in the resulting .zip file along with web-fetched medias (also considered dynamic objects), while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
 
 This package comes with an [API documentation](./API.md), that makes available a series of methods to customize passes.
+
+> Looking for [latest release]()'s API Documentation? [Check them out here](https://github.com/alexandercerutti/passkit-generator/blob/master/API.md)!
 
 > ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
 

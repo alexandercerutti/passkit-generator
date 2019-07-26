@@ -418,6 +418,26 @@ const nfcDict = Joi.object().keys({
 	encryptionPublicKey: Joi.string()
 });
 
+// ************************************* //
+// *** Personalizable Passes Schemas *** //
+// ************************************* //
+
+export interface Personalization {
+	requiredPersonalizationFields: PRSField[];
+	description: string;
+	termsAndConditions?: string;
+}
+
+type PRSField = "PKPassPersonalizationFieldName" | "PKPassPersonalizationFieldPostalCode" | "PKPassPersonalizationFieldEmailAddress" | "PKPassPersonalizationFieldPhoneNumber";
+
+const personalizationDict = Joi.object().keys({
+	requiredPersonalizationFields: Joi.array()
+		.items("PKPassPersonalizationFieldName", "PKPassPersonalizationFieldPostalCode", "PKPassPersonalizationFieldEmailAddress", "PKPassPersonalizationFieldPhoneNumber")
+		.required(),
+	description: Joi.string().required(),
+	termsAndConditions: Joi.string(),
+});
+
 // --------- UTILITIES ---------- //
 
 type Schemas = {
@@ -433,7 +453,8 @@ const schemas: Schemas = {
 	locationsDict,
 	transitType,
 	nfcDict,
-	supportedOptions
+	supportedOptions,
+	personalizationDict
 };
 
 function resolveSchemaName(name: keyof Schemas) {

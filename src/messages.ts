@@ -8,7 +8,7 @@ const errors: MessageGroup = {
 	CP_NO_CERTS: "Cannot initialize the pass creation: no valid certificates were passed.",
 	PASSFILE_VALIDATION_FAILED: "Validation of pass type failed. Pass file is not a valid buffer or (more probably) does not respect the schema.\nRefer to https://apple.co/2Nvshvn to build a correct pass.",
 	REQUIR_VALID_FAILED: "The options passed to Pass constructor does not meet the requirements.\nRefer to the documentation to compile them correctly.",
-	MODEL_UNINITIALIZED: "Provided model ( %s ) matched but unitialized or may not contain icon.\nRefer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
+	MODEL_UNINITIALIZED: "Provided model ( %s ) matched but unitialized or may not contain icon or a valid pass.json.\nRefer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
 	MODEL_NOT_VALID: "A model must be provided in form of path (string) or object { 'fileName': Buffer } in order to continue.",
 	MODELF_NOT_FOUND: "Model %s not found. Provide a valid one to continue.",
 	MODELF_FILE_NOT_FOUND: "File %s not found.",
@@ -27,7 +27,9 @@ const debugMessages: MessageGroup = {
 	BRC_BW_FORMAT_UNSUPPORTED: "This format is not supported (by Apple) for backward support. Please choose another one.",
 	BRC_NO_POOL: "Cannot set barcode: no barcodes found. Please set barcodes first. Barcode is for retrocompatibility only.",
 	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format.",
-	NFC_INVALID: "Unable to set NFC properties: data not compliant with schema."
+	NFC_INVALID: "Unable to set NFC properties: data not compliant with schema.",
+	PRS_INVALID: "Unable to parse Personalization.json. File is not a valid JSON. Error: %s",
+	PRS_REMOVED: "Personalization has been removed as it requires an NFC-enabled pass to work."
 };
 
 /**

@@ -143,7 +143,7 @@ export class Pass {
 		if (!this[passProps].nfc && currentBundleFiles.includes("personalization.json")) {
 			genericDebug(formatMessage("PRS_REMOVED"));
 			deletePersonalization(this.bundle, getAllFilesWithName(
-				"personalizationLogo@",
+				"personalizationLogo",
 				currentBundleFiles,
 				"startsWith"
 			));

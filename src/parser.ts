@@ -60,7 +60,7 @@ export async function getModelContents(model: FactoryOptions["model"]) {
 		return modelContents;
 	}
 
-	const logoFullNames = getAllFilesWithName("personalizationLogo@", modelFiles, "startsWith");
+	const logoFullNames = getAllFilesWithName("personalizationLogo", modelFiles, "startsWith");
 	if (!(logoFullNames.length && modelContents.bundle[personalizationJsonFile].length)) {
 		deletePersonalization(modelContents.bundle, logoFullNames);
 		return modelContents;

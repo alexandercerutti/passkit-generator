@@ -2,10 +2,12 @@ import * as path from "path";
 import forge from "node-forge";
 import formatMessage from "./messages";
 import { FactoryOptions, PartitionedBundle, BundleUnit, Certificates, FinalCertificates, isValid } from "./schema";
-import { removeHidden, splitBufferBundle } from "./utils";
+import { removeHidden, splitBufferBundle, getAllFilesWithName, hasFilesWithName, deletePersonalization } from "./utils";
 import { promisify } from "util";
 import { readFile as _readFile, readdir as _readdir } from "fs";
+import debug from "debug";
 
+const prsDebug = debug("Personalization");
 const readDir = promisify(_readdir);
 const readFile = promisify(_readFile);
 
@@ -38,9 +40,45 @@ export async function getModelContents(model: FactoryOptions["model"]) {
 	}
 
 	const modelFiles = Object.keys(modelContents.bundle);
+	const isModelInitialized = (
+		modelFiles.includes("pass.json") &&
+		hasFilesWithName("icon", modelFiles, "startsWith")
+	);
 
-	if (!(modelFiles.includes("pass.json") && modelContents.bundle["pass.json"].length && modelFiles.some(file => Boolean(file.includes("icon") && modelContents.bundle[file].length)))) {
-		throw new Error("missing icon or pass.json");
+	if (!isModelInitialized) {
+		// @TODO: set a good error message
+		throw new Error(formatMessage("MODEL_UNINITIALIZED", "parse result"));
+	}
+
+	// ======================= //
+	// *** Personalization *** //
+	// ======================= //
+
+	const personalizationJsonFile = "personalization.json";
+
+	if (!modelFiles.includes(personalizationJsonFile)) {
+		return modelContents;
+	}
+
+	const logoFullNames = getAllFilesWithName("personalizationLogo@", modelFiles, "startsWith");
+	if (!(logoFullNames.length && modelContents.bundle[personalizationJsonFile].length)) {
+		deletePersonalization(modelContents.bundle, logoFullNames);
+		return modelContents;
+	}
+
+	try {
+		const parsedPersonalization = JSON.parse(modelContents.bundle[personalizationJsonFile].toString("utf8"));
+		const isPersonalizationValid = isValid(parsedPersonalization, "personalizationDict");
+
+		if (!isPersonalizationValid) {
+			[...logoFullNames, personalizationJsonFile]
+				.forEach(file => delete modelContents.bundle[file]);
+
+			return modelContents;
+		}
+	} catch (err) {
+		prsDebug(formatMessage("PRS_INVALID", err));
+		deletePersonalization(modelContents.bundle, logoFullNames);
 	}
 
 	return modelContents;
@@ -63,7 +101,7 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 
 		const isModelInitialized = (
 			filteredFiles.length &&
-			filteredFiles.some(file => file.toLowerCase().includes("icon"))
+			hasFilesWithName("icon", filteredFiles, "startsWith")
 		);
 
 		// Icon is required to proceed
@@ -171,7 +209,7 @@ export function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 
 	const isModelInitialized = (
 		bundleKeys.length &&
-		bundleKeys.some(file => file.toLowerCase().includes("icon"))
+		hasFilesWithName("icon", bundleKeys, "startsWith")
 	);
 
 	// Icon is required to proceed

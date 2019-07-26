@@ -7,7 +7,7 @@ import { ZipFile } from "yazl";
 import * as schema from "./schema";
 import formatMessage from "./messages";
 import FieldsArray from "./fieldsArray";
-import { generateStringFile, dateToW3CString, isValidRGB } from "./utils";
+import { generateStringFile, dateToW3CString, isValidRGB, deletePersonalization, getAllFilesWithName } from "./utils";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
@@ -133,6 +133,21 @@ export class Pass {
 	generate(): Stream {
 		// Editing Pass.json
 		this.bundle["pass.json"] = this._patch(this.bundle["pass.json"]);
+
+		/**
+		 * Checking Personalization, as this is available only with NFC
+		 * @see https://apple.co/2SHfb22
+		 */
+		const currentBundleFiles = Object.keys(this.bundle);
+
+		if (!this[passProps].nfc && currentBundleFiles.includes("personalization.json")) {
+			genericDebug(formatMessage("PRS_REMOVED"));
+			deletePersonalization(this.bundle, getAllFilesWithName(
+				"personalizationLogo@",
+				currentBundleFiles,
+				"startsWith"
+			));
+		}
 
 		const finalBundle = { ...this.bundle } as schema.BundleUnit;
 

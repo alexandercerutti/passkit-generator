@@ -1,6 +1,6 @@
 import moment from "moment";
 import { EOL } from "os";
-import { PartitionedBundle } from "./schema";
+import { PartitionedBundle, BundleUnit } from "./schema";
 import { sep } from "path";
 
 /**
@@ -104,4 +104,19 @@ export function splitBufferBundle(origin: Object): [PartitionedBundle["l10nBundl
 			return [ l10n, { ...bundle, [current]: origin[current] }];
 		}
 	}, [{},{}]);
+}
+
+type StringSearchMode = "includes" | "startsWith" | "endsWith";
+
+export function getAllFilesWithName(name: string, source: string[], mode: StringSearchMode = "includes", forceLowerCase: boolean = false): string[] {
+	return source.filter(file => (forceLowerCase && file.toLowerCase() || file)[mode](name));
+}
+
+export function hasFilesWithName(name: string, source: string[], mode: StringSearchMode = "includes", forceLowerCase: boolean = false): boolean {
+	return source.some(file => (forceLowerCase && file.toLowerCase() || file)[mode](name));
+}
+
+export function deletePersonalization(source: BundleUnit, logosNames: string[] = []): void {
+	[...logosNames, "personalization.json"]
+		.forEach(file => delete source[file]);
 }

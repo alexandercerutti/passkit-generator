@@ -350,10 +350,10 @@ For *relevantDate*, the date is parsed in the same formats of [#expiration()](#m
 **Example**:
 
 ```javascript
-pass.relevance("location", [{
+pass.relevance("locations", [{
 	longitude: "73.2943532945212",
 	latitude: "-42.3088613015625",
-]);
+}]);
 
 pass.relevance("maxDistance", 150);
 

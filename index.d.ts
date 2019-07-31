@@ -105,6 +105,7 @@ declare namespace Schema {
 	interface SupportedOptions {
 		serialNumber?: string;
 		description?: string;
+		expirationDate?: string;
 		userInfo?: Object | any[];
 		webServiceURL?: string;
 		authenticationToken?: string;

@@ -9,7 +9,7 @@ export declare class Pass {
 	public headerFields: Schema.Field[];
 	public primaryFields: Schema.Field[];
 	public secondaryFields: Schema.Field[];
-	public auxiliaryFields: (Schema.Field & { row: number })[];
+	public auxiliaryFields: (Schema.Field & { row?: number })[];
 	public backFields: Schema.Field[];
 
 	/**

@@ -327,7 +327,6 @@ export interface Field {
 	timeStyle?: string;
 	currencyCode?: string;
 	numberStyle?: string;
-	row?: number;
 }
 
 const field = Joi.object().keys({
@@ -387,7 +386,7 @@ const locationsDict = Joi.object().keys({
 });
 
 export interface PassFields {
-	auxiliaryFields: Field[];
+	auxiliaryFields: (Field & { row?: number })[];
 	backFields: Field[];
 	headerFields: Field[];
 	primaryFields: Field[];

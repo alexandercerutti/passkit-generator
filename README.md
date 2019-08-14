@@ -12,8 +12,6 @@
 </div>
 <br>
 
-> **v2.0.0 beta** is now available! It introduces a lot of changes. Check it out in its [new branch](https://github.com/alexandercerutti/passkit-generator/tree/v2.0.0-beta). Also, a [migration guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2) has been made available. Any suggestion is well-accepted. Thank you!
-
 ### Architecture
 
 This package was created with a specific architecture in mind: **application** and **model** (as preprocessed entity), to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...).

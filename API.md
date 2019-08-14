@@ -1,4 +1,7 @@
-# API Reference
+# API Reference (v1.6.8)
+
+> Looking for the latest release API documentation? Click [here](https://github.com/alexandercerutti/passkit-generator/blob/master/API.md)!
+___
 
 The flow of execution is really easy (once setted-up everything):
 
@@ -48,7 +51,7 @@ ___
 		* [.load()](#method_load)
 	* [Setting Pass Structure Keys (primaryFields, secondaryFields, ...)](#prop_fields)
 		* [TransitType](#prop_transitType)
-	* Generating the compiled pass.
+	* Generating the compiled pass
 		* [.generate()](#method_generate)
 
 <br><br>

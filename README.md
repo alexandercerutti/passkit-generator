@@ -6,13 +6,13 @@
 	<br>
 	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS.</p>
 
-![](https://img.shields.io/npm/v/passkit-generator.svg?label=passkit-generator)
+![](https://img.shields.io/badge/passkit--generator-v1.6.8-blue)
 ![](https://img.shields.io/node/v/passkit-generator.svg)
 
 </div>
 <br>
 
-> ⚠ You are in the v1.6.7 branch. This is kept for reference only and its code is not supported anymore. You can move to the [latest release](https://github.com/alexandercerutti/passkit-generator/tree/master) (currently v2.0). Trust me, it introduces plenty of new features and changes. Also, it has an interesting [Migration guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2). Check it out!
+> ⚠ You are currently in the v1.6.8 branch. This is kept for **reference only** and its code is not supported anymore. You can move to the [latest release](https://github.com/alexandercerutti/passkit-generator/tree/master) (currently v2.0). It introduces new features and changes. Also, it has an interesting [migration guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2). Check it out!
 
 ### Architecture
 

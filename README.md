@@ -25,11 +25,22 @@ This package comes with an [API documentation](./API.md), that makes available a
 
 > ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
 
-
 ### Install
 ```sh
 $ npm install passkit-generator --save
 ```
+
+___
+
+### Looking for the previous major version?
+
+Check the [v1 branch](https://github.com/alexandercerutti/passkit-generator/tree/v1.6.8). That branch is kept for reference only.
+
+___
+
+### Coming from the previous major version?
+
+Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2).
 
 ___
 

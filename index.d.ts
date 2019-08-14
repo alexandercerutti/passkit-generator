@@ -1,6 +1,14 @@
 import { Stream } from "stream";
 
-export function createPass(options: Schema.FactoryOptions): Promise<Pass>;
+/**
+ * Creates a new Pass instance.
+ *
+ * @param options Options to be used to create the instance or an Abstract Model reference
+ * @param additionalBuffers More buffers (with file name) to be added on runtime (if you are downloading some files from the web)
+ * @param abstractMissingData Additional data for abstract models, that might vary from pass to pass.
+ */
+export declare function createPass(options: Schema.FactoryOptions | AbstractModel, additionalBuffers?: Schema.BundleUnit, abstractMissingData?: Omit<Schema.AbstractFactoryOptions, "model">): Promise<Pass>;
+
 
 export declare class Pass {
 	constructor(options: Schema.PassInstance);
@@ -115,6 +123,20 @@ export declare class Pass {
 	readonly props: Readonly<Schema.ValidPass>;
 }
 
+/**
+ * Creates an abstract model to keep data
+ * in memory for future passes creation
+ * @param options
+ */
+export declare function createAbstractModel(options: Schema.AbstractFactoryOptions): Promise<AbstractModel>;
+
+export declare class AbstractModel {
+    constructor(options: Schema.AbstractModelOptions);
+    readonly certificates: Schema.FinalCertificates;
+    readonly bundle: Schema.PartitionedBundle;
+    readonly overrides: Schema.OverridesSupportedOptions;
+}
+
 declare namespace Schema {
 	type DataDetectorType = "PKDataDetectorTypePhoneNumber" | "PKDataDetectorTypeLink" | "PKDataDetectorTypeAddress" | "PKDataDetectorTypeCalendarEvent";
 	type TextAlignment = "PKTextAlignmentLeft" | "PKTextAlignmentCenter" | "PKTextAlignmentRight" | "PKTextAlignmentNatural";
@@ -154,6 +176,16 @@ declare namespace Schema {
 		wwdr: string;
 		signerCert: string;
 		signerKey: string;
+	}
+
+	interface AbstractFactoryOptions extends Omit<FactoryOptions, "certificates"> {
+		certificates?: Certificates;
+	}
+
+	interface AbstractModelOptions {
+		bundle: PartitionedBundle;
+		certificates: FinalCertificates;
+		overrides?: OverridesSupportedOptions;
 	}
 
 	interface PassInstance {

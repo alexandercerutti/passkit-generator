@@ -1,9 +1,19 @@
 import { Stream } from "stream";
 
-export declare class Pass {
-	constructor(options: Schema.Instance);
+/**
+ * Creates a new Pass instance.
+ *
+ * @param options Options to be used to create the instance or an Abstract Model reference
+ * @param additionalBuffers More buffers (with file name) to be added on runtime (if you are downloading some files from the web)
+ * @param abstractMissingData Additional data for abstract models, that might vary from pass to pass.
+ */
+export declare function createPass(options: Schema.FactoryOptions | AbstractModel, additionalBuffers?: Schema.BundleUnit, abstractMissingData?: Omit<Schema.AbstractFactoryOptions, "model">): Promise<Pass>;
 
-	public transitType: "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";
+
+export declare class Pass {
+	constructor(options: Schema.PassInstance);
+
+	public transitType: Schema.TransitType;
 	public headerFields: Schema.Field[];
 	public primaryFields: Schema.Field[];
 	public secondaryFields: Schema.Field[];
@@ -11,72 +21,120 @@ export declare class Pass {
 	public backFields: Schema.Field[];
 
 	/**
-	 * Generates a Stream of a zip file using the infos passed through overrides or methods.
-	 * (MIME: `application/vnd.apple.pkpass`)
+	 * Generates the pass Stream
+	 *
+	 * @method generate
+	 * @return A Stream of the generated pass.
 	 */
-	generate(): Promise<Stream>;
+	generate(): Stream;
 
 	/**
-	 * Generates pass.strings translation files in the specified language
-	 * @param lang - lang in ISO 3166 alpha-2 format (e.g. `en` or `en-US`);
-	 * @param translations - Object in format `{ "placeholder" : "translated-text" }`
-	 * @see https://apple.co/2KOv0OW
+	 * Adds traslated strings object to the list of translation to be inserted into the pass
+	 *
+	 * @method localize
+	 * @params lang - the ISO 3166 alpha-2 code for the language
+	 * @params translations - key/value pairs where key is the
+	 * 		placeholder in pass.json localizable strings
+	 * 		and value the real translated string.
+	 * @returns {this}
+	 *
+	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
-	localize(lang: string, translations: Object): this;
+	localize(lang: string, translations?: { [key: string]: string }): this;
 
 	/**
-	 * Sets pass expiration date
-	 * @param date - A date in the format you want (see "format")
-	 * @param format - A custom date format. If `undefined`, the date will be parsed in the following formats: `MM-DD-YYYY`, `MM-DD-YYYY hh:mm:ss`, `DD-MM-YYYY`, `DD-MM-YYYY hh:mm:ss`.
-	*/
-	expiration(date: string, format?: string | string[]): this;
+	 * Sets expirationDate property to a W3C-formatted date
+	 *
+	 * @method expiration
+	 * @params date
+	 * @returns {this}
+	 */
+	expiration(date: Date | null): this;
 
-	/** Generates a voided pass. Useful for backend pass updates. */
+	/**
+	 * Sets voided property to true
+	 *
+	 * @method void
+	 * @return {this}
+	 */
 	void(): this;
 
 	/**
-	 * Sets relevance for pass (conditions to appear in the lockscren).
-	 * @param type - must be `beacons`, `locations`, `maxDistance` or `relevantDate`
-	 * @param data - if object, will be treated as one-element array
-	 * @param relevanceDateFormat - custom format to be used in case of "relevatDate" as type. Otherwise the date will be parsed in the following formats: `MM-DD-YYYY`, `MM-DD-YYYY hh:mm:ss`, `DD-MM-YYYY`, `DD-MM-YYYY hh:mm:ss`.
+	 * Sets current pass' relevancy through beacons
+	 * @param data
+	 * @returns {Pass}
 	 */
-	relevance(type: Schema.RelevanceType, data: string | Schema.Location | Schema.Location[] | Schema.Beacon | Schema.Beacon[], relevanceDateFormat?: string): SuccessfulOperations;
+	beacons(...data: Schema.Beacon[] | null): this;
 
 	/**
-	 * Adds barcode to the pass. If data is an Object, will be treated as one-element array.
-	 * @param data - data to be used to generate a barcode. If string, Barcode will contain structures for all the supported types and `data` will be used message and altText.
-	 * @see https://apple.co/2C74kbm
+	 * Sets current pass' relevancy through locations
+	 * @param data
+	 * @returns {Pass}
 	 */
-	barcode(data: Schema.Barcode | Schema.Barcode[] | string): BarcodeInterfaces;
+	locations(...data: Schema.Location[] | null): this;
 
 	/**
-	 * Sets nfc infos for the pass
-	 * @param data - NFC data
+	 * Sets current pass' relevancy through a date
+	 * @param data
+	 * @returns {Pass}
+	 */
+	relevantDate(date: Date | null): this;
+
+	/**
+	 * Adds barcodes "barcodes" property.
+	 * It allows to pass a string to autogenerate all the structures.
+	 *
+	 * @method barcode
+	 * @params first - a structure or the string (message) that will generate
+	 * 		all the barcodes
+	 * @params data - other barcodes support
+	 * @return {this} Improved this with length property and other methods
+	 */
+	barcodes(first: null | string | Schema.Barcode, ...data: Schema.Barcode[]): this;
+
+	/**
+	 * Given an index <= the amount of already set "barcodes",
+	 * this let you choose which structure to use for retrocompatibility
+	 * property "barcode".
+	 *
+	 * @method barcode
+	 * @params format - the format to be used
+	 * @return {this}
+	 */
+	barcode(chosenFormat: Schema.BarcodeFormat | null): this;
+
+	/**
+	 * Sets nfc fields in properties
+	 *
+	 * @method nfc
+	 * @params data - the data to be pushed in the pass
+	 * @returns {this}
 	 * @see https://apple.co/2wTxiaC
 	 */
-	nfc(...data: Schema.NFC[]): this;
+	nfc(data: Schema.NFC | null): this;
 
 	/**
-	 * Sets resources to be downloaded right inside
-	 * the pass archive.
-	 * @param resource - url
-	 * @param name - name (or path) to be used inside the archive
-	 * @returns this;
+	 * Allows to get the current inserted props;
+	 * will return all props from valid overrides,
+	 * template's pass.json and methods-inserted ones;
+	 *
+	 * @returns The properties will be inserted in the pass.
 	 */
-
-	load(resource: string, name: string): this;
+	readonly props: Readonly<Schema.ValidPass>;
 }
 
-interface BarcodeInterfaces extends BarcodeSuccessfulOperations {
-	autocomplete: () => void | BarcodeSuccessfulOperations
-}
+/**
+ * Creates an abstract model to keep data
+ * in memory for future passes creation
+ * @param options
+ */
+export declare function createAbstractModel(options: Schema.AbstractFactoryOptions): Promise<AbstractModel>;
 
-interface BarcodeSuccessfulOperations extends SuccessfulOperations {
-	backward: (format: null | string) => void | ThisType<Pass>
-}
-
-interface SuccessfulOperations extends ThisType<Pass> {
-	length: number
+export declare class AbstractModel {
+    constructor(options: Schema.AbstractModelOptions);
+    readonly certificates: Schema.FinalCertificates;
+    readonly bundle: Schema.PartitionedBundle;
+    readonly overrides: Schema.OverridesSupportedOptions;
 }
 
 declare namespace Schema {
@@ -85,34 +143,70 @@ declare namespace Schema {
 	type DateTimeStyle = "PKDateStyleNone" | "PKDateStyleShort" | "PKDateStyleMedium" | "PKDateStyleLong" | "PKDateStyleFull";
 	type NumberStyle = "PKNumberStyleDecimal" | "PKNumberStylePercent" | "PKNumberStyleScientific" | "PKNumberStyleSpellOut";
 	type BarcodeFormat = "PKBarcodeFormatQR" | "PKBarcodeFormatPDF417" | "PKBarcodeFormatAztec" | "PKBarcodeFormatCode128";
-	type RelevanceType = "beacons" | "locations" | "maxDistance" | "relevantDate";
 	type SemanticsEventType = "PKEventTypeGeneric" | "PKEventTypeLivePerformance" | "PKEventTypeMovie" | "PKEventTypeSports" | "PKEventTypeConference" | "PKEventTypeConvention" | "PKEventTypeWorkshop" | "PKEventTypeSocialGathering";
+	type TransitType = "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";
 
-	interface Instance {
-		model: string;
-		certificates: {
-			wwdr: string;
-			signerCert: string;
-			signerKey: {
-				keyFile: string;
-				passphrase: string;
-			}
+	interface Certificates {
+		wwdr?: string;
+		signerCert?: string;
+		signerKey?: {
+			keyFile: string;
+			passphrase?: string;
 		};
-		overrides: SupportedOptions;
-		shouldOverwrite?: boolean;
 	}
 
-	interface SupportedOptions {
+	interface FactoryOptions {
+		model: BundleUnit | string;
+		certificates: Certificates;
+		overrides?: Object;
+	}
+
+	interface BundleUnit {
+		[key: string]: Buffer;
+	}
+
+	interface PartitionedBundle {
+		bundle: BundleUnit;
+		l10nBundle: {
+			[key: string]: BundleUnit
+		};
+	}
+
+	interface FinalCertificates {
+		wwdr: string;
+		signerCert: string;
+		signerKey: string;
+	}
+
+	interface AbstractFactoryOptions extends Omit<FactoryOptions, "certificates"> {
+		certificates?: Certificates;
+	}
+
+	interface AbstractModelOptions {
+		bundle: PartitionedBundle;
+		certificates: FinalCertificates;
+		overrides?: OverridesSupportedOptions;
+	}
+
+	interface PassInstance {
+		model: PartitionedBundle;
+		certificates: FinalCertificates;
+		overrides?: OverridesSupportedOptions;
+	}
+
+	interface OverridesSupportedOptions {
 		serialNumber?: string;
 		description?: string;
-		userInfo?: Object | any[];
+		userInfo?: Object | Array<any>;
 		webServiceURL?: string;
 		authenticationToken?: string;
+		sharingProhibited?: boolean;
 		backgroundColor?: string;
 		foregroundColor?: string;
 		labelColor?: string;
 		groupingIdentifier?: string;
 		suppressStripShine?: boolean;
+		maxDistance?: number;
 	}
 
 	interface Field {
@@ -130,6 +224,34 @@ declare namespace Schema {
 		currencyCode?: string;
 		numberStyle?: NumberStyle;
 		semantics?: Semantics;
+	}
+
+	interface PassFields {
+		auxiliaryFields: Field[];
+		backFields: Field[];
+		headerFields: Field[];
+		primaryFields: Field[];
+		secondaryFields: Field[];
+	}
+
+	interface ValidPassType {
+		boardingPass?: PassFields & { transitType: TransitType };
+		eventTicket?: PassFields;
+		coupon?: PassFields;
+		generic?: PassFields;
+		storeCard?: PassFields;
+	}
+
+	interface ValidPass extends OverridesSupportedOptions, ValidPassType {
+		barcode?: Barcode;
+		barcodes?: Barcode[];
+		beacons?: Beacon[];
+		locations?: Location[];
+		maxDistance?: number;
+		relevantDate?: string;
+		nfc?: NFC;
+		expirationDate?: string;
+		voided?: boolean;
 	}
 
 	interface Beacon {

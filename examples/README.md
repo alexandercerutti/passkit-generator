@@ -1,15 +1,16 @@
 # Examples
 
-This is examples folder. Each example is linked to webserver.js, which *requires* express.js to run.
-Express.js **was not** inserted as dipendency.
+This is examples folder. These examples are used to test new features and as sample showcases.
+
+Each example is linked to webserver.js, which *requires* express.js to run.
+Express.js has been inserted as "example package" dipendency.
 
 ```sh
-git clone https://github.com/alexandercerutti/passkit-generator.git;
-cd passkit-generator;
-npm install;
-npm install -g express;
-cd examples;
-node <the-example-you-want-to-execute>.js
+$ git clone https://github.com/alexandercerutti/passkit-generator.git;
+$ cd passkit-generator && npm install;
+$ cd examples && npm install;
+$ npm run build;
+$ node <the-example-you-want-to-execute>.js
 ```
 
 Certificates paths in examples are linked to a folder `certificates` in the root of this project which is not provided.

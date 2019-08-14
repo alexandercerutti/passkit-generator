@@ -5,12 +5,13 @@
  *
  * To check if a ticket has an expiration date, you'll
  * have to wait two minutes.
+ *
  */
 
-const app = require("./webserver");
-const { Pass } = require("..");
+import app from "./webserver";
+import { createPass } from "..";
 
-app.all(function manageRequest(request, response) {
+app.all(async function manageRequest(request, response) {
 	if (!request.query.fn) {
 		response.send("<a href='?fn=void'>Generate a voided pass.</a><br><a href='?fn=expiration'>Generate a pass with expiration date</a>");
 		return;
@@ -18,39 +19,39 @@ app.all(function manageRequest(request, response) {
 
 	let passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 
-	let pass = new Pass({
-		model: `./models/${request.params.modelName}`,
-		certificates: {
-			wwdr: "../certificates/WWDR.pem",
-			signerCert: "../certificates/signerCert.pem",
-			signerKey: {
-				keyFile: "../certificates/signerKey.pem",
-				passphrase: "123456"
-			}
-		},
-		overrides: request.body || request.params || request.query,
-	});
+	try {
+		let pass = await createPass({
+			model: `./models/${request.params.modelName}`,
+			certificates: {
+				wwdr: "../certificates/WWDR.pem",
+				signerCert: "../certificates/signerCert.pem",
+				signerKey: {
+					keyFile: "../certificates/signerKey.pem",
+					passphrase: "123456"
+				}
+			},
+			overrides: request.body || request.params || request.query,
+		});
 
-	if (request.query.fn === "void") {
-		pass.void();
-	} else if (request.query.fn === "expiration") {
-		// 2 minutes later...
-		let d = new Date();
-		d.setMinutes(d.getMinutes() + 2);
+		if (request.query.fn === "void") {
+			pass.void();
+		} else if (request.query.fn === "expiration") {
+			// 2 minutes later...
+			const d = new Date();
+			d.setMinutes(d.getMinutes() + 2);
 
-		// setting the expiration
-		pass.expiration(d.toLocaleString());
-	}
+			// setting the expiration
+			pass.expiration(d);
+		}
 
-	pass.generate().then(function (stream) {
+		const stream = pass.generate();
 		response.set({
 			"Content-type": "application/vnd.apple.pkpass",
 			"Content-disposition": `attachment; filename=${passName}.pkpass`
 		});
 
 		stream.pipe(response);
-	}).catch(err => {
-
+	} catch(err) {
 		console.log(err);
 
 		response.set({
@@ -58,5 +59,5 @@ app.all(function manageRequest(request, response) {
 		});
 
 		response.send(err.message);
-	});
+	}
 });

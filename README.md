@@ -16,15 +16,17 @@
 
 ### Architecture
 
-This package was created with a specific architecture in mind: **application** and **model**, to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...).
+This package was created with a specific architecture in mind: **application** and **model** (as preprocessed entity), to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...).
 
-Actually, pass creation and population doesn't fully happen within the application in runtime. Pass template is a folder in, for example, _your application directory_ (but nothing will stop you from putting it outside), that will contain all the objects needed (static medias) and structure to make a pass work.
+Pass creation and population doesn't fully happen in runtime. Pass template (model) can be one of a set of buffers or a folder, that will contain all the objects needed (static medias) and structure to make a pass work.
 
-Pass template will be read and pushed as is in the resulting .zip file along with web-fetched medias (also considered dynamic objects), while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
+Both Pass template will be read and pushed as they are in the resulting .zip file, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
+All the static medias from both sources, will be read and pushed as they are in the resulting .zip file; dynamic object will be patched against `pass.json`, generated on runtime (`manifest.json`, `signature`) or merged if already existing (translation files).
 
 This package comes with an [API documentation](./API.md), that makes available a series of methods to customize passes.
 
 > ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
+
 
 ### Install
 ```sh
@@ -37,14 +39,18 @@ ___
 
 ##### Model
 
-The first thing you'll have to do, is to start creating a model. A model is a folder in your project directory, with inside the basic pass infos, like the thumbnails, the icon, and the background and **pass.json** containing all the static infos about the pass, like Team identifier, Pass type identifier, colors, etc.
+The first thing you'll have to do, is to start creating a model. A model will contain all the basic pass infos, like the thumbnails, the icon, and the background and **pass.json** containing all the static infos about the pass, like Team identifier, Pass type identifier, colors, etc.
+
+If starting from scratch, the preferred solution is to use the folder as model, as it will allow you to access easily all the files. Also, a buffer model is mainly designed for models that are ready to be used in your application.
+
+Let's suppose you have a file `model.zip` stored somewhere: you unzip it in runtime and then get the access to its files as buffers. Those buffers should be available for the rest of your application run-time and you shouldn't be in need to read them every time you are going to create a pass.
 ___
 
 > Using the .pass extension is a best practice, showing that the directory is a pass package.
 > ([Build your first pass - Apple Developer Portal](https://apple.co/2LYXWo3)).
 
-Following to this best practice, the package is set to require each model to have a **_.pass_** extension.
-If the extension is not specified in the configuration (as in [Usage Example](#usage_example), at "model" key), it will be added forcefully.
+Following to this best practice, the package is set to require each folder-model to have a **_.pass_** extension.
+If omitted in the configuration (as in [Usage Example](#usage_example), at "model" key), it will be forcefully added.
 
 ___
 
@@ -57,9 +63,11 @@ Follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package S
 
 You can also create `.lproj` folders (e.g. *en.lproj* or *it.lproj*) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#method_localize) in the API documentation.
 
+To include a file that belongs to an `.lproj` folder in buffers, you'll just have to name a key like `en.lproj/thumbnail.png`.
+
 ##### Pass.json
 
-Create a `pass.json` by taking example from examples folder models or the one provided by Apple for the [first tutorial](https://apple.co/2NA2nus) and fill it with the basic informations, that is `teamIdentifier`, `passTypeIdentifier` and all the other basic keys like pass type. Please refer to [Top-Level Keys/Standard Keys](https://apple.co/2PRfSnu) and [Top-Level Keys/Style Keys](https://apple.co/2wzyL5J).
+Create a `pass.json` by taking example from examples folder models or the one provided by Apple for the [first tutorial](https://apple.co/2NA2nus) and fill it with the basic informations, that are `teamIdentifier`, `passTypeIdentifier` and all the other basic keys like pass type. Please refer to [Top-Level Keys/Standard Keys](https://apple.co/2PRfSnu) and [Top-Level Keys/Style Keys](https://apple.co/2wzyL5J).
 
 ```json
 {
@@ -115,41 +123,44 @@ ___
 
 ## Usage example
 
-```javascript
-const { Pass } = require("passkit-generator");
+```typescript
+const { createPass, Pass } = require("passkit-generator");
+// or, for typescript
+import { createPass, Pass } from "passkit-generator";
 
-let examplePass = new Pass({
-	model: "./passModels/myFirstModel",
-	certificates: {
-		wwdr: "./certs/wwdr.pem",
-		signerCert: "./certs/signercert.pem",
-		signerKey: {
-			keyFile: "./certs/signerkey.pem",
-			passphrase: "123456"
+let examplePass: Pass;
+
+try {
+	examplePass = await createPass({
+		model: "./passModels/myFirstModel",
+		certificates: {
+			wwdr: "./certs/wwdr.pem",
+			signerCert: "./certs/signercert.pem",
+			signerKey: {
+				keyFile: "./certs/signerkey.pem",
+				passphrase: "123456"
+			}
+		},
+		overrides: {
+			// keys to be added or overridden
+			serialNumber: "AAGH44625236dddaffbda"
 		}
-	},
-	overrides: {
-		// keys to be added or overridden
-		serialNumber: "AAGH44625236dddaffbda"
-	},
-	// if true, existing keys added through methods get overwritten
-	// pushed in queue otherwise.
-	shouldOverwrite: true
-});
-
-// Adding some settings to be written inside pass.json
-examplePass.localize("en", { ... });
-examplePass.barcode("36478105430"); // Random value
-
-// Generate the stream, which gets returned through a Promise
-examplePass.generate()
-	.then(stream => {
-		doSomethingWithTheStream(stream);
-	})
-	.catch(err => {
-		doSomethingWithTheError(err);
 	});
+
+	// Adding some settings to be written inside pass.json
+	examplePass.localize("en", { ... });
+	examplePass.barcode("36478105430"); // Random value
+
+	// Generate the stream, which gets returned through a Promise
+	const stream: Stream = examplePass.generate();
+
+	doSomethingWithTheStream(stream);
+} catch (err) {
+	doSomethingWithTheError(err);
+}
 ```
+
+For more complex usage examples, please refer to [examples](https://github.com/alexandercerutti/passkit-generator/tree/master/examples) folder.
 
 ___
 
@@ -159,7 +170,7 @@ If you used this package in any of your projects, feel free to open a topic in i
 
 The idea to develop this package, was born during the Apple Developer Academy 17/18, in Naples, Italy, driven by the need to create an iOS app component regarding passes generation for events.
 
-A big thanks to all the people and friends in the Apple Developer Academy (and not) that pushed me and helped me into realizing something like this and a big thanks to the ones that helped me to make technical choices.
+A big thanks to all the people and friends in the Apple Developer Academy (and not) that pushed me and helped me into realizing something like this and a big thanks to the ones that helped me to make technical choices and to all the contributors.
 
 Any contribution, is welcome.
 Made with ❤️ in Italy.

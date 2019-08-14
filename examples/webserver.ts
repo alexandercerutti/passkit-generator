@@ -4,8 +4,8 @@
  * Requires express to run
  */
 
-const express = require("express");
-const app = express();
+import express from "express";
+export const app = express();
 
 app.use(express.json());
 
@@ -23,4 +23,4 @@ app.route("/gen")
 		res.send("Cannot generate a pass. Specify a modelName in the url to continue. <br/>Usage: /gen/<i>modelName</i>")
 	});
 
-module.exports = app.route("/gen/:modelName");
+export default app.route("/gen/:modelName");

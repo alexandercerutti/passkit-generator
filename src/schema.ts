@@ -1,19 +1,83 @@
-const Joi = require("joi");
-const debug = require("debug")("Schema");
+import Joi from "@hapi/joi";
+import debug from "debug";
+
+const schemaDebug = debug("Schema");
+
+export interface Certificates {
+	wwdr?: string;
+	signerCert?: string;
+	signerKey?: {
+		keyFile: string;
+		passphrase?: string;
+	};
+}
+
+export interface FactoryOptions {
+	model: BundleUnit | string;
+	certificates: Certificates;
+	overrides?: OverridesSupportedOptions;
+}
+
+export interface BundleUnit {
+	[key: string]: Buffer;
+}
+
+export interface PartitionedBundle {
+	bundle: BundleUnit;
+	l10nBundle: {
+		[key: string]: BundleUnit
+	};
+}
+
+export interface FinalCertificates {
+	wwdr: string;
+	signerCert: string;
+	signerKey: string;
+}
+
+export interface PassInstance {
+	model: PartitionedBundle;
+	certificates: FinalCertificates;
+	overrides?: OverridesSupportedOptions;
+}
+
+// ************************************ //
+// * JOI Schemas + Related Interfaces * //
+// ************************************ //
+
+const certificatesSchema = Joi.object().keys({
+	wwdr: Joi.alternatives(Joi.binary(), Joi.string()).required(),
+	signerCert: Joi.alternatives(Joi.binary(), Joi.string()).required(),
+	signerKey: Joi.alternatives().try(
+		Joi.object().keys({
+			keyFile: Joi.alternatives(Joi.binary(), Joi.string()).required(),
+			passphrase: Joi.string().required(),
+		}),
+		Joi.alternatives(Joi.binary(), Joi.string())
+	).required()
+}).required();
 
 const instance = Joi.object().keys({
-	model: Joi.string().required(),
-	certificates: Joi.object().keys({
-		wwdr: Joi.string().required(),
-		signerCert: Joi.string().required(),
-		signerKey: Joi.object().keys({
-			keyFile: Joi.string().required(),
-			passphrase: Joi.string().required(),
-		}).required()
-	}).required(),
+	model: Joi.alternatives(Joi.object(), Joi.string()).required(),
+	certificates: Joi.object(),
 	overrides: Joi.object(),
-	shouldOverwrite: Joi.boolean()
 });
+
+export interface OverridesSupportedOptions {
+	serialNumber?: string;
+	description?: string;
+	userInfo?: Object | Array<any>;
+	webServiceURL?: string;
+	authenticationToken?: string;
+	sharingProhibited?: boolean;
+	backgroundColor?: string;
+	foregroundColor?: string;
+	labelColor?: string;
+	groupingIdentifier?: string;
+	suppressStripShine?: boolean;
+	logoText?: string;
+	maxDistance?: number;
+}
 
 const supportedOptions = Joi.object().keys({
 	serialNumber: Joi.string(),
@@ -29,20 +93,40 @@ const supportedOptions = Joi.object().keys({
 	groupingIdentifier: Joi.string(),
 	suppressStripShine: Joi.boolean(),
 	logoText: Joi.string(),
+	maxDistance: Joi.number().positive(),
 }).with("webServiceURL", "authenticationToken");
 
 
 /* For a correct usage of semantics, please refer to https://apple.co/2I66Phk */
+
+interface CurrencyAmount {
+	currencyCode: string;
+	amount: string;
+}
 
 const currencyAmount = Joi.object().keys({
 	currencyCode: Joi.string().required(),
 	amount: Joi.string().required(),
 });
 
+interface PersonNameComponent {
+	givenName: string;
+	familyName: string;
+}
+
 const personNameComponents = Joi.object().keys({
 	givenName: Joi.string().required(),
 	familyName: Joi.string().required()
 });
+
+interface Seat {
+	seatSection?: string;
+	seatRow?: string;
+	seatNumber?: string;
+	seatIdentifier?: string;
+	seatType?: string;
+	seatDescription?: string;
+}
 
 const seat = Joi.object().keys({
 	seatSection: Joi.string(),
@@ -57,6 +141,69 @@ const location = Joi.object().keys({
 	latitude: Joi.number().required(),
 	longitude: Joi.number().required()
 });
+
+interface Semantics {
+	totalPrice?: CurrencyAmount;
+	duration?: number;
+	seats?: Seat[];
+	silenceRequested?: boolean;
+	departureLocation?: Location;
+	destinationLocation?: Location;
+	destinationLocationDescription?: Location;
+	transitProvider?: string;
+	vehicleName?: string;
+	vehicleType?: string;
+	originalDepartureDate?: string;
+	currentDepartureDate?: string;
+	originalArrivalDate?: string;
+	currentArrivalDate?: string;
+	originalBoardingDate?: string;
+	currentBoardingDate?: string;
+	boardingGroup?: string;
+	boardingSequenceNumber?: string;
+	confirmationNumber?: string;
+	transitStatus?: string;
+	transitStatuReason?: string;
+	passengetName?: PersonNameComponent;
+	membershipProgramName?: string;
+	membershipProgramNumber?: string;
+	priorityStatus?: string;
+	securityScreening?: string;
+	flightCode?: string;
+	airlineCode?: string;
+	flightNumber?: number;
+	departureAirportCode?: string;
+	departureAirportName?: string;
+	destinationTerminal?: string;
+	destinationGate?: string;
+	departurePlatform?: string;
+	departureStationName?: string;
+	destinationPlatform?: string;
+	destinationStationName?: string;
+	carNumber?: string;
+	eventName?: string;
+	venueName?: string;
+	venueLocation?: Location;
+	venueEntrance?: string;
+	venuePhoneNumber?: string;
+	venueRoom?: string;
+	eventType?: "PKEventTypeGeneric" | "PKEventTypeLivePerformance" | "PKEventTypeMovie" | "PKEventTypeSports" | "PKEventTypeConference" | "PKEventTypeConvention" | "PKEventTypeWorkshop" | "PKEventTypeSocialGathering";
+	eventStartDate?: string;
+	eventEndDate?: string;
+	artistIDs?: string;
+	performerNames?: string[];
+	genre?: string;
+	leagueName?: string;
+	leagueAbbreviation?: string;
+	homeTeamLocation?: string;
+	homeTeamName?: string;
+	homeTeamAbbreviation?: string;
+	awayTeamLocation?: string;
+	awayTeamName?: string;
+	awayTeamAbbreviation?: string;
+	sportName?: string;
+	balance?: CurrencyAmount;
+}
 
 const semantics = Joi.object().keys({
 	// All
@@ -129,12 +276,58 @@ const semantics = Joi.object().keys({
 	balance: currencyAmount
 });
 
+export interface ValidPassType {
+	boardingPass?: PassFields & { transitType: TransitType };
+	eventTicket?: PassFields;
+	coupon?: PassFields;
+	generic?: PassFields;
+	storeCard?: PassFields;
+}
+
+export interface ValidPass extends OverridesSupportedOptions, ValidPassType {
+	barcode?: Barcode;
+	barcodes?: Barcode[];
+	beacons?: Beacon[];
+	locations?: Location[];
+	maxDistance?: number;
+	relevantDate?: string;
+	nfc?: NFC;
+	expirationDate?: string;
+	voided?: boolean;
+}
+
+export interface Barcode {
+	altText?: string;
+	messageEncoding?: string;
+	format: string;
+	message: string;
+}
+
+export type BarcodeFormat = "PKBarcodeFormatQR" | "PKBarcodeFormatPDF417" | "PKBarcodeFormatAztec" | "PKBarcodeFormatCode128";
+
 const barcode = Joi.object().keys({
 	altText: Joi.string(),
 	messageEncoding: Joi.string().default("iso-8859-1"),
 	format: Joi.string().required().regex(/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/, "barcodeType"),
 	message: Joi.string().required()
 });
+
+export interface Field {
+	attributedValue?: string | number | Date;
+	changeMessage?: string;
+	dataDetectorType?: string[];
+	label?: string;
+	textAlignment?: string;
+	key: string;
+	value: string | number | Date;
+	semantics?: Semantics;
+	dateStyle?: string;
+	ignoreTimeZone?: boolean;
+	isRelative?: boolean;
+	timeStyle?: string;
+	currencyCode?: string;
+	numberStyle?: string;
+}
 
 const field = Joi.object().keys({
 	attributedValue: Joi.alternatives(Joi.string().allow(""), Joi.number(), Joi.date().iso()),
@@ -164,12 +357,26 @@ const field = Joi.object().keys({
 		}),
 });
 
+export interface Beacon {
+	major?: number;
+	minor?: number;
+	relevantText?: string;
+	proximityUUID: string;
+}
+
 const beaconsDict = Joi.object().keys({
 	major: Joi.number().integer().positive().max(65535).greater(Joi.ref("minor")),
-	minor: Joi.number().integer().positive().max(65535).less(Joi.ref("major")),
+	minor: Joi.number().integer().min(0).max(65535).less(Joi.ref("major")),
 	proximityUUID: Joi.string().required(),
 	relevantText: Joi.string()
 });
+
+export interface Location {
+	relevantText?: string;
+	altitude?: number;
+	latitude: number;
+	longitude: number;
+}
 
 const locationsDict = Joi.object().keys({
 	altitude: Joi.number(),
@@ -177,6 +384,14 @@ const locationsDict = Joi.object().keys({
 	longitude: Joi.number().required(),
 	relevantText: Joi.string()
 });
+
+export interface PassFields {
+	auxiliaryFields: (Field & { row?: number })[];
+	backFields: Field[];
+	headerFields: Field[];
+	primaryFields: Field[];
+	secondaryFields: Field[];
+}
 
 const passDict = Joi.object().keys({
 	auxiliaryFields: Joi.array().items(Joi.object().keys({
@@ -188,17 +403,48 @@ const passDict = Joi.object().keys({
 	secondaryFields: Joi.array().items(field)
 });
 
+export type TransitType = "PKTransitTypeAir" | "PKTransitTypeBoat" | "PKTransitTypeBus" | "PKTransitTypeGeneric" | "PKTransitTypeTrain";
+
 const transitType = Joi.string().regex(/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/);
+
+export interface NFC {
+	message: string;
+	encryptionPublicKey?: string;
+}
 
 const nfcDict = Joi.object().keys({
 	message: Joi.string().required().max(64),
 	encryptionPublicKey: Joi.string()
 });
 
+// ************************************* //
+// *** Personalizable Passes Schemas *** //
+// ************************************* //
+
+export interface Personalization {
+	requiredPersonalizationFields: PRSField[];
+	description: string;
+	termsAndConditions?: string;
+}
+
+type PRSField = "PKPassPersonalizationFieldName" | "PKPassPersonalizationFieldPostalCode" | "PKPassPersonalizationFieldEmailAddress" | "PKPassPersonalizationFieldPhoneNumber";
+
+const personalizationDict = Joi.object().keys({
+	requiredPersonalizationFields: Joi.array()
+		.items("PKPassPersonalizationFieldName", "PKPassPersonalizationFieldPostalCode", "PKPassPersonalizationFieldEmailAddress", "PKPassPersonalizationFieldPhoneNumber")
+		.required(),
+	description: Joi.string().required(),
+	termsAndConditions: Joi.string(),
+});
+
 // --------- UTILITIES ---------- //
 
-const schemas = {
+type Schemas = {
+	[index: string]: Joi.ObjectSchema | Joi.StringSchema;
+};
+const schemas: Schemas = {
 	instance,
+	certificatesSchema,
 	barcode,
 	field,
 	passDict,
@@ -206,11 +452,12 @@ const schemas = {
 	locationsDict,
 	transitType,
 	nfcDict,
-	supportedOptions
+	supportedOptions,
+	personalizationDict
 };
 
-function resolveSchemaName(name) {
-	return schemas[name] || "";
+function resolveSchemaName(name: keyof Schemas) {
+	return schemas[name] || undefined;
 }
 
 /**
@@ -220,18 +467,18 @@ function resolveSchemaName(name) {
  * @returns {boolean} - result of the check
  */
 
-function isValid(opts, schemaName) {
-	let resolvedSchema = resolveSchemaName(schemaName);
+export function isValid(opts: any, schemaName: keyof Schemas): boolean {
+	const resolvedSchema = resolveSchemaName(schemaName);
 
 	if (!resolvedSchema) {
-		debug(`validation failed due to missing or mispelled schema name`);
+		schemaDebug(`validation failed due to missing or mispelled schema name`);
 		return false;
 	}
 
-	let validation = Joi.validate(opts, resolvedSchema);
+	const validation = Joi.validate(opts, resolvedSchema);
 
 	if (validation.error) {
-		debug(`validation failed due to error: ${validation.error.message}`);
+		schemaDebug(`validation failed due to error: ${validation.error.message}`);
 	}
 
 	return !validation.error;
@@ -244,19 +491,14 @@ function isValid(opts, schemaName) {
  * @returns {object} the filtered value or empty object
  */
 
-function getValidated(opts, schemaName) {
+export function getValidated<T extends Object>(opts: any, schemaName: keyof Schemas): T {
 	let resolvedSchema = resolveSchemaName(schemaName);
 	let validation = Joi.validate(opts, resolvedSchema, { stripUnknown: true });
 
 	if (validation.error) {
-		debug(`Validation failed in getValidated due to error: ${validation.error.message}`);
+		schemaDebug(`Validation failed in getValidated due to error: ${validation.error.message}`);
 		return null;
 	}
 
 	return validation.value;
 }
-
-module.exports = {
-	isValid,
-	getValidated
-};

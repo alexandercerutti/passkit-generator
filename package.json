@@ -1,10 +1,12 @@
 {
 	"name": "passkit-generator",
-	"version": "1.6.8",
+	"version": "2.0.0",
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
 	"main": "index.js",
 	"scripts": {
-		"test": "jasmine spec/index.js"
+		"build": "tsc",
+		"prepublishOnly": "npm run build",
+		"test": "npm run build && jasmine spec/index.js"
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",
@@ -17,17 +19,23 @@
 		"Pass"
 	],
 	"dependencies": {
-		"archiver": "^3.0.0",
-		"debug": "^3.2.6",
-		"got": "^9.6.0",
-		"joi": "^13.7.0",
+		"@hapi/joi": "^15.1.0",
+		"debug": "^4.1.1",
 		"moment": "^2.24.0",
-		"node-forge": "^0.7.6"
+		"node-forge": "^0.8.5",
+		"yazl": "^2.5.1"
 	},
 	"engines": {
 		"node": ">=8.1.0"
 	},
 	"devDependencies": {
-		"jasmine": "^3.4.0"
+		"@types/debug": "^4.1.4",
+		"@types/hapi__joi": "^15.0.2",
+		"@types/jasmine": "^3.3.13",
+		"@types/node": "^12.0.10",
+		"@types/node-forge": "^0.8.4",
+		"@types/yazl": "^2.4.1",
+		"jasmine": "^3.4.0",
+		"typescript": "^3.5.2"
 	}
 }

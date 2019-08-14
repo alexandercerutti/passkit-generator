@@ -16,6 +16,12 @@ interface AbstractModelOptions {
 	overrides?: OverridesSupportedOptions;
 }
 
+/**
+ * Creates an abstract model to keep data
+ * in memory for future passes creation
+ * @param options
+ */
+
 export async function createAbstractModel(options: AbstractFactoryOptions) {
 	if (!(options && Object.keys(options).length)) {
 		throw new Error(formatMessage("CP_NO_OPTS"));

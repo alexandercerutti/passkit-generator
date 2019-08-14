@@ -5,6 +5,14 @@ import { getModelContents, readCertificatesFromOptions } from "./parser";
 import { splitBufferBundle } from "./utils";
 import { AbstractModel, AbstractFactoryOptions } from "./abstract";
 
+/**
+ * Creates a new Pass instance.
+ *
+ * @param options Options to be used to create the instance or an Abstract Model reference
+ * @param additionalBuffers More buffers (with file name) to be added on runtime (if you are downloading some files from the web)
+ * @param abstractMissingData Additional data for abstract models, that might vary from pass to pass.
+ */
+
 export async function createPass(
 	options: FactoryOptions | AbstractModel,
 	additionalBuffers?: BundleUnit,

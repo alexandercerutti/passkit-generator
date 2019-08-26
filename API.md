@@ -484,7 +484,7 @@ ___
 **Setting Pass Structure Keys (primaryFields, secondaryFields, ...)**:
 ___
 
-Unlike method-set properties or overrides, to set fields inside areas (*primaryFields*, *secondaryFields*, *auxiliaryFields*, *headerFields*, *backFields*), this library make available a dedicated interface that extends native Array, to let you perform all the operations you need on the fields. Still, **shouldOverride** option, will determine whether default inserted fields should be kept or not.
+Unlike method-set properties or overrides, to set fields inside _areas_ (*primaryFields*, *secondaryFields*, *auxiliaryFields*, *headerFields*, *backFields*), this library make available a dedicated interface that extends native Array, to let you perform all the operations you need on the fields. Fields already available in pass.json, will be automatically loaded in the library. Therefore, reading one of the _areas_, will also show those that were loaded.
 
 **Examples:**
 

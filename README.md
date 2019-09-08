@@ -21,14 +21,18 @@ Pass creation and population doesn't fully happen in runtime. Pass template (mod
 Both Pass template will be read and pushed as they are in the resulting .zip file, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
 All the static medias from both sources, will be read and pushed as they are in the resulting .zip file; dynamic object will be patched against `pass.json`, generated on runtime (`manifest.json`, `signature`) or merged if already existing (translation files).
 
-This package comes with an [API documentation](./API.md), that makes available a series of methods to customize passes.
-
 > ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
 
 ### Install
 ```sh
 $ npm install passkit-generator --save
 ```
+
+___
+
+### API Documentation
+
+This package comes with an [API documentation](./API.md), that makes available a series of methods to create and customize passes.
 
 ___
 
@@ -48,11 +52,15 @@ ___
 
 ##### Model
 
-The first thing you'll have to do, is to start creating a model. A model will contain all the basic pass infos, like the thumbnails, the icon, and the background and **pass.json** containing all the static infos about the pass, like Team identifier, Pass type identifier, colors, etc.
+The first thing you'll have to do, is to start creating a model. A model contains all the basic pass data that compose the Pass identity.
+These data can be files (icon, thumbnails, ...), or pieces of information to be written in `pass.json` (Pass type identifier, Team Identifier, colors, ...).
 
-If starting from scratch, the preferred solution is to use the folder as model, as it will allow you to access easily all the files. Also, a buffer model is mainly designed for models that are ready to be used in your application.
+This package allows to use two kinds of models: **Folder Model** or **Buffer Model**. If starting from scratch, the preferred solution is to use the folder as model, as it will allow you to access easily all the files. Also, a buffer model is mainly designed for models that are ready to be used in your application.
 
 Let's suppose you have a file `model.zip` stored somewhere: you unzip it in runtime and then get the access to its files as buffers. Those buffers should be available for the rest of your application run-time and you shouldn't be in need to read them every time you are going to create a pass.
+
+> To keep a model in memory, the method [`createAbstractModel`](https://github.com/alexandercerutti/passkit-generator/blob/master/API.md#create-an-abstract-model) has been created.
+
 ___
 
 > Using the .pass extension is a best practice, showing that the directory is a pass package.
@@ -133,14 +141,15 @@ ___
 ## Usage example
 
 ```typescript
-const { createPass, Pass } = require("passkit-generator");
-// or, for typescript
+/**
+ * Use `const { createPass } = require("passkit-generator");`
+ * for usage in pure Node.js. Please note that `Pass` is only exported
+ * as Typescript type.
+ */
 import { createPass, Pass } from "passkit-generator";
 
-let examplePass: Pass;
-
 try {
-	examplePass = await createPass({
+	const examplePass = await createPass({
 		model: "./passModels/myFirstModel",
 		certificates: {
 			wwdr: "./certs/wwdr.pem",

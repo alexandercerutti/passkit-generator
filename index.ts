@@ -1,7 +1,7 @@
-import { Pass } from "./src/pass";
-import { AbstractModel } from "./src/abstract";
+import { Pass as PassClass } from "./src/pass";
+import { AbstractModel as AbstractModelClass } from "./src/abstract";
 
 export { createPass } from "./src/factory";
 export { createAbstractModel } from "./src/abstract";
-export type Pass = InstanceType<typeof Pass>
-export type AbstractModel = InstanceType<typeof AbstractModel>
+export type Pass = InstanceType<typeof PassClass>
+export type AbstractModel = InstanceType<typeof AbstractModelClass>

@@ -84,8 +84,8 @@ const supportedOptions = Joi.object().keys({
 	description: Joi.string(),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
 	// parsing url as set of words and nums followed by dots, optional port and any possible path after
-	webServiceURL: Joi.string().regex(/https?:\/\/(?:(?:[a-z0-9]+\.?)+(?::\d)?(?:\/[\S]+)*)*/),
-	authenticationToken: Joi.string().token().min(16),
+	webServiceURL: Joi.string().regex(/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/),
+	authenticationToken: Joi.string().min(16),
 	sharingProhibited: Joi.boolean(),
 	backgroundColor: Joi.string().min(10).max(16),
 	foregroundColor: Joi.string().min(10).max(16),

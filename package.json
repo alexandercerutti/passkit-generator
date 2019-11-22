@@ -36,6 +36,6 @@
 		"@types/node-forge": "^0.8.4",
 		"@types/yazl": "^2.4.1",
 		"jasmine": "^3.4.0",
-		"typescript": "^3.5.2"
+		"typescript": "^3.7.2"
 	}
 }

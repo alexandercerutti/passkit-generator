@@ -67,6 +67,10 @@ export interface OverridesSupportedOptions {
 	serialNumber?: string;
 	description?: string;
 	organizationName?: string;
+	passTypeIdentifier?: string;
+	teamIdentifier?: string;
+	appLaunchURL?: string;
+	associatedStoreIdentifiers?: Array<number>;
 	userInfo?: Object | Array<any>;
 	webServiceURL?: string;
 	authenticationToken?: string;
@@ -84,6 +88,10 @@ const supportedOptions = Joi.object().keys({
 	serialNumber: Joi.string(),
 	description: Joi.string(),
 	organizationName: Joi.string(),
+	passTypeIdentifier: Joi.string(),
+	teamIdentifier: Joi.string(),
+	appLaunchURL: Joi.string(),
+	associatedStoreIdentifiers: Joi.array().items(Joi.number()),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
 	// parsing url as set of words and nums followed by dots, optional port and any possible path after
 	webServiceURL: Joi.string().regex(/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/),

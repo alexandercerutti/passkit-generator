@@ -441,10 +441,7 @@ const personalizationDict = Joi.object().keys({
 
 // --------- UTILITIES ---------- //
 
-type Schemas = {
-	[index: string]: Joi.ObjectSchema | Joi.StringSchema;
-};
-const schemas: Schemas = {
+const schemas = {
 	instance,
 	certificatesSchema,
 	barcode,
@@ -458,7 +455,9 @@ const schemas: Schemas = {
 	personalizationDict
 };
 
-function resolveSchemaName(name: keyof Schemas) {
+type Schema = keyof typeof schemas;
+
+function resolveSchemaName(name: Schema) {
 	return schemas[name] || undefined;
 }
 
@@ -469,7 +468,7 @@ function resolveSchemaName(name: keyof Schemas) {
  * @returns {boolean} - result of the check
  */
 
-export function isValid(opts: any, schemaName: keyof Schemas): boolean {
+export function isValid(opts: any, schemaName: Schema): boolean {
 	const resolvedSchema = resolveSchemaName(schemaName);
 
 	if (!resolvedSchema) {
@@ -493,7 +492,7 @@ export function isValid(opts: any, schemaName: keyof Schemas): boolean {
  * @returns {object} the filtered value or empty object
  */
 
-export function getValidated<T extends Object>(opts: any, schemaName: keyof Schemas): T {
+export function getValidated<T extends Object>(opts: any, schemaName: Schema): T {
 	let resolvedSchema = resolveSchemaName(schemaName);
 	let validation = Joi.validate(opts, resolvedSchema, { stripUnknown: true });
 

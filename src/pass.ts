@@ -15,7 +15,7 @@ const genericDebug = debug("passkit:generic");
 const transitType = Symbol("transitType");
 const passProps = Symbol("_props");
 
-const propsSchemaMap = new Map([
+const propsSchemaMap = new Map<string, schema.Schema>([
 	["barcodes", "barcode"],
 	["barcode", "barcode"],
 	["beacons", "beaconsDict"],
@@ -634,10 +634,10 @@ function barcodesFromUncompleteData(message: string): schema.Barcode[] {
 }
 
 function processRelevancySet<T>(key: string, data: T[]): T[] {
-	return getValidInArray(`${key}Dict`, data);
+	return getValidInArray(`${key}Dict` as schema.Schema, data);
 }
 
-function getValidInArray<T>(schemaName: string, contents: T[]): T[] {
+function getValidInArray<T>(schemaName: schema.Schema, contents: T[]): T[] {
 	return contents.filter(current => Object.keys(current).length && schema.isValid(current, schemaName));
 }
 

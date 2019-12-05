@@ -455,7 +455,7 @@ const schemas = {
 	personalizationDict
 };
 
-type Schema = keyof typeof schemas;
+export type Schema = keyof typeof schemas;
 
 function resolveSchemaName(name: Schema) {
 	return schemas[name] || undefined;

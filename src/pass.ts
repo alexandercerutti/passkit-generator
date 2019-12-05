@@ -38,9 +38,9 @@ export class Pass {
 	public auxiliaryFields: FieldsArray;
 	public backFields: FieldsArray;
 
-	Certificates: schema.FinalCertificates;
+	private Certificates: schema.FinalCertificates;
+	private [transitType]: string = "";
 	l10nTranslations: { [key: string]: { [key: string]: string } } = {};
-	[transitType]: string = "";
 
 	constructor(options: schema.PassInstance) {
 		if (!schema.isValid(options, "instance")) {
@@ -425,7 +425,7 @@ export class Pass {
 	 */
 
 	barcode(chosenFormat: schema.BarcodeFormat | null): this {
-		let { barcodes } = this[passProps];
+		const { barcodes } = this[passProps];
 
 		if (chosenFormat === null) {
 			delete this[passProps]["barcode"];
@@ -568,7 +568,7 @@ export class Pass {
 	 */
 
 	private _patch(passCoreBuffer: Buffer): Buffer {
-		let passFile = JSON.parse(passCoreBuffer.toString());
+		const passFile = JSON.parse(passCoreBuffer.toString()) as schema.ValidPass;
 
 		if (Object.keys(this[passProps]).length) {
 			/*

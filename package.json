@@ -19,23 +19,23 @@
 		"Pass"
 	],
 	"dependencies": {
-		"@hapi/joi": "^15.1.0",
+		"@hapi/joi": "^16.1.8",
 		"debug": "^4.1.1",
 		"moment": "^2.24.0",
-		"node-forge": "^0.8.5",
+		"node-forge": "^0.9.1",
 		"yazl": "^2.5.1"
 	},
 	"engines": {
 		"node": ">=8.1.0"
 	},
 	"devDependencies": {
-		"@types/debug": "^4.1.4",
-		"@types/hapi__joi": "^15.0.2",
-		"@types/jasmine": "^3.3.13",
-		"@types/node": "^12.0.10",
-		"@types/node-forge": "^0.8.4",
-		"@types/yazl": "^2.4.1",
-		"jasmine": "^3.4.0",
+		"@types/debug": "^4.1.5",
+		"@types/hapi__joi": "^16.0.4",
+		"@types/jasmine": "^3.5.0",
+		"@types/node": "^12.12.14",
+		"@types/node-forge": "^0.9.0",
+		"@types/yazl": "^2.4.2",
+		"jasmine": "^3.5.0",
 		"typescript": "^3.7.2"
 	}
 }

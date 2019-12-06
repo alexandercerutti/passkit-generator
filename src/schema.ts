@@ -502,6 +502,12 @@ export function isValid(opts: any, schemaName: Schema): boolean {
 
 export function getValidated<T extends Object>(opts: any, schemaName: Schema): T {
 	const resolvedSchema = resolveSchemaName(schemaName);
+
+	if (!resolvedSchema) {
+		schemaDebug(`validation failed due to missing or mispelled schema name`);
+		return null;
+	}
+
 	const validation = resolvedSchema.validate(opts, { stripUnknown: true });
 
 	if (validation.error) {

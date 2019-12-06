@@ -376,7 +376,7 @@ export interface Beacon {
 
 const beaconsDict = Joi.object().keys({
 	major: Joi.number().integer().positive().max(65535).greater(Joi.ref("minor")),
-	minor: Joi.number().integer().min(0).max(65535).less(Joi.ref("major")),
+	minor: Joi.number().integer().min(0).max(65535),
 	proximityUUID: Joi.string().required(),
 	relevantText: Joi.string()
 });
@@ -484,7 +484,7 @@ export function isValid(opts: any, schemaName: Schema): boolean {
 		return false;
 	}
 
-	const validation = Joi.validate(opts, resolvedSchema);
+	const validation = resolvedSchema.validate(opts);
 
 	if (validation.error) {
 		schemaDebug(`validation failed due to error: ${validation.error.message}`);
@@ -501,8 +501,8 @@ export function isValid(opts: any, schemaName: Schema): boolean {
  */
 
 export function getValidated<T extends Object>(opts: any, schemaName: Schema): T {
-	let resolvedSchema = resolveSchemaName(schemaName);
-	let validation = Joi.validate(opts, resolvedSchema, { stripUnknown: true });
+	const resolvedSchema = resolveSchemaName(schemaName);
+	const validation = resolvedSchema.validate(opts, { stripUnknown: true });
 
 	if (validation.error) {
 		schemaDebug(`Validation failed in getValidated due to error: ${validation.error.message}`);

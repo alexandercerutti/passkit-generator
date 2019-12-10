@@ -281,17 +281,19 @@ export class Pass {
 
 	/**
 	 * Sets current pass' relevancy through beacons
-	 * @param data
+	 * @param data varargs with type schema.Beacon, or single arg null
 	 * @returns {Pass}
 	 */
 
-	beacons(...data: schema.Beacon[] | null): this {
-		if (data === null) {
+	beacons(resetFlag: null): this;
+	beacons(...data: schema.Beacon[]): this 
+	beacons(...args: (schema.Beacon|null)[]){
+		if (args[0] === null) {
 			delete this[passProps]["beacons"];
 			return this;
 		}
 
-		const valid = processRelevancySet("beacons", data);
+		const valid = processRelevancySet("beacons", args);
 
 		if (valid.length) {
 			this[passProps]["beacons"] = valid;
@@ -302,17 +304,19 @@ export class Pass {
 
 	/**
 	 * Sets current pass' relevancy through locations
-	 * @param data
+	 * @param data varargs with type schema.Location, or single arg null
 	 * @returns {Pass}
 	 */
 
-	locations(...data: schema.Location[] | null): this {
-		if (data === null) {
+	locations(resetFlag : null) : this;
+	locations(...data: schema.Location[]): this;
+	locations(...args: (schema.Location|null)[]) : this {
+		if (args[0] === null) {
 			delete this[passProps]["locations"];
 			return this;
 		}
 
-		const valid = processRelevancySet("locations", data);
+		const valid = processRelevancySet("locations", args);
 
 		if (valid.length) {
 			this[passProps]["locations"] = valid;

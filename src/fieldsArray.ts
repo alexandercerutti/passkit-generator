@@ -11,6 +11,8 @@ const fieldsDebug = debug("passkit:fields");
 const poolSymbol = Symbol("pool");
 
 export default class FieldsArray extends Array {
+	private [poolSymbol]: Set<string>;
+
 	constructor(pool: Set<string>, ...args: any[]) {
 		super(...args);
 		this[poolSymbol] = pool;

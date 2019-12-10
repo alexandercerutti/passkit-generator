@@ -107,7 +107,7 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 		if (!isModelInitialized) {
 			throw new Error(formatMessage(
 				"MODEL_UNINITIALIZED",
-				path.parse(this.model).name
+				path.parse(model).name
 			));
 		}
 

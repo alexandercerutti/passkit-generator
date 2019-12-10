@@ -90,19 +90,18 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
  */
 
 export function splitBufferBundle(origin: Object): [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]] {
-	const keys = Object.keys(origin);
-	return keys.reduce(([ l10n, bundle ], current) => {
-		if (current.includes(".lproj")) {
-			const pathComponents = current.split(sep);
-			const lang = pathComponents[0];
-			const file = pathComponents.slice(1).join("/");
-
-			(l10n[lang] || (l10n[lang] = {}))[file] = origin[current];
-
-			return [ l10n, bundle ];
-		} else {
+	return Object.keys(origin).reduce(([ l10n, bundle ], current) => {
+		if (!current.includes(".lproj")) {
 			return [ l10n, { ...bundle, [current]: origin[current] }];
 		}
+
+		const pathComponents = current.split(sep);
+		const lang = pathComponents[0];
+		const file = pathComponents.slice(1).join("/");
+
+		(l10n[lang] || (l10n[lang] = {}))[file] = origin[current];
+
+		return [ l10n, bundle ];
 	}, [{},{}]);
 }
 

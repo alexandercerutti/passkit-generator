@@ -288,7 +288,6 @@ export class Pass {
 	beacons(resetFlag: null): this;
 	beacons(...data: schema.Beacon[]): this 
 	beacons(...data: (schema.Beacon|null)[]){
-
 		if (data[0] === null) {
 			delete this[passProps]["beacons"];
 			return this;

@@ -6,3 +6,5 @@ examples/
 *.ts
 !*.d.ts
 tsconfig.json
+.github/
+spec/

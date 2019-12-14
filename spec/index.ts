@@ -8,7 +8,7 @@ type Unpacked<T> = T extends Promise<infer U> ? U : T;
  * Tests created upon Jasmine testing suite.
  */
 
-describe("Node-Passkit-generator", function () {
+describe("Passkit-generator", function () {
 	let pass: Unpacked<ReturnType<typeof createPass>>;
 	beforeEach(async () => {
 		pass = await createPass({
@@ -32,24 +32,24 @@ describe("Node-Passkit-generator", function () {
 			expect(Object.keys(pass.l10nTranslations).length).toBe(0);
 		});
 
-		it("Passing first argument not a string, won't apply changes", () => {
+		it("Won't apply changes with a non-string first argument", () => {
 			// @ts-ignore -- Ignoring for test purposes
 			pass.localize(5);
 			expect(Object.keys(pass.l10nTranslations).length).toBe(0);
 		});
 
-		it("Not passing the second argument, will apply changes (.lproj folder inclusion)", () => {
+		it("Will include .lproj folder if only the first argument is passed", () => {
 			pass.localize("en");
 			expect(Object.keys(pass.l10nTranslations).length).toBe(1);
 		});
 
-		it("Second argument of type different from object or undefined, won't apply changes.", () => {
+		it("Will ignore all the second argument is not object or undefined", () => {
 			// @ts-ignore -- Ignoring for test purposes
 			pass.localize("en", 42);
 			expect(Object.keys(pass.l10nTranslations).length).toBe(0);
 		});
 
-		it("A second argument of type object will apply changes", () => {
+		it("Will apply changes if a second object argument with translations is passed", () => {
 			pass.localize("it", {
 				"Test": "Prova"
 			});
@@ -60,7 +60,7 @@ describe("Node-Passkit-generator", function () {
 	});
 
 	describe("expiration()", () => {
-		it("Missing first argument or not a string won't apply changes", () => {
+		it("Won't apply changes withouta valid argument", () => {
 			// @ts-ignore -- Ignoring for test purposes
 			pass.expiration();
 			expect(pass.props["expirationDate"]).toBe(undefined);
@@ -69,7 +69,7 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["expirationDate"]).toBe(undefined);
 		});
 
-		it("A date as a Date object will apply changes", () => {
+		it("Will set expiration with a Date as argument", () => {
 			pass.expiration(new Date(2020,5,1,0,0,0));
 			// this is made to avoid problems with winter and summer time:
 			// we focus only on the date and time for the tests.
@@ -88,96 +88,94 @@ describe("Node-Passkit-generator", function () {
 		});
 	});
 
-	describe("Relevancy:", () => {
-		describe("Relevant Date", () => {
-			it("A date object will apply changes", () => {
-				pass.relevantDate(new Date("10-04-2021"));
-				// this is made to avoid problems with winter and summer time:
-				// we focus only on the date and time for the tests.
-				let noTimeZoneDateTime = pass.props["relevantDate"].split("+")[0];
-				expect(noTimeZoneDateTime).toBe("2021-10-04T00:00:00");
-			});
+	describe("relevantDate()", () => {
+		it("A date object will apply changes", () => {
+			pass.relevantDate(new Date("10-04-2021"));
+			// this is made to avoid problems with winter and summer time:
+			// we focus only on the date and time for the tests.
+			let noTimeZoneDateTime = pass.props["relevantDate"].split("+")[0];
+			expect(noTimeZoneDateTime).toBe("2021-10-04T00:00:00");
+		});
+	});
+
+	describe("locations()", () => {
+		it("Won't apply changes if invalid location objects are passed", () => {
+			const props = pass.props["locations"] || [];
+			const oldAmountOfLocations = props && props.length || 0;
+
+			pass.locations({
+				// @ts-ignore
+				"ibrupofene": "no",
+				"longitude": 0.00000000
+			}, ...props);
+
+			if (oldAmountOfLocations) {
+				expect(pass.props["locations"].length).toBe(oldAmountOfLocations);
+			} else {
+				expect(pass.props["locations"]).toBe(undefined);
+			}
 		});
 
-		describe("locations :: ", () => {
-			it("One-Invalid-schema location won't apply changes", () => {
-				const props = pass.props["locations"] || [];
-				const oldAmountOfLocations = props && props.length || 0;
+		it("Will filter out invalid location objects", () => {
+			const props = pass.props["locations"] || [];
+			const oldAmountOfLocations = props && props.length || 0;
 
-				pass.locations({
-					// @ts-ignore
-					"ibrupofene": "no",
-					"longitude": 0.00000000
-				}, ...props);
+			pass.locations({
+				//@ts-ignore
+				"ibrupofene": "no",
+				"longitude": 0.00000000
+			}, {
+				"longitude": 4.42634523,
+				"latitude": 5.344233323352
+			}, ...(pass.props["locations"] || []));
 
-				if (oldAmountOfLocations) {
-					expect(pass.props["locations"].length).toBe(oldAmountOfLocations);
-				} else {
-					expect(pass.props["locations"]).toBe(undefined);
-				}
-			});
+			expect(pass.props["locations"].length).toBe((oldAmountOfLocations || 0) + 1);
+		});
+	});
 
-			it("Two locations, with one invalid, will be filtered", () => {
-				const props = pass.props["locations"] || [];
-				const oldAmountOfLocations = props && props.length || 0;
+	describe("Beacons()", () => {
+		it("Won't apply changes if invalid beacon objects are passed", () => {
+			const props = pass.props["beacons"] || [];
+			const oldAmountOfBeacons = props && props.length || 0;
 
-				pass.locations({
-					//@ts-ignore
-					"ibrupofene": "no",
-					"longitude": 0.00000000
-				}, {
-					"longitude": 4.42634523,
-					"latitude": 5.344233323352
-				}, ...(pass.props["locations"] || []));
+			pass.beacons({
+				// @ts-ignore
+				"ibrupofene": "no",
+				"major": 55,
+				"minor": 0,
+				"proximityUUID": "2707c5f4-deb9-48ff-b760-671bc885b6a7"
+			}, ...props);
 
-				expect(pass.props["locations"].length).toBe((oldAmountOfLocations || 0) + 1);
-			});
+			if (oldAmountOfBeacons) {
+				expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons);
+			} else {
+				expect(pass.props["beacons"]).toBe(undefined);
+			}
 		});
 
-		describe("Beacons :: ", () => {
-			it("One-Invalid-schema beacon data won't apply changes", () => {
-				const props = pass.props["beacons"] || [];
-				const oldAmountOfBeacons = props && props.length || 0;
+		it("Will filter out invalid beacons objects", () => {
+			const props = pass.props["beacons"] || [];
+			const oldAmountOfBeacons = props && props.length || 0;
 
-				pass.beacons({
-					// @ts-ignore
-					"ibrupofene": "no",
-					"major": 55,
-					"minor": 0,
-					"proximityUUID": "2707c5f4-deb9-48ff-b760-671bc885b6a7"
-				}, ...props);
-
-				if (oldAmountOfBeacons) {
-					expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons);
-				} else {
-					expect(pass.props["beacons"]).toBe(undefined);
-				}
-			});
-
-			it("Two beacons sets, with one invalid, will be filtered out", () => {
-				const props = pass.props["beacons"] || [];
-				const oldAmountOfBeacons = props && props.length || 0;
-
-				pass.beacons({
-					"major": 55,
-					"minor": 0,
-					"proximityUUID": "59da0f96-3fb5-43aa-9028-2bc796c3d0c5"
-				}, {
-					"major": 55,
-					"minor": 0,
-					"proximityUUID": "fdcbbf48-a4ae-4ffb-9200-f8a373c5c18e",
-					// @ts-ignore
-					"animal": "Monkey"
-				}, ...props);
+			pass.beacons({
+				"major": 55,
+				"minor": 0,
+				"proximityUUID": "59da0f96-3fb5-43aa-9028-2bc796c3d0c5"
+			}, {
+				"major": 55,
+				"minor": 0,
+				"proximityUUID": "fdcbbf48-a4ae-4ffb-9200-f8a373c5c18e",
+				// @ts-ignore
+				"animal": "Monkey"
+			}, ...props);
 
 
-				expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons + 1);
-			});
+			expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons + 1);
 		});
 	});
 
 	describe("barcodes()", () => {
-		it("Missing data will left situation unchanged", () => {
+		it("Won't apply changes if no data is passed", () => {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
@@ -186,7 +184,7 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
 
-		it("Boolean parameter won't apply changes", () => {
+		it("Will ignore boolean parameter", () => {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
@@ -195,7 +193,7 @@ describe("Node-Passkit-generator", function () {
 			expect(props.length).toBe(oldAmountOfBarcodes);
 		});
 
-		it("Numeric parameter won't apply changes", () => {
+		it("Will ignore numeric parameter", () => {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
@@ -204,12 +202,12 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
 
-		it("String parameter will autogenerate all the objects", () => {
+		it("Will autogenerate all the barcode objects with a string parameter (message)", () => {
 			pass.barcodes("28363516282");
 			expect(pass.props["barcodes"].length).toBe(4);
 		});
 
-		it("Object parameter will be accepted", () => {
+		it("Will accept object parameters", () => {
 			pass.barcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
@@ -219,17 +217,7 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["barcodes"].length).toBe(1);
 		});
 
-		it("Array parameter will apply changes", () => {
-			pass.barcodes({
-				message: "28363516282",
-				format: "PKBarcodeFormatPDF417",
-				messageEncoding: "utf8"
-			});
-
-			expect(pass.props["barcodes"].length).toBe(1);
-		});
-
-		it("Missing messageEncoding gets automatically added.", () => {
+		it("Will automatically add messageEncoding if missing in valid Barcodes objects", () => {
 			pass.barcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
@@ -238,7 +226,7 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["barcodes"][0].messageEncoding).toBe("iso-8859-1");
 		});
 
-		it("Object without message property, will be ignored", () => {
+		it("Will ignore objects without message property", () => {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
@@ -250,7 +238,7 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
 
-		it("Array containing non-object elements will be rejected", () => {
+		it("Will ignore non-Barcodes schema compliant objects", () => {
 			// @ts-ignore -- Ignoring for test purposes
 			pass.barcodes(5, 10, 15, {
 				message: "28363516282",
@@ -259,10 +247,15 @@ describe("Node-Passkit-generator", function () {
 
 			expect(pass.props["barcodes"].length).toBe(1)
 		});
+
+		it("Will reset barcodes content if parameter is null", () => {
+			pass.barcodes(null);
+			expect(pass.props["barcodes"]).toBe(undefined);
+		});
 	});
 
 	describe("barcode retrocompatibility", () => {
-		it("Passing argument of type different from string or null, won't apply changes", function () {
+		it("Will ignore non string or null arguments", function () {
 			const oldBarcode = pass.props["barcode"] || undefined;
 
 			pass
@@ -274,7 +267,7 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["barcode"]).toEqual(oldBarcode);
 		});
 
-		it("Null will delete backward support", () => {
+		it("Will reset backward value on null", () => {
 			pass.barcodes("Message-22645272183")
 				.barcode("PKBarcodeFormatAztec");
 
@@ -284,7 +277,7 @@ describe("Node-Passkit-generator", function () {
 			expect(pass.props["barcode"]).toBe(undefined);
 		});
 
-		it("Unknown format won't apply changes", () => {
+		it("Won't apply changes if unknown format is passed", () => {
 			const oldBarcode = pass.props["barcode"] || undefined;
 
 			pass

@@ -292,8 +292,8 @@ export class Pass {
 	 */
 
 	beacons(resetFlag: null): this;
-	beacons(...data: schema.Beacon[]): this 
-	beacons(...data: (schema.Beacon|null)[]){
+	beacons(...data: schema.Beacon[]): this
+	beacons(...data: (schema.Beacon|null)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["beacons"];
 			return this;
@@ -314,9 +314,9 @@ export class Pass {
 	 * @returns {Pass}
 	 */
 
-	locations(resetFlag : null) : this;
+	locations(resetFlag: null): this;
 	locations(...data: schema.Location[]): this;
-	locations(...data: (schema.Location|null)[]) : this {
+	locations(...data: (schema.Location|null)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["locations"];
 			return this;
@@ -363,27 +363,17 @@ export class Pass {
 	 * @return {this} Improved this with length property and other methods
 	 */
 
-	barcodes(first: null | string | schema.Barcode, ...data: schema.Barcode[]): this {
-		if (first === null) {
+	barcodes(resetFlag: null): this;
+	barcodes(message: string): this;
+	barcodes(...data: schema.Barcode[]): this;
+	barcodes(...data: (schema.Barcode|null|string)[]): this {
+		if (data[0] === null) {
 			delete this[passProps]["barcodes"];
 			return this;
 		}
 
-		const isFirstParameterValid = (
-			first && (
-				typeof first === "string" || (
-					typeof first === "object" &&
-					first.hasOwnProperty("message")
-				)
-			)
-		);
-
-		if (!isFirstParameterValid) {
-			return this;
-		}
-
-		if (typeof first === "string") {
-			const autogen = barcodesFromUncompleteData(first);
+		if (typeof data[0] === "string") {
+			const autogen = barcodesFromUncompleteData(data[0]);
 
 			if (!autogen.length) {
 				barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
@@ -394,15 +384,13 @@ export class Pass {
 
 			return this;
 		} else {
-			const barcodes = [first, ...(data || [])];
-
 			/**
 			 * Stripping from the array not-object elements
 			 * and the ones that does not pass validation.
 			 * Validation assign default value to missing parameters (if any).
 			 */
 
-			const valid = barcodes.reduce<schema.Barcode[]>((acc, current) => {
+			const validBarcodes = data.reduce<schema.Barcode[]>((acc, current) => {
 				if (!(current && current instanceof Object)) {
 					return acc;
 				}
@@ -416,8 +404,8 @@ export class Pass {
 				return [...acc, validated] as schema.Barcode[];
 			}, []);
 
-			if (valid.length) {
-				this[passProps]["barcodes"] = valid;
+			if (validBarcodes.length) {
+				this[passProps]["barcodes"] = validBarcodes;
 			}
 
 			return this;

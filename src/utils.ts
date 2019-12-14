@@ -11,7 +11,7 @@ import { sep } from "path";
  * @returns {Boolean} True if valid rgb, false otherwise
  */
 
-export function isValidRGB(value: string): boolean {
+export function isValidRGB(value?: string): boolean {
 	if (!value || typeof value !== "string") {
 		return false;
 	}
@@ -89,20 +89,21 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
  * @param origin
  */
 
-export function splitBufferBundle(origin: Object): [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]] {
-	const keys = Object.keys(origin);
-	return keys.reduce(([ l10n, bundle ], current) => {
-		if (current.includes(".lproj")) {
-			const pathComponents = current.split(sep);
-			const lang = pathComponents[0];
-			const file = pathComponents.slice(1).join("/");
+type PartitionedBundleElements = [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]];
 
-			(l10n[lang] || (l10n[lang] = {}))[file] = origin[current];
-
-			return [ l10n, bundle ];
-		} else {
+export function splitBufferBundle(origin: any): PartitionedBundleElements {
+	return Object.keys(origin).reduce<PartitionedBundleElements>(([ l10n, bundle ], current) => {
+		if (!current.includes(".lproj")) {
 			return [ l10n, { ...bundle, [current]: origin[current] }];
 		}
+
+		const pathComponents = current.split(sep);
+		const lang = pathComponents[0];
+		const file = pathComponents.slice(1).join("/");
+
+		(l10n[lang] || (l10n[lang] = {}))[file] = origin[current];
+
+		return [ l10n, bundle ];
 	}, [{},{}]);
 }
 

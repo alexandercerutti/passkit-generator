@@ -9,7 +9,6 @@ import { Stream } from "stream";
  */
 export declare function createPass(options: Schema.FactoryOptions | AbstractModel, additionalBuffers?: Schema.BundleUnit, abstractMissingData?: Omit<Schema.AbstractFactoryOptions, "model">): Promise<Pass>;
 
-
 export declare class Pass {
 	constructor(options: Schema.PassInstance);
 
@@ -40,7 +39,9 @@ export declare class Pass {
 	 *
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
-	localize(lang: string, translations?: { [key: string]: string }): this;
+	localize(lang: string, translations?: {
+		[key: string]: string
+	}): this;
 
 	/**
 	 * Sets expirationDate property to a W3C-formatted date
@@ -64,14 +65,16 @@ export declare class Pass {
 	 * @param data
 	 * @returns {Pass}
 	 */
-	beacons(...data: Schema.Beacon[] | null): this;
+	beacons(resetFlag: null): this;
+	beacons(...data: Schema.Beacon[]): this;
 
 	/**
 	 * Sets current pass' relevancy through locations
 	 * @param data
 	 * @returns {Pass}
 	 */
-	locations(...data: Schema.Location[] | null): this;
+    locations(resetFlag: null): this;
+	locations(...data: Schema.Location[]): this;
 
 	/**
 	 * Sets current pass' relevancy through a date
@@ -90,7 +93,9 @@ export declare class Pass {
 	 * @params data - other barcodes support
 	 * @return {this} Improved this with length property and other methods
 	 */
-	barcodes(first: null | string | Schema.Barcode, ...data: Schema.Barcode[]): this;
+    barcodes(resetFlag: null): this;
+    barcodes(message: string): this;
+	barcodes(...data: Schema.Barcode[]): this;
 
 	/**
 	 * Given an index <= the amount of already set "barcodes",

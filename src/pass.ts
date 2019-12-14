@@ -30,13 +30,15 @@ export class Pass {
 	private [passProps]: schema.ValidPass = {};
 	private type: keyof schema.ValidPassType;
 	private fieldsKeys: Set<string> = new Set<string>();
-	private passCore: schema.ValidPass = {};
+	private passCore: schema.ValidPass;
 
-	public headerFields: FieldsArray;
-	public primaryFields: FieldsArray;
-	public secondaryFields: FieldsArray;
-	public auxiliaryFields: FieldsArray;
-	public backFields: FieldsArray;
+	// Setting these as possibly undefined because we set
+	// them all in an loop later
+	public headerFields: FieldsArray | undefined;
+	public primaryFields: FieldsArray | undefined;
+	public secondaryFields: FieldsArray | undefined;
+	public auxiliaryFields: FieldsArray | undefined;
+	public backFields: FieldsArray | undefined;
 
 	private Certificates: schema.FinalCertificates;
 	private [transitType]: string = "";
@@ -72,7 +74,8 @@ export class Pass {
 		}
 
 		// Parsing and validating pass.json keys
-		const validatedPassKeys = Object.keys(this.passCore).reduce((acc, current) => {
+		const passCoreKeys = Object.keys(this.passCore) as (keyof schema.ValidPass)[];
+		const validatedPassKeys = passCoreKeys.reduce((acc, current) => {
 			if (this.type === current) {
 				// We want to exclude type keys (eventTicket,
 				// boardingPass, ecc.) and their content
@@ -86,10 +89,13 @@ export class Pass {
 				return { ...acc, [current]: this.passCore[current] };
 			}
 
-			const currentSchema = propsSchemaMap.get(current);
+			const currentSchema = propsSchemaMap.get(current)!;
 
 			if (Array.isArray(this.passCore[current])) {
-				const valid = getValidInArray(currentSchema, this.passCore[current]);
+				const valid = getValidInArray<schema.ArrayPassSchema>(
+					currentSchema,
+					this.passCore[current] as schema.ArrayPassSchema[]
+				);
 				return { ...acc, [current]: valid };
 			} else {
 				return {
@@ -201,7 +207,7 @@ export class Pass {
 		* and returning the compiled manifest
 		*/
 		const archive = new ZipFile();
-		const manifest = Object.keys(finalBundle).reduce((acc, current) => {
+		const manifest = Object.keys(finalBundle).reduce<schema.Manifest>((acc, current) => {
 			let hashFlow = forge.md.sha1.create();
 
 			hashFlow.update(finalBundle[current].toString("binary"));
@@ -504,7 +510,7 @@ export class Pass {
 	 * @returns {Buffer}
 	 */
 
-	private _sign(manifest: { [key: string]: string }): Buffer {
+	private _sign(manifest: schema.Manifest): Buffer {
 		const signature = forge.pkcs7.createSignedData();
 
 		signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8");
@@ -577,8 +583,8 @@ export class Pass {
 			 * and then delete it from the passFile.
 			 */
 
-			["backgroundColor", "foregroundColor", "labelColor"]
-				.filter(v => this[passProps][v] && !isValidRGB(this[passProps][v]))
+			const passColors = ["backgroundColor", "foregroundColor", "labelColor"] as Array<keyof schema.PassColors>;
+			passColors.filter(v => this[passProps][v] && !isValidRGB(this[passProps][v]))
 				.forEach(v => delete this[passProps][v]);
 
 			Object.assign(passFile, this[passProps]);
@@ -630,7 +636,7 @@ function barcodesFromUncompleteData(message: string): schema.Barcode[] {
 		"PKBarcodeFormatPDF417",
 		"PKBarcodeFormatAztec",
 		"PKBarcodeFormatCode128"
-	].map(format => schema.getValidated({ format, message }, "barcode"));
+	].map(format => schema.getValidated({ format, message }, "barcode") as schema.Barcode);
 }
 
 function processRelevancySet<T>(key: string, data: T[]): T[] {

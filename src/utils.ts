@@ -11,7 +11,7 @@ import { sep } from "path";
  * @returns {Boolean} True if valid rgb, false otherwise
  */
 
-export function isValidRGB(value: string): boolean {
+export function isValidRGB(value?: string): boolean {
 	if (!value || typeof value !== "string") {
 		return false;
 	}
@@ -89,8 +89,10 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
  * @param origin
  */
 
-export function splitBufferBundle(origin: Object): [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]] {
-	return Object.keys(origin).reduce(([ l10n, bundle ], current) => {
+type PartitionedBundleElements = [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]];
+
+export function splitBufferBundle(origin: any): PartitionedBundleElements {
+	return Object.keys(origin).reduce<PartitionedBundleElements>(([ l10n, bundle ], current) => {
 		if (!current.includes(".lproj")) {
 			return [ l10n, { ...bundle, [current]: origin[current] }];
 		}

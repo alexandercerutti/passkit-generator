@@ -3,6 +3,10 @@ import debug from "debug";
 
 const schemaDebug = debug("Schema");
 
+export interface Manifest {
+	[key: string]: string;
+}
+
 export interface Certificates {
 	wwdr?: string;
 	signerCert?: string;
@@ -71,7 +75,7 @@ export interface OverridesSupportedOptions {
 	teamIdentifier?: string;
 	appLaunchURL?: string;
 	associatedStoreIdentifiers?: Array<number>;
-	userInfo?: Object | Array<any>;
+	userInfo?: { [key: string]: any };
 	webServiceURL?: string;
 	authenticationToken?: string;
 	sharingProhibited?: boolean;
@@ -294,7 +298,7 @@ export interface ValidPassType {
 	storeCard?: PassFields;
 }
 
-export interface ValidPass extends OverridesSupportedOptions, ValidPassType {
+interface PassInterfacesProps {
 	barcode?: Barcode;
 	barcodes?: Barcode[];
 	beacons?: Beacon[];
@@ -305,6 +309,12 @@ export interface ValidPass extends OverridesSupportedOptions, ValidPassType {
 	expirationDate?: string;
 	voided?: boolean;
 }
+
+type AllPassProps = PassInterfacesProps & ValidPassType & OverridesSupportedOptions;
+export type ValidPass = {
+	[K in keyof AllPassProps]: AllPassProps[K];
+};
+export type PassColors = Pick<OverridesSupportedOptions, "backgroundColor" | "foregroundColor" | "labelColor">;
 
 export interface Barcode {
 	altText?: string;
@@ -464,6 +474,7 @@ const schemas = {
 };
 
 export type Schema = keyof typeof schemas;
+export type ArrayPassSchema = Beacon | Location | Barcode;
 
 function resolveSchemaName(name: Schema) {
 	return schemas[name] || undefined;
@@ -500,7 +511,7 @@ export function isValid(opts: any, schemaName: Schema): boolean {
  * @returns {object} the filtered value or empty object
  */
 
-export function getValidated<T extends Object>(opts: any, schemaName: Schema): T {
+export function getValidated<T extends Object>(opts: any, schemaName: Schema): T | null {
 	const resolvedSchema = resolveSchemaName(schemaName);
 
 	if (!resolvedSchema) {

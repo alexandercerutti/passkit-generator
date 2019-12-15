@@ -6,7 +6,7 @@
 	<br>
 	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS.</p>
 
-![](https://img.shields.io/npm/v/passkit-generator.svg?label=passkit-generator)
+[![Financial Contributors on Open Collective](https://opencollective.com/passkit-generator/all/badge.svg?label=financial+contributors)](https://opencollective.com/passkit-generator) ![](https://img.shields.io/npm/v/passkit-generator.svg?label=passkit-generator)
 ![](https://img.shields.io/node/v/passkit-generator.svg)
 
 </div>
@@ -192,3 +192,33 @@ A big thanks to all the people and friends in the Apple Developer Academy (and n
 
 Any contribution, is welcome.
 Made with ❤️ in Italy.
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/alexandercerutti/passkit-generator/graphs/contributors"><img src="https://opencollective.com/passkit-generator/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/passkit-generator/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/passkit-generator"><img src="https://opencollective.com/passkit-generator/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/passkit-generator/contribute)]
+
+<a href="https://opencollective.com/passkit-generator/organization/0/website"><img src="https://opencollective.com/passkit-generator/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/1/website"><img src="https://opencollective.com/passkit-generator/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/2/website"><img src="https://opencollective.com/passkit-generator/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/3/website"><img src="https://opencollective.com/passkit-generator/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/4/website"><img src="https://opencollective.com/passkit-generator/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/5/website"><img src="https://opencollective.com/passkit-generator/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/6/website"><img src="https://opencollective.com/passkit-generator/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/7/website"><img src="https://opencollective.com/passkit-generator/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/8/website"><img src="https://opencollective.com/passkit-generator/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/passkit-generator/organization/9/website"><img src="https://opencollective.com/passkit-generator/organization/9/avatar.svg"></a>

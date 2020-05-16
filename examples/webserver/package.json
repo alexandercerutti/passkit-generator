@@ -1,7 +1,7 @@
 {
-  "name": "examples",
+  "name": "passkit-generator-webserver-examples",
   "version": "0.0.0",
-  "description": "Passkit-generator examples",
+  "description": "Passkit-generator examples based on webserver",
   "author": "Alexander P. Cerutti <cerutti.alexander@gmail.com>",
   "license": "ISC",
   "scripts": {

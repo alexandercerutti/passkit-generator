@@ -4,4 +4,3 @@ passModels/
 certificates/
 *.code-workspace
 .vscode/
-*.js

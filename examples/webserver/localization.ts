@@ -5,7 +5,7 @@
  */
 
 import app from "./webserver";
-import { createPass } from "..";
+import { createPass } from "../..";
 
 app.all(async function manageRequest(request, response) {
 	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
@@ -61,7 +61,7 @@ app.all(async function manageRequest(request, response) {
 		});
 
 		stream.pipe(response);
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 
 		response.set({

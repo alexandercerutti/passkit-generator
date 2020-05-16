@@ -1,28 +1,32 @@
-import genRoute, { app } from "./webserver";
-import { createPass, createAbstractModel, AbstractModel } from "..";
+/**
+ * Fields pushing dimostration
+ * To see all the included Fields, just open the pass
+ * Refer to https://apple.co/2Nvshvn to see how passes
+ * have their fields disposed.
+ *
+ * In this example we are going to imitate an EasyJet boarding pass
+ *
+ * @Author: Alexander P. Cerutti
+ */
 
-let abstractModel: AbstractModel;
+import app from "./webserver";
+import { createPass } from "../..";
 
-(async () => {
-	abstractModel = await createAbstractModel({
-		model: `./models/exampleBooking.pass`,
-		certificates: {
-			wwdr: "../certificates/WWDR.pem",
-			signerCert: "../certificates/signerCert.pem",
-			signerKey: {
-				keyFile: "../certificates/signerKey.pem",
-				passphrase: "123456"
-			}
-		},
-		// overrides: request.body || request.params || request.query,
-	});
-})();
-
-genRoute.all(async function manageRequest(request, response) {
-	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
-
+app.all(async function manageRequest(request, response) {
+	let passName = "exampleBooking" + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 	try {
-		const pass = await createPass(abstractModel);
+		let pass = await createPass({
+			model: `./models/exampleBooking`,
+			certificates: {
+				wwdr: "../certificates/WWDR.pem",
+				signerCert: "../certificates/signerCert.pem",
+				signerKey: {
+					keyFile: "../certificates/signerKey.pem",
+					passphrase: "123456"
+				}
+			},
+			overrides: request.body || request.params || request.query,
+		});
 
 		pass.transitType = "PKTransitTypeAir";
 
@@ -148,7 +152,7 @@ genRoute.all(async function manageRequest(request, response) {
 		});
 
 		stream.pipe(response);
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 
 		response.set({

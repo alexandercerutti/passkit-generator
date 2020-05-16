@@ -9,7 +9,7 @@
  */
 
 import app from "./webserver";
-import { createPass } from "..";
+import { createPass } from "../..";
 
 app.all(async function manageRequest(request, response) {
 	if (!request.query.fn) {
@@ -51,7 +51,7 @@ app.all(async function manageRequest(request, response) {
 		});
 
 		stream.pipe(response);
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 
 		response.set({

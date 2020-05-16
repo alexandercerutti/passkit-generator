@@ -1,11 +1,8 @@
 {
   "name": "passkitserverless",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Serverless example",
   "main": "handler.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Dicondur",
   "license": "ISC",
   "dependencies": {

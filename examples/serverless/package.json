@@ -1,7 +1,7 @@
 {
-  "name": "passkitserverless",
+  "name": "passkit-generator-serverless-example",
   "version": "0.0.0",
-  "description": "Serverless example",
+  "description": "Passkit-generator examples based on serverless",
   "main": "handler.js",
   "author": "Dicondur",
   "license": "ISC",

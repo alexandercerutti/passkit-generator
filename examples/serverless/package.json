@@ -8,5 +8,8 @@
   "dependencies": {
     "passkit-generator": "^2.0.4",
     "serverless": "^1.71.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.1"
   }
 }

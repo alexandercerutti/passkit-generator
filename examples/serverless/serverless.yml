@@ -20,7 +20,7 @@ provider:
 #Lambda function to generate pass using API-GW
 functions:
   createPass:
-    handler: handler.createPass
+    handler: handler.generatePass
     events:
       - http:
           path: gen/booking #Example: https://<apigw>/dev/gen/{modelname}

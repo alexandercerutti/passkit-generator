@@ -4,3 +4,6 @@ jspm_packages
 
 # Serverless directories
 .serverless
+
+certs/
+*.js

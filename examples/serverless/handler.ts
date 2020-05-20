@@ -1,8 +1,9 @@
 "use strict";
-const { createPass } = require("passkit-generator");
+// const { createPass } = require("passkit-generator");
+import { createPass, Pass } from "passkit-generator";
 
 //Lambda handler
-module.exports.createPass = async (event, context, callback) => {
+module.exports.createPass = async (event :any, context:any, callback:any) => {
   const passName = "Bookingpass"+ "_" + (new Date()).toISOString();
   
   try {
@@ -49,3 +50,4 @@ module.exports.createPass = async (event, context, callback) => {
     };
   }
 };
+

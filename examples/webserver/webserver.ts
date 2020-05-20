@@ -9,7 +9,7 @@ export const app = express();
 
 app.use(express.json());
 
-app.listen(8080, "0.0.0.0", function(request, response) {
+app.listen(8080, "0.0.0.0", function (request, response) {
 	console.log("Webserver started.");
 });
 

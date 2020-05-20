@@ -5,12 +5,12 @@ let abstractModel: AbstractModel;
 
 (async () => {
 	abstractModel = await createAbstractModel({
-		model: `./models/exampleBooking.pass`,
+		model: `../models/exampleBooking.pass`,
 		certificates: {
-			wwdr: "../certificates/WWDR.pem",
-			signerCert: "../certificates/signerCert.pem",
+			wwdr: "../../certificates/WWDR.pem",
+			signerCert: "../../certificates/signerCert.pem",
 			signerKey: {
-				keyFile: "../certificates/signerKey.pem",
+				keyFile: "../../certificates/signerKey.pem",
 				passphrase: "123456"
 			}
 		},

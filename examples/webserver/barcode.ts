@@ -16,12 +16,12 @@ app.all(async function manageRequest(request, response) {
 
 	try {
 		const pass = await createPass({
-			model: `./models/${request.params.modelName}`,
+			model: `../models/${request.params.modelName}`,
 			certificates: {
-				wwdr: "../certificates/WWDR.pem",
-				signerCert: "../certificates/signerCert.pem",
+				wwdr: "../../certificates/WWDR.pem",
+				signerCert: "../../certificates/signerCert.pem",
 				signerKey: {
-					keyFile: "../certificates/signerKey.pem",
+					keyFile: "../../certificates/signerKey.pem",
 					passphrase: "123456"
 				}
 			},

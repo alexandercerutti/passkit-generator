@@ -1,19 +1,21 @@
-"use strict";
-// const { createPass } = require("passkit-generator");
-import { createPass, Pass } from "passkit-generator";
+import { createPass } from "passkit-generator";
+import { Handler } from "aws-lambda";
+import * as path from "path";
 
-//Lambda handler
-module.exports.createPass = async (event :any, context:any, callback:any) => {
-  const passName = "Bookingpass"+ "_" + (new Date()).toISOString();
-  
+// Lambda handler
+export const generatePass: Handler = async (event, context, callback) => {
+  const passName = "Bookingpass" + "_" + (new Date()).toISOString();
+
   try {
+    //NOTE: using __dirname is required inside lambda
+
     const examplePass = await createPass({
-      model: __dirname + "/models/exampleBooking", //NOTE:  __dirname notation is required inside lambda
+      model: path.resolve(__dirname, "/models/exampleBooking"),
       certificates: {
-        wwdr:  __dirname + "/certs/wwdr.pem",
-        signerCert:  __dirname + "/certs/signercert.pem",
+        wwdr: path.resolve(__dirname, "/certs/wwdr.pem"),
+        signerCert: path.resolve(__dirname, "/certs/signercert.pem"),
         signerKey: {
-          keyFile:  __dirname + "/certs/signerkey.pem",
+          keyFile: path.resolve(__dirname, "/certs/signerkey.pem"),
           passphrase: "123456"
         }
       },
@@ -22,11 +24,13 @@ module.exports.createPass = async (event :any, context:any, callback:any) => {
         serialNumber: "AAGH44625236dddaffbda"
       }
     });
-  
 
-    // Generate the stream, which gets returned through a Promise 
-    const stream = await examplePass.generate();
-    const pass = await stream.toString('base64'); //Important needed for API GW to work
+
+    // Generate the stream, which gets returned through a Promise
+    const stream = examplePass.generate();
+
+    // Important: this is needed for API GW to work
+    const pass = stream.toString();
 
     const response = {
       statusCode: 200,
@@ -39,7 +43,9 @@ module.exports.createPass = async (event :any, context:any, callback:any) => {
       body: pass,
       isBase64Encoded: true
     };
-    console.log(response); //To debug in Cloudwatch
+
+    // To debug in Cloudwatch
+    console.log(response);
     callback(null, response);
 
     return response;
@@ -50,4 +56,3 @@ module.exports.createPass = async (event :any, context:any, callback:any) => {
     };
   }
 };
-

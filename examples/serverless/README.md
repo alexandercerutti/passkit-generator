@@ -8,7 +8,7 @@ Install the dependencies:
 
 ```sh
 $ git clone https://github.com/alexandercerutti/passkit-generator.git;
-$ cd examples/serverless;
+$ cd passkit-generator/examples/serverless;
 $ npm install
 ```
 

@@ -30,5 +30,5 @@
   "description": "A Booking pass",
   "foregroundColor": "rgb(255, 255, 255)",
   "backgroundColor": "rgb(253, 123, 35)",
-  "boardingPass": {}
+  "genericPass": {}
 }

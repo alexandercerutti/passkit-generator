@@ -5,12 +5,7 @@
 		// "outDir": "./dist",
 		"strict": true,
 		"baseUrl": "./",
-		"typeRoots": [
-			"node_modules/@types"
-		],
-		"types": [
-			"node"
-		],
+		"moduleResolution": "node",
 		"esModuleInterop": true,
 		"inlineSourceMap": true
 	}

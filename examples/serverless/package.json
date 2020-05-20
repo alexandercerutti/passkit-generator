@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Passkit-generator examples based on serverless",
   "main": "handler.js",
+  "scripts": {
+    "build": "npx tsc"
+  },
   "author": "Dicondur",
   "license": "ISC",
   "dependencies": {
@@ -10,6 +13,8 @@
     "serverless": "^1.71.1"
   },
   "devDependencies": {
-    "@types/node": "^14.0.1"
+    "@types/aws-lambda": "^8.10.51",
+    "@types/node": "^14.0.1",
+    "typescript": "^3.9.2"
   }
 }

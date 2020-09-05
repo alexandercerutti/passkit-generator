@@ -36,7 +36,7 @@ export async function createPass(
 			}
 
 			if (additionalBuffers) {
-				const [ additionalL10n, additionalBundle ] = splitBufferBundle(additionalBuffers);
+				const [additionalL10n, additionalBundle] = splitBufferBundle(additionalBuffers);
 				Object.assign(options.bundle["l10nBundle"], additionalL10n);
 				Object.assign(options.bundle["bundle"], additionalBundle);
 			}
@@ -56,7 +56,7 @@ export async function createPass(
 			]);
 
 			if (additionalBuffers) {
-				const [ additionalL10n, additionalBundle ] = splitBufferBundle(additionalBuffers);
+				const [additionalL10n, additionalBundle] = splitBufferBundle(additionalBuffers);
 				Object.assign(bundle["l10nBundle"], additionalL10n);
 				Object.assign(bundle["bundle"], additionalBundle);
 			}

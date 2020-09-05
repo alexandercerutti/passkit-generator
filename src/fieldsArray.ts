@@ -48,7 +48,7 @@ export default class FieldsArray extends Array {
 	 */
 
 	pop(): schema.Field {
-	 	const element: schema.Field = Array.prototype.pop.call(this);
+		const element: schema.Field = Array.prototype.pop.call(this);
 		this[poolSymbol].delete(element.key);
 		return element;
 	}
@@ -59,7 +59,7 @@ export default class FieldsArray extends Array {
 	 */
 
 	splice(start: number, deleteCount: number, ...items: schema.Field[]): schema.Field[] {
-		const removeList = this.slice(start, deleteCount+start);
+		const removeList = this.slice(start, deleteCount + start);
 		removeList.forEach(item => this[poolSymbol].delete(item.key));
 
 		return Array.prototype.splice.call(this, start, deleteCount, items);

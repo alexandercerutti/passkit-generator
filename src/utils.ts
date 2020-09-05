@@ -92,9 +92,9 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
 type PartitionedBundleElements = [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]];
 
 export function splitBufferBundle(origin: any): PartitionedBundleElements {
-	return Object.keys(origin).reduce<PartitionedBundleElements>(([ l10n, bundle ], current) => {
+	return Object.keys(origin).reduce<PartitionedBundleElements>(([l10n, bundle], current) => {
 		if (!current.includes(".lproj")) {
-			return [ l10n, { ...bundle, [current]: origin[current] }];
+			return [l10n, { ...bundle, [current]: origin[current] }];
 		}
 
 		const pathComponents = current.split(sep);
@@ -103,8 +103,8 @@ export function splitBufferBundle(origin: any): PartitionedBundleElements {
 
 		(l10n[lang] || (l10n[lang] = {}))[file] = origin[current];
 
-		return [ l10n, bundle ];
-	}, [{},{}]);
+		return [l10n, bundle];
+	}, [{}, {}]);
 }
 
 type StringSearchMode = "includes" | "startsWith" | "endsWith";

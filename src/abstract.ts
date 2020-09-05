@@ -51,7 +51,7 @@ export class AbstractModel {
 
 	constructor(options: AbstractModelOptions) {
 		this[abmModel] = options.bundle;
-		this[abmCertificates] = options.certificates,
+		this[abmCertificates] = options.certificates;
 		this[abmOverrides] = options.overrides
 	}
 

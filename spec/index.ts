@@ -25,6 +25,63 @@ describe("Passkit-generator", function () {
 		});
 	});
 
+	describe("Model validation", () => {
+		it("Should reject with non valid model", async () => {
+			expectAsync(createPass({
+				// @ts-expect-error
+				model: 0,
+				certificates: {
+					wwdr: "certificates/WWDR.pem",
+					signerCert: "certificates/signerCert.pem",
+					signerKey: {
+						keyFile: "certificates/signerKey.pem",
+						passphrase: "123456"
+					}
+				},
+				overrides: {}
+			})).toBeRejected();
+
+			expectAsync(createPass({
+				model: undefined,
+				certificates: {
+					wwdr: "certificates/WWDR.pem",
+					signerCert: "certificates/signerCert.pem",
+					signerKey: {
+						keyFile: "certificates/signerKey.pem",
+						passphrase: "123456"
+					}
+				},
+				overrides: {}
+			})).toBeRejected();
+
+			expectAsync(createPass({
+				model: null,
+				certificates: {
+					wwdr: "certificates/WWDR.pem",
+					signerCert: "certificates/signerCert.pem",
+					signerKey: {
+						keyFile: "certificates/signerKey.pem",
+						passphrase: "123456"
+					}
+				},
+				overrides: {}
+			})).toBeRejected();
+
+			expectAsync(createPass({
+				model: {},
+				certificates: {
+					wwdr: "certificates/WWDR.pem",
+					signerCert: "certificates/signerCert.pem",
+					signerKey: {
+						keyFile: "certificates/signerKey.pem",
+						passphrase: "123456"
+					}
+				},
+				overrides: {}
+			})).toBeRejected();
+		});
+	});
+
 	describe("localize()", () => {
 		it("Won't apply changes without at least one parameter", () => {
 			// @ts-ignore -- Ignoring for test purposes
@@ -70,7 +127,7 @@ describe("Passkit-generator", function () {
 		});
 
 		it("Will set expiration with a Date as argument", () => {
-			pass.expiration(new Date(2020,5,1,0,0,0));
+			pass.expiration(new Date(2020, 5, 1, 0, 0, 0));
 			// this is made to avoid problems with winter and summer time:
 			// we focus only on the date and time for the tests.
 			let noTimeZoneDateTime = pass.props["expirationDate"].split("+")[0];

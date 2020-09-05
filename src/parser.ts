@@ -231,24 +231,26 @@ export function getModelBufferContents(model: BundleUnit): PartitionedBundle {
  * @param options
  */
 
-type flatCertificates = Omit<Certificates, "signerKey"> & { signerKey: string; [key: string]: string };
+type flatCertificates = Omit<Certificates, "signerKey"> & {
+	signerKey: string;
+};
 
 export async function readCertificatesFromOptions(options: Certificates): Promise<FinalCertificates> {
 	if (!(options && Object.keys(options).length && isValid(options, "certificatesSchema"))) {
 		throw new Error(formatMessage("CP_NO_CERTS"));
 	}
 
+	let signerKey: string;
+
+	if (typeof options.signerKey === "object") {
+		signerKey = options.signerKey?.keyFile;
+	} else {
+		signerKey = options.signerKey;
+	}
+
 	// if the signerKey is an object, we want to get
 	// all the real contents and don't care of passphrase
-	const flattenedDocs = Object.assign({}, options, {
-		signerKey: (
-			options.signerKey && typeof options.signerKey === "string" &&
-			options.signerKey || (
-				options.signerKey &&
-				options.signerKey.keyFile
-			)
-		)
-	}) as flatCertificates;
+	const flattenedDocs = Object.assign({}, options, { signerKey }) as flatCertificates;
 
 	// We read the contents
 	const rawContentsPromises = Object.keys(flattenedDocs)

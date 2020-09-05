@@ -18,25 +18,14 @@ const readFile = promisify(_readFile);
  */
 
 export async function getModelContents(model: FactoryOptions["model"]) {
-	const isModelValid = (
-		model && (
-			typeof model === "string" || (
-				typeof model === "object" &&
-				Object.keys(model).length
-			)
-		)
-	);
-
-	if (!isModelValid) {
-		throw new Error(formatMessage("MODEL_NOT_VALID"));
-	}
-
 	let modelContents: PartitionedBundle;
 
 	if (typeof model === "string") {
 		modelContents = await getModelFolderContents(model);
-	} else {
+	} else if (typeof model === "object" && Object.keys(model).length) {
 		modelContents = getModelBufferContents(model);
+	} else {
+		throw new Error(formatMessage("MODEL_NOT_VALID"));
 	}
 
 	const modelFiles = Object.keys(modelContents.bundle);
@@ -112,14 +101,15 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 		}
 
 		// Splitting files from localization folders
-		const rawBundle = filteredFiles.filter(entry => !entry.includes(".lproj"));
+		const rawBundleFiles = filteredFiles.filter(entry => !entry.includes(".lproj"));
 		const l10nFolders = filteredFiles.filter(entry => entry.includes(".lproj"));
 
-		const bundleBuffers = rawBundle.map(file => readFile(path.resolve(modelPath, file)));
-		const buffers = await Promise.all(bundleBuffers);
+		const rawBundleBuffers = await Promise.all(
+			rawBundleFiles.map(file => readFile(path.resolve(modelPath, file)))
+		);
 
 		const bundle: BundleUnit = Object.assign({},
-			...rawBundle.map((fileName, index) => ({ [fileName]: buffers[index] }))
+			...rawBundleFiles.map((fileName, index) => ({ [fileName]: rawBundleBuffers[index] }))
 		);
 
 		// Reading concurrently localizations folder

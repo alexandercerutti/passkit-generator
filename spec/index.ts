@@ -27,7 +27,7 @@ describe("Passkit-generator", function () {
 
 	describe("Model validation", () => {
 		it("Should reject with non valid model", async () => {
-			expectAsync(createPass({
+			await expectAsync(createPass({
 				// @ts-expect-error
 				model: 0,
 				certificates: {
@@ -41,7 +41,7 @@ describe("Passkit-generator", function () {
 				overrides: {}
 			})).toBeRejected();
 
-			expectAsync(createPass({
+			await expectAsync(createPass({
 				model: undefined,
 				certificates: {
 					wwdr: "certificates/WWDR.pem",
@@ -54,7 +54,7 @@ describe("Passkit-generator", function () {
 				overrides: {}
 			})).toBeRejected();
 
-			expectAsync(createPass({
+			await expectAsync(createPass({
 				model: null,
 				certificates: {
 					wwdr: "certificates/WWDR.pem",
@@ -67,7 +67,7 @@ describe("Passkit-generator", function () {
 				overrides: {}
 			})).toBeRejected();
 
-			expectAsync(createPass({
+			await expectAsync(createPass({
 				model: {},
 				certificates: {
 					wwdr: "certificates/WWDR.pem",

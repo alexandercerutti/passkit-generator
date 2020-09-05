@@ -39,7 +39,6 @@ export async function createAbstractModel(options: AbstractFactoryOptions) {
 			overrides: options.overrides
 		});
 	} catch (err) {
-		console.log(err);
 		throw new Error(formatMessage("CP_INIT_ERROR", "abstract model", err));
 	}
 }

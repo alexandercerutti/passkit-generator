@@ -13,7 +13,7 @@ export interface Certificates {
 	signerKey?: {
 		keyFile: string;
 		passphrase?: string;
-	};
+	} | string;
 }
 
 export interface FactoryOptions {

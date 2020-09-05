@@ -270,13 +270,12 @@ export async function readCertificatesFromOptions(options: Certificates): Promis
 		const parsedContents = await Promise.all(rawContentsPromises);
 		const pemParsedContents = parsedContents.map((file, index) => {
 			const certName = Object.keys(options)[index];
-			const pem = parsePEM(
-				certName,
-				file,
-				typeof options.signerKey === "object"
-					? options.signerKey.passphrase
-					: undefined
-			);
+			const passphrase = (
+				typeof options.signerKey === "object" &&
+				options.signerKey?.passphrase
+			) || undefined;
+
+			const pem = parsePEM(certName, file, passphrase);
 
 			if (!pem) {
 				throw new Error(formatMessage("INVALID_CERTS", certName));

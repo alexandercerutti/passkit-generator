@@ -148,7 +148,7 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 								}
 
 								const fileComponents = file.split(path.sep);
-								const fileName = fileComponents[fileComponents.length-1];
+								const fileName = fileComponents[fileComponents.length - 1];
 
 								return { ...acc, [fileName]: buffers[index] };
 							}, {})
@@ -177,7 +177,7 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 				const pathContents = (err.path as string).split(/(\/|\\\?)/);
 				throw new Error(formatMessage(
 					"MODELF_FILE_NOT_FOUND",
-					pathContents[pathContents.length-1]
+					pathContents[pathContents.length - 1]
 				))
 			}
 		}
@@ -217,7 +217,7 @@ export function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 	}
 
 	// separing localization folders from bundle files
-	const [ l10nBundle, bundle ] = splitBufferBundle(rawBundle);
+	const [l10nBundle, bundle] = splitBufferBundle(rawBundle);
 
 	return {
 		bundle,
@@ -259,7 +259,7 @@ export async function readCertificatesFromOptions(options: Certificates): Promis
 
 			if (!!path.parse(content).ext) {
 				// The content is a path to the document
-				return readFile(path.resolve(content), { encoding: "utf8"});
+				return readFile(path.resolve(content), { encoding: "utf8" });
 			} else {
 				// Content is the real document content
 				return Promise.resolve(content);

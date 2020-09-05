@@ -125,35 +125,36 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 		// Reading concurrently localizations folder
 		// and their files and their buffers
 		const L10N_FilesListByFolder: Array<BundleUnit> = await Promise.all(
-			l10nFolders.map(folderPath => {
+			l10nFolders.map(async folderPath => {
 				// Reading current folder
 				const currentLangPath = path.join(modelPath, folderPath);
-				return readDir(currentLangPath)
-					.then(files => {
-						// Transforming files path to a model-relative path
-						const validFiles = removeHidden(files)
-							.map(file => path.join(currentLangPath, file));
 
-						// Getting all the buffers from file paths
-						return Promise.all([
-							...validFiles.map(file =>
-								readFile(file).catch(() => Buffer.alloc(0))
-							)
-						]).then(buffers =>
-							// Assigning each file path to its buffer
-							// and discarding the empty ones
-							validFiles.reduce<BundleUnit>((acc, file, index) => {
-								if (!buffers[index].length) {
-									return acc;
-								}
+				const files = await readDir(currentLangPath);
+				// Transforming files path to a model-relative path
+				const validFiles = removeHidden(files)
+					.map(file => path.join(currentLangPath, file));
 
-								const fileComponents = file.split(path.sep);
-								const fileName = fileComponents[fileComponents.length - 1];
+				// Getting all the buffers from file paths
+				const buffers = await Promise.all(
+					validFiles.map(file => readFile(file).catch(() => Buffer.alloc(0)))
+				);
 
-								return { ...acc, [fileName]: buffers[index] };
-							}, {})
-						);
-					});
+				// Assigning each file path to its buffer
+				// and discarding the empty ones
+
+				return validFiles.reduce<BundleUnit>((acc, file, index) => {
+					if (!buffers[index].length) {
+						return acc;
+					}
+
+					const fileComponents = file.split(path.sep);
+					const fileName = fileComponents[fileComponents.length - 1];
+
+					return {
+						...acc,
+						[fileName]: buffers[index]
+					};
+				}, {});
 			})
 		);
 
@@ -168,7 +169,7 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 			l10nBundle
 		};
 	} catch (err) {
-		if (err.code && err.code === "ENOENT") {
+		if (err?.code === "ENOENT") {
 			if (err.syscall === "open") {
 				// file opening failed
 				throw new Error(formatMessage("MODELF_NOT_FOUND", err.path))

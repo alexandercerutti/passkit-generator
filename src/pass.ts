@@ -75,7 +75,7 @@ export class Pass {
 
 		// Parsing and validating pass.json keys
 		const passCoreKeys = Object.keys(this.passCore) as (keyof schema.ValidPass)[];
-		const validatedPassKeys = passCoreKeys.reduce((acc, current) => {
+		const validatedPassKeys = passCoreKeys.reduce<schema.ValidPass>((acc, current) => {
 			if (this.type === current) {
 				// We want to exclude type keys (eventTicket,
 				// boardingPass, ecc.) and their content
@@ -293,7 +293,7 @@ export class Pass {
 
 	beacons(resetFlag: null): this;
 	beacons(...data: schema.Beacon[]): this
-	beacons(...data: (schema.Beacon|null)[]): this {
+	beacons(...data: (schema.Beacon | null)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["beacons"];
 			return this;
@@ -316,7 +316,7 @@ export class Pass {
 
 	locations(resetFlag: null): this;
 	locations(...data: schema.Location[]): this;
-	locations(...data: (schema.Location|null)[]): this {
+	locations(...data: (schema.Location | null)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["locations"];
 			return this;
@@ -366,7 +366,7 @@ export class Pass {
 	barcodes(resetFlag: null): this;
 	barcodes(message: string): this;
 	barcodes(...data: schema.Barcode[]): this;
-	barcodes(...data: (schema.Barcode|null|string)[]): this {
+	barcodes(...data: (schema.Barcode | null | string)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["barcodes"];
 			return this;

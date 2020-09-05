@@ -3,13 +3,11 @@ import forge from "node-forge";
 import formatMessage from "./messages";
 import { FactoryOptions, PartitionedBundle, BundleUnit, Certificates, FinalCertificates, isValid } from "./schema";
 import { removeHidden, splitBufferBundle, getAllFilesWithName, hasFilesWithName, deletePersonalization } from "./utils";
-import { promisify } from "util";
-import { readFile as _readFile, readdir as _readdir } from "fs";
+import fs from "fs";
 import debug from "debug";
 
 const prsDebug = debug("Personalization");
-const readDir = promisify(_readdir);
-const readFile = promisify(_readFile);
+const { readdir: readDir, readFile } = fs.promises;
 
 /**
  * Performs checks on the passed model to

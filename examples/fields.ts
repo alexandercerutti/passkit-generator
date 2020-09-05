@@ -152,7 +152,7 @@ app.all(async function manageRequest(request, response) {
 		});
 
 		stream.pipe(response);
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 
 		response.set({

@@ -19,7 +19,7 @@
 		"Pass"
 	],
 	"dependencies": {
-		"@hapi/joi": "^16.1.8",
+		"joi": "^17.2.1",
 		"debug": "^4.1.1",
 		"moment": "^2.24.0",
 		"node-forge": "^0.9.1",
@@ -30,7 +30,7 @@
 	},
 	"devDependencies": {
 		"@types/debug": "^4.1.5",
-		"@types/hapi__joi": "^16.0.4",
+		"@types/joi": "^14.3.4",
 		"@types/jasmine": "^3.5.0",
 		"@types/node": "^12.12.14",
 		"@types/node-forge": "^0.9.0",

@@ -8,3 +8,4 @@ examples/
 tsconfig.json
 .github/
 spec/
+assets/

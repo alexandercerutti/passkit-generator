@@ -5,3 +5,5 @@ certificates/
 *.code-workspace
 .vscode/
 *.js
+lib/
+examples/build

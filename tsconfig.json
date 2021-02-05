@@ -4,6 +4,7 @@
 		"target": "es2018",
 		"esModuleInterop": true,
 		"newLine": "LF",
+		"importHelpers": true
 	},
 	"exclude": [
 		"node_modules/"

@@ -9,7 +9,7 @@
  */
 
 import app from "./webserver";
-import { createPass } from "..";
+import { createPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
 	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
@@ -45,6 +45,7 @@ app.all(async function manageRequest(request, response) {
 				format: "PKBarcodeFormatPDF417"
 			}, {
 				message: "Thank you for using this package <3",
+				// @ts-expect-error
 				format: "PKBarcodeFormatMock44617"
 			});
 		}
@@ -65,7 +66,7 @@ app.all(async function manageRequest(request, response) {
 		});
 
 		stream.pipe(response);
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 
 		response.set({

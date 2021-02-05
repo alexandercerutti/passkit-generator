@@ -8,14 +8,14 @@
 
 import app from "./webserver";
 import fetch from "node-fetch";
-import { createPass } from "..";
+import { createPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
 	let passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
 
 	const avatar = await (
 		fetch("https://s.gravatar.com/avatar/83cd11399b7ea79977bc302f3931ee52?size=32&default=retro")
-		.then(res => res.buffer())
+			.then(res => res.buffer())
 	);
 
 	const passConfig = {

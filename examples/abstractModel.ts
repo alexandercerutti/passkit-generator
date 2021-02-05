@@ -1,5 +1,5 @@
 import genRoute, { app } from "./webserver";
-import { createPass, createAbstractModel, AbstractModel } from "..";
+import { createPass, createAbstractModel, AbstractModel } from "passkit-generator";
 
 let abstractModel: AbstractModel;
 

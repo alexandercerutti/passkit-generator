@@ -10,7 +10,7 @@ $ git clone https://github.com/alexandercerutti/passkit-generator.git;
 $ cd passkit-generator && npm install;
 $ cd examples && npm install;
 $ npm run build;
-$ node <the-example-you-want-to-execute>.js
+$ npm run example <the-example-you-want-to-execute>.js
 ```
 
 Certificates paths in examples are linked to a folder `certificates` in the root of this project which is not provided.

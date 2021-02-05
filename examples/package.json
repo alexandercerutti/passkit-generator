@@ -5,7 +5,11 @@
   "author": "Alexander P. Cerutti <cerutti.alexander@gmail.com>",
   "license": "ISC",
   "scripts": {
-    "build": "cd ..; npm run build; cd examples"
+    "preinstall": "npm run clear:deps && npm unlink --no-save passkit-generator && cd .. && npm run build && npm link && cd examples && npm link passkit-generator",
+    "example": "cd build && node",
+    "build": "npm run build:clear && npx tsc",
+    "build:clear": "rm -rf build",
+    "clear:deps": "rm -rf node_modules"
   },
   "dependencies": {
     "express": "^4.17.1",

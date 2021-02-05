@@ -42,7 +42,7 @@ export class Pass {
 
 	private Certificates: schema.FinalCertificates;
 	private [transitType]: string = "";
-	l10nTranslations: { [key: string]: { [key: string]: string } } = {};
+	private l10nTranslations: { [languageCode: string]: { [placeholder: string]: string } } = {};
 
 	constructor(options: schema.PassInstance) {
 		if (!schema.isValid(options, "instance")) {
@@ -242,7 +242,7 @@ export class Pass {
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 
-	localize(lang: string, translations?: { [key: string]: string }): this {
+	localize(lang: string, translations?: { [placeholder: string]: string }): this {
 		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
 			this.l10nTranslations[lang] = translations || {};
 		}

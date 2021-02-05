@@ -1,15 +1,11 @@
-import { createPass } from "..";
-
-// This is used to extract the type of a Promise (like Promise<Pass> => Pass)
-// found here: https://medium.com/@curtistatewilkinson/this-can-be-done-using-conditional-types-like-so-633cf9787c8b
-type Unpacked<T> = T extends Promise<infer U> ? U : T;
+import { createPass, Pass } from "..";
 
 /**
  * Tests created upon Jasmine testing suite.
  */
 
 describe("Passkit-generator", function () {
-	let pass: Unpacked<ReturnType<typeof createPass>>;
+	let pass: Pass;
 	beforeEach(async () => {
 		pass = await createPass({
 			model: "examples/models/examplePass.pass",
@@ -84,26 +80,26 @@ describe("Passkit-generator", function () {
 
 	describe("localize()", () => {
 		it("Won't apply changes without at least one parameter", () => {
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.localize();
-			expect(Object.keys(pass.l10nTranslations).length).toBe(0);
+			expect(Object.keys(pass["l10nTranslations"]).length).toBe(0);
 		});
 
 		it("Won't apply changes with a non-string first argument", () => {
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.localize(5);
-			expect(Object.keys(pass.l10nTranslations).length).toBe(0);
+			expect(Object.keys(pass["l10nTranslations"]).length).toBe(0);
 		});
 
 		it("Will include .lproj folder if only the first argument is passed", () => {
 			pass.localize("en");
-			expect(Object.keys(pass.l10nTranslations).length).toBe(1);
+			expect(Object.keys(pass["l10nTranslations"]).length).toBe(1);
 		});
 
 		it("Will ignore all the second argument is not object or undefined", () => {
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.localize("en", 42);
-			expect(Object.keys(pass.l10nTranslations).length).toBe(0);
+			expect(Object.keys(pass["l10nTranslations"]).length).toBe(0);
 		});
 
 		it("Will apply changes if a second object argument with translations is passed", () => {
@@ -111,17 +107,17 @@ describe("Passkit-generator", function () {
 				"Test": "Prova"
 			});
 
-			expect(typeof pass.l10nTranslations["it"]).toBe("object");
-			expect(pass.l10nTranslations["it"]["Test"]).toBe("Prova");
+			expect(typeof pass["l10nTranslations"]["it"]).toBe("object");
+			expect(pass["l10nTranslations"]["it"]["Test"]).toBe("Prova");
 		});
 	});
 
 	describe("expiration()", () => {
 		it("Won't apply changes withouta valid argument", () => {
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.expiration();
 			expect(pass.props["expirationDate"]).toBe(undefined);
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.expiration(42);
 			expect(pass.props["expirationDate"]).toBe(undefined);
 		});
@@ -135,11 +131,11 @@ describe("Passkit-generator", function () {
 		});
 
 		it("An invalid date, will not apply changes", () => {
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.expiration("32/18/228317");
 			expect(pass.props["expirationDate"]).toBe(undefined);
 
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.expiration("32/18/228317");
 			expect(pass.props["expirationDate"]).toBe(undefined);
 		});
@@ -161,7 +157,7 @@ describe("Passkit-generator", function () {
 			const oldAmountOfLocations = props && props.length || 0;
 
 			pass.locations({
-				// @ts-ignore
+				// @ts-expect-error
 				"ibrupofene": "no",
 				"longitude": 0.00000000
 			}, ...props);
@@ -178,7 +174,7 @@ describe("Passkit-generator", function () {
 			const oldAmountOfLocations = props && props.length || 0;
 
 			pass.locations({
-				//@ts-ignore
+				// @ts-expect-error
 				"ibrupofene": "no",
 				"longitude": 0.00000000
 			}, {
@@ -196,7 +192,7 @@ describe("Passkit-generator", function () {
 			const oldAmountOfBeacons = props && props.length || 0;
 
 			pass.beacons({
-				// @ts-ignore
+				// @ts-expect-error
 				"ibrupofene": "no",
 				"major": 55,
 				"minor": 0,
@@ -222,7 +218,7 @@ describe("Passkit-generator", function () {
 				"major": 55,
 				"minor": 0,
 				"proximityUUID": "fdcbbf48-a4ae-4ffb-9200-f8a373c5c18e",
-				// @ts-ignore
+				// @ts-expect-error
 				"animal": "Monkey"
 			}, ...props);
 
@@ -236,7 +232,6 @@ describe("Passkit-generator", function () {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
-			// @ts-ignore - Ignoring for test purposes
 			pass.barcodes();
 			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
@@ -245,7 +240,7 @@ describe("Passkit-generator", function () {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.barcode(true);
 			expect(props.length).toBe(oldAmountOfBarcodes);
 		});
@@ -254,7 +249,7 @@ describe("Passkit-generator", function () {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.barcodes(42);
 			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
 		});
@@ -287,7 +282,7 @@ describe("Passkit-generator", function () {
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props && props.length || 0;
 
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.barcodes({
 				format: "PKBarcodeFormatPDF417",
 			});
@@ -296,7 +291,7 @@ describe("Passkit-generator", function () {
 		});
 
 		it("Will ignore non-Barcodes schema compliant objects", () => {
-			// @ts-ignore -- Ignoring for test purposes
+			// @ts-expect-error
 			pass.barcodes(5, 10, 15, {
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417"
@@ -317,7 +312,7 @@ describe("Passkit-generator", function () {
 
 			pass
 				.barcodes("Message-22645272183")
-				// @ts-ignore -- Ignoring for test purposes
+				// @ts-expect-error
 				.barcode(55)
 
 			// unchanged
@@ -339,7 +334,7 @@ describe("Passkit-generator", function () {
 
 			pass
 				.barcodes("Message-22645272183")
-				// @ts-ignore -- Ignoring for test purposes
+				// @ts-expect-error
 				.barcode("PKBingoBongoFormat");
 
 			expect(pass.props["barcode"]).toEqual(oldBarcode);

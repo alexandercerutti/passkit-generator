@@ -6,6 +6,7 @@ examples/
 *.ts
 !*.d.ts
 tsconfig.json
+tsconfig.dist.json
 .github/
 spec/
 assets/

@@ -73,7 +73,7 @@ export declare class Pass {
 	 * @param data
 	 * @returns {Pass}
 	 */
-    locations(resetFlag: null): this;
+	locations(resetFlag: null): this;
 	locations(...data: Schema.Location[]): this;
 
 	/**
@@ -93,8 +93,8 @@ export declare class Pass {
 	 * @params data - other barcodes support
 	 * @return {this} Improved this with length property and other methods
 	 */
-    barcodes(resetFlag: null): this;
-    barcodes(message: string): this;
+	barcodes(resetFlag: null): this;
+	barcodes(message: string): this;
 	barcodes(...data: Schema.Barcode[]): this;
 
 	/**
@@ -136,10 +136,10 @@ export declare class Pass {
 export declare function createAbstractModel(options: Schema.AbstractFactoryOptions): Promise<AbstractModel>;
 
 export declare class AbstractModel {
-    constructor(options: Schema.AbstractModelOptions);
-    readonly certificates: Schema.FinalCertificates;
-    readonly bundle: Schema.PartitionedBundle;
-    readonly overrides: Schema.OverridesSupportedOptions;
+	constructor(options: Schema.AbstractModelOptions);
+	readonly certificates: Schema.FinalCertificates;
+	readonly bundle: Schema.PartitionedBundle;
+	readonly overrides: Schema.OverridesSupportedOptions;
 }
 
 declare namespace Schema {

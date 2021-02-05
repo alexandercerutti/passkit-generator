@@ -1,34 +1,36 @@
 {
-  "formatVersion": 1,
-  "passTypeIdentifier": "pass.com.example.myapp",
-  "serialNumber": "nmyuxofgna",
-  "teamIdentifier": "F53WB8AE67",
-  "webServiceURL": "https://192.168.1.254:80/",
-  "authenticationToken": "vxwxd7J8AlNNFPS8k0a0FfUFtq0ewzFdc",
-  "relevantDate": "2011-12-08T13:00-08:00",
-  "locations": [
-    {
-      "longitude": -122.3748889,
-      "latitude": 37.6189722
-    },
-    {
-      "longitude": -122.03118,
-      "latitude": 37.33182
-    }
-  ],
-  "barcodes": [{
-    "message": "123456789",
-    "format": "PKBarcodeFormatQR",
-    "messageEncoding": "iso-8859-1"
-  }],
-  "barcode": {
-    "message": "123456789",
-    "format": "PKBarcodeFormatQR",
-    "messageEncoding": "iso-8859-1"
-  },
-  "organizationName": "Apple Inc.",
-  "description": "A Booking pass",
-  "foregroundColor": "rgb(255, 255, 255)",
-  "backgroundColor": "rgb(253, 123, 35)",
-  "boardingPass": {}
+	"formatVersion": 1,
+	"passTypeIdentifier": "pass.com.example.myapp",
+	"serialNumber": "nmyuxofgna",
+	"teamIdentifier": "F53WB8AE67",
+	"webServiceURL": "https://192.168.1.254:80/",
+	"authenticationToken": "vxwxd7J8AlNNFPS8k0a0FfUFtq0ewzFdc",
+	"relevantDate": "2011-12-08T13:00-08:00",
+	"locations": [
+		{
+			"longitude": -122.3748889,
+			"latitude": 37.6189722
+		},
+		{
+			"longitude": -122.03118,
+			"latitude": 37.33182
+		}
+	],
+	"barcodes": [
+		{
+			"message": "123456789",
+			"format": "PKBarcodeFormatQR",
+			"messageEncoding": "iso-8859-1"
+		}
+	],
+	"barcode": {
+		"message": "123456789",
+		"format": "PKBarcodeFormatQR",
+		"messageEncoding": "iso-8859-1"
+	},
+	"organizationName": "Apple Inc.",
+	"description": "A Booking pass",
+	"foregroundColor": "rgb(255, 255, 255)",
+	"backgroundColor": "rgb(253, 123, 35)",
+	"boardingPass": {}
 }

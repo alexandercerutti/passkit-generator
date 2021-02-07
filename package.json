@@ -10,7 +10,7 @@
 		"build:examples": "cd examples && npm run build",
 		"build:spec": "rm -rf ./spec/*.js && npx tsc",
 		"prepublishOnly": "npm run build",
-		"test": "npm run build:spec && npm run build:src && jasmine spec/*.js",
+		"test": "npm run build:spec && jasmine spec/*.js",
 		"example": "npm run build:src && npm --prefix examples run example"
 	},
 	"author": "Alexander Patrick Cerutti",

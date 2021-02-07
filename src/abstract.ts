@@ -1,4 +1,10 @@
-import { Certificates, FinalCertificates, PartitionedBundle, OverridesSupportedOptions, FactoryOptions } from "./schema";
+import {
+	Certificates,
+	FinalCertificates,
+	PartitionedBundle,
+	OverridesSupportedOptions,
+	FactoryOptions,
+} from "./schema";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
 import formatMessage from "./messages";
 
@@ -6,7 +12,8 @@ const abmCertificates = Symbol("certificates");
 const abmModel = Symbol("model");
 const abmOverrides = Symbol("overrides");
 
-export interface AbstractFactoryOptions extends Omit<FactoryOptions, "certificates"> {
+export interface AbstractFactoryOptions
+	extends Omit<FactoryOptions, "certificates"> {
 	certificates?: Certificates;
 }
 
@@ -30,13 +37,13 @@ export async function createAbstractModel(options: AbstractFactoryOptions) {
 	try {
 		const [bundle, certificates] = await Promise.all([
 			getModelContents(options.model),
-			readCertificatesFromOptions(options.certificates)
+			readCertificatesFromOptions(options.certificates),
 		]);
 
 		return new AbstractModel({
 			bundle,
 			certificates,
-			overrides: options.overrides
+			overrides: options.overrides,
 		});
 	} catch (err) {
 		throw new Error(formatMessage("CP_INIT_ERROR", "abstract model", err));
@@ -51,7 +58,7 @@ export class AbstractModel {
 	constructor(options: AbstractModelOptions) {
 		this[abmModel] = options.bundle;
 		this[abmCertificates] = options.certificates;
-		this[abmOverrides] = options.overrides
+		this[abmOverrides] = options.overrides;
 	}
 
 	get certificates(): FinalCertificates {

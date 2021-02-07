@@ -7,7 +7,13 @@ import { ZipFile } from "yazl";
 import * as schema from "./schema";
 import formatMessage from "./messages";
 import FieldsArray from "./fieldsArray";
-import { generateStringFile, dateToW3CString, isValidRGB, deletePersonalization, getAllFilesWithName } from "./utils";
+import {
+	generateStringFile,
+	dateToW3CString,
+	isValidRGB,
+	deletePersonalization,
+	getAllFilesWithName,
+} from "./utils";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
@@ -20,7 +26,7 @@ const propsSchemaMap = new Map<string, schema.Schema>([
 	["barcode", "barcode"],
 	["beacons", "beaconsDict"],
 	["locations", "locationsDict"],
-	["nfc", "nfcDict"]
+	["nfc", "nfcDict"],
 ]);
 
 export class Pass {
@@ -42,7 +48,9 @@ export class Pass {
 
 	private Certificates: schema.FinalCertificates;
 	private [transitType]: string = "";
-	private l10nTranslations: { [languageCode: string]: { [placeholder: string]: string } } = {};
+	private l10nTranslations: {
+		[languageCode: string]: { [placeholder: string]: string };
+	} = {};
 
 	constructor(options: schema.PassInstance) {
 		if (!schema.isValid(options, "instance")) {
@@ -54,77 +62,101 @@ export class Pass {
 		this.bundle = { ...options.model.bundle };
 
 		try {
-			this.passCore = JSON.parse(this.bundle["pass.json"].toString("utf8"));
+			this.passCore = JSON.parse(
+				this.bundle["pass.json"].toString("utf8"),
+			);
 		} catch (err) {
 			throw new Error(formatMessage("PASSFILE_VALIDATION_FAILED"));
 		}
 
 		// Parsing the options and extracting only the valid ones.
-		const validOverrides = schema.getValidated(options.overrides || {}, "supportedOptions") as schema.OverridesSupportedOptions;
+		const validOverrides = schema.getValidated(
+			options.overrides || {},
+			"supportedOptions",
+		) as schema.OverridesSupportedOptions;
 
 		if (validOverrides === null) {
-			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"))
+			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"));
 		}
 
-		this.type = Object.keys(this.passCore)
-			.find(key => /(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key)) as keyof schema.ValidPassType;
+		this.type = Object.keys(this.passCore).find((key) =>
+			/(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key),
+		) as keyof schema.ValidPassType;
 
 		if (!this.type) {
 			throw new Error(formatMessage("NO_PASS_TYPE"));
 		}
 
 		// Parsing and validating pass.json keys
-		const passCoreKeys = Object.keys(this.passCore) as (keyof schema.ValidPass)[];
-		const validatedPassKeys = passCoreKeys.reduce<schema.ValidPass>((acc, current) => {
-			if (this.type === current) {
-				// We want to exclude type keys (eventTicket,
-				// boardingPass, ecc.) and their content
-				return acc;
-			}
+		const passCoreKeys = Object.keys(
+			this.passCore,
+		) as (keyof schema.ValidPass)[];
+		const validatedPassKeys = passCoreKeys.reduce<schema.ValidPass>(
+			(acc, current) => {
+				if (this.type === current) {
+					// We want to exclude type keys (eventTicket,
+					// boardingPass, ecc.) and their content
+					return acc;
+				}
 
-			if (!propsSchemaMap.has(current)) {
-				// If the property is unknown (we don't care if
-				// it is valid or not for Wallet), we return
-				// directly the content
-				return { ...acc, [current]: this.passCore[current] };
-			}
+				if (!propsSchemaMap.has(current)) {
+					// If the property is unknown (we don't care if
+					// it is valid or not for Wallet), we return
+					// directly the content
+					return { ...acc, [current]: this.passCore[current] };
+				}
 
-			const currentSchema = propsSchemaMap.get(current)!;
+				const currentSchema = propsSchemaMap.get(current)!;
 
-			if (Array.isArray(this.passCore[current])) {
-				const valid = getValidInArray<schema.ArrayPassSchema>(
-					currentSchema,
-					this.passCore[current] as schema.ArrayPassSchema[]
-				);
-				return { ...acc, [current]: valid };
-			} else {
-				return {
-					...acc,
-					[current]: schema.isValid(
-						this.passCore[current],
-						currentSchema
-					) && this.passCore[current] || undefined
-				};
-			}
-		}, {});
+				if (Array.isArray(this.passCore[current])) {
+					const valid = getValidInArray<schema.ArrayPassSchema>(
+						currentSchema,
+						this.passCore[current] as schema.ArrayPassSchema[],
+					);
+					return { ...acc, [current]: valid };
+				} else {
+					return {
+						...acc,
+						[current]:
+							(schema.isValid(
+								this.passCore[current],
+								currentSchema,
+							) &&
+								this.passCore[current]) ||
+							undefined,
+					};
+				}
+			},
+			{},
+		);
 
 		this[passProps] = {
 			...(validatedPassKeys || {}),
-			...(validOverrides || {})
+			...(validOverrides || {}),
 		};
 
-		if (this.type === "boardingPass" && this.passCore[this.type]["transitType"]) {
+		if (
+			this.type === "boardingPass" &&
+			this.passCore[this.type]["transitType"]
+		) {
 			// We might want to generate a boarding pass without setting manually
 			// in the code the transit type but right in the model;
 			this[transitType] = this.passCore[this.type]["transitType"];
 		}
 
-		this._fields = ["primaryFields", "secondaryFields", "auxiliaryFields", "backFields", "headerFields"];
-		this._fields.forEach(fieldName => {
+		this._fields = [
+			"primaryFields",
+			"secondaryFields",
+			"auxiliaryFields",
+			"backFields",
+			"headerFields",
+		];
+		this._fields.forEach((fieldName) => {
 			this[fieldName] = new FieldsArray(
 				this.fieldsKeys,
-				...(this.passCore[this.type][fieldName] || [])
-					.filter(field => schema.isValid(field, "field"))
+				...(this.passCore[this.type][fieldName] || []).filter((field) =>
+					schema.isValid(field, "field"),
+				),
 			);
 		});
 	}
@@ -146,13 +178,19 @@ export class Pass {
 		 */
 		const currentBundleFiles = Object.keys(this.bundle);
 
-		if (!this[passProps].nfc && currentBundleFiles.includes("personalization.json")) {
+		if (
+			!this[passProps].nfc &&
+			currentBundleFiles.includes("personalization.json")
+		) {
 			genericDebug(formatMessage("PRS_REMOVED"));
-			deletePersonalization(this.bundle, getAllFilesWithName(
-				"personalizationLogo",
-				currentBundleFiles,
-				"startsWith"
-			));
+			deletePersonalization(
+				this.bundle,
+				getAllFilesWithName(
+					"personalizationLogo",
+					currentBundleFiles,
+					"startsWith",
+				),
+			);
 		}
 
 		const finalBundle = { ...this.bundle } as schema.BundleUnit;
@@ -161,7 +199,7 @@ export class Pass {
 		 * Iterating through languages and generating pass.string file
 		 */
 
-		Object.keys(this.l10nTranslations).forEach(lang => {
+		Object.keys(this.l10nTranslations).forEach((lang) => {
 			const strings = generateStringFile(this.l10nTranslations[lang]);
 			const langInBundles = `${lang}.lproj`;
 
@@ -176,13 +214,21 @@ export class Pass {
 					this.l10nBundles[langInBundles] = {};
 				}
 
-				this.l10nBundles[langInBundles]["pass.strings"] = Buffer.concat([
-					this.l10nBundles[langInBundles]["pass.strings"] || Buffer.alloc(0),
-					strings
+				this.l10nBundles[langInBundles][
+					"pass.strings"
+				] = Buffer.concat([
+					this.l10nBundles[langInBundles]["pass.strings"] ||
+						Buffer.alloc(0),
+					strings,
 				]);
 			}
 
-			if (!(this.l10nBundles[langInBundles] && Object.keys(this.l10nBundles[langInBundles]).length)) {
+			if (
+				!(
+					this.l10nBundles[langInBundles] &&
+					Object.keys(this.l10nBundles[langInBundles]).length
+				)
+			) {
 				return;
 			}
 
@@ -194,33 +240,48 @@ export class Pass {
 			 * composition.
 			 */
 
-			Object.assign(finalBundle, ...Object.keys(this.l10nBundles[langInBundles])
-				.map(fileName => {
-					const fullPath = path.join(langInBundles, fileName).replace(/\\/, "/");
-					return { [fullPath]: this.l10nBundles[langInBundles][fileName] };
-				})
+			Object.assign(
+				finalBundle,
+				...Object.keys(this.l10nBundles[langInBundles]).map(
+					(fileName) => {
+						const fullPath = path
+							.join(langInBundles, fileName)
+							.replace(/\\/, "/");
+						return {
+							[fullPath]: this.l10nBundles[langInBundles][
+								fileName
+							],
+						};
+					},
+				),
 			);
 		});
 
 		/*
-		* Parsing the buffers, pushing them into the archive
-		* and returning the compiled manifest
-		*/
+		 * Parsing the buffers, pushing them into the archive
+		 * and returning the compiled manifest
+		 */
 		const archive = new ZipFile();
-		const manifest = Object.keys(finalBundle).reduce<schema.Manifest>((acc, current) => {
-			let hashFlow = forge.md.sha1.create();
+		const manifest = Object.keys(finalBundle).reduce<schema.Manifest>(
+			(acc, current) => {
+				let hashFlow = forge.md.sha1.create();
 
-			hashFlow.update(finalBundle[current].toString("binary"));
-			archive.addBuffer(finalBundle[current], current);
-			acc[current] = hashFlow.digest().toHex();
+				hashFlow.update(finalBundle[current].toString("binary"));
+				archive.addBuffer(finalBundle[current], current);
+				acc[current] = hashFlow.digest().toHex();
 
-			return acc;
-		}, {});
+				return acc;
+			},
+			{},
+		);
 
 		const signatureBuffer = this._sign(manifest);
 
 		archive.addBuffer(signatureBuffer, "signature");
-		archive.addBuffer(Buffer.from(JSON.stringify(manifest)), "manifest.json");
+		archive.addBuffer(
+			Buffer.from(JSON.stringify(manifest)),
+			"manifest.json",
+		);
 		const passStream = new Stream.PassThrough();
 
 		archive.outputStream.pipe(passStream);
@@ -242,8 +303,15 @@ export class Pass {
 	 * @see https://apple.co/2KOv0OW - Passes support localization
 	 */
 
-	localize(lang: string, translations?: { [placeholder: string]: string }): this {
-		if (lang && typeof lang === "string" && (typeof translations === "object" || translations === undefined)) {
+	localize(
+		lang: string,
+		translations?: { [placeholder: string]: string },
+	): this {
+		if (
+			lang &&
+			typeof lang === "string" &&
+			(typeof translations === "object" || translations === undefined)
+		) {
 			this.l10nTranslations[lang] = translations || {};
 		}
 
@@ -292,7 +360,7 @@ export class Pass {
 	 */
 
 	beacons(resetFlag: null): this;
-	beacons(...data: schema.Beacon[]): this
+	beacons(...data: schema.Beacon[]): this;
 	beacons(...data: (schema.Beacon | null)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["beacons"];
@@ -322,7 +390,10 @@ export class Pass {
 			return this;
 		}
 
-		const valid = processRelevancySet("locations", data as schema.Location[]);
+		const valid = processRelevancySet(
+			"locations",
+			data as schema.Location[],
+		);
 
 		if (valid.length) {
 			this[passProps]["locations"] = valid;
@@ -390,19 +461,28 @@ export class Pass {
 			 * Validation assign default value to missing parameters (if any).
 			 */
 
-			const validBarcodes = data.reduce<schema.Barcode[]>((acc, current) => {
-				if (!(current && current instanceof Object)) {
-					return acc;
-				}
+			const validBarcodes = data.reduce<schema.Barcode[]>(
+				(acc, current) => {
+					if (!(current && current instanceof Object)) {
+						return acc;
+					}
 
-				const validated = schema.getValidated(current, "barcode");
+					const validated = schema.getValidated(current, "barcode");
 
-				if (!(validated && validated instanceof Object && Object.keys(validated).length)) {
-					return acc;
-				}
+					if (
+						!(
+							validated &&
+							validated instanceof Object &&
+							Object.keys(validated).length
+						)
+					) {
+						return acc;
+					}
 
-				return [...acc, validated] as schema.Barcode[];
-			}, []);
+					return [...acc, validated] as schema.Barcode[];
+				},
+				[],
+			);
 
 			if (validBarcodes.length) {
 				this[passProps]["barcodes"] = validBarcodes;
@@ -446,7 +526,9 @@ export class Pass {
 		}
 
 		// Checking which object among barcodes has the same format of the specified one.
-		const index = barcodes.findIndex(b => b.format.toLowerCase().includes(chosenFormat.toLowerCase()));
+		const index = barcodes.findIndex((b) =>
+			b.format.toLowerCase().includes(chosenFormat.toLowerCase()),
+		);
 
 		if (index === -1) {
 			barcodeDebug(formatMessage("BRC_NOT_SUPPORTED"));
@@ -472,7 +554,14 @@ export class Pass {
 			return this;
 		}
 
-		if (!(data && typeof data === "object" && !Array.isArray(data) && schema.isValid(data, "nfcDict"))) {
+		if (
+			!(
+				data &&
+				typeof data === "object" &&
+				!Array.isArray(data) &&
+				schema.isValid(data, "nfcDict")
+			)
+		) {
 			genericDebug(formatMessage("NFC_INVALID"));
 			return this;
 		}
@@ -505,7 +594,10 @@ export class Pass {
 	private _sign(manifest: schema.Manifest): Buffer {
 		const signature = forge.pkcs7.createSignedData();
 
-		signature.content = forge.util.createBuffer(JSON.stringify(manifest), "utf8");
+		signature.content = forge.util.createBuffer(
+			JSON.stringify(manifest),
+			"utf8",
+		);
 
 		signature.addCertificate(this.Certificates.wwdr);
 		signature.addCertificate(this.Certificates.signerCert);
@@ -523,14 +615,18 @@ export class Pass {
 			key: this.Certificates.signerKey,
 			certificate: this.Certificates.signerCert,
 			digestAlgorithm: forge.pki.oids.sha1,
-			authenticatedAttributes: [{
-				type: forge.pki.oids.contentType,
-				value: forge.pki.oids.data
-			}, {
-				type: forge.pki.oids.messageDigest,
-			}, {
-				type: forge.pki.oids.signingTime,
-			}]
+			authenticatedAttributes: [
+				{
+					type: forge.pki.oids.contentType,
+					value: forge.pki.oids.data,
+				},
+				{
+					type: forge.pki.oids.messageDigest,
+				},
+				{
+					type: forge.pki.oids.signingTime,
+				},
+			],
 		});
 
 		/**
@@ -554,7 +650,10 @@ export class Pass {
 		 * of beautiful things. ¯\_(ツ)_/¯
 		 */
 
-		return Buffer.from(forge.asn1.toDer(signature.toAsn1()).getBytes(), "binary");
+		return Buffer.from(
+			forge.asn1.toDer(signature.toAsn1()).getBytes(),
+			"binary",
+		);
 	}
 
 	/**
@@ -566,7 +665,9 @@ export class Pass {
 	 */
 
 	private _patch(passCoreBuffer: Buffer): Buffer {
-		const passFile = JSON.parse(passCoreBuffer.toString()) as schema.ValidPass;
+		const passFile = JSON.parse(
+			passCoreBuffer.toString(),
+		) as schema.ValidPass;
 
 		if (Object.keys(this[passProps]).length) {
 			/*
@@ -575,14 +676,22 @@ export class Pass {
 			 * and then delete it from the passFile.
 			 */
 
-			const passColors = ["backgroundColor", "foregroundColor", "labelColor"] as Array<keyof schema.PassColors>;
-			passColors.filter(v => this[passProps][v] && !isValidRGB(this[passProps][v]))
-				.forEach(v => delete this[passProps][v]);
+			const passColors = [
+				"backgroundColor",
+				"foregroundColor",
+				"labelColor",
+			] as Array<keyof schema.PassColors>;
+			passColors
+				.filter(
+					(v) =>
+						this[passProps][v] && !isValidRGB(this[passProps][v]),
+				)
+				.forEach((v) => delete this[passProps][v]);
 
 			Object.assign(passFile, this[passProps]);
 		}
 
-		this._fields.forEach(field => {
+		this._fields.forEach((field) => {
 			passFile[this.type][field] = this[field];
 		});
 
@@ -627,8 +736,14 @@ function barcodesFromUncompleteData(message: string): schema.Barcode[] {
 		"PKBarcodeFormatQR",
 		"PKBarcodeFormatPDF417",
 		"PKBarcodeFormatAztec",
-		"PKBarcodeFormatCode128"
-	].map(format => schema.getValidated({ format, message }, "barcode") as schema.Barcode);
+		"PKBarcodeFormatCode128",
+	].map(
+		(format) =>
+			schema.getValidated(
+				{ format, message },
+				"barcode",
+			) as schema.Barcode,
+	);
 }
 
 function processRelevancySet<T>(key: string, data: T[]): T[] {
@@ -636,7 +751,10 @@ function processRelevancySet<T>(key: string, data: T[]): T[] {
 }
 
 function getValidInArray<T>(schemaName: schema.Schema, contents: T[]): T[] {
-	return contents.filter(current => Object.keys(current).length && schema.isValid(current, schemaName));
+	return contents.filter(
+		(current) =>
+			Object.keys(current).length && schema.isValid(current, schemaName),
+	);
 }
 
 function processDate(key: string, date: Date): string | null {

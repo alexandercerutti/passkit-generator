@@ -13,11 +13,16 @@ import { createPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
 	if (!request.query.fn) {
-		response.send("<a href='?fn=void'>Generate a voided pass.</a><br><a href='?fn=expiration'>Generate a pass with expiration date</a>");
+		response.send(
+			"<a href='?fn=void'>Generate a voided pass.</a><br><a href='?fn=expiration'>Generate a pass with expiration date</a>",
+		);
 		return;
 	}
 
-	let passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
+	let passName =
+		request.params.modelName +
+		"_" +
+		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
 	try {
 		let pass = await createPass({
@@ -27,8 +32,8 @@ app.all(async function manageRequest(request, response) {
 				signerCert: "../certificates/signerCert.pem",
 				signerKey: {
 					keyFile: "../certificates/signerKey.pem",
-					passphrase: "123456"
-				}
+					passphrase: "123456",
+				},
 			},
 			overrides: request.body || request.params || request.query,
 		});
@@ -47,7 +52,7 @@ app.all(async function manageRequest(request, response) {
 		const stream = pass.generate();
 		response.set({
 			"Content-type": "application/vnd.apple.pkpass",
-			"Content-disposition": `attachment; filename=${passName}.pkpass`
+			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 
 		stream.pipe(response);

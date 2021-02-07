@@ -8,7 +8,10 @@ import app from "./webserver";
 import { createPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
-	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
+	const passName =
+		request.params.modelName +
+		"_" +
+		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
 	try {
 		const pass = await createPass({
@@ -18,10 +21,10 @@ app.all(async function manageRequest(request, response) {
 				signerCert: "../certificates/signerCert.pem",
 				signerKey: {
 					keyFile: "../certificates/signerKey.pem",
-					passphrase: "123456"
-				}
+					passphrase: "123456",
+				},
 			},
-			overrides: request.body || request.params || request.query
+			overrides: request.body || request.params || request.query,
 		});
 
 		// For each language you include, an .lproj folder in pass bundle
@@ -38,30 +41,33 @@ app.all(async function manageRequest(request, response) {
 
 		// Italian, already has an .lproj which gets included
 		pass.localize("it", {
-			"EVENT": "Evento",
-			"LOCATION": "Dove"
+			EVENT: "Evento",
+			LOCATION: "Dove",
 		});
 
 		// German, doesn't, so is created
 		pass.localize("de", {
-			"EVENT": "Ereignis",
-			"LOCATION": "Ort"
+			EVENT: "Ereignis",
+			LOCATION: "Ort",
 		});
 
 		// This language does not exist but is still added as .lproj folder
 		pass.localize("zu", {});
 
 		// @ts-ignore - ignoring for logging purposes. Do not replicate
-		console.log("Added languages", Object.keys(pass.l10nTranslations).join(", "))
+		console.log(
+			"Added languages",
+			Object.keys(pass.l10nTranslations).join(", "),
+		);
 
 		const stream = pass.generate();
 		response.set({
 			"Content-type": "application/vnd.apple.pkpass",
-			"Content-disposition": `attachment; filename=${passName}.pkpass`
+			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 
 		stream.pipe(response);
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
 
 		response.set({

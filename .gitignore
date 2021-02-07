@@ -3,7 +3,8 @@ node_modules
 passModels/
 certificates/
 *.code-workspace
-.vscode/
+.vscode/*
+!.vscode/settings.json
 *.js
 lib/
 examples/build

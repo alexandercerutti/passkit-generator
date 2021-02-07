@@ -9,7 +9,7 @@ describe("splitBufferBundle", () => {
 			"de.lproj/background@2x.png": zeroBuffer,
 			"it.lproj/thumbnail@2x.png": zeroBuffer,
 			"thumbnail@2x.png": zeroBuffer,
-			"background.png": zeroBuffer
+			"background.png": zeroBuffer,
 		};
 
 		const result = splitBufferBundle(payload);
@@ -25,11 +25,11 @@ describe("splitBufferBundle", () => {
 			},
 			"it.lproj": {
 				"thumbnail@2x.png": zeroBuffer,
-			}
+			},
 		});
 		expect(result[1]).toEqual({
 			"thumbnail@2x.png": zeroBuffer,
-			"background.png": zeroBuffer
+			"background.png": zeroBuffer,
 		});
 	});
 

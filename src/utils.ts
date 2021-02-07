@@ -16,13 +16,15 @@ export function isValidRGB(value?: string): boolean {
 		return false;
 	}
 
-	const rgb = value.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/);
+	const rgb = value.match(
+		/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/,
+	);
 
 	if (!rgb) {
 		return false;
 	}
 
-	return rgb.slice(1, 4).every(v => Math.abs(Number(v)) <= 255);
+	return rgb.slice(1, 4).every((v) => Math.abs(Number(v)) <= 255);
 }
 
 /**
@@ -57,7 +59,7 @@ export function dateToW3CString(date: Date) {
  */
 
 export function removeHidden(from: Array<string>): Array<string> {
-	return from.filter(e => e.charAt(0) !== ".");
+	return from.filter((e) => e.charAt(0) !== ".");
 }
 
 /**
@@ -77,8 +79,9 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
 	// Pass.strings format is the following one for each row:
 	// "key" = "value";
 
-	const strings = Object.keys(lang)
-		.map(key => `"${key}" = "${lang[key].replace(/"/g, '\"')}";`);
+	const strings = Object.keys(lang).map(
+		(key) => `"${key}" = "${lang[key].replace(/"/g, '"')}";`,
+	);
 
 	return Buffer.from(strings.join(EOL), "utf8");
 }
@@ -89,47 +92,73 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
  * @param origin
  */
 
-type PartitionedBundleElements = [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]];
+type PartitionedBundleElements = [
+	PartitionedBundle["l10nBundle"],
+	PartitionedBundle["bundle"],
+];
 
-export function splitBufferBundle(origin: BundleUnit): PartitionedBundleElements {
+export function splitBufferBundle(
+	origin: BundleUnit,
+): PartitionedBundleElements {
 	const initialValue: PartitionedBundleElements = [{}, {}];
 
 	if (!origin) {
 		return initialValue;
 	}
 
-	return Object.entries(origin).reduce<PartitionedBundleElements>(([l10n, bundle], [key, buffer]) => {
-		if (!key.includes(".lproj")) {
-			return [
-				l10n,
-				{
-					...bundle,
-					[key]: buffer
-				}
-			];
-		}
+	return Object.entries(origin).reduce<PartitionedBundleElements>(
+		([l10n, bundle], [key, buffer]) => {
+			if (!key.includes(".lproj")) {
+				return [
+					l10n,
+					{
+						...bundle,
+						[key]: buffer,
+					},
+				];
+			}
 
-		const pathComponents = key.split(sep);
-		const lang = pathComponents[0];
-		const file = pathComponents.slice(1).join("/");
+			const pathComponents = key.split(sep);
+			const lang = pathComponents[0];
+			const file = pathComponents.slice(1).join("/");
 
-		(l10n[lang] || (l10n[lang] = {}))[file] = buffer;
+			(l10n[lang] || (l10n[lang] = {}))[file] = buffer;
 
-		return [l10n, bundle];
-	}, initialValue);
+			return [l10n, bundle];
+		},
+		initialValue,
+	);
 }
 
 type StringSearchMode = "includes" | "startsWith" | "endsWith";
 
-export function getAllFilesWithName(name: string, source: string[], mode: StringSearchMode = "includes", forceLowerCase: boolean = false): string[] {
-	return source.filter(file => (forceLowerCase && file.toLowerCase() || file)[mode](name));
+export function getAllFilesWithName(
+	name: string,
+	source: string[],
+	mode: StringSearchMode = "includes",
+	forceLowerCase: boolean = false,
+): string[] {
+	return source.filter((file) =>
+		((forceLowerCase && file.toLowerCase()) || file)[mode](name),
+	);
 }
 
-export function hasFilesWithName(name: string, source: string[], mode: StringSearchMode = "includes", forceLowerCase: boolean = false): boolean {
-	return source.some(file => (forceLowerCase && file.toLowerCase() || file)[mode](name));
+export function hasFilesWithName(
+	name: string,
+	source: string[],
+	mode: StringSearchMode = "includes",
+	forceLowerCase: boolean = false,
+): boolean {
+	return source.some((file) =>
+		((forceLowerCase && file.toLowerCase()) || file)[mode](name),
+	);
 }
 
-export function deletePersonalization(source: BundleUnit, logosNames: string[] = []): void {
-	[...logosNames, "personalization.json"]
-		.forEach(file => delete source[file]);
+export function deletePersonalization(
+	source: BundleUnit,
+	logosNames: string[] = [],
+): void {
+	[...logosNames, "personalization.json"].forEach(
+		(file) => delete source[file],
+	);
 }

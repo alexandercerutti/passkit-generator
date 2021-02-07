@@ -12,7 +12,10 @@ import app from "./webserver";
 import { createPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
-	const passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
+	const passName =
+		request.params.modelName +
+		"_" +
+		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
 	try {
 		const pass = await createPass({
@@ -22,8 +25,8 @@ app.all(async function manageRequest(request, response) {
 				signerCert: "../certificates/signerCert.pem",
 				signerKey: {
 					keyFile: "../certificates/signerKey.pem",
-					passphrase: "123456"
-				}
+					passphrase: "123456",
+				},
 			},
 			overrides: request.body || request.params || request.query,
 		});
@@ -37,17 +40,21 @@ app.all(async function manageRequest(request, response) {
 			// After this, pass.props["barcodes"] will have support for just two of three
 			// of the passed format (the valid ones);
 
-			pass.barcodes({
-				message: "Thank you for using this package <3",
-				format: "PKBarcodeFormatCode128"
-			}, {
-				message: "Thank you for using this package <3",
-				format: "PKBarcodeFormatPDF417"
-			}, {
-				message: "Thank you for using this package <3",
-				// @ts-expect-error
-				format: "PKBarcodeFormatMock44617"
-			});
+			pass.barcodes(
+				{
+					message: "Thank you for using this package <3",
+					format: "PKBarcodeFormatCode128",
+				},
+				{
+					message: "Thank you for using this package <3",
+					format: "PKBarcodeFormatPDF417",
+				},
+				{
+					message: "Thank you for using this package <3",
+					// @ts-expect-error
+					format: "PKBarcodeFormatMock44617",
+				},
+			);
 		}
 
 		// You can change the format chosen for barcode prop support by calling .barcode()
@@ -57,12 +64,15 @@ app.all(async function manageRequest(request, response) {
 		pass.barcode("PKBarcodeFormatPDF417");
 
 		console.log("Barcode property is now:", pass.props["barcode"]);
-		console.log("Barcodes support is autocompleted:", pass.props["barcodes"]);
+		console.log(
+			"Barcodes support is autocompleted:",
+			pass.props["barcodes"],
+		);
 
 		const stream = pass.generate();
 		response.set({
 			"Content-type": "application/vnd.apple.pkpass",
-			"Content-disposition": `attachment; filename=${passName}.pkpass`
+			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 
 		stream.pipe(response);

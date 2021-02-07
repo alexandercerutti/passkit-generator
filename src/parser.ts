@@ -1,8 +1,21 @@
 import * as path from "path";
 import forge from "node-forge";
 import formatMessage from "./messages";
-import { FactoryOptions, PartitionedBundle, BundleUnit, Certificates, FinalCertificates, isValid } from "./schema";
-import { removeHidden, splitBufferBundle, getAllFilesWithName, hasFilesWithName, deletePersonalization } from "./utils";
+import {
+	FactoryOptions,
+	PartitionedBundle,
+	BundleUnit,
+	Certificates,
+	FinalCertificates,
+	isValid,
+} from "./schema";
+import {
+	removeHidden,
+	splitBufferBundle,
+	getAllFilesWithName,
+	hasFilesWithName,
+	deletePersonalization,
+} from "./utils";
 import fs from "fs";
 import debug from "debug";
 
@@ -27,10 +40,9 @@ export async function getModelContents(model: FactoryOptions["model"]) {
 	}
 
 	const modelFiles = Object.keys(modelContents.bundle);
-	const isModelInitialized = (
+	const isModelInitialized =
 		modelFiles.includes("pass.json") &&
-		hasFilesWithName("icon", modelFiles, "startsWith")
-	);
+		hasFilesWithName("icon", modelFiles, "startsWith");
 
 	if (!isModelInitialized) {
 		throw new Error(formatMessage("MODEL_UNINITIALIZED", "parse result"));
@@ -46,19 +58,34 @@ export async function getModelContents(model: FactoryOptions["model"]) {
 		return modelContents;
 	}
 
-	const logoFullNames = getAllFilesWithName("personalizationLogo", modelFiles, "startsWith");
-	if (!(logoFullNames.length && modelContents.bundle[personalizationJsonFile].length)) {
+	const logoFullNames = getAllFilesWithName(
+		"personalizationLogo",
+		modelFiles,
+		"startsWith",
+	);
+	if (
+		!(
+			logoFullNames.length &&
+			modelContents.bundle[personalizationJsonFile].length
+		)
+	) {
 		deletePersonalization(modelContents.bundle, logoFullNames);
 		return modelContents;
 	}
 
 	try {
-		const parsedPersonalization = JSON.parse(modelContents.bundle[personalizationJsonFile].toString("utf8"));
-		const isPersonalizationValid = isValid(parsedPersonalization, "personalizationDict");
+		const parsedPersonalization = JSON.parse(
+			modelContents.bundle[personalizationJsonFile].toString("utf8"),
+		);
+		const isPersonalizationValid = isValid(
+			parsedPersonalization,
+			"personalizationDict",
+		);
 
 		if (!isPersonalizationValid) {
-			[...logoFullNames, personalizationJsonFile]
-				.forEach(file => delete modelContents.bundle[file]);
+			[...logoFullNames, personalizationJsonFile].forEach(
+				(file) => delete modelContents.bundle[file],
+			);
 
 			return modelContents;
 		}
@@ -76,55 +103,70 @@ export async function getModelContents(model: FactoryOptions["model"]) {
  * @param model
  */
 
-export async function getModelFolderContents(model: string): Promise<PartitionedBundle> {
+export async function getModelFolderContents(
+	model: string,
+): Promise<PartitionedBundle> {
 	try {
-		const modelPath = `${model}${!path.extname(model) && ".pass" || ""}`;
+		const modelPath = `${model}${(!path.extname(model) && ".pass") || ""}`;
 		const modelFilesList = await readDir(modelPath);
 
 		// No dot-starting files, manifest and signature
-		const filteredFiles = removeHidden(modelFilesList)
-			.filter(f => !/(manifest|signature)/i.test(f) && /.+$/.test(path.parse(f).ext));
-
-		const isModelInitialized = (
-			filteredFiles.length &&
-			hasFilesWithName("icon", filteredFiles, "startsWith")
+		const filteredFiles = removeHidden(modelFilesList).filter(
+			(f) =>
+				!/(manifest|signature)/i.test(f) &&
+				/.+$/.test(path.parse(f).ext),
 		);
+
+		const isModelInitialized =
+			filteredFiles.length &&
+			hasFilesWithName("icon", filteredFiles, "startsWith");
 
 		// Icon is required to proceed
 		if (!isModelInitialized) {
-			throw new Error(formatMessage(
-				"MODEL_UNINITIALIZED",
-				path.parse(model).name
-			));
+			throw new Error(
+				formatMessage("MODEL_UNINITIALIZED", path.parse(model).name),
+			);
 		}
 
 		// Splitting files from localization folders
-		const rawBundleFiles = filteredFiles.filter(entry => !entry.includes(".lproj"));
-		const l10nFolders = filteredFiles.filter(entry => entry.includes(".lproj"));
-
-		const rawBundleBuffers = await Promise.all(
-			rawBundleFiles.map(file => readFile(path.resolve(modelPath, file)))
+		const rawBundleFiles = filteredFiles.filter(
+			(entry) => !entry.includes(".lproj"),
+		);
+		const l10nFolders = filteredFiles.filter((entry) =>
+			entry.includes(".lproj"),
 		);
 
-		const bundle: BundleUnit = Object.assign({},
-			...rawBundleFiles.map((fileName, index) => ({ [fileName]: rawBundleBuffers[index] }))
+		const rawBundleBuffers = await Promise.all(
+			rawBundleFiles.map((file) =>
+				readFile(path.resolve(modelPath, file)),
+			),
+		);
+
+		const bundle: BundleUnit = Object.assign(
+			{},
+			...rawBundleFiles.map((fileName, index) => ({
+				[fileName]: rawBundleBuffers[index],
+			})),
 		);
 
 		// Reading concurrently localizations folder
 		// and their files and their buffers
 		const L10N_FilesListByFolder: Array<BundleUnit> = await Promise.all(
-			l10nFolders.map(async folderPath => {
+			l10nFolders.map(async (folderPath) => {
 				// Reading current folder
 				const currentLangPath = path.join(modelPath, folderPath);
 
 				const files = await readDir(currentLangPath);
 				// Transforming files path to a model-relative path
-				const validFiles = removeHidden(files)
-					.map(file => path.join(currentLangPath, file));
+				const validFiles = removeHidden(files).map((file) =>
+					path.join(currentLangPath, file),
+				);
 
 				// Getting all the buffers from file paths
 				const buffers = await Promise.all(
-					validFiles.map(file => readFile(file).catch(() => Buffer.alloc(0)))
+					validFiles.map((file) =>
+						readFile(file).catch(() => Buffer.alloc(0)),
+					),
 				);
 
 				// Assigning each file path to its buffer
@@ -140,34 +182,37 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
 
 					return {
 						...acc,
-						[fileName]: buffers[index]
+						[fileName]: buffers[index],
 					};
 				}, {});
-			})
+			}),
 		);
 
 		const l10nBundle: PartitionedBundle["l10nBundle"] = Object.assign(
 			{},
-			...L10N_FilesListByFolder
-				.map((folder, index) => ({ [l10nFolders[index]]: folder }))
+			...L10N_FilesListByFolder.map((folder, index) => ({
+				[l10nFolders[index]]: folder,
+			})),
 		);
 
 		return {
 			bundle,
-			l10nBundle
+			l10nBundle,
 		};
 	} catch (err) {
 		if (err?.code === "ENOENT") {
 			if (err.syscall === "open") {
 				// file opening failed
-				throw new Error(formatMessage("MODELF_NOT_FOUND", err.path))
+				throw new Error(formatMessage("MODELF_NOT_FOUND", err.path));
 			} else if (err.syscall === "scandir") {
 				// directory reading failed
 				const pathContents = (err.path as string).split(/(\/|\\\?)/);
-				throw new Error(formatMessage(
-					"MODELF_FILE_NOT_FOUND",
-					pathContents[pathContents.length - 1]
-				))
+				throw new Error(
+					formatMessage(
+						"MODELF_FILE_NOT_FOUND",
+						pathContents[pathContents.length - 1],
+					),
+				);
 			}
 		}
 
@@ -182,27 +227,28 @@ export async function getModelFolderContents(model: string): Promise<Partitioned
  */
 
 export function getModelBufferContents(model: BundleUnit): PartitionedBundle {
-	const rawBundle = removeHidden(Object.keys(model)).reduce<BundleUnit>((acc, current) => {
-		// Checking if current file is one of the autogenerated ones or if its
-		// content is not available
+	const rawBundle = removeHidden(Object.keys(model)).reduce<BundleUnit>(
+		(acc, current) => {
+			// Checking if current file is one of the autogenerated ones or if its
+			// content is not available
 
-		if (/(manifest|signature)/.test(current) || !model[current]) {
-			return acc;
-		}
+			if (/(manifest|signature)/.test(current) || !model[current]) {
+				return acc;
+			}
 
-		return { ...acc, [current]: model[current] };
-	}, {});
+			return { ...acc, [current]: model[current] };
+		},
+		{},
+	);
 
 	const bundleKeys = Object.keys(rawBundle);
 
-	const isModelInitialized = (
-		bundleKeys.length &&
-		hasFilesWithName("icon", bundleKeys, "startsWith")
-	);
+	const isModelInitialized =
+		bundleKeys.length && hasFilesWithName("icon", bundleKeys, "startsWith");
 
 	// Icon is required to proceed
 	if (!isModelInitialized) {
-		throw new Error(formatMessage("MODEL_UNINITIALIZED", "Buffers"))
+		throw new Error(formatMessage("MODEL_UNINITIALIZED", "Buffers"));
 	}
 
 	// separing localization folders from bundle files
@@ -210,7 +256,7 @@ export function getModelBufferContents(model: BundleUnit): PartitionedBundle {
 
 	return {
 		bundle,
-		l10nBundle
+		l10nBundle,
 	};
 }
 
@@ -224,8 +270,16 @@ type flatCertificates = Omit<Certificates, "signerKey"> & {
 	signerKey: string;
 };
 
-export async function readCertificatesFromOptions(options: Certificates): Promise<FinalCertificates> {
-	if (!(options && Object.keys(options).length && isValid(options, "certificatesSchema"))) {
+export async function readCertificatesFromOptions(
+	options: Certificates,
+): Promise<FinalCertificates> {
+	if (
+		!(
+			options &&
+			Object.keys(options).length &&
+			isValid(options, "certificatesSchema")
+		)
+	) {
 		throw new Error(formatMessage("CP_NO_CERTS"));
 	}
 
@@ -239,30 +293,31 @@ export async function readCertificatesFromOptions(options: Certificates): Promis
 
 	// if the signerKey is an object, we want to get
 	// all the real contents and don't care of passphrase
-	const flattenedDocs = Object.assign({}, options, { signerKey }) as flatCertificates;
+	const flattenedDocs = Object.assign({}, options, {
+		signerKey,
+	}) as flatCertificates;
 
 	// We read the contents
-	const rawContentsPromises = Object.keys(flattenedDocs)
-		.map(key => {
-			const content = flattenedDocs[key];
+	const rawContentsPromises = Object.keys(flattenedDocs).map((key) => {
+		const content = flattenedDocs[key];
 
-			if (!!path.parse(content).ext) {
-				// The content is a path to the document
-				return readFile(path.resolve(content), { encoding: "utf8" });
-			} else {
-				// Content is the real document content
-				return Promise.resolve(content);
-			}
-		});
+		if (!!path.parse(content).ext) {
+			// The content is a path to the document
+			return readFile(path.resolve(content), { encoding: "utf8" });
+		} else {
+			// Content is the real document content
+			return Promise.resolve(content);
+		}
+	});
 
 	try {
 		const parsedContents = await Promise.all(rawContentsPromises);
 		const pemParsedContents = parsedContents.map((file, index) => {
 			const certName = Object.keys(options)[index];
-			const passphrase = (
-				typeof options.signerKey === "object" &&
-				options.signerKey?.passphrase
-			) || undefined;
+			const passphrase =
+				(typeof options.signerKey === "object" &&
+					options.signerKey?.passphrase) ||
+				undefined;
 
 			const pem = parsePEM(certName, file, passphrase);
 
@@ -279,7 +334,9 @@ export async function readCertificatesFromOptions(options: Certificates): Promis
 			throw err;
 		}
 
-		throw new Error(formatMessage("INVALID_CERT_PATH", path.parse(err.path).base));
+		throw new Error(
+			formatMessage("INVALID_CERT_PATH", path.parse(err.path).base),
+		);
 	}
 }
 

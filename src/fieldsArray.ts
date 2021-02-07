@@ -24,20 +24,28 @@ export default class FieldsArray extends Array {
 	 */
 
 	push(...fieldsData: schema.Field[]): number {
-		const validFields = fieldsData.reduce((acc: schema.Field[], current: schema.Field) => {
-			if (!(typeof current === "object") || !schema.isValid(current, "field")) {
+		const validFields = fieldsData.reduce(
+			(acc: schema.Field[], current: schema.Field) => {
+				if (
+					!(typeof current === "object") ||
+					!schema.isValid(current, "field")
+				) {
+					return acc;
+				}
+
+				if (this[poolSymbol].has(current.key)) {
+					fieldsDebug(
+						`Field with key "${current.key}" discarded: fields must be unique in pass scope.`,
+					);
+				} else {
+					this[poolSymbol].add(current.key);
+					acc.push(current);
+				}
+
 				return acc;
-			}
-
-			if (this[poolSymbol].has(current.key)) {
-				fieldsDebug(`Field with key "${current.key}" discarded: fields must be unique in pass scope.`);
-			} else {
-				this[poolSymbol].add(current.key);
-				acc.push(current);
-			}
-
-			return acc;
-		}, []);
+			},
+			[],
+		);
 
 		return Array.prototype.push.call(this, ...validFields);
 	}
@@ -58,9 +66,13 @@ export default class FieldsArray extends Array {
 	 * also uniqueKeys set
 	 */
 
-	splice(start: number, deleteCount: number, ...items: schema.Field[]): schema.Field[] {
+	splice(
+		start: number,
+		deleteCount: number,
+		...items: schema.Field[]
+	): schema.Field[] {
 		const removeList = this.slice(start, deleteCount + start);
-		removeList.forEach(item => this[poolSymbol].delete(item.key));
+		removeList.forEach((item) => this[poolSymbol].delete(item.key));
 
 		return Array.prototype.splice.call(this, start, deleteCount, items);
 	}

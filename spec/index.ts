@@ -9,16 +9,25 @@ describe("Passkit-generator", function () {
 	let pass: Pass;
 	beforeEach(async () => {
 		pass = await createPass({
-			model: path.resolve(__dirname, "../examples/models/examplePass.pass"),
+			model: path.resolve(
+				__dirname,
+				"../examples/models/examplePass.pass",
+			),
 			certificates: {
 				wwdr: path.resolve(__dirname, "../certificates/WWDR.pem"),
-				signerCert: path.resolve(__dirname, "../certificates/signerCert.pem"),
+				signerCert: path.resolve(
+					__dirname,
+					"../certificates/signerCert.pem",
+				),
 				signerKey: {
-					keyFile: path.resolve(__dirname, "../certificates/signerKey.pem"),
-					passphrase: "123456"
-				}
+					keyFile: path.resolve(
+						__dirname,
+						"../certificates/signerKey.pem",
+					),
+					passphrase: "123456",
+				},
 			},
-			overrides: {}
+			overrides: {},
 		});
 	});
 
@@ -48,7 +57,7 @@ describe("Passkit-generator", function () {
 
 		it("Will apply changes if a second object argument with translations is passed", () => {
 			pass.localize("it", {
-				"Test": "Prova"
+				Test: "Prova",
 			});
 
 			expect(typeof pass["l10nTranslations"]["it"]).toBe("object");
@@ -99,16 +108,21 @@ describe("Passkit-generator", function () {
 	describe("locations()", () => {
 		it("Won't apply changes if invalid location objects are passed", () => {
 			const props = pass.props["locations"] || [];
-			const oldAmountOfLocations = props && props.length || 0;
+			const oldAmountOfLocations = (props && props.length) || 0;
 
-			pass.locations({
-				// @ts-expect-error
-				"ibrupofene": "no",
-				"longitude": 0.00000000
-			}, ...props);
+			pass.locations(
+				{
+					// @ts-expect-error
+					ibrupofene: "no",
+					longitude: 0.0,
+				},
+				...props,
+			);
 
 			if (oldAmountOfLocations) {
-				expect(pass.props["locations"].length).toBe(oldAmountOfLocations);
+				expect(pass.props["locations"].length).toBe(
+					oldAmountOfLocations,
+				);
 			} else {
 				expect(pass.props["locations"]).toBe(undefined);
 			}
@@ -116,33 +130,42 @@ describe("Passkit-generator", function () {
 
 		it("Will filter out invalid location objects", () => {
 			const props = pass.props["locations"] || [];
-			const oldAmountOfLocations = props && props.length || 0;
+			const oldAmountOfLocations = (props && props.length) || 0;
 
-			pass.locations({
-				// @ts-expect-error
-				"ibrupofene": "no",
-				"longitude": 0.00000000
-			}, {
-				"longitude": 4.42634523,
-				"latitude": 5.344233323352
-			}, ...(pass.props["locations"] || []));
+			pass.locations(
+				{
+					// @ts-expect-error
+					ibrupofene: "no",
+					longitude: 0.0,
+				},
+				{
+					longitude: 4.42634523,
+					latitude: 5.344233323352,
+				},
+				...(pass.props["locations"] || []),
+			);
 
-			expect(pass.props["locations"].length).toBe((oldAmountOfLocations || 0) + 1);
+			expect(pass.props["locations"].length).toBe(
+				(oldAmountOfLocations || 0) + 1,
+			);
 		});
 	});
 
 	describe("Beacons()", () => {
 		it("Won't apply changes if invalid beacon objects are passed", () => {
 			const props = pass.props["beacons"] || [];
-			const oldAmountOfBeacons = props && props.length || 0;
+			const oldAmountOfBeacons = (props && props.length) || 0;
 
-			pass.beacons({
-				// @ts-expect-error
-				"ibrupofene": "no",
-				"major": 55,
-				"minor": 0,
-				"proximityUUID": "2707c5f4-deb9-48ff-b760-671bc885b6a7"
-			}, ...props);
+			pass.beacons(
+				{
+					// @ts-expect-error
+					ibrupofene: "no",
+					major: 55,
+					minor: 0,
+					proximityUUID: "2707c5f4-deb9-48ff-b760-671bc885b6a7",
+				},
+				...props,
+			);
 
 			if (oldAmountOfBeacons) {
 				expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons);
@@ -153,20 +176,23 @@ describe("Passkit-generator", function () {
 
 		it("Will filter out invalid beacons objects", () => {
 			const props = pass.props["beacons"] || [];
-			const oldAmountOfBeacons = props && props.length || 0;
+			const oldAmountOfBeacons = (props && props.length) || 0;
 
-			pass.beacons({
-				"major": 55,
-				"minor": 0,
-				"proximityUUID": "59da0f96-3fb5-43aa-9028-2bc796c3d0c5"
-			}, {
-				"major": 55,
-				"minor": 0,
-				"proximityUUID": "fdcbbf48-a4ae-4ffb-9200-f8a373c5c18e",
-				// @ts-expect-error
-				"animal": "Monkey"
-			}, ...props);
-
+			pass.beacons(
+				{
+					major: 55,
+					minor: 0,
+					proximityUUID: "59da0f96-3fb5-43aa-9028-2bc796c3d0c5",
+				},
+				{
+					major: 55,
+					minor: 0,
+					proximityUUID: "fdcbbf48-a4ae-4ffb-9200-f8a373c5c18e",
+					// @ts-expect-error
+					animal: "Monkey",
+				},
+				...props,
+			);
 
 			expect(pass.props["beacons"].length).toBe(oldAmountOfBeacons + 1);
 		});
@@ -175,7 +201,7 @@ describe("Passkit-generator", function () {
 	describe("barcodes()", () => {
 		it("Won't apply changes if no data is passed", () => {
 			const props = pass.props["barcodes"] || [];
-			const oldAmountOfBarcodes = props && props.length || 0;
+			const oldAmountOfBarcodes = (props && props.length) || 0;
 
 			pass.barcodes();
 			expect(pass.props["barcodes"].length).toBe(oldAmountOfBarcodes);
@@ -183,7 +209,7 @@ describe("Passkit-generator", function () {
 
 		it("Will ignore boolean parameter", () => {
 			const props = pass.props["barcodes"] || [];
-			const oldAmountOfBarcodes = props && props.length || 0;
+			const oldAmountOfBarcodes = (props && props.length) || 0;
 
 			// @ts-expect-error
 			pass.barcode(true);
@@ -192,7 +218,7 @@ describe("Passkit-generator", function () {
 
 		it("Will ignore numeric parameter", () => {
 			const props = pass.props["barcodes"] || [];
-			const oldAmountOfBarcodes = props && props.length || 0;
+			const oldAmountOfBarcodes = (props && props.length) || 0;
 
 			// @ts-expect-error
 			pass.barcodes(42);
@@ -208,7 +234,7 @@ describe("Passkit-generator", function () {
 			pass.barcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
-				messageEncoding: "utf8"
+				messageEncoding: "utf8",
 			});
 
 			expect(pass.props["barcodes"].length).toBe(1);
@@ -220,12 +246,14 @@ describe("Passkit-generator", function () {
 				format: "PKBarcodeFormatPDF417",
 			});
 
-			expect(pass.props["barcodes"][0].messageEncoding).toBe("iso-8859-1");
+			expect(pass.props["barcodes"][0].messageEncoding).toBe(
+				"iso-8859-1",
+			);
 		});
 
 		it("Will ignore objects without message property", () => {
 			const props = pass.props["barcodes"] || [];
-			const oldAmountOfBarcodes = props && props.length || 0;
+			const oldAmountOfBarcodes = (props && props.length) || 0;
 
 			// @ts-expect-error
 			pass.barcodes({
@@ -237,12 +265,19 @@ describe("Passkit-generator", function () {
 
 		it("Will ignore non-Barcodes schema compliant objects", () => {
 			// @ts-expect-error
-			pass.barcodes(5, 10, 15, {
-				message: "28363516282",
-				format: "PKBarcodeFormatPDF417"
-			}, 7, 1);
+			pass.barcodes(
+				5,
+				10,
+				15,
+				{
+					message: "28363516282",
+					format: "PKBarcodeFormatPDF417",
+				},
+				7,
+				1,
+			);
 
-			expect(pass.props["barcodes"].length).toBe(1)
+			expect(pass.props["barcodes"].length).toBe(1);
 		});
 
 		it("Will reset barcodes content if parameter is null", () => {
@@ -255,18 +290,18 @@ describe("Passkit-generator", function () {
 		it("Will ignore non string or null arguments", function () {
 			const oldBarcode = pass.props["barcode"] || undefined;
 
-			pass
-				.barcodes("Message-22645272183")
+			pass.barcodes("Message-22645272183")
 				// @ts-expect-error
-				.barcode(55)
+				.barcode(55);
 
 			// unchanged
 			expect(pass.props["barcode"]).toEqual(oldBarcode);
 		});
 
 		it("Will reset backward value on null", () => {
-			pass.barcodes("Message-22645272183")
-				.barcode("PKBarcodeFormatAztec");
+			pass.barcodes("Message-22645272183").barcode(
+				"PKBarcodeFormatAztec",
+			);
 
 			expect(pass.props["barcode"].format).toBe("PKBarcodeFormatAztec");
 
@@ -277,8 +312,7 @@ describe("Passkit-generator", function () {
 		it("Won't apply changes if unknown format is passed", () => {
 			const oldBarcode = pass.props["barcode"] || undefined;
 
-			pass
-				.barcodes("Message-22645272183")
+			pass.barcodes("Message-22645272183")
 				// @ts-expect-error
 				.barcode("PKBingoBongoFormat");
 

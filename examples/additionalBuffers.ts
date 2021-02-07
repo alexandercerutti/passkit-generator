@@ -11,12 +11,14 @@ import fetch from "node-fetch";
 import { createPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
-	let passName = request.params.modelName + "_" + (new Date()).toISOString().split('T')[0].replace(/-/ig, "");
+	let passName =
+		request.params.modelName +
+		"_" +
+		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
-	const avatar = await (
-		fetch("https://s.gravatar.com/avatar/83cd11399b7ea79977bc302f3931ee52?size=32&default=retro")
-			.then(res => res.buffer())
-	);
+	const avatar = await fetch(
+		"https://s.gravatar.com/avatar/83cd11399b7ea79977bc302f3931ee52?size=32&default=retro",
+	).then((res) => res.buffer());
 
 	const passConfig = {
 		model: `./models/${request.params.modelName}`,
@@ -25,8 +27,8 @@ app.all(async function manageRequest(request, response) {
 			signerCert: "../certificates/signerCert.pem",
 			signerKey: {
 				keyFile: "../certificates/signerKey.pem",
-				passphrase: "123456"
-			}
+				passphrase: "123456",
+			},
 		},
 		overrides: request.body || request.params || request.query,
 	};
@@ -44,7 +46,7 @@ app.all(async function manageRequest(request, response) {
 
 		response.set({
 			"Content-type": "application/vnd.apple.pkpass",
-			"Content-disposition": `attachment; filename=${passName}.pkpass`
+			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 
 		stream.pipe(response);

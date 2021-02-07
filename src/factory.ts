@@ -1,5 +1,5 @@
 import { Pass } from "./pass";
-import { FactoryOptions, BundleUnit, FinalCertificates } from "./schema";
+import { FactoryOptions, BundleUnit, FinalCertificates, PartitionedBundle, OverridesSupportedOptions } from "./schema";
 import formatMessage from "./messages";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
 import { splitBufferBundle } from "./utils";
@@ -14,7 +14,7 @@ import { AbstractModel, AbstractFactoryOptions } from "./abstract";
  */
 
 export async function createPass(
-	options: FactoryOptions | AbstractModel,
+	options: FactoryOptions | InstanceType<typeof AbstractModel>,
 	additionalBuffers?: BundleUnit,
 	abstractMissingData?: Omit<AbstractFactoryOptions, "model">
 ): Promise<Pass> {
@@ -25,6 +25,10 @@ export async function createPass(
 	try {
 		if (options instanceof AbstractModel) {
 			let certificates: FinalCertificates;
+			let overrides: OverridesSupportedOptions = {
+				...(options.overrides || {}),
+				...(abstractMissingData && abstractMissingData.overrides || {})
+			};
 
 			if (!(options.certificates && options.certificates.signerCert && options.certificates.signerKey) && abstractMissingData.certificates) {
 				certificates = Object.assign(
@@ -35,39 +39,30 @@ export async function createPass(
 				certificates = options.certificates;
 			}
 
-			if (additionalBuffers) {
-				const [additionalL10n, additionalBundle] = splitBufferBundle(additionalBuffers);
-				Object.assign(options.bundle["l10nBundle"], additionalL10n);
-				Object.assign(options.bundle["bundle"], additionalBundle);
-			}
-
-			return new Pass({
-				model: options.bundle,
-				certificates: certificates,
-				overrides: {
-					...(options.overrides || {}),
-					...(abstractMissingData && abstractMissingData.overrides || {})
-				}
-			});
+			return createPassInstance(options.bundle, certificates, overrides, additionalBuffers);
 		} else {
 			const [bundle, certificates] = await Promise.all([
 				getModelContents(options.model),
 				readCertificatesFromOptions(options.certificates)
 			]);
 
-			if (additionalBuffers) {
-				const [additionalL10n, additionalBundle] = splitBufferBundle(additionalBuffers);
-				Object.assign(bundle["l10nBundle"], additionalL10n);
-				Object.assign(bundle["bundle"], additionalBundle);
-			}
-
-			return new Pass({
-				model: bundle,
-				certificates,
-				overrides: options.overrides
-			});
+			return createPassInstance(bundle, certificates, options.overrides, additionalBuffers);
 		}
 	} catch (err) {
 		throw new Error(formatMessage("CP_INIT_ERROR", "pass", err));
 	}
+}
+
+function createPassInstance(model: PartitionedBundle, certificates: FinalCertificates, overrides: OverridesSupportedOptions, additionalBuffers?: BundleUnit) {
+	if (additionalBuffers) {
+		const [additionalL10n, additionalBundle] = splitBufferBundle(additionalBuffers);
+		Object.assign(model["l10nBundle"], additionalL10n);
+		Object.assign(model["bundle"], additionalBundle);
+	}
+
+	return new Pass({
+		model,
+		certificates,
+		overrides
+	});
 }

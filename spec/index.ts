@@ -1,4 +1,5 @@
 import { createPass, Pass } from "..";
+import * as path from "path";
 
 /**
  * Tests created upon Jasmine testing suite.
@@ -8,73 +9,16 @@ describe("Passkit-generator", function () {
 	let pass: Pass;
 	beforeEach(async () => {
 		pass = await createPass({
-			model: "examples/models/examplePass.pass",
+			model: path.resolve(__dirname, "../examples/models/examplePass.pass"),
 			certificates: {
-				wwdr: "certificates/WWDR.pem",
-				signerCert: "certificates/signerCert.pem",
+				wwdr: path.resolve(__dirname, "../certificates/WWDR.pem"),
+				signerCert: path.resolve(__dirname, "../certificates/signerCert.pem"),
 				signerKey: {
-					keyFile: "certificates/signerKey.pem",
+					keyFile: path.resolve(__dirname, "../certificates/signerKey.pem"),
 					passphrase: "123456"
 				}
 			},
 			overrides: {}
-		});
-	});
-
-	describe("Model validation", () => {
-		it("Should reject with non valid model", async () => {
-			await expectAsync(createPass({
-				// @ts-expect-error
-				model: 0,
-				certificates: {
-					wwdr: "certificates/WWDR.pem",
-					signerCert: "certificates/signerCert.pem",
-					signerKey: {
-						keyFile: "certificates/signerKey.pem",
-						passphrase: "123456"
-					}
-				},
-				overrides: {}
-			})).toBeRejected();
-
-			await expectAsync(createPass({
-				model: undefined,
-				certificates: {
-					wwdr: "certificates/WWDR.pem",
-					signerCert: "certificates/signerCert.pem",
-					signerKey: {
-						keyFile: "certificates/signerKey.pem",
-						passphrase: "123456"
-					}
-				},
-				overrides: {}
-			})).toBeRejected();
-
-			await expectAsync(createPass({
-				model: null,
-				certificates: {
-					wwdr: "certificates/WWDR.pem",
-					signerCert: "certificates/signerCert.pem",
-					signerKey: {
-						keyFile: "certificates/signerKey.pem",
-						passphrase: "123456"
-					}
-				},
-				overrides: {}
-			})).toBeRejected();
-
-			await expectAsync(createPass({
-				model: {},
-				certificates: {
-					wwdr: "certificates/WWDR.pem",
-					signerCert: "certificates/signerCert.pem",
-					signerKey: {
-						keyFile: "certificates/signerKey.pem",
-						passphrase: "123456"
-					}
-				},
-				overrides: {}
-			})).toBeRejected();
 		});
 	});
 

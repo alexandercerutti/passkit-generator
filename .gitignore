@@ -7,3 +7,5 @@ certificates/
 *.js
 lib/
 examples/build
+spec/**/*.js
+spec/**/*.js.map

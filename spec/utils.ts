@@ -1,5 +1,5 @@
 import { splitBufferBundle } from "../lib/utils";
-import type { BundleUnit } from "../src/schema";
+import type { BundleUnit } from "../lib/schema";
 
 describe("splitBufferBundle", () => {
 	it("should split the bundle in language-organized files buffers and normal files with valid bundleUnit passed", () => {

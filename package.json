@@ -8,9 +8,9 @@
 		"build:all": "npm run build:src && npm run build:examples && npm run build:spec",
 		"build:src": "rm -rf ./lib && npx tsc -p tsconfig.dist.json",
 		"build:examples": "cd examples && npm run build",
-		"build:spec": "rm -rf ./spec/*.js && npx tsc",
+		"build:spec": "rm -rf ./spec/*.js && rm -rf ./spec/*.js.map && npx tsc -p tsconfig.spec.json",
 		"prepublishOnly": "npm run build",
-		"test": "npm run build:spec && jasmine spec/*.js",
+		"test": "npm run build:spec && npx jasmine",
 		"example": "npm run build:src && npm --prefix examples run example"
 	},
 	"author": "Alexander Patrick Cerutti",

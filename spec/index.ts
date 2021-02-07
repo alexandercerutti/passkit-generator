@@ -113,10 +113,11 @@ describe("Passkit-generator", function () {
 	});
 
 	describe("expiration()", () => {
-		it("Won't apply changes withouta valid argument", () => {
+		it("Won't apply changes without a valid argument", () => {
 			// @ts-expect-error
 			pass.expiration();
 			expect(pass.props["expirationDate"]).toBe(undefined);
+
 			// @ts-expect-error
 			pass.expiration(42);
 			expect(pass.props["expirationDate"]).toBe(undefined);

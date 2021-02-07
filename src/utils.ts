@@ -91,20 +91,32 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
 
 type PartitionedBundleElements = [PartitionedBundle["l10nBundle"], PartitionedBundle["bundle"]];
 
-export function splitBufferBundle(origin: any): PartitionedBundleElements {
-	return Object.keys(origin).reduce<PartitionedBundleElements>(([l10n, bundle], current) => {
-		if (!current.includes(".lproj")) {
-			return [l10n, { ...bundle, [current]: origin[current] }];
+export function splitBufferBundle(origin: BundleUnit): PartitionedBundleElements {
+	const initialValue: PartitionedBundleElements = [{}, {}];
+
+	if (!origin) {
+		return initialValue;
+	}
+
+	return Object.entries(origin).reduce<PartitionedBundleElements>(([l10n, bundle], [key, buffer]) => {
+		if (!key.includes(".lproj")) {
+			return [
+				l10n,
+				{
+					...bundle,
+					[key]: buffer
+				}
+			];
 		}
 
-		const pathComponents = current.split(sep);
+		const pathComponents = key.split(sep);
 		const lang = pathComponents[0];
 		const file = pathComponents.slice(1).join("/");
 
-		(l10n[lang] || (l10n[lang] = {}))[file] = origin[current];
+		(l10n[lang] || (l10n[lang] = {}))[file] = buffer;
 
 		return [l10n, bundle];
-	}, [{}, {}]);
+	}, initialValue);
 }
 
 type StringSearchMode = "includes" | "startsWith" | "endsWith";

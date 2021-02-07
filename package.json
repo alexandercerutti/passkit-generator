@@ -6,9 +6,9 @@
 	"scripts": {
 		"build": "npm run build:src",
 		"build:all": "npm run build:src && npm run build:examples && npm run build:spec",
-		"build:src": "rm -rf ./lib && npx tsc -p tsconfig.dist.json",
+		"build:src": "rimraf lib && npx tsc -p tsconfig.dist.json",
 		"build:examples": "cd examples && npm run build",
-		"build:spec": "rm -rf ./spec/*.js && rm -rf ./spec/*.js.map && npx tsc -p tsconfig.spec.json",
+		"build:spec": "rimraf \"./spec/*.!(ts)\" && npx tsc -p tsconfig.spec.json",
 		"prepublishOnly": "npm run build",
 		"test": "npm run build:spec && npx jasmine",
 		"example": "npm run build:src && npm --prefix examples run example"
@@ -41,6 +41,7 @@
 		"@types/node-forge": "^0.9.7",
 		"@types/yazl": "^2.4.2",
 		"jasmine": "^3.6.4",
+		"rimraf": "^3.0.2",
 		"typescript": "^4.1.3"
 	},
 	"files": [

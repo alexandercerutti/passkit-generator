@@ -1,6 +1,7 @@
 {
 	"name": "examples",
 	"version": "0.0.0",
+	"private": true,
 	"description": "Passkit-generator examples",
 	"author": "Alexander P. Cerutti <cerutti.alexander@gmail.com>",
 	"license": "ISC",

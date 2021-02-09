@@ -11,7 +11,8 @@
 		"build:spec": "rimraf \"./spec/*.!(ts)\" && npx tsc -p tsconfig.spec.json",
 		"prepublishOnly": "npm run build",
 		"test": "npm run build:spec && npx jasmine",
-		"example": "npm run build:src && npm --prefix examples run example"
+		"example": "npm run build:src && npm --prefix examples run example",
+		"example:debug": "npm run build:src && npm --prefix examples run example:debug"
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",

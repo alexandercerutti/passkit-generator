@@ -61,7 +61,6 @@ app.all(async function manageRequest(request, response) {
 				},
 				{
 					message: "Thank you for using this package <3",
-					// @ts-expect-error
 					format: "PKBarcodeFormatMock44617",
 				},
 			);

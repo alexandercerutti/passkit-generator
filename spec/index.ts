@@ -76,12 +76,11 @@ describe("Passkit-generator", function () {
 			expect(pass.props["expirationDate"]).toBe(undefined);
 		});
 
-		it("Will set expiration with a Date as argument", () => {
-			pass.expiration(new Date(2020, 5, 1, 0, 0, 0));
-			// this is made to avoid problems with winter and summer time:
-			// we focus only on the date and time for the tests.
-			let noTimeZoneDateTime = pass.props["expirationDate"].split("+")[0];
-			expect(noTimeZoneDateTime).toBe("2020-06-01T00:00:00");
+		it("expects a Date object as the only argument", () => {
+			pass.expiration(new Date(2020, 6, 1, 0, 0, 0, 0));
+			// Month starts from 0 in Date Object when used this way, therefore
+			// we expect one month more
+			expect(pass.props["expirationDate"]).toBe("2020-07-01T00:00:00Z");
 		});
 
 		it("An invalid date, will not apply changes", () => {
@@ -96,12 +95,9 @@ describe("Passkit-generator", function () {
 	});
 
 	describe("relevantDate()", () => {
-		it("A date object will apply changes", () => {
+		it("expects a Date object as the only argument", () => {
 			pass.relevantDate(new Date("10-04-2021"));
-			// this is made to avoid problems with winter and summer time:
-			// we focus only on the date and time for the tests.
-			let noTimeZoneDateTime = pass.props["relevantDate"].split("+")[0];
-			expect(noTimeZoneDateTime).toBe("2021-10-04T00:00:00");
+			expect(pass.props["relevantDate"]).toBe("2021-10-04T00:00:00Z");
 		});
 	});
 
@@ -264,8 +260,8 @@ describe("Passkit-generator", function () {
 		});
 
 		it("Will ignore non-Barcodes schema compliant objects", () => {
-			// @ts-expect-error
 			pass.barcodes(
+				// @ts-expect-error
 				5,
 				10,
 				15,

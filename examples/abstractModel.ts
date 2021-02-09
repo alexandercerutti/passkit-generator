@@ -4,17 +4,24 @@ import {
 	createAbstractModel,
 	AbstractModel,
 } from "passkit-generator";
+import path from "path";
 
 let abstractModel: AbstractModel;
 
 (async () => {
 	abstractModel = await createAbstractModel({
-		model: `./models/exampleBooking.pass`,
+		model: path.resolve(__dirname, `../models/exampleBooking.pass`),
 		certificates: {
-			wwdr: "../certificates/WWDR.pem",
-			signerCert: "../certificates/signerCert.pem",
+			wwdr: path.resolve(__dirname, "../../certificates/WWDR.pem"),
+			signerCert: path.resolve(
+				__dirname,
+				"../../certificates/signerCert.pem",
+			),
 			signerKey: {
-				keyFile: "../certificates/signerKey.pem",
+				keyFile: path.resolve(
+					__dirname,
+					"../../certificates/signerKey.pem",
+				),
 				passphrase: "123456",
 			},
 		},

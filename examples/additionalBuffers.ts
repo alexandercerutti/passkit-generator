@@ -9,6 +9,7 @@
 import app from "./webserver";
 import fetch from "node-fetch";
 import { createPass } from "passkit-generator";
+import path from "path";
 
 app.all(async function manageRequest(request, response) {
 	let passName =
@@ -21,12 +22,18 @@ app.all(async function manageRequest(request, response) {
 	).then((res) => res.buffer());
 
 	const passConfig = {
-		model: `./models/${request.params.modelName}`,
+		model: path.resolve(__dirname, `../models/${request.params.modelName}`),
 		certificates: {
-			wwdr: "../certificates/WWDR.pem",
-			signerCert: "../certificates/signerCert.pem",
+			wwdr: path.resolve(__dirname, "../../certificates/WWDR.pem"),
+			signerCert: path.resolve(
+				__dirname,
+				"../../certificates/signerCert.pem",
+			),
 			signerKey: {
-				keyFile: "../certificates/signerKey.pem",
+				keyFile: path.resolve(
+					__dirname,
+					"../../certificates/signerKey.pem",
+				),
 				passphrase: "123456",
 			},
 		},

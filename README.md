@@ -140,7 +140,9 @@ ___
 
 <a name="usage_example"></a>
 
-## Usage Example - Folder Model
+## Usage Example
+
+#### Folder Model
 
 ```typescript
 /**
@@ -180,7 +182,7 @@ try {
 }
 ```
 
-## Usage Example - Buffer Model
+#### Buffer Model
 
 ```typescript 
 

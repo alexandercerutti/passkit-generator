@@ -198,6 +198,8 @@ try {
 		},
 
 		// The rest will be the same as above 
+		...	
+	});
 
 } catch (err) {
 	doSomethingWithTheError(err);

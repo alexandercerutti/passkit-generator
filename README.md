@@ -140,7 +140,9 @@ ___
 
 <a name="usage_example"></a>
 
-## Usage example
+## Usage Example
+
+#### Folder Model
 
 ```typescript
 /**
@@ -178,6 +180,31 @@ try {
 } catch (err) {
 	doSomethingWithTheError(err);
 }
+```
+
+#### Buffer Model
+
+```typescript 
+
+import { createPass, Pass } from "passkit-generator";
+
+try {
+	const examplePass = await createPass({
+		model: {
+			"thumbnail": Buffer.from([ ... ]),
+			"icon": Buffer.from([ ... ]),
+			"pass.json": Buffer.from([ ... ]),
+			"it.lproj/pass.strings": Buffer.from([ ... ])
+		},
+
+		// The rest will be the same as above 
+		...	
+	});
+
+} catch (err) {
+	doSomethingWithTheError(err);
+}
+
 ```
 
 For more complex usage examples, please refer to [examples](https://github.com/alexandercerutti/passkit-generator/tree/master/examples) folder.

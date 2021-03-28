@@ -26,29 +26,30 @@ All the static medias from both sources, will be read and pushed as they are in 
 > ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
 
 ### Install
+
 ```sh
 $ npm install passkit-generator --save
 ```
 
-___
+---
 
 ### API Documentation
 
 This package comes with an [API documentation](./API.md), that makes available a series of methods to create and customize passes.
 
-___
+---
 
 ### Looking for the previous major version?
 
 Check the [v1 branch](https://github.com/alexandercerutti/passkit-generator/tree/v1.6.8). That branch is kept for reference only.
 
-___
+---
 
 ### Coming from the previous major version?
 
 Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2).
 
-___
+---
 
 ## Get Started
 
@@ -63,7 +64,7 @@ Let's suppose you have a file `model.zip` stored somewhere: you unzip it in runt
 
 > To keep a model in memory, the method [`createAbstractModel`](https://github.com/alexandercerutti/passkit-generator/blob/master/API.md#create-an-abstract-model) has been created.
 
-___
+---
 
 > Using the .pass extension is a best practice, showing that the directory is a pass package.
 > ([Build your first pass - Apple Developer Portal](https://apple.co/2LYXWo3)).
@@ -71,16 +72,21 @@ ___
 Following to this best practice, the package is set to require each folder-model to have a **_.pass_** extension.
 If omitted in the configuration (as in [Usage Example](#usage_example), at "model" key), it will be forcefully added.
 
-___
+---
+
+To create a model, you can do that manually or use a web tool I developed, [Passkit Visual Designer](https://pkvd.app), which will allow you to design your model through a neat user interface.
+It will output a .zip file that you can decompress and use it as both file model and buffer model.
+
+Since `.pass` extension is required, **it will be up to you to unzip the generated model in a .pass folder**.
 
 ```bash
 $ cd yourProjectDir;
 $ mkdir passModels && mkdir $_/myFirstModel.pass && cd $_;
 ```
 
-Follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package Structure_) to build a correct pass model. The **icon is required** in order to make the pass work. *Manifest.json* and *signature* will be automatically ignored from the model and generated in runtime.
+Follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package Structure_) to build a correct pass model. The **icon is required** in order to make the pass work. _Manifest.json_ and _signature_ will be automatically ignored from the model and generated in runtime.
 
-You can also create `.lproj` folders (e.g. *en.lproj* or *it.lproj*) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#method_localize) in the API documentation.
+You can also create `.lproj` folders (e.g. _en.lproj_ or _it.lproj_) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#method_localize) in the API documentation.
 
 To include a file that belongs to an `.lproj` folder in buffers, you'll just have to name a key like `en.lproj/thumbnail.png`.
 
@@ -90,14 +96,15 @@ Create a `pass.json` by taking example from examples folder models or the one pr
 
 ```json
 {
-  "formatVersion": 1,
-  "passTypeIdentifier": "pass.<bundle id>",
-  "teamIdentifier": "<here your team identifier>",
-  "organizationName": "<your organization name>",
-  "description": "A localizable description of your pass. To do so, put here a placeholder.",
-  "boardingPass": {}
+	"formatVersion": 1,
+	"passTypeIdentifier": "pass.<bundle id>",
+	"teamIdentifier": "<here your team identifier>",
+	"organizationName": "<your organization name>",
+	"description": "A localizable description of your pass. To do so, put here a placeholder.",
+	"boardingPass": {}
 }
 ```
+
 <a name="certificates"></a>
 
 ##### Certificates
@@ -107,9 +114,9 @@ The third step is about the developer and WWDR certificates. I suggest you to cr
 This is a standard procedure: you would have to do it also without using this library. We'll use OpenSSL to complete our work (or to do it entirely, if only on terminal), so be sure to have it installed.
 You'll need the following three elements:
 
-* Apple WWDR (_Worldwide Developer Relationship_) certificate
-* Signer certificate
-* Signer key
+-   Apple WWDR (_Worldwide Developer Relationship_) certificate
+-   Signer certificate
+-   Signer key
 
 While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certificateauthority/), to get the `signer key` and the `certificate`, you'll have to get first a `Certificate Signing Request` (`.certSigningRequest` file) and upload it to Apple Developers Portal, at [Pass Types Identifiers](https://developer.apple.com/account/ios/identifier/passTypeId) (open it, it's worth it 😜).
 
@@ -117,8 +124,8 @@ While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certifi
 <hr>
 
 > **If you don't have access to macOS** (or you are a terminal enthusiast), **follow [these steps](./non-macOS-steps.md) instead.**
-<hr>
 
+<hr>
 
 1. Create a new pass type identifier and provide it with a Name and a reverse-domain bundle id (starting with "pass."). You will put this identifier as value for `passTypeIdentifier` in `pass.json` file.
 2. Confirm and register the new identifier.
@@ -128,19 +135,20 @@ While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certifi
 6. Open terminal, place where you want to save the files and insert the following OpenSSL commands changing the contents between angular brackets. You'll have to choose a secret passphrase (and write it down) that you'll use also in the application.
 
     ```sh
-	# Creating and changing dir
+    # Creating and changing dir
     $ mkdir "certs" && cd $_
-	# Extracting key and cert from pkcs12
+    # Extracting key and cert from pkcs12
     $ openssl pkcs12 -in <cert-name>.p12 -clcerts -nokeys -out signerCert.pem -passin pass:<your-password>
     $ openssl pkcs12 -in <cert-name>.p12 -nocerts -out signerKey.pem -passin pass:<your-password> -passout pass:<secret-passphrase>
     ```
-7. Execute step 5 also for the WWDR certificate (`.cer`) you downloaded from Apple PKI portal (default name: *AppleWWDRCA.cer*) but instead exporting it as PKCS#12 (`.p12` - you'll also be unable to do that), export it as PEM (`.pem`) file.
 
-___
+7. Execute step 5 also for the WWDR certificate (`.cer`) you downloaded from Apple PKI portal (default name: _AppleWWDRCA.cer_) but instead exporting it as PKCS#12 (`.p12` - you'll also be unable to do that), export it as PEM (`.pem`) file.
+
+---
 
 <a name="usage_example"></a>
 
-## Usage Example
+## Usage Examples
 
 #### Folder Model
 
@@ -173,7 +181,7 @@ try {
 	examplePass.localize("en", { ... });
 	examplePass.barcode("36478105430"); // Random value
 
-	// Generate the stream, which gets returned through a Promise
+	// Generate the stream .pkpass file stream
 	const stream: Stream = examplePass.generate();
 
 	doSomethingWithTheStream(stream);
@@ -184,8 +192,12 @@ try {
 
 #### Buffer Model
 
-```typescript 
-
+```typescript
+/**
+ * Use `const { createPass } = require("passkit-generator");`
+ * for usage in pure Node.js. Please note that `Pass` is only exported
+ * as Typescript type.
+ */
 import { createPass, Pass } from "passkit-generator";
 
 try {
@@ -196,11 +208,28 @@ try {
 			"pass.json": Buffer.from([ ... ]),
 			"it.lproj/pass.strings": Buffer.from([ ... ])
 		},
-
-		// The rest will be the same as above 
-		...	
+		certificates: {
+			wwdr: "./certs/wwdr.pem",
+			signerCert: "./certs/signercert.pem",
+			signerKey: {
+				keyFile: "./certs/signerkey.pem",
+				passphrase: "123456"
+			}
+		},
+		overrides: {
+			// keys to be added or overridden
+			serialNumber: "AAGH44625236dddaffbda"
+		}
 	});
 
+	// Adding some settings to be written inside pass.json
+	examplePass.localize("en", { ... });
+	examplePass.barcode("36478105430"); // Random value
+
+	// Generate the stream .pkpass file stream
+	const stream: Stream = examplePass.generate();
+
+	doSomethingWithTheStream(stream);
 } catch (err) {
 	doSomethingWithTheError(err);
 }
@@ -209,7 +238,7 @@ try {
 
 For more complex usage examples, please refer to [examples](https://github.com/alexandercerutti/passkit-generator/tree/master/examples) folder.
 
-___
+---
 
 ## Other
 
@@ -222,7 +251,7 @@ A big thanks to all the people and friends in the Apple Developer Academy (and n
 Any contribution, is welcome.
 Made with ❤️ in Italy.
 
-___
+---
 
 ## Contributors
 

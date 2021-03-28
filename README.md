@@ -74,7 +74,7 @@ If omitted in the configuration (as in [Usage Example](#usage_example), at "mode
 
 ---
 
-To create a model, you can do that manually or use a web tool I developed, [Passkit Visual Designer](https://pkvd.app), which will allow you to design your model through a neat user interface.
+Model creation can be performed both manually or with the auxiliary of a web tool I developed, [Passkit Visual Designer](https://pkvd.app), which will let you design your model through a neat user interface.
 It will output a .zip file that you can decompress and use it as both file model and buffer model.
 
 Since `.pass` extension is required, **it will be up to you to unzip the generated model in a .pass folder**.

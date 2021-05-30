@@ -1,6 +1,6 @@
 # API Reference
 
-The flow of execution is really easy (once setted-up everything):
+The flow of execution is really easy (once everything is set up):
 
 * You get your data from somewhere
 * You set the needed data in the pass through methods, overrides and data in fields
@@ -13,7 +13,7 @@ Some details:
 
 * In case of troubleshooting, you can refer to the [Self-help](https://github.com/alexandercerutti/passkit-generator/wiki/Self-help) guide in Wiki or open an issue.
 
-* Keep this as always valid for the reference:
+* Keep this as it is always valid for the reference:
 
 ```javascript
 const { createPass } = require("passkit-generator");
@@ -95,7 +95,7 @@ ___
 Following Apple Developer Documentation, localization (L10N) is done by creating a `.lproj` folder for each language you want to translate your pass, each named with the relative [ISO-3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code (e.g. `en.lproj`).
 
 In this library, localization can be done in three ways: **media-only** (images), **translations-only** or both.
-The only differences stands in the way the only method below is used and how the model is designed.
+The only difference stands in the way the only method below is used and how the model is designed.
 If this method is used for translations and the model already contains a `pass.strings` for the specified language, the translations will be appended to that file.
 
 > If you are designing your pass for a language only, you can directly replace the placeholders in `pass.json` with translation.
@@ -115,7 +115,7 @@ pass.localize(lang: string, options = {});
 
 **Description**:
 
-You may want to create the folder and add translated media and no translations; else you may want to add only translations without different medias or maybe both.
+You may want to create the folder and add translated media with no translations; else you may want to add only translations without different media or maybe both.
 
 In the first case, create the `.lproj` folder in the model root folder and add the translated medias inside. Then use the method by passing only the first parameters, the code.
 

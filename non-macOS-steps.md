@@ -3,7 +3,7 @@
 This is a branch file that starts from the [Certificate paragraph](./README.md#certificates) and is made for developers that does not have access to macOS or are very very enthusiast of terminal (so its still valid for macOS).
 
 I have to use these steps to work under WSL (Windows Subsystem for Linux), or Bash on Windows. The only thing you'll still need over the certificates, are an Wallet-ready iOS App (and so an iPhone) or a way to pass it.
-To test it, I use my [Passkit-sample-client](https://github.com/alexandercerutti/passkit-sample-client), an really basic iOS App which requires just few informations and will show you the generated pass. Or you can use like Telegram, save your generated pass in your "Saved Messages" and then open it from the iPhone. Your choice.
+To test it, I use my [Passkit-sample-client](https://github.com/alexandercerutti/passkit-sample-client), a really basic iOS App which requires just few informations and will show you the generated pass. Or you can use like Telegram, save your generated pass in your "Saved Messages" and then open it from the iPhone. Your choice.
 
 But let's not talk anymore about testing and let's go with the steps to follow. **It will still require OpenSSL installed**. We are going to use it in a massive way.
 

@@ -371,14 +371,14 @@ const barcode = Joi.object().keys({
 export interface Field {
 	attributedValue?: string | number | Date;
 	changeMessage?: string;
-	dataDetectorType?: string[];
+	dataDetectorTypes?: string[];
 	label?: string;
 	textAlignment?: string;
 	key: string;
 	value: string | number | Date;
 	semantics?: Semantics;
 	dateStyle?: string;
-	ignoreTimeZone?: boolean;
+	ignoresTimeZone?: boolean;
 	isRelative?: boolean;
 	timeStyle?: string;
 	currencyCode?: string;
@@ -392,7 +392,7 @@ const field = Joi.object().keys({
 		Joi.date().iso(),
 	),
 	changeMessage: Joi.string(),
-	dataDetectorType: Joi.array().items(
+	dataDetectorTypes: Joi.array().items(
 		Joi.string().regex(
 			/(PKDataDetectorTypePhoneNumber|PKDataDetectorTypeLink|PKDataDetectorTypeAddress|PKDataDetectorTypeCalendarEvent)/,
 			"dataDetectorType",
@@ -415,7 +415,7 @@ const field = Joi.object().keys({
 		/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/,
 		"date style",
 	),
-	ignoreTimeZone: Joi.boolean(),
+	ignoresTimeZone: Joi.boolean(),
 	isRelative: Joi.boolean(),
 	timeStyle: Joi.string().regex(
 		/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/,

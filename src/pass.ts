@@ -200,9 +200,15 @@ export class Pass {
 		 * Iterating through languages and generating pass.string file
 		 */
 
-		Object.keys(this.l10nTranslations).forEach((lang) => {
+		const translationsLanguageCodes = Object.keys(this.l10nTranslations);
+
+		for (
+			let langs = translationsLanguageCodes.length, lang: string;
+			(lang = translationsLanguageCodes[--langs]);
+
+		) {
 			const strings = generateStringFile(this.l10nTranslations[lang]);
-			const langInBundles = `${lang}.lproj`;
+			const languageBundleDirname = `${lang}.lproj`;
 
 			if (strings.length) {
 				/**
@@ -211,14 +217,14 @@ export class Pass {
 				 * it otherwise.
 				 */
 
-				if (!this.l10nBundles[langInBundles]) {
-					this.l10nBundles[langInBundles] = {};
+				if (!this.l10nBundles[languageBundleDirname]) {
+					this.l10nBundles[languageBundleDirname] = {};
 				}
 
-				this.l10nBundles[langInBundles][
+				this.l10nBundles[languageBundleDirname][
 					"pass.strings"
 				] = Buffer.concat([
-					this.l10nBundles[langInBundles]["pass.strings"] ||
+					this.l10nBundles[languageBundleDirname]["pass.strings"] ||
 						Buffer.alloc(0),
 					strings,
 				]);
@@ -226,8 +232,8 @@ export class Pass {
 
 			if (
 				!(
-					this.l10nBundles[langInBundles] &&
-					Object.keys(this.l10nBundles[langInBundles]).length
+					this.l10nBundles[languageBundleDirname] &&
+					Object.keys(this.l10nBundles[languageBundleDirname]).length
 				)
 			) {
 				return;
@@ -241,22 +247,21 @@ export class Pass {
 			 * composition.
 			 */
 
-			Object.assign(
-				finalBundle,
-				...Object.keys(this.l10nBundles[langInBundles]).map(
-					(fileName) => {
-						const fullPath = path
-							.join(langInBundles, fileName)
-							.replace(/\\/, "/");
-						return {
-							[fullPath]: this.l10nBundles[langInBundles][
-								fileName
-							],
-						};
-					},
-				),
-			);
-		});
+			const bundleRelativeL10NPaths = Object.entries(
+				this.l10nBundles[languageBundleDirname],
+			).reduce((acc, [fileName, fileContent]) => {
+				const fullPath = path
+					.join(languageBundleDirname, fileName)
+					.replace(/\\/, "/");
+
+				return {
+					...acc,
+					[fullPath]: fileContent,
+				};
+			}, {});
+
+			Object.assign(finalBundle, bundleRelativeL10NPaths);
+		}
 
 		/*
 		 * Parsing the buffers, pushing them into the archive
@@ -682,6 +687,7 @@ export class Pass {
 				"foregroundColor",
 				"labelColor",
 			] as Array<keyof Schemas.PassColors>;
+
 			passColors
 				.filter(
 					(v) =>

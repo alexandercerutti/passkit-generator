@@ -368,7 +368,7 @@ export class Pass {
 			return this;
 		}
 
-		const valid = processRelevancySet(Schemas.Beacon, data);
+		const valid = getValidInArray(Schemas.Beacon, data);
 
 		if (valid.length) {
 			this[passProps]["beacons"] = valid;
@@ -391,7 +391,7 @@ export class Pass {
 			return this;
 		}
 
-		const valid = processRelevancySet(Schemas.Location, data);
+		const valid = getValidInArray(Schemas.Location, data);
 
 		if (valid.length) {
 			this[passProps]["locations"] = valid;
@@ -745,10 +745,6 @@ function barcodesFromUncompleteData(message: string): Schemas.Barcode[] {
 				Schemas.Barcode,
 			) as Schemas.Barcode,
 	);
-}
-
-function processRelevancySet<T>(schema: Joi.ObjectSchema<T>, data: T[]): T[] {
-	return getValidInArray(schema, data);
 }
 
 function getValidInArray<T>(

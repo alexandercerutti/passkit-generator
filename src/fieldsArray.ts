@@ -1,4 +1,4 @@
-import * as schema from "./schema";
+import * as Schemas from "./schemas";
 import debug from "debug";
 
 const fieldsDebug = debug("passkit:fields");
@@ -23,12 +23,12 @@ export default class FieldsArray extends Array {
 	 * also uniqueKeys set.
 	 */
 
-	push(...fieldsData: schema.Field[]): number {
+	push(...fieldsData: Schemas.Field[]): number {
 		const validFields = fieldsData.reduce(
-			(acc: schema.Field[], current: schema.Field) => {
+			(acc: Schemas.Field[], current: Schemas.Field) => {
 				if (
 					!(typeof current === "object") ||
-					!schema.isValid(current, "field")
+					!Schemas.isValid(current, Schemas.Field)
 				) {
 					return acc;
 				}
@@ -55,8 +55,8 @@ export default class FieldsArray extends Array {
 	 * also uniqueKeys set
 	 */
 
-	pop(): schema.Field {
-		const element: schema.Field = Array.prototype.pop.call(this);
+	pop(): Schemas.Field {
+		const element: Schemas.Field = Array.prototype.pop.call(this);
 		this[poolSymbol].delete(element.key);
 		return element;
 	}
@@ -69,8 +69,8 @@ export default class FieldsArray extends Array {
 	splice(
 		start: number,
 		deleteCount: number,
-		...items: schema.Field[]
-	): schema.Field[] {
+		...items: Schemas.Field[]
+	): Schemas.Field[] {
 		const removeList = this.slice(start, deleteCount + start);
 		removeList.forEach((item) => this[poolSymbol].delete(item.key));
 

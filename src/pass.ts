@@ -4,7 +4,7 @@ import debug from "debug";
 import { Stream } from "stream";
 import { ZipFile } from "yazl";
 
-import * as schema from "./schema";
+import * as Schemas from "./schemas";
 import formatMessage from "./messages";
 import FieldsArray from "./fieldsArray";
 import {
@@ -14,6 +14,7 @@ import {
 	deletePersonalization,
 	getAllFilesWithName,
 } from "./utils";
+import type Joi from "joi";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
@@ -21,22 +22,22 @@ const genericDebug = debug("passkit:generic");
 const transitType = Symbol("transitType");
 const passProps = Symbol("_props");
 
-const propsSchemaMap = new Map<string, schema.Schema>([
-	["barcodes", "barcode"],
-	["barcode", "barcode"],
-	["beacons", "beaconsDict"],
-	["locations", "locationsDict"],
-	["nfc", "nfcDict"],
+const propsSchemaMap = new Map<string, Joi.ObjectSchema<any>>([
+	["barcodes", Schemas.Barcode],
+	["barcode", Schemas.Barcode],
+	["beacons", Schemas.Beacon],
+	["locations", Schemas.Location],
+	["nfc", Schemas.NFC],
 ]);
 
 export class Pass {
-	private bundle: schema.BundleUnit;
-	private l10nBundles: schema.PartitionedBundle["l10nBundle"];
-	private _fields: (keyof schema.PassFields)[];
-	private [passProps]: schema.ValidPass = {};
-	private type: keyof schema.ValidPassType;
+	private bundle: Schemas.BundleUnit;
+	private l10nBundles: Schemas.PartitionedBundle["l10nBundle"];
+	private _fields: (keyof Schemas.PassFields)[];
+	private [passProps]: Schemas.ValidPass = {};
+	private type: keyof Schemas.ValidPassType;
 	private fieldsKeys: Set<string> = new Set<string>();
-	private passCore: schema.ValidPass;
+	private passCore: Schemas.ValidPass;
 
 	// Setting these as possibly undefined because we set
 	// them all in an loop later
@@ -46,14 +47,14 @@ export class Pass {
 	public auxiliaryFields: FieldsArray | undefined;
 	public backFields: FieldsArray | undefined;
 
-	private Certificates: schema.FinalCertificates;
+	private Certificates: Schemas.CertificatesSchema;
 	private [transitType]: string = "";
 	private l10nTranslations: {
 		[languageCode: string]: { [placeholder: string]: string };
 	} = {};
 
-	constructor(options: schema.PassInstance) {
-		if (!schema.isValid(options, "instance")) {
+	constructor(options: Schemas.PassInstance) {
+		if (!Schemas.isValid(options, Schemas.PassInstance)) {
 			throw new Error(formatMessage("REQUIR_VALID_FAILED"));
 		}
 
@@ -70,10 +71,10 @@ export class Pass {
 		}
 
 		// Parsing the options and extracting only the valid ones.
-		const validOverrides = schema.getValidated(
+		const validOverrides = Schemas.getValidated(
 			options.overrides || {},
-			"supportedOptions",
-		) as schema.OverridesSupportedOptions;
+			Schemas.OverridesSupportedOptions,
+		);
 
 		if (validOverrides === null) {
 			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"));
@@ -81,7 +82,7 @@ export class Pass {
 
 		this.type = Object.keys(this.passCore).find((key) =>
 			/(boardingPass|eventTicket|coupon|generic|storeCard)/.test(key),
-		) as keyof schema.ValidPassType;
+		) as keyof Schemas.ValidPassType;
 
 		if (!this.type) {
 			throw new Error(formatMessage("NO_PASS_TYPE"));
@@ -90,8 +91,8 @@ export class Pass {
 		// Parsing and validating pass.json keys
 		const passCoreKeys = Object.keys(
 			this.passCore,
-		) as (keyof schema.ValidPass)[];
-		const validatedPassKeys = passCoreKeys.reduce<schema.ValidPass>(
+		) as (keyof Schemas.ValidPass)[];
+		const validatedPassKeys = passCoreKeys.reduce<Schemas.ValidPass>(
 			(acc, current) => {
 				if (this.type === current) {
 					// We want to exclude type keys (eventTicket,
@@ -109,16 +110,16 @@ export class Pass {
 				const currentSchema = propsSchemaMap.get(current)!;
 
 				if (Array.isArray(this.passCore[current])) {
-					const valid = getValidInArray<schema.ArrayPassSchema>(
+					const valid = getValidInArray<Schemas.ArrayPassSchema>(
 						currentSchema,
-						this.passCore[current] as schema.ArrayPassSchema[],
+						this.passCore[current] as Schemas.ArrayPassSchema[],
 					);
 					return { ...acc, [current]: valid };
 				} else {
 					return {
 						...acc,
 						[current]:
-							(schema.isValid(
+							(Schemas.isValid(
 								this.passCore[current],
 								currentSchema,
 							) &&
@@ -155,7 +156,7 @@ export class Pass {
 			this[fieldName] = new FieldsArray(
 				this.fieldsKeys,
 				...(this.passCore[this.type][fieldName] || []).filter((field) =>
-					schema.isValid(field, "field"),
+					Schemas.isValid(field, Schemas.Field),
 				),
 			);
 		});
@@ -193,7 +194,7 @@ export class Pass {
 			);
 		}
 
-		const finalBundle = { ...this.bundle } as schema.BundleUnit;
+		const finalBundle = { ...this.bundle } as Schemas.BundleUnit;
 
 		/**
 		 * Iterating through languages and generating pass.string file
@@ -262,7 +263,7 @@ export class Pass {
 		 * and returning the compiled manifest
 		 */
 		const archive = new ZipFile();
-		const manifest = Object.keys(finalBundle).reduce<schema.Manifest>(
+		const manifest = Object.keys(finalBundle).reduce<Schemas.Manifest>(
 			(acc, current) => {
 				let hashFlow = forge.md.sha1.create();
 
@@ -360,14 +361,14 @@ export class Pass {
 	 */
 
 	beacons(resetFlag: null): this;
-	beacons(...data: schema.Beacon[]): this;
-	beacons(...data: (schema.Beacon | null)[]): this {
+	beacons(...data: Schemas.Beacon[]): this;
+	beacons(...data: (Schemas.Beacon | null)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["beacons"];
 			return this;
 		}
 
-		const valid = processRelevancySet("beacons", data as schema.Beacon[]);
+		const valid = processRelevancySet(Schemas.Beacon, data);
 
 		if (valid.length) {
 			this[passProps]["beacons"] = valid;
@@ -383,17 +384,14 @@ export class Pass {
 	 */
 
 	locations(resetFlag: null): this;
-	locations(...data: schema.Location[]): this;
-	locations(...data: (schema.Location | null)[]): this {
+	locations(...data: Schemas.Location[]): this;
+	locations(...data: (Schemas.Location | null)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["locations"];
 			return this;
 		}
 
-		const valid = processRelevancySet(
-			"locations",
-			data as schema.Location[],
-		);
+		const valid = processRelevancySet(Schemas.Location, data);
 
 		if (valid.length) {
 			this[passProps]["locations"] = valid;
@@ -436,8 +434,8 @@ export class Pass {
 
 	barcodes(resetFlag: null): this;
 	barcodes(message: string): this;
-	barcodes(...data: schema.Barcode[]): this;
-	barcodes(...data: (schema.Barcode | null | string)[]): this {
+	barcodes(...data: Schemas.Barcode[]): this;
+	barcodes(...data: (Schemas.Barcode | null | string)[]): this {
 		if (data[0] === null) {
 			delete this[passProps]["barcodes"];
 			return this;
@@ -461,13 +459,16 @@ export class Pass {
 			 * Validation assign default value to missing parameters (if any).
 			 */
 
-			const validBarcodes = data.reduce<schema.Barcode[]>(
+			const validBarcodes = data.reduce<Schemas.Barcode[]>(
 				(acc, current) => {
 					if (!(current && current instanceof Object)) {
 						return acc;
 					}
 
-					const validated = schema.getValidated(current, "barcode");
+					const validated = Schemas.getValidated(
+						current,
+						Schemas.Barcode,
+					);
 
 					if (
 						!(
@@ -479,7 +480,7 @@ export class Pass {
 						return acc;
 					}
 
-					return [...acc, validated] as schema.Barcode[];
+					return [...acc, validated] as Schemas.Barcode[];
 				},
 				[],
 			);
@@ -502,7 +503,7 @@ export class Pass {
 	 * @return {this}
 	 */
 
-	barcode(chosenFormat: schema.BarcodeFormat | null): this {
+	barcode(chosenFormat: Schemas.BarcodeFormat | null): this {
 		const { barcodes } = this[passProps];
 
 		if (chosenFormat === null) {
@@ -548,7 +549,7 @@ export class Pass {
 	 * @see https://apple.co/2wTxiaC
 	 */
 
-	nfc(data: schema.NFC | null): this {
+	nfc(data: Schemas.NFC | null): this {
 		if (data === null) {
 			delete this[passProps]["nfc"];
 			return this;
@@ -559,7 +560,7 @@ export class Pass {
 				data &&
 				typeof data === "object" &&
 				!Array.isArray(data) &&
-				schema.isValid(data, "nfcDict")
+				Schemas.isValid(data, Schemas.NFC)
 			)
 		) {
 			genericDebug(formatMessage("NFC_INVALID"));
@@ -579,7 +580,7 @@ export class Pass {
 	 * @returns The properties will be inserted in the pass.
 	 */
 
-	get props(): Readonly<schema.ValidPass> {
+	get props(): Readonly<Schemas.ValidPass> {
 		return this[passProps];
 	}
 
@@ -591,7 +592,7 @@ export class Pass {
 	 * @returns {Buffer}
 	 */
 
-	private _sign(manifest: schema.Manifest): Buffer {
+	private _sign(manifest: Schemas.Manifest): Buffer {
 		const signature = forge.pkcs7.createSignedData();
 
 		signature.content = forge.util.createBuffer(
@@ -667,7 +668,7 @@ export class Pass {
 	private _patch(passCoreBuffer: Buffer): Buffer {
 		const passFile = JSON.parse(
 			passCoreBuffer.toString(),
-		) as schema.ValidPass;
+		) as Schemas.ValidPass;
 
 		if (Object.keys(this[passProps]).length) {
 			/*
@@ -680,7 +681,7 @@ export class Pass {
 				"backgroundColor",
 				"foregroundColor",
 				"labelColor",
-			] as Array<keyof schema.PassColors>;
+			] as Array<keyof Schemas.PassColors>;
 			passColors
 				.filter(
 					(v) =>
@@ -705,7 +706,7 @@ export class Pass {
 	}
 
 	set transitType(value: string) {
-		if (!schema.isValid(value, "transitType")) {
+		if (!Schemas.isValid(value, Schemas.TransitType)) {
 			genericDebug(formatMessage("TRSTYPE_NOT_VALID", value));
 			this[transitType] = this[transitType] || "";
 			return;
@@ -727,7 +728,7 @@ export class Pass {
  * @return Array of barcodeDict compliant
  */
 
-function barcodesFromUncompleteData(message: string): schema.Barcode[] {
+function barcodesFromUncompleteData(message: string): Schemas.Barcode[] {
 	if (!(message && typeof message === "string")) {
 		return [];
 	}
@@ -739,21 +740,24 @@ function barcodesFromUncompleteData(message: string): schema.Barcode[] {
 		"PKBarcodeFormatCode128",
 	].map(
 		(format) =>
-			schema.getValidated(
+			Schemas.getValidated(
 				{ format, message },
-				"barcode",
-			) as schema.Barcode,
+				Schemas.Barcode,
+			) as Schemas.Barcode,
 	);
 }
 
-function processRelevancySet<T>(key: string, data: T[]): T[] {
-	return getValidInArray(`${key}Dict` as schema.Schema, data);
+function processRelevancySet<T>(schema: Joi.ObjectSchema<T>, data: T[]): T[] {
+	return getValidInArray(schema, data);
 }
 
-function getValidInArray<T>(schemaName: schema.Schema, contents: T[]): T[] {
+function getValidInArray<T>(
+	schemaName: Joi.ObjectSchema<T>,
+	contents: T[],
+): T[] {
 	return contents.filter(
 		(current) =>
-			Object.keys(current).length && schema.isValid(current, schemaName),
+			Object.keys(current).length && Schemas.isValid(current, schemaName),
 	);
 }
 

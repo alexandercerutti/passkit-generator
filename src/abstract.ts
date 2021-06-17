@@ -1,10 +1,4 @@
-import {
-	Certificates,
-	FinalCertificates,
-	PartitionedBundle,
-	OverridesSupportedOptions,
-	FactoryOptions,
-} from "./schema";
+import * as Schemas from "./schemas";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
 import formatMessage from "./messages";
 
@@ -13,14 +7,14 @@ const abmModel = Symbol("model");
 const abmOverrides = Symbol("overrides");
 
 export interface AbstractFactoryOptions
-	extends Omit<FactoryOptions, "certificates"> {
-	certificates?: Certificates;
+	extends Omit<Schemas.FactoryOptions, "certificates"> {
+	certificates?: Schemas.Certificates;
 }
 
 interface AbstractModelOptions {
-	bundle: PartitionedBundle;
-	certificates: FinalCertificates;
-	overrides?: OverridesSupportedOptions;
+	bundle: Schemas.PartitionedBundle;
+	certificates: Schemas.CertificatesSchema;
+	overrides?: Schemas.OverridesSupportedOptions;
 }
 
 /**
@@ -51,9 +45,9 @@ export async function createAbstractModel(options: AbstractFactoryOptions) {
 }
 
 export class AbstractModel {
-	private [abmCertificates]: FinalCertificates;
-	private [abmModel]: PartitionedBundle;
-	private [abmOverrides]: OverridesSupportedOptions;
+	private [abmCertificates]: Schemas.CertificatesSchema;
+	private [abmModel]: Schemas.PartitionedBundle;
+	private [abmOverrides]: Schemas.OverridesSupportedOptions;
 
 	constructor(options: AbstractModelOptions) {
 		this[abmModel] = options.bundle;
@@ -61,15 +55,15 @@ export class AbstractModel {
 		this[abmOverrides] = options.overrides;
 	}
 
-	get certificates(): FinalCertificates {
+	get certificates(): Schemas.CertificatesSchema {
 		return this[abmCertificates];
 	}
 
-	get bundle(): PartitionedBundle {
+	get bundle(): Schemas.PartitionedBundle {
 		return this[abmModel];
 	}
 
-	get overrides(): OverridesSupportedOptions {
+	get overrides(): Schemas.OverridesSupportedOptions {
 		return this[abmOverrides];
 	}
 }

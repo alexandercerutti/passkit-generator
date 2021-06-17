@@ -1,5 +1,5 @@
 import { EOL } from "os";
-import { PartitionedBundle, BundleUnit } from "./schema";
+import type * as Schemas from "./schemas";
 import { sep } from "path";
 
 /**
@@ -118,12 +118,12 @@ export function generateStringFile(lang: { [index: string]: string }): Buffer {
  */
 
 type PartitionedBundleElements = [
-	PartitionedBundle["l10nBundle"],
-	PartitionedBundle["bundle"],
+	Schemas.PartitionedBundle["l10nBundle"],
+	Schemas.PartitionedBundle["bundle"],
 ];
 
 export function splitBufferBundle(
-	origin: BundleUnit,
+	origin: Schemas.BundleUnit,
 ): PartitionedBundleElements {
 	const initialValue: PartitionedBundleElements = [{}, {}];
 
@@ -180,7 +180,7 @@ export function hasFilesWithName(
 }
 
 export function deletePersonalization(
-	source: BundleUnit,
+	source: Schemas.BundleUnit,
 	logosNames: string[] = [],
 ): void {
 	[...logosNames, "personalization.json"].forEach(

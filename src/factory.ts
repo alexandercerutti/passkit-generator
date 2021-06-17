@@ -1,11 +1,5 @@
 import { Pass } from "./pass";
-import {
-	FactoryOptions,
-	BundleUnit,
-	FinalCertificates,
-	PartitionedBundle,
-	OverridesSupportedOptions,
-} from "./schema";
+import * as Schemas from "./schemas";
 import formatMessage from "./messages";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
 import { splitBufferBundle } from "./utils";
@@ -20,8 +14,8 @@ import { AbstractModel, AbstractFactoryOptions } from "./abstract";
  */
 
 export async function createPass(
-	options: FactoryOptions | InstanceType<typeof AbstractModel>,
-	additionalBuffers?: BundleUnit,
+	options: Schemas.FactoryOptions | InstanceType<typeof AbstractModel>,
+	additionalBuffers?: Schemas.BundleUnit,
 	abstractMissingData?: Omit<AbstractFactoryOptions, "model">,
 ): Promise<Pass> {
 	if (
@@ -35,8 +29,8 @@ export async function createPass(
 
 	try {
 		if (options instanceof AbstractModel) {
-			let certificates: FinalCertificates;
-			let overrides: OverridesSupportedOptions = {
+			let certificates: Schemas.CertificatesSchema;
+			let overrides: Schemas.OverridesSupportedOptions = {
 				...(options.overrides || {}),
 				...((abstractMissingData && abstractMissingData.overrides) ||
 					{}),
@@ -85,10 +79,10 @@ export async function createPass(
 }
 
 function createPassInstance(
-	model: PartitionedBundle,
-	certificates: FinalCertificates,
-	overrides: OverridesSupportedOptions,
-	additionalBuffers?: BundleUnit,
+	model: Schemas.PartitionedBundle,
+	certificates: Schemas.CertificatesSchema,
+	overrides: Schemas.OverridesSupportedOptions,
+	additionalBuffers?: Schemas.BundleUnit,
 ) {
 	if (additionalBuffers) {
 		const [additionalL10n, additionalBundle] = splitBufferBundle(

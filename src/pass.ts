@@ -3,6 +3,7 @@ import forge from "node-forge";
 import debug from "debug";
 import { Stream } from "stream";
 import { ZipFile } from "yazl";
+import type Joi from "joi";
 
 import * as Schemas from "./schemas";
 import formatMessage from "./messages";
@@ -14,7 +15,7 @@ import {
 	deletePersonalization,
 	getAllFilesWithName,
 } from "./utils";
-import type Joi from "joi";
+import * as Signature from "./signature";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
@@ -283,7 +284,7 @@ export class Pass {
 			{},
 		);
 
-		const signatureBuffer = this._sign(manifest);
+		const signatureBuffer = Signature.create(manifest, this.Certificates);
 
 		archive.addBuffer(signatureBuffer, "signature");
 		archive.addBuffer(
@@ -589,79 +590,6 @@ export class Pass {
 
 	get props(): Readonly<Schemas.ValidPass> {
 		return this[passProps];
-	}
-
-	/**
-	 * Generates the PKCS #7 cryptografic signature for the manifest file.
-	 *
-	 * @method _sign
-	 * @params {Object} manifest - Manifest content.
-	 * @returns {Buffer}
-	 */
-
-	private _sign(manifest: Schemas.Manifest): Buffer {
-		const signature = forge.pkcs7.createSignedData();
-
-		signature.content = forge.util.createBuffer(
-			JSON.stringify(manifest),
-			"utf8",
-		);
-
-		signature.addCertificate(this.Certificates.wwdr);
-		signature.addCertificate(this.Certificates.signerCert);
-
-		/**
-		 * authenticatedAttributes belong to PKCS#9 standard.
-		 * It requires at least 2 values:
-		 * • content-type (which is a PKCS#7 oid) and
-		 * • message-digest oid.
-		 *
-		 * Wallet requires a signingTime.
-		 */
-
-		signature.addSigner({
-			key: this.Certificates.signerKey,
-			certificate: this.Certificates.signerCert,
-			digestAlgorithm: forge.pki.oids.sha1,
-			authenticatedAttributes: [
-				{
-					type: forge.pki.oids.contentType,
-					value: forge.pki.oids.data,
-				},
-				{
-					type: forge.pki.oids.messageDigest,
-				},
-				{
-					type: forge.pki.oids.signingTime,
-				},
-			],
-		});
-
-		/**
-		 * We are creating a detached signature because we don't need the signed content.
-		 * Detached signature is a property of PKCS#7 cryptography standard.
-		 */
-
-		signature.sign({ detached: true });
-
-		/**
-		 * Signature here is an ASN.1 valid structure (DER-compliant).
-		 * Generating a non-detached signature, would have pushed inside signature.contentInfo
-		 * (which has type 16, or "SEQUENCE", and is an array) a Context-Specific element, with the
-		 * signed content as value.
-		 *
-		 * In fact the previous approach was to generating a detached signature and the pull away the generated
-		 * content.
-		 *
-		 * That's what happens when you copy a fu****g line without understanding what it does.
-		 * Well, nevermind, it was funny to study BER, DER, CER, ASN.1 and PKCS#7. You can learn a lot
-		 * of beautiful things. ¯\_(ツ)_/¯
-		 */
-
-		return Buffer.from(
-			forge.asn1.toDer(signature.toAsn1()).getBytes(),
-			"binary",
-		);
 	}
 
 	/**

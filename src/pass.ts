@@ -268,15 +268,17 @@ export class Pass {
 		 * and returning the compiled manifest
 		 */
 		const archive = new ZipFile();
-		const manifest = Object.keys(finalBundle).reduce<Schemas.Manifest>(
-			(acc, current) => {
+		const manifest = Object.entries(finalBundle).reduce<Schemas.Manifest>(
+			(acc, [fileName, buffer]) => {
 				let hashFlow = forge.md.sha1.create();
 
-				hashFlow.update(finalBundle[current].toString("binary"));
-				archive.addBuffer(finalBundle[current], current);
-				acc[current] = hashFlow.digest().toHex();
+				hashFlow.update(buffer.toString("binary"));
+				archive.addBuffer(buffer, fileName);
 
-				return acc;
+				return {
+					...acc,
+					[fileName]: hashFlow.digest().toHex(),
+				};
 			},
 			{},
 		);

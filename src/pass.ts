@@ -220,26 +220,21 @@ export class Pass {
 				 * it otherwise.
 				 */
 
-				if (!this.l10nBundles[languageBundleDirname]) {
-					this.l10nBundles[languageBundleDirname] = {};
-				}
+				const languageBundleUnit = (this.l10nBundles[
+					languageBundleDirname
+				] ??= {});
 
-				this.l10nBundles[languageBundleDirname]["pass.strings"] =
-					Buffer.concat([
-						this.l10nBundles[languageBundleDirname][
-							"pass.strings"
-						] || Buffer.alloc(0),
-						strings,
-					]);
+				languageBundleUnit["pass.strings"] = Buffer.concat([
+					languageBundleUnit["pass.strings"] || Buffer.alloc(0),
+					strings,
+				]);
 			}
 
 			if (
-				!(
-					this.l10nBundles[languageBundleDirname] &&
-					Object.keys(this.l10nBundles[languageBundleDirname]).length
-				)
+				!this.l10nBundles[languageBundleDirname] ||
+				!Object.keys(this.l10nBundles[languageBundleDirname]).length
 			) {
-				return;
+				continue;
 			}
 
 			/**

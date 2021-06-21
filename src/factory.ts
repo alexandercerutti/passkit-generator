@@ -1,6 +1,6 @@
 import { Pass } from "./pass";
 import * as Schemas from "./schemas";
-import formatMessage from "./messages";
+import formatMessage, { ERROR } from "./messages";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
 import { splitBufferBundle } from "./utils";
 import { AbstractModel, AbstractFactoryOptions } from "./abstract";
@@ -24,7 +24,7 @@ export async function createPass(
 			(options instanceof AbstractModel || Object.keys(options).length)
 		)
 	) {
-		throw new Error(formatMessage("CP_NO_OPTS"));
+		throw new Error(formatMessage(ERROR.CP_NO_OPTS));
 	}
 
 	try {
@@ -74,7 +74,7 @@ export async function createPass(
 			);
 		}
 	} catch (err) {
-		throw new Error(formatMessage("CP_INIT_ERROR", "pass", err));
+		throw new Error(formatMessage(ERROR.CP_INIT, "pass", err));
 	}
 }
 
@@ -85,9 +85,8 @@ function createPassInstance(
 	additionalBuffers?: Schemas.BundleUnit,
 ) {
 	if (additionalBuffers) {
-		const [additionalL10n, additionalBundle] = splitBufferBundle(
-			additionalBuffers,
-		);
+		const [additionalL10n, additionalBundle] =
+			splitBufferBundle(additionalBuffers);
 		Object.assign(model["l10nBundle"], additionalL10n);
 		Object.assign(model["bundle"], additionalBundle);
 	}

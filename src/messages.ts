@@ -1,5 +1,5 @@
-const errors = {
-	CP_INIT_ERROR:
+export const ERROR = {
+	CP_INIT:
 		"Something went really bad in the %s initialization! Look at the log below this message. It should contain all the infos about the problem: \n%s",
 	CP_NO_OPTS:
 		"Cannot initialize the pass or abstract model creation: no options were passed.",
@@ -24,9 +24,9 @@ const errors = {
 		"Cannot proceed with pass creation due to bad keys format in overrides.",
 	NO_PASS_TYPE:
 		"Cannot proceed with pass creation. Model definition (pass.json) has no valid type in it.\nRefer to https://apple.co/2wzyL5J to choose a valid pass type.",
-};
+} as const;
 
-const debugMessages = {
+export const DEBUG = {
 	TRSTYPE_NOT_VALID:
 		'Transit type changing rejected as not compliant with Apple Specifications. Transit type would become "%s" but should be in [PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain]',
 	BRC_NOT_SUPPORTED:
@@ -46,9 +46,11 @@ const debugMessages = {
 		"Unable to parse Personalization.json. File is not a valid JSON. Error: %s",
 	PRS_REMOVED:
 		"Personalization has been removed as it requires an NFC-enabled pass to work.",
-};
+} as const;
 
-type AllMessages = keyof (typeof debugMessages & typeof errors);
+type ERROR_OR_DEBUG_MESSAGE =
+	| typeof ERROR[keyof typeof ERROR]
+	| typeof DEBUG[keyof typeof DEBUG];
 
 /**
  * Creates a message with replaced values
@@ -56,24 +58,14 @@ type AllMessages = keyof (typeof debugMessages & typeof errors);
  * @param  {any[]} values
  */
 
-export default function format(messageName: AllMessages, ...values: any[]) {
+export default function format(
+	messageName: ERROR_OR_DEBUG_MESSAGE,
+	...values: any[]
+) {
 	// reversing because it is better popping than shifting.
 	let replaceValues = values.reverse();
-	return resolveMessageName(messageName).replace(/%s/g, () => {
+	return messageName.replace(/%s/g, () => {
 		let next = replaceValues.pop();
 		return next !== undefined ? next : "<passedValueIsUndefined>";
 	});
-}
-
-/**
- * Looks among errors and debugMessages for the specified message name
- * @param {string} name
- */
-
-function resolveMessageName(name: AllMessages): string {
-	if (!errors[name] && !debugMessages[name]) {
-		return `<ErrorName "${name}" is not linked to any error messages>`;
-	}
-
-	return errors[name] || debugMessages[name];
 }

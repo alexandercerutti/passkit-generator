@@ -1,6 +1,6 @@
 import * as path from "path";
 import forge from "node-forge";
-import formatMessage from "./messages";
+import formatMessage, { ERROR, DEBUG } from "./messages";
 import * as Schemas from "./schemas";
 import {
 	removeHidden,
@@ -29,7 +29,7 @@ export async function getModelContents(model: Schemas.FactoryOptions["model"]) {
 	} else if (typeof model === "object" && Object.keys(model).length) {
 		modelContents = getModelBufferContents(model);
 	} else {
-		throw new Error(formatMessage("MODEL_NOT_VALID"));
+		throw new Error(formatMessage(ERROR.MODEL_NOT_VALID));
 	}
 
 	const modelFiles = Object.keys(modelContents.bundle);
@@ -38,7 +38,9 @@ export async function getModelContents(model: Schemas.FactoryOptions["model"]) {
 		hasFilesWithName("icon", modelFiles, "startsWith");
 
 	if (!isModelInitialized) {
-		throw new Error(formatMessage("MODEL_UNINITIALIZED", "parse result"));
+		throw new Error(
+			formatMessage(ERROR.MODEL_UNINITIALIZED, "parse result"),
+		);
 	}
 
 	// ======================= //
@@ -83,7 +85,7 @@ export async function getModelContents(model: Schemas.FactoryOptions["model"]) {
 			return modelContents;
 		}
 	} catch (err) {
-		prsDebug(formatMessage("PRS_INVALID", err));
+		prsDebug(formatMessage(DEBUG.PRS_INVALID, err));
 		deletePersonalization(modelContents.bundle, logoFullNames);
 	}
 
@@ -117,7 +119,10 @@ export async function getModelFolderContents(
 		// Icon is required to proceed
 		if (!isModelInitialized) {
 			throw new Error(
-				formatMessage("MODEL_UNINITIALIZED", path.parse(model).name),
+				formatMessage(
+					ERROR.MODEL_UNINITIALIZED,
+					path.parse(model).name,
+				),
 			);
 		}
 
@@ -144,53 +149,55 @@ export async function getModelFolderContents(
 
 		// Reading concurrently localizations folder
 		// and their files and their buffers
-		const L10N_FilesListByFolder: Array<Schemas.BundleUnit> = await Promise.all(
-			l10nFolders.map(async (folderPath) => {
-				// Reading current folder
-				const currentLangPath = path.join(modelPath, folderPath);
+		const L10N_FilesListByFolder: Array<Schemas.BundleUnit> =
+			await Promise.all(
+				l10nFolders.map(async (folderPath) => {
+					// Reading current folder
+					const currentLangPath = path.join(modelPath, folderPath);
 
-				const files = await readDir(currentLangPath);
-				// Transforming files path to a model-relative path
-				const validFiles = removeHidden(files).map((file) =>
-					path.join(currentLangPath, file),
-				);
+					const files = await readDir(currentLangPath);
+					// Transforming files path to a model-relative path
+					const validFiles = removeHidden(files).map((file) =>
+						path.join(currentLangPath, file),
+					);
 
-				// Getting all the buffers from file paths
-				const buffers = await Promise.all(
-					validFiles.map((file) =>
-						readFile(file).catch(() => Buffer.alloc(0)),
-					),
-				);
+					// Getting all the buffers from file paths
+					const buffers = await Promise.all(
+						validFiles.map((file) =>
+							readFile(file).catch(() => Buffer.alloc(0)),
+						),
+					);
 
-				// Assigning each file path to its buffer
-				// and discarding the empty ones
+					// Assigning each file path to its buffer
+					// and discarding the empty ones
 
-				return validFiles.reduce<Schemas.BundleUnit>(
-					(acc, file, index) => {
-						if (!buffers[index].length) {
-							return acc;
-						}
+					return validFiles.reduce<Schemas.BundleUnit>(
+						(acc, file, index) => {
+							if (!buffers[index].length) {
+								return acc;
+							}
 
-						const fileComponents = file.split(path.sep);
-						const fileName =
-							fileComponents[fileComponents.length - 1];
+							const fileComponents = file.split(path.sep);
+							const fileName =
+								fileComponents[fileComponents.length - 1];
 
-						return {
-							...acc,
-							[fileName]: buffers[index],
-						};
-					},
-					{},
-				);
-			}),
-		);
+							return {
+								...acc,
+								[fileName]: buffers[index],
+							};
+						},
+						{},
+					);
+				}),
+			);
 
-		const l10nBundle: Schemas.PartitionedBundle["l10nBundle"] = Object.assign(
-			{},
-			...L10N_FilesListByFolder.map((folder, index) => ({
-				[l10nFolders[index]]: folder,
-			})),
-		);
+		const l10nBundle: Schemas.PartitionedBundle["l10nBundle"] =
+			Object.assign(
+				{},
+				...L10N_FilesListByFolder.map((folder, index) => ({
+					[l10nFolders[index]]: folder,
+				})),
+			);
 
 		return {
 			bundle,
@@ -200,13 +207,15 @@ export async function getModelFolderContents(
 		if (err?.code === "ENOENT") {
 			if (err.syscall === "open") {
 				// file opening failed
-				throw new Error(formatMessage("MODELF_NOT_FOUND", err.path));
+				throw new Error(
+					formatMessage(ERROR.MODELF_NOT_FOUND, err.path),
+				);
 			} else if (err.syscall === "scandir") {
 				// directory reading failed
 				const pathContents = (err.path as string).split(/(\/|\\\?)/);
 				throw new Error(
 					formatMessage(
-						"MODELF_FILE_NOT_FOUND",
+						ERROR.MODELF_FILE_NOT_FOUND,
 						pathContents[pathContents.length - 1],
 					),
 				);
@@ -246,7 +255,7 @@ export function getModelBufferContents(
 
 	// Icon is required to proceed
 	if (!isModelInitialized) {
-		throw new Error(formatMessage("MODEL_UNINITIALIZED", "Buffers"));
+		throw new Error(formatMessage(ERROR.MODEL_UNINITIALIZED, "Buffers"));
 	}
 
 	// separing localization folders from bundle files
@@ -278,7 +287,7 @@ export async function readCertificatesFromOptions(
 			Schemas.isValid(options, Schemas.CertificatesSchema)
 		)
 	) {
-		throw new Error(formatMessage("CP_NO_CERTS"));
+		throw new Error(formatMessage(ERROR.CP_NO_CERTS));
 	}
 
 	let signerKey: string;
@@ -320,7 +329,7 @@ export async function readCertificatesFromOptions(
 			const pem = parsePEM(certName, file, passphrase);
 
 			if (!pem) {
-				throw new Error(formatMessage("INVALID_CERTS", certName));
+				throw new Error(formatMessage(ERROR.INVALID_CERTS, certName));
 			}
 
 			return { [certName]: pem };
@@ -333,7 +342,7 @@ export async function readCertificatesFromOptions(
 		}
 
 		throw new Error(
-			formatMessage("INVALID_CERT_PATH", path.parse(err.path).base),
+			formatMessage(ERROR.INVALID_CERT_PATH, path.parse(err.path).base),
 		);
 	}
 }

@@ -1,6 +1,6 @@
 import * as Schemas from "./schemas";
 import { getModelContents, readCertificatesFromOptions } from "./parser";
-import formatMessage from "./messages";
+import formatMessage, { ERROR } from "./messages";
 
 const abmCertificates = Symbol("certificates");
 const abmModel = Symbol("model");
@@ -25,7 +25,7 @@ interface AbstractModelOptions {
 
 export async function createAbstractModel(options: AbstractFactoryOptions) {
 	if (!(options && Object.keys(options).length)) {
-		throw new Error(formatMessage("CP_NO_OPTS"));
+		throw new Error(formatMessage(ERROR.CP_NO_OPTS));
 	}
 
 	try {
@@ -40,7 +40,7 @@ export async function createAbstractModel(options: AbstractFactoryOptions) {
 			overrides: options.overrides,
 		});
 	} catch (err) {
-		throw new Error(formatMessage("CP_INIT_ERROR", "abstract model", err));
+		throw new Error(formatMessage(ERROR.CP_INIT, "abstract model", err));
 	}
 }
 

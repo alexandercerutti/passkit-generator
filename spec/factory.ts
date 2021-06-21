@@ -1,12 +1,12 @@
 import { createPass } from "../lib/factory";
-import formatMessage from "../lib/messages";
+import formatMessage, { ERROR } from "../lib/messages";
 import * as fs from "fs";
 import * as path from "path";
 
 describe("createPass", () => {
 	it("should throw if first argument is not provided", async () => {
 		await expectAsync(createPass(undefined)).toBeRejectedWithError(
-			formatMessage("CP_NO_OPTS"),
+			formatMessage(ERROR.CP_NO_OPTS),
 		);
 	});
 

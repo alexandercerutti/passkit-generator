@@ -6,7 +6,7 @@ import { ZipFile } from "yazl";
 import type Joi from "joi";
 
 import * as Schemas from "./schemas";
-import formatMessage from "./messages";
+import formatMessage, { ERROR, DEBUG } from "./messages";
 import FieldsArray from "./fieldsArray";
 import {
 	generateStringFile,
@@ -56,7 +56,7 @@ export class Pass {
 
 	constructor(options: Schemas.PassInstance) {
 		if (!Schemas.isValid(options, Schemas.PassInstance)) {
-			throw new Error(formatMessage("REQUIR_VALID_FAILED"));
+			throw new Error(formatMessage(ERROR.REQUIR_VALID_FAILED));
 		}
 
 		this.Certificates = options.certificates;
@@ -68,7 +68,7 @@ export class Pass {
 				this.bundle["pass.json"].toString("utf8"),
 			);
 		} catch (err) {
-			throw new Error(formatMessage("PASSFILE_VALIDATION_FAILED"));
+			throw new Error(formatMessage(ERROR.PASSFILE_VALIDATION_FAILED));
 		}
 
 		// Parsing the options and extracting only the valid ones.
@@ -78,7 +78,7 @@ export class Pass {
 		);
 
 		if (validOverrides === null) {
-			throw new Error(formatMessage("OVV_KEYS_BADFORMAT"));
+			throw new Error(formatMessage(ERROR.OVV_KEYS_BADFORMAT));
 		}
 
 		this.type = Object.keys(this.passCore).find((key) =>
@@ -86,7 +86,7 @@ export class Pass {
 		) as keyof Schemas.ValidPassType;
 
 		if (!this.type) {
-			throw new Error(formatMessage("NO_PASS_TYPE"));
+			throw new Error(formatMessage(ERROR.NO_PASS_TYPE));
 		}
 
 		// Parsing and validating pass.json keys
@@ -184,7 +184,7 @@ export class Pass {
 			!this[passProps].nfc &&
 			currentBundleFiles.includes("personalization.json")
 		) {
-			genericDebug(formatMessage("PRS_REMOVED"));
+			genericDebug(formatMessage(DEBUG.PRS_REMOVED));
 			deletePersonalization(
 				this.bundle,
 				getAllFilesWithName(
@@ -222,13 +222,13 @@ export class Pass {
 					this.l10nBundles[languageBundleDirname] = {};
 				}
 
-				this.l10nBundles[languageBundleDirname][
-					"pass.strings"
-				] = Buffer.concat([
-					this.l10nBundles[languageBundleDirname]["pass.strings"] ||
-						Buffer.alloc(0),
-					strings,
-				]);
+				this.l10nBundles[languageBundleDirname]["pass.strings"] =
+					Buffer.concat([
+						this.l10nBundles[languageBundleDirname][
+							"pass.strings"
+						] || Buffer.alloc(0),
+						strings,
+					]);
 			}
 
 			if (
@@ -453,7 +453,7 @@ export class Pass {
 			const autogen = barcodesFromUncompleteData(data[0]);
 
 			if (!autogen.length) {
-				barcodeDebug(formatMessage("BRC_AUTC_MISSING_DATA"));
+				barcodeDebug(formatMessage(DEBUG.BRC_AUTC_MISSING_DATA));
 				return this;
 			}
 
@@ -520,17 +520,17 @@ export class Pass {
 		}
 
 		if (typeof chosenFormat !== "string") {
-			barcodeDebug(formatMessage("BRC_FORMATTYPE_UNMATCH"));
+			barcodeDebug(formatMessage(DEBUG.BRC_FORMATTYPE_UNMATCH));
 			return this;
 		}
 
 		if (chosenFormat === "PKBarcodeFormatCode128") {
-			barcodeDebug(formatMessage("BRC_BW_FORMAT_UNSUPPORTED"));
+			barcodeDebug(formatMessage(DEBUG.BRC_BW_FORMAT_UNSUPPORTED));
 			return this;
 		}
 
 		if (!(barcodes && barcodes.length)) {
-			barcodeDebug(formatMessage("BRC_NO_POOL"));
+			barcodeDebug(formatMessage(DEBUG.BRC_NO_POOL));
 			return this;
 		}
 
@@ -540,7 +540,7 @@ export class Pass {
 		);
 
 		if (index === -1) {
-			barcodeDebug(formatMessage("BRC_NOT_SUPPORTED"));
+			barcodeDebug(formatMessage(DEBUG.BRC_NOT_SUPPORTED));
 			return this;
 		}
 
@@ -571,7 +571,7 @@ export class Pass {
 				Schemas.isValid(data, Schemas.NFC)
 			)
 		) {
-			genericDebug(formatMessage("NFC_INVALID"));
+			genericDebug(formatMessage(DEBUG.NFC_INVALID));
 			return this;
 		}
 
@@ -633,7 +633,7 @@ export class Pass {
 		});
 
 		if (this.type === "boardingPass" && !this[transitType]) {
-			throw new Error(formatMessage("TRSTYPE_REQUIRED"));
+			throw new Error(formatMessage(ERROR.TRSTYPE_REQUIRED));
 		}
 
 		passFile[this.type]["transitType"] = this[transitType];
@@ -643,7 +643,7 @@ export class Pass {
 
 	set transitType(value: string) {
 		if (!Schemas.isValid(value, Schemas.TransitType)) {
-			genericDebug(formatMessage("TRSTYPE_NOT_VALID", value));
+			genericDebug(formatMessage(DEBUG.TRSTYPE_NOT_VALID, value));
 			this[transitType] = this[transitType] || "";
 			return;
 		}
@@ -701,7 +701,7 @@ function processDate(key: string, date: Date): string | null {
 	const dateParse = dateToW3CString(date);
 
 	if (!dateParse) {
-		genericDebug(formatMessage("DATE_FORMAT_UNMATCH", key));
+		genericDebug(formatMessage(DEBUG.DATE_FORMAT_UNMATCH, key));
 		return null;
 	}
 

@@ -34,7 +34,13 @@ const propsSchemaMap = new Map<string, Joi.ObjectSchema<any>>([
 export class Pass {
 	private bundle: Schemas.BundleUnit;
 	private l10nBundles: Schemas.PartitionedBundle["l10nBundle"];
-	private _fields: (keyof Schemas.PassFields)[];
+	private _fields: (keyof Schemas.PassFields)[] = [
+		"primaryFields",
+		"secondaryFields",
+		"auxiliaryFields",
+		"backFields",
+		"headerFields",
+	];
 	private [passProps]: Schemas.ValidPass = {};
 	private type: keyof Schemas.ValidPassType;
 	private fieldsKeys: Set<string> = new Set<string>();
@@ -149,13 +155,6 @@ export class Pass {
 			this[transitType] = this.passCore[this.type]["transitType"];
 		}
 
-		this._fields = [
-			"primaryFields",
-			"secondaryFields",
-			"auxiliaryFields",
-			"backFields",
-			"headerFields",
-		];
 		this._fields.forEach((fieldName) => {
 			this[fieldName] = new FieldsArray(
 				this.fieldsKeys,

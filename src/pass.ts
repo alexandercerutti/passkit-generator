@@ -40,13 +40,11 @@ export class Pass {
 	private fieldsKeys: Set<string> = new Set<string>();
 	private passCore: Schemas.ValidPass;
 
-	// Setting these as possibly undefined because we set
-	// them all in an loop later
-	public headerFields: FieldsArray | undefined;
-	public primaryFields: FieldsArray | undefined;
-	public secondaryFields: FieldsArray | undefined;
-	public auxiliaryFields: FieldsArray | undefined;
-	public backFields: FieldsArray | undefined;
+	public headerFields: FieldsArray;
+	public primaryFields: FieldsArray;
+	public secondaryFields: FieldsArray;
+	public auxiliaryFields: FieldsArray;
+	public backFields: FieldsArray;
 
 	private Certificates: Schemas.CertificatesSchema;
 	private [transitType]: string = "";
@@ -93,6 +91,7 @@ export class Pass {
 		const passCoreKeys = Object.keys(
 			this.passCore,
 		) as (keyof Schemas.ValidPass)[];
+
 		const validatedPassKeys = passCoreKeys.reduce<Schemas.ValidPass>(
 			(acc, current) => {
 				if (this.type === current) {
@@ -115,7 +114,11 @@ export class Pass {
 						currentSchema,
 						this.passCore[current] as Schemas.ArrayPassSchema[],
 					);
-					return { ...acc, [current]: valid };
+
+					return {
+						...acc,
+						[current]: valid,
+					};
 				} else {
 					return {
 						...acc,
@@ -195,7 +198,7 @@ export class Pass {
 			);
 		}
 
-		const finalBundle = { ...this.bundle } as Schemas.BundleUnit;
+		const finalBundle: Schemas.BundleUnit = { ...this.bundle };
 
 		/**
 		 * Iterating through languages and generating pass.string file
@@ -488,7 +491,7 @@ export class Pass {
 						return acc;
 					}
 
-					return [...acc, validated] as Schemas.Barcode[];
+					return [...acc, validated];
 				},
 				[],
 			);
@@ -669,17 +672,15 @@ function barcodesFromUncompleteData(message: string): Schemas.Barcode[] {
 		return [];
 	}
 
-	return [
-		"PKBarcodeFormatQR",
-		"PKBarcodeFormatPDF417",
-		"PKBarcodeFormatAztec",
-		"PKBarcodeFormatCode128",
-	].map(
-		(format) =>
-			Schemas.getValidated(
-				{ format, message },
-				Schemas.Barcode,
-			) as Schemas.Barcode,
+	return (
+		[
+			"PKBarcodeFormatQR",
+			"PKBarcodeFormatPDF417",
+			"PKBarcodeFormatAztec",
+			"PKBarcodeFormatCode128",
+		] as Array<Schemas.BarcodeFormat>
+	).map((format) =>
+		Schemas.getValidated({ format, message }, Schemas.Barcode),
 	);
 }
 

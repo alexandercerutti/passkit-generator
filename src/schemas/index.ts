@@ -17,6 +17,7 @@ import { NFC } from "./NFC";
 import { Field } from "./PassFieldContent";
 import { PassFields, TransitType } from "./PassFields";
 import { Personalization } from "./personalization";
+import { Semantics } from "./SemanticTags";
 
 const schemaDebug = debug("Schema");
 
@@ -108,6 +109,7 @@ export interface OverridesSupportedOptions {
 	suppressStripShine?: boolean;
 	logoText?: string;
 	maxDistance?: number;
+	semantics?: Semantics;
 }
 
 export const OverridesSupportedOptions = Joi.object<OverridesSupportedOptions>()
@@ -133,6 +135,7 @@ export const OverridesSupportedOptions = Joi.object<OverridesSupportedOptions>()
 		suppressStripShine: Joi.boolean(),
 		logoText: Joi.string(),
 		maxDistance: Joi.number().positive(),
+		semantics: Semantics,
 	})
 	.with("webServiceURL", "authenticationToken");
 

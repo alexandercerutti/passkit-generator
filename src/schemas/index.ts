@@ -1,21 +1,21 @@
-export * from "./barcode";
-export * from "./beacon";
-export * from "./location";
-export * from "./field";
-export * from "./nfc";
-export * from "./semantics";
-export * from "./passFields";
+export * from "./Barcodes";
+export * from "./Beacons";
+export * from "./Location";
+export * from "./PassFieldContent";
+export * from "./NFC";
+export * from "./SemanticTags";
+export * from "./PassFields";
 export * from "./personalization";
 
 import Joi from "joi";
 import debug from "debug";
 
-import { Barcode } from "./barcode";
-import { Location } from "./location";
-import { Beacon } from "./beacon";
-import { NFC } from "./nfc";
-import { Field } from "./field";
-import { PassFields, TransitType } from "./passFields";
+import { Barcode } from "./Barcodes";
+import { Location } from "./Location";
+import { Beacon } from "./Beacons";
+import { NFC } from "./NFC";
+import { Field } from "./PassFieldContent";
+import { PassFields, TransitType } from "./PassFields";
 import { Personalization } from "./personalization";
 
 const schemaDebug = debug("Schema");

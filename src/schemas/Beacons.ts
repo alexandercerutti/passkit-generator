@@ -1,5 +1,10 @@
 import Joi from "joi";
 
+/**
+ * @see https://developer.apple.com/documentation/walletpasses/pass/beacons
+ * @TODO Rename "Beacon" in "Beacons". This will be done in v3.0
+ */
+
 export interface Beacon {
 	major?: number;
 	minor?: number;

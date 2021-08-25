@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { Field } from "./field";
+import { Field } from "./PassFieldContent";
 
 export interface PassFields {
 	auxiliaryFields: (Field & { row?: number })[];

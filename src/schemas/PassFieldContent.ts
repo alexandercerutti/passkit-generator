@@ -1,5 +1,10 @@
 import Joi from "joi";
-import { Semantics } from "./semantics";
+import { Semantics } from "./SemanticTags";
+
+/**
+ * @see https://developer.apple.com/documentation/walletpasses/passfieldcontent
+ * @TODO Rename interface to PassFieldContent to conform to above. This will be done in v3.0
+ */
 
 export interface Field {
 	attributedValue?: string | number | Date;

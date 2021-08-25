@@ -1,5 +1,10 @@
 import Joi from "joi";
 
+/**
+ * @see https://developer.apple.com/documentation/walletpasses/pass/barcodes
+ * @TODO Rename "Barcode" in "Barcodes". It will be done in v3.0
+ */
+
 export type BarcodeFormat =
 	| "PKBarcodeFormatQR"
 	| "PKBarcodeFormatPDF417"

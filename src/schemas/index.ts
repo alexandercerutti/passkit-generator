@@ -5,7 +5,7 @@ export * from "./PassFieldContent";
 export * from "./NFC";
 export * from "./SemanticTags";
 export * from "./PassFields";
-export * from "./personalization";
+export * from "./Personalize";
 
 import Joi from "joi";
 import debug from "debug";
@@ -16,7 +16,7 @@ import { Beacon } from "./Beacons";
 import { NFC } from "./NFC";
 import { Field } from "./PassFieldContent";
 import { PassFields, TransitType } from "./PassFields";
-import { Personalization } from "./personalization";
+import { Personalization } from "./Personalize";
 import { Semantics } from "./SemanticTags";
 
 const schemaDebug = debug("Schema");

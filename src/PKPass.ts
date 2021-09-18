@@ -66,6 +66,35 @@ export class PKPass extends Bundle {
 		return new PKPass(buffers, certificates);
 	}
 
+	/**
+	 *
+	 * @param passes
+	 */
+
+	static async pack(...passes: PKPass[]): Promise<Bundle> {
+		if (!passes.every((pass) => pass instanceof PKPass)) {
+			throw new Error(
+				"Cannot pack passes. Only PKPass instances allowed",
+			);
+		}
+
+		const bundle = Bundle.autoFreezable("application/vnd.apple.pkpasses");
+
+		const buffers = await Promise.all(
+			passes.map((pass) => pass.getAsBuffer()),
+		);
+
+		for (let i = 0; i < buffers.length; i++) {
+			bundle.addBuffer(`packed-pass-${i + 1}.pkpass`, buffers[i]);
+		}
+
+		return bundle;
+	}
+
+	// **************** //
+	// *** INSTANCE *** //
+	// **************** //
+
 	constructor(buffers: NamedBuffers, certificates: Certificates) {
 		super("application/vnd.apple.pkpass");
 

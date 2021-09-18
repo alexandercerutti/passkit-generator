@@ -100,6 +100,10 @@ export class PKPass extends Bundle {
 	constructor(buffers: NamedBuffers, certificates: Certificates) {
 		super("application/vnd.apple.pkpass");
 
+		/**
+		 * @TODO Validate options against Joi Schema
+		 */
+
 		const buffersEntries = Object.entries(buffers);
 
 		for (

@@ -33,11 +33,34 @@ export default class Bundle {
 	}
 
 	/**
+	 * @EXPERIMENTAL
+	 *
+	 * @param mimeType
+	 */
+
+	static autoFreezable(mimeType: `${Mime.type}/${Mime.subtype}`): Bundle {
+		const bundle = new Bundle(mimeType);
+
+		/**
+		 * @TODO
+		 * Might not be the best idea I might have had.
+		 * I have to test this further more to check if
+		 * actually we can leverage of this event loop feature
+		 * to freeze it automatically once we processed every
+		 * promise for bundling;
+		 */
+
+		setTimeout(bundle.freeze, 0);
+
+		return bundle;
+	}
+
+	/**
 	 * Freezes / Closes the bundle so no more files
 	 * can be added any further.
 	 */
 
-	private freeze() {
+	protected freeze() {
 		if (this[bundleStateSymbol] === BundleState.CLOSED) {
 			return;
 		}

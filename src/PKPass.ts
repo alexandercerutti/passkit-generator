@@ -1,7 +1,9 @@
-import FieldsArray from "../src/fieldsArray";
-import { Certificates } from "../src/schemas";
+import FieldsArray from "./fieldsArray";
+import { Certificates } from "./schemas";
 import { default as Bundle, filesSymbol } from "./Bundle";
 import { getModelFolderContents } from "./parser";
+import * as Schemas from "./schemas";
+import { Stream } from "stream";
 
 const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
 

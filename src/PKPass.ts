@@ -86,11 +86,11 @@ export class PKPass extends Bundle {
 			);
 		}
 
-		const bundle = Bundle.autoFreezable("application/vnd.apple.pkpasses");
-
 		const buffers = await Promise.all(
 			passes.map((pass) => pass.getAsBuffer()),
 		);
+
+		const bundle = Bundle.autoFreezable("application/vnd.apple.pkpasses");
 
 		for (let i = 0; i < buffers.length; i++) {
 			bundle.addBuffer(`packed-pass-${i + 1}.pkpass`, buffers[i]);

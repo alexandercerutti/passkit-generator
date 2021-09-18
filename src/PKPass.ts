@@ -69,7 +69,13 @@ export class PKPass extends Bundle {
 	}
 
 	/**
+	 * Creates a Bundle made of PKPass to be distributed
+	 * as a `.pkpasses` zip file. Returns a Bundle instance
+	 * so it can be outputted both as stream or as a buffer.
 	 *
+	 * Throws if not all the files are instance of PKPass.
+	 *
+	 * @TODO test autofreezing
 	 * @param passes
 	 */
 

@@ -245,3 +245,14 @@ export function getValidated<T extends Object>(
 
 	return validation.value;
 }
+
+export function filterValid<T extends Object>(
+	source: T[],
+	schema: AvailableSchemas,
+): T[] {
+	if (!source) {
+		return [];
+	}
+
+	return source.filter((current) => isValid(current, schema));
+}

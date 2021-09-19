@@ -284,15 +284,32 @@ export default class PKPass extends Bundle {
 	 * Allows setting some beacons the OS should
 	 * react to and show this pass.
 	 *
+	 * Pass `null` to remove them at all.
+	 *
+	 * @example
+	 * ```ts
+	 *		PKPassInstance.setBeacons(null)
+	 *		PKPassInstance.setBeacons({
+	 *			proximityUUID: "00000-000000-0000-00000000000",
+	 *		});
+	 * ```
+	 *
 	 * @param beacons
 	 * @returns
 	 */
 
-	setBeacons(...beacons: Schemas.Beacon[]): this {
-		/**
-		 * @TODO implement
-		 * @TODO specify a way to get current ones deleted
-		 */
+	setBeacons(beacons: null): this;
+	setBeacons(...beacons: Schemas.Beacon[]): this;
+	setBeacons(...beacons: (Schemas.Beacon | null)[]): this {
+		if (beacons[0] === null) {
+			delete this[propsSymbol]["beacons"];
+			return;
+		}
+
+		this[propsSymbol]["beacons"] = Schemas.filterValid(
+			beacons,
+			Schemas.Beacon,
+		);
 
 		return this;
 	}

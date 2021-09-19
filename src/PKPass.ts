@@ -303,7 +303,7 @@ export default class PKPass extends Bundle {
 	setBeacons(...beacons: (Schemas.Beacon | null)[]): this {
 		if (beacons[0] === null) {
 			delete this[propsSymbol]["beacons"];
-			return;
+			return this;
 		}
 
 		this[propsSymbol]["beacons"] = Schemas.filterValid(
@@ -338,7 +338,7 @@ export default class PKPass extends Bundle {
 	setLocations(...locations: (Schemas.Location | null)[]): this {
 		if (locations[0] === null) {
 			delete this[propsSymbol]["locations"];
-			return;
+			return this;
 		}
 
 		this[propsSymbol]["locations"] = Schemas.filterValid(

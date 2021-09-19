@@ -19,7 +19,7 @@ type TransitTypes = `PKTransitType${
 	| "Generic"
 	| "Train"}`;
 
-export class PKPass extends Bundle {
+export default class PKPass extends Bundle {
 	private certificates: Certificates;
 	private [fieldKeysPoolSymbol] = new Set<string>();
 	private [propsSymbol]: Schemas.ValidPass = {};

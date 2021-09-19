@@ -95,4 +95,36 @@ describe("PKPass", () => {
 			);
 		});
 	});
+
+	describe("setNFCCapability", () => {
+		it("should reset instance.props['nfc'] if 'null' is passed as value", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setNFCCapability({
+				encryptionPublicKey: "mimmo",
+				message: "No message for you here",
+			});
+
+			expect(pass.props["nfc"]).toEqual({
+				encryptionPublicKey: "mimmo",
+				message: "No message for you here",
+			});
+
+			pass.setNFCCapability(null);
+
+			expect(pass.props["nfc"]).toBeUndefined();
+		});
+
+		it("should not accept invalid objects", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setNFCCapability({
+				// @ts-expect-error
+				requiresAuth: false,
+				encryptionPublicKey: "Nope",
+			});
+
+			expect(pass.props["nfc"]).toBeUndefined();
+		});
+	});
 });

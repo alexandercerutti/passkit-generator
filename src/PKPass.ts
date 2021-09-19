@@ -388,16 +388,21 @@ export default class PKPass extends Bundle {
 	 * Allows to specify details to make this, an
 	 * NFC-capable pass.
 	 *
+	 * Pass `null` as parameter to remove it at all.
+	 *
 	 * @see https://developer.apple.com/documentation/walletpasses/pass/nfc
 	 * @param data
 	 * @returns
 	 */
 
-	setNFCCapability(data: Schemas.NFC): this {
-		/**
-		 * @TODO implement
-		 * @TODO specify a way to get current one deleted
-		 */
+	setNFCCapability(nfc: Schemas.NFC | null): this {
+		if (nfc === null) {
+			delete this[propsSymbol]["nfc"];
+			return this;
+		}
+
+		this[propsSymbol]["nfc"] =
+			Schemas.getValidated(nfc, Schemas.NFC) ?? undefined;
 
 		return this;
 	}

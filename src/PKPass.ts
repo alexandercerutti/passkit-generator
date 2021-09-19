@@ -6,6 +6,7 @@ import * as Schemas from "./schemas";
 import { Stream } from "stream";
 
 const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
+const propsSymbol = Symbol("props");
 
 interface NamedBuffers {
 	[key: string]: Buffer;
@@ -21,6 +22,7 @@ type TransitTypes = `PKTransitType${
 export class PKPass extends Bundle {
 	private certificates: Certificates;
 	private [fieldKeysPoolSymbol] = new Set<string>();
+	private [propsSymbol]: Schemas.ValidPass = {};
 	public primaryFields /*****/ = new FieldsArray(this[fieldKeysPoolSymbol]);
 	public secondaryFields /***/ = new FieldsArray(this[fieldKeysPoolSymbol]);
 	public auxiliaryFields /***/ = new FieldsArray(this[fieldKeysPoolSymbol]);
@@ -128,11 +130,7 @@ export class PKPass extends Bundle {
 	 */
 
 	get props(): Readonly<Schemas.ValidPass> {
-		/**
-		 * @TODO implement
-		 */
-
-		return undefined;
+		return freezeRecusive(this[propsSymbol]);
 	}
 
 	/**
@@ -368,4 +366,29 @@ export class PKPass extends Bundle {
 
 		return this;
 	}
+}
+
+function freezeRecusive(object: Object) {
+	const objectCopy = {};
+	const objectEntries = Object.entries(object);
+
+	for (let i = 0; i < objectEntries.length; i++) {
+		const [key, value] = objectEntries[i];
+
+		if (value && typeof value === "object") {
+			if (Array.isArray(value)) {
+				objectCopy[key] = value.slice();
+
+				for (let j = 0; j < value.length; j++) {
+					objectCopy[key][j] = freezeRecusive(value[j]);
+				}
+			} else {
+				objectCopy[key] = freezeRecusive(value);
+			}
+		} else {
+			objectCopy[key] = value;
+		}
+	}
+
+	return Object.freeze(objectCopy);
 }

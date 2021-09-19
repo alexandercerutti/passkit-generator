@@ -318,15 +318,33 @@ export default class PKPass extends Bundle {
 	 * Allows setting some locations the OS should
 	 * react to and show this pass.
 	 *
+	 * Pass `null` to remove them at all.
+	 *
+	 * @example
+	 * ```ts
+	 *		PKPassInstance.setLocations(null)
+	 *		PKPassInstance.setLocations({
+	 *			latitude: 0.5333245342
+	 *			longitude: 0.2135332252
+	 *		});
+	 * ```
+	 *
 	 * @param locations
 	 * @returns
 	 */
 
-	setLocations(...locations: Schemas.Location[]): this {
-		/**
-		 * @TODO implement
-		 * @TODO specify a way to get current ones deleted
-		 */
+	setLocations(locations: null): this;
+	setLocations(...locations: Schemas.Location[]): this;
+	setLocations(...locations: (Schemas.Location | null)[]): this {
+		if (locations[0] === null) {
+			delete this[propsSymbol]["locations"];
+			return;
+		}
+
+		this[propsSymbol]["locations"] = Schemas.filterValid(
+			locations,
+			Schemas.Location,
+		);
 
 		return this;
 	}

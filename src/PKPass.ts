@@ -234,6 +234,7 @@ export default class PKPass extends Bundle {
 	 * If the language already exists in the origin source,
 	 * translations will be added to the existing ones.
 	 *
+	 * @see https://developer.apple.com/documentation/walletpasses/creating_the_source_for_a_pass#3736718
 	 * @param lang
 	 * @param translations
 	 */
@@ -301,6 +302,7 @@ export default class PKPass extends Bundle {
 	 *		});
 	 * ```
 	 *
+	 * @see https://developer.apple.com/documentation/walletpasses/pass/beacons
 	 * @param beacons
 	 * @returns
 	 */
@@ -336,6 +338,7 @@ export default class PKPass extends Bundle {
 	 *		});
 	 * ```
 	 *
+	 * @see https://developer.apple.com/documentation/walletpasses/pass/locations
 	 * @param locations
 	 * @returns
 	 */
@@ -377,6 +380,7 @@ export default class PKPass extends Bundle {
 	 * will be shown to the user, without any possibility
 	 * to change it.
 	 *
+	 * @see https://developer.apple.com/documentation/walletpasses/pass/barcodes
 	 * @param barcodes
 	 * @returns
 	 */

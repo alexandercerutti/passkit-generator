@@ -16,6 +16,7 @@ import {
 	getAllFilesWithName,
 } from "./utils";
 import * as Signature from "./signature";
+import { processDate } from "./processDate";
 
 const barcodeDebug = debug("passkit:barcode");
 const genericDebug = debug("passkit:generic");
@@ -686,19 +687,4 @@ function getValidInArray<T>(
 		(current) =>
 			Object.keys(current).length && Schemas.isValid(current, schemaName),
 	);
-}
-
-function processDate(key: string, date: Date): string | null {
-	if (!(date instanceof Date)) {
-		return null;
-	}
-
-	const dateParse = dateToW3CString(date);
-
-	if (!dateParse) {
-		genericDebug(formatMessage(DEBUG.DATE_FORMAT_UNMATCH, key));
-		return null;
-	}
-
-	return dateParse;
 }

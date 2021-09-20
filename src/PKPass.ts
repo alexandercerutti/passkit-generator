@@ -256,10 +256,17 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setExpiration(date: Date | null): this {
-		/**
-		 * @TODO implement
-		 */
+	setExpirationDate(date: Date | null): this {
+		if (date === null) {
+			delete this[propsSymbol]["expirationDate"];
+			return this;
+		}
+
+		const parsedDate = processDate("expirationDate", date);
+
+		if (parsedDate) {
+			this[propsSymbol]["expirationDate"] = parsedDate;
+		}
 
 		return this;
 	}

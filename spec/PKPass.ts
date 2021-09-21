@@ -221,4 +221,121 @@ describe("PKPass", () => {
 			expect(pass.props["relevantDate"]).toBe(undefined);
 		});
 	});
+
+	describe("setBarcodes", () => {
+		it("shouldn't apply changes if no data is passed", () => {
+			const pass = new PKPass({}, {});
+
+			const props = pass.props["barcodes"] || [];
+			const oldAmountOfBarcodes = props?.length ?? 0;
+
+			pass.setBarcodes();
+			expect(pass.props["barcodes"]?.length || 0).toBe(
+				oldAmountOfBarcodes,
+			);
+		});
+
+		it("should throw error if a boolean parameter is received", () => {
+			const pass = new PKPass({}, {});
+
+			// @ts-expect-error
+			expect(() => pass.setBarcodes(true)).toThrowError(
+				TypeError,
+				"Expected Schema.Barcode in setBarcodes but no one is valid.",
+			);
+		});
+
+		it("should ignore if a number parameter is received", () => {
+			const pass = new PKPass({}, {});
+
+			// @ts-expect-error
+			expect(() => pass.setBarcodes(42)).toThrowError(
+				TypeError,
+				"Expected Schema.Barcode in setBarcodes but no one is valid.",
+			);
+		});
+
+		it("should autogenerate all the barcodes objects if a string is provided as message", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setBarcodes("28363516282");
+			expect(pass.props["barcodes"].length).toBe(4);
+		});
+
+		it("should save changes if object conforming to Schemas.Barcode are provided", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setBarcodes({
+				message: "28363516282",
+				format: "PKBarcodeFormatPDF417",
+				messageEncoding: "utf8",
+			});
+
+			expect(pass.props["barcodes"].length).toBe(1);
+		});
+
+		it("should add 'messageEncoding' if missing in valid Schema.Barcode parameters", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setBarcodes({
+				message: "28363516282",
+				format: "PKBarcodeFormatPDF417",
+			});
+
+			expect(pass.props["barcodes"][0].messageEncoding).toBe(
+				"iso-8859-1",
+			);
+		});
+
+		it("should ignore objects without 'message' property in Schema.Barcode", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setBarcodes(
+				{
+					format: "PKBarcodeFormatCode128",
+					message: "No one can validate meeee",
+				},
+				// @ts-expect-error
+				{
+					format: "PKBarcodeFormatPDF417",
+				},
+			);
+
+			expect(pass.props["barcodes"].length).toBe(1);
+		});
+
+		it("should ignore objects and values that not comply with Schema.Barcodes", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setBarcodes(
+				// @ts-expect-error
+				5,
+				10,
+				15,
+				{
+					message: "28363516282",
+					format: "PKBarcodeFormatPDF417",
+				},
+				7,
+				1,
+			);
+
+			expect(pass.props["barcodes"].length).toBe(1);
+		});
+
+		it("should reset barcodes content if parameter is null", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setBarcodes({
+				message: "28363516282",
+				format: "PKBarcodeFormatPDF417",
+				messageEncoding: "utf8",
+			});
+
+			expect(pass.props["barcodes"].length).toBe(1);
+
+			pass.setBarcodes(null);
+			expect(pass.props["barcodes"]).toBe(undefined);
+		});
+	});
 });

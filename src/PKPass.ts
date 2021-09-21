@@ -392,12 +392,51 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setBarcodes(...barcodes: Schemas.Barcode[]): this {
-		/**
-		 * @TODO implement
-		 * @TODO implement data completion
-		 * @TODO specify a way to get current ones deleted
-		 */
+	setBarcodes(barcodes: null): this;
+	setBarcodes(message: string): this;
+	setBarcodes(...barcodes: Schemas.Barcode[]): this;
+	setBarcodes(...barcodes: (Schemas.Barcode | string | null)[]): this {
+		if (!barcodes.length) {
+			return this;
+		}
+
+		if (barcodes[0] === null) {
+			delete this[propsSymbol]["barcodes"];
+			return this;
+		}
+
+		let finalBarcodes: Schemas.Barcode[];
+
+		if (typeof barcodes[0] === "string") {
+			/** A string has been received instead of objects. We can only auto-fill them all with the same data. */
+
+			const supportedFormats: Array<Schemas.BarcodeFormat> = [
+				"PKBarcodeFormatQR",
+				"PKBarcodeFormatPDF417",
+				"PKBarcodeFormatAztec",
+				"PKBarcodeFormatCode128",
+			];
+
+			finalBarcodes = supportedFormats.map((format) =>
+				Schemas.getValidated(
+					{ format, message: barcodes[0] } as Schemas.Barcode,
+					Schemas.Barcode,
+				),
+			);
+		} else {
+			finalBarcodes = Schemas.filterValid(
+				barcodes as Schemas.Barcode[],
+				Schemas.Barcode,
+			);
+
+			if (!finalBarcodes.length) {
+				throw new TypeError(
+					"Expected Schema.Barcode in setBarcodes but no one is valid.",
+				);
+			}
+		}
+
+		this[propsSymbol]["barcodes"] = finalBarcodes;
 
 		return this;
 	}

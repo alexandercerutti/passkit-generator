@@ -254,5 +254,13 @@ export function filterValid<T extends Object>(
 		return [];
 	}
 
-	return source.filter((current) => isValid(current, schema));
+	return source.reduce((acc, current) => {
+		const validation = getValidated(current, schema);
+
+		if (!validation) {
+			return acc;
+		}
+
+		return [...acc, validation];
+	}, []);
 }

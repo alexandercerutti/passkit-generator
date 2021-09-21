@@ -367,9 +367,16 @@ export default class PKPass extends Bundle {
 	 */
 
 	setRelevantDate(date: Date): this {
-		/**
-		 * @TODO implement
-		 */
+		if (date === null) {
+			delete this[propsSymbol]["relevantDate"];
+			return this;
+		}
+
+		const parsedDate = processDate("relevantDate", date);
+
+		if (parsedDate) {
+			this[propsSymbol]["relevantDate"] = parsedDate;
+		}
 
 		return this;
 	}

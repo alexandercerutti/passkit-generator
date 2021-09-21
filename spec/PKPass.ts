@@ -126,42 +126,99 @@ describe("PKPass", () => {
 
 			expect(pass.props["nfc"]).toBeUndefined();
 		});
+	});
 
-		describe("setExpirationDate", () => {
-			it("Won't apply changes without a valid argument", () => {
-				const pass = new PKPass({}, {});
+	describe("setExpirationDate", () => {
+		it("should reset instance.props['expirationDate'] if 'null' is passed as value", () => {
+			const pass = new PKPass({}, {});
 
-				// @ts-expect-error
-				pass.setExpirationDate();
-				expect(pass.props["expirationDate"]).toBe(undefined);
+			pass.setExpirationDate(new Date(2020, 6, 1, 0, 0, 0, 0));
+			// Month starts from 0 in Date Object when used this way, therefore
+			// we expect one month more
+			expect(pass.props["expirationDate"]).toBe("2020-07-01T00:00:00Z");
 
-				// @ts-expect-error
-				pass.setExpirationDate(42);
-				expect(pass.props["expirationDate"]).toBe(undefined);
-			});
+			pass.setExpirationDate(null);
 
-			it("expects a Date object as the only argument", () => {
-				const pass = new PKPass({}, {});
+			expect(pass.props["expirationDate"]).toBeUndefined();
+		});
 
-				pass.setExpirationDate(new Date(2020, 6, 1, 0, 0, 0, 0));
-				// Month starts from 0 in Date Object when used this way, therefore
-				// we expect one month more
-				expect(pass.props["expirationDate"]).toBe(
-					"2020-07-01T00:00:00Z",
-				);
-			});
+		it("Won't apply changes without a valid argument", () => {
+			const pass = new PKPass({}, {});
 
-			it("An invalid date, will not apply changes", () => {
-				const pass = new PKPass({}, {});
+			// @ts-expect-error
+			pass.setExpirationDate();
+			expect(pass.props["expirationDate"]).toBe(undefined);
 
-				// @ts-expect-error
-				pass.setExpirationDate("32/18/228317");
-				expect(pass.props["expirationDate"]).toBe(undefined);
+			// @ts-expect-error
+			pass.setExpirationDate(42);
+			expect(pass.props["expirationDate"]).toBe(undefined);
+		});
 
-				// @ts-expect-error
-				pass.setExpirationDate("32/18/228317");
-				expect(pass.props["expirationDate"]).toBe(undefined);
-			});
+		it("expects a Date object as the only argument", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setExpirationDate(new Date(2020, 6, 1, 0, 0, 0, 0));
+			// Month starts from 0 in Date Object when used this way, therefore
+			// we expect one month more
+			expect(pass.props["expirationDate"]).toBe("2020-07-01T00:00:00Z");
+		});
+
+		it("An invalid date, will not apply changes", () => {
+			const pass = new PKPass({}, {});
+
+			// @ts-expect-error
+			pass.setExpirationDate("32/18/228317");
+			expect(pass.props["expirationDate"]).toBe(undefined);
+
+			// @ts-expect-error
+			pass.setExpirationDate("32/18/228317");
+			expect(pass.props["expirationDate"]).toBe(undefined);
+		});
+	});
+
+	describe("setRelevantDate", () => {
+		it("should reset instance.props['relevantDate'] if 'null' is passed as value", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setRelevantDate(new Date(2020, 6, 1, 0, 0, 0, 0));
+			// Month starts from 0 in Date Object when used this way, therefore
+			// we expect one month more
+			expect(pass.props["relevantDate"]).toBe("2020-07-01T00:00:00Z");
+
+			pass.setRelevantDate(null);
+
+			expect(pass.props["relevantDate"]).toBeUndefined();
+		});
+
+		it("Won't apply changes without a valid argument", () => {
+			const pass = new PKPass({}, {});
+
+			// @ts-expect-error
+			pass.setRelevantDate();
+			expect(pass.props["relevantDate"]).toBe(undefined);
+
+			// @ts-expect-error
+			pass.setRelevantDate(42);
+			expect(pass.props["relevantDate"]).toBe(undefined);
+		});
+
+		it("expects a Date object as the only argument", () => {
+			const pass = new PKPass({}, {});
+
+			pass.setRelevantDate(new Date("10-04-2021"));
+			expect(pass.props["relevantDate"]).toBe("2021-10-04T00:00:00Z");
+		});
+
+		it("An invalid date, will not apply changes", () => {
+			const pass = new PKPass({}, {});
+
+			// @ts-expect-error
+			pass.setRelevantDate("32/18/228317");
+			expect(pass.props["relevantDate"]).toBe(undefined);
+
+			// @ts-expect-error
+			pass.setRelevantDate("32/18/228317");
+			expect(pass.props["relevantDate"]).toBe(undefined);
 		});
 	});
 });

@@ -338,4 +338,55 @@ describe("PKPass", () => {
 			expect(pass.props["barcodes"]).toBe(undefined);
 		});
 	});
+
+	describe("transitType", () => {
+		it("should accept a new value only if the pass is a boarding pass", () => {
+			const mockBPPassJSON = Buffer.from(
+				JSON.stringify({
+					boardingPass: {},
+				}),
+			);
+
+			const mockCPPassJSON = Buffer.from(
+				JSON.stringify({
+					coupon: {},
+				}),
+			);
+
+			const passBP = new PKPass(
+				{
+					"pass.json": mockBPPassJSON,
+				},
+				{},
+			);
+
+			const passCP = new PKPass(
+				{
+					"pass.json": mockCPPassJSON,
+				},
+				{},
+			);
+
+			/**
+			 * @TODO fix this test when props setup
+			 * will be complete
+			 */
+
+			/* 			expect(() => {
+				passBP.transitType = "PKTransitTypeAir";
+			}).toThrowError(
+				TypeError,
+				"Cannot set transitType on a pass with type different from 'boardingPass'.",
+			); */
+			// expect(passBP.transitType).toBe("PKTransitTypeAir");
+
+			/* 			expect(
+				() => (passCP.transitType = "PKTransitTypeAir"),
+			).toThrowError(
+				TypeError,
+				"Cannot set transitType on a pass with type different from 'boardingPass'.",
+			);
+			expect(passCP.transitType).toBeUndefined(); */
+		});
+	});
 });

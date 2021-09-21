@@ -141,11 +141,24 @@ export default class PKPass extends Bundle {
 	 */
 
 	set transitType(value: TransitTypes) {
+		if (!this[propsSymbol].boardingPass) {
+			throw new TypeError(
+				"Cannot set transitType on a pass with type different from 'boardingPass'.",
+			);
+		}
+
 		/**
-		 * @TODO implement
-		 * @TODO validate against schema
-		 * @TODO save into props
+		 * @TODO Make getValidated more explicit in case of error.
+		 * @TODO maybe make an automated error.
 		 */
+
+		if (!Schemas.getValidated(value, Schemas.TransitType)) {
+			throw new TypeError(
+				`Cannot set transitType to '${value}': invalid type. Expected one of PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain.`,
+			);
+		}
+
+		this[propsSymbol]["boardingPass"].transitType = value;
 	}
 
 	/**
@@ -154,12 +167,7 @@ export default class PKPass extends Bundle {
 	 */
 
 	get transitType(): TransitTypes {
-		/**
-		 * @TODO implement
-		 * @TODO read from props
-		 */
-
-		return undefined;
+		return this[propsSymbol]["boardingPass"]?.transitType;
 	}
 
 	// **************************** //

@@ -187,6 +187,24 @@ export default class PKPass extends Bundle {
 		 * @TODO exclude pass.json, manifest, signature files
 		 */
 
+		if (/manifest|signature/.test(pathName)) {
+			return;
+		}
+
+		if (/pass\.json/.test(pathName)) {
+			if (this[filesSymbol]["pass.json"]) {
+				/**
+				 * Ignoring any further addition. In a
+				 * future we might consider merging instead
+				 */
+				return;
+			}
+
+			/**
+			 * @TODO parse pass.json
+			 */
+		}
+
 		super.addBuffer(pathName, buffer);
 	}
 

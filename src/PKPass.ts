@@ -7,6 +7,7 @@ import { Stream } from "stream";
 
 const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
 const propsSymbol = Symbol("props");
+const importMetadataSymbol = Symbol("import.pass.metadata");
 
 interface NamedBuffers {
 	[key: string]: Buffer;
@@ -108,6 +109,26 @@ export default class PKPass extends Bundle {
 	constructor(buffers: NamedBuffers, certificates: Certificates) {
 		super("application/vnd.apple.pkpass");
 
+		for (let [key, value] of Object.entries(buffers)) {
+			const isManifestOrSignature = /manifest|signature/.test(key);
+			const isPassJson = /pass\.json/.test(key);
+
+			if (!isManifestOrSignature) {
+				if (isPassJson) {
+					this[importMetadataSymbol](readPassMetadata(value));
+
+					/**
+					 * Adding an empty buffer just for reference
+					 * that we received a valid pass.json file.
+					 * It will be reconciliated in export phase.
+					 */
+
+					this.addBuffer("pass.json", Buffer.alloc(0));
+				} else {
+					this.addBuffer(key, value);
+				}
+			}
+		}
 		/**
 		 * @TODO Validate options against Joi Schema
 		 */
@@ -200,12 +221,40 @@ export default class PKPass extends Bundle {
 				return;
 			}
 
+			this[importMetadataSymbol](readPassMetadata(buffer));
+
 			/**
 			 * @TODO parse pass.json
 			 */
 		}
 
 		super.addBuffer(pathName, buffer);
+	}
+
+	private [importMetadataSymbol](data: Schemas.ValidPass) {
+		const possibleTypes = [
+			"boardingPass",
+			"coupon",
+			"eventTicket",
+			"storeCard",
+			"generic",
+		] as string[]; /** @TODO fix this type */
+
+		const type = possibleTypes.find((type) => Boolean(data[type]));
+
+		if (!type) {
+			/**
+			 * @TODO improve message
+			 */
+
+			throw new Error("Cannot find a valid type in this pass.json");
+		}
+
+		this.headerFields.push(...data[type]?.headerFields);
+		this.primaryFields.push(...data[type]?.primaryFields);
+		this.secondaryFields.push(...data[type]?.secondaryFields);
+		this.auxiliaryFields.push(...data[type]?.auxiliaryFields);
+		this.backFields.push(...data[type]?.backFields);
 	}
 
 	// ************************* //
@@ -514,4 +563,31 @@ function freezeRecusive(object: Object) {
 	}
 
 	return Object.freeze(objectCopy);
+}
+
+function readPassMetadata(buffer: Buffer) {
+	try {
+		const contentAsJSON = JSON.parse(
+			buffer.toString("utf8"),
+		) as Schemas.ValidPass;
+
+		const validation = Schemas.getValidated(
+			contentAsJSON,
+			Schemas.ValidPass,
+		);
+
+		/**
+		 * @TODO validation.error?
+		 */
+
+		if (!validation) {
+			throw new Error(
+				"Cannot validate pass.json file. Not conformant to",
+			);
+		}
+
+		return validation;
+	} catch (err) {
+		console.error(err);
+	}
 }

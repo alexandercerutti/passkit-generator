@@ -8,6 +8,7 @@ import { Stream } from "stream";
 const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
 const propsSymbol = Symbol("props");
 const importMetadataSymbol = Symbol("import.pass.metadata");
+const localizationSymbol = Symbol("pass.l10n");
 
 interface NamedBuffers {
 	[key: string]: Buffer;
@@ -20,10 +21,17 @@ type TransitTypes = `PKTransitType${
 	| "Generic"
 	| "Train"}`;
 
+const LOCALIZED_FILE_REGEX_BASE = "(?<lang>[a-zA-Z-]{2,}).lproj/";
+
 export default class PKPass extends Bundle {
 	private certificates: Certificates;
 	private [fieldKeysPoolSymbol] = new Set<string>();
 	private [propsSymbol]: Schemas.ValidPass = {};
+	private [localizationSymbol]: {
+		[lang: string]: {
+			[placeholder: string]: string;
+		};
+	} = {};
 	public primaryFields /*****/ = new FieldsArray(this[fieldKeysPoolSymbol]);
 	public secondaryFields /***/ = new FieldsArray(this[fieldKeysPoolSymbol]);
 	public auxiliaryFields /***/ = new FieldsArray(this[fieldKeysPoolSymbol]);
@@ -228,7 +236,30 @@ export default class PKPass extends Bundle {
 			 */
 		}
 
-		super.addBuffer(pathName, buffer);
+		/**
+		 * If a new pass.strings file is added, we want to
+		 * prevent if from being merged and, instead, save
+		 * its translations for later
+		 */
+
+		const translationsFileRegexp = new RegExp(
+			`${LOCALIZED_FILE_REGEX_BASE}pass.strings`,
+		);
+
+		let match: RegExpMatchArray;
+
+		if ((match = pathName.match(translationsFileRegexp))) {
+			const [, lang] = match;
+
+			Object.assign(
+				(this[localizationSymbol][lang] ??= {}),
+				parseStringsFile(buffer),
+			);
+
+			return;
+		}
+
+		return super.addBuffer(pathName, buffer);
 	}
 
 	private [importMetadataSymbol](data: Schemas.ValidPass) {
@@ -590,4 +621,63 @@ function readPassMetadata(buffer: Buffer) {
 	} catch (err) {
 		console.error(err);
 	}
+}
+
+function parseStringsFile(buffer: Buffer) {
+	const fileAsString = buffer.toString("utf8");
+	const translationRowRegex = /"(?<key>.+)"\s+=\s+"(?<value>.+)";\n?/;
+	const commentRowRegex = /\/\*\s*(.+)\s*\*\//;
+
+	/**
+	 * Regole di parsing:
+	 *		1) Uso un solo ciclo
+	 *		2) Accumulo il cursore finché non trovo "\n" oppure il contenuto non è finito
+	 *		3) Quando questo succede, parso il blocco. Ho due blocchi possibili: commento e riga
+	 *
+	 */
+
+	let translations: [placeholder: string, value: string][] = [];
+	let comments: string[] = [];
+
+	let blockStartPoint = 0;
+	let blockEndPoint = 0;
+
+	do {
+		if (
+			/** New Line, new life */
+			/\n/.test(fileAsString[blockEndPoint]) ||
+			/** EOF  */
+			blockEndPoint === fileAsString.length
+		) {
+			let match: RegExpMatchArray;
+
+			const section = fileAsString.substring(
+				blockStartPoint,
+				blockEndPoint + 1,
+			);
+
+			if ((match = section.match(translationRowRegex))) {
+				const {
+					groups: { key, value },
+				} = match;
+
+				translations.push([key, value]);
+			} else if ((match = section.match(commentRowRegex))) {
+				const [, content] = match;
+
+				comments.push(content.trimEnd());
+			}
+
+			/** Skipping \n and going to the next block. */
+			blockEndPoint += 2;
+			blockStartPoint = blockEndPoint - 1;
+		} else {
+			blockEndPoint += 1;
+		}
+	} while (blockEndPoint <= fileAsString.length);
+
+	return {
+		translations,
+		comments,
+	};
 }

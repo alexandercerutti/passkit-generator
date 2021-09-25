@@ -686,14 +686,6 @@ function parseStringsFile(buffer: Buffer) {
 	const translationRowRegex = /"(?<key>.+)"\s+=\s+"(?<value>.+)";\n?/;
 	const commentRowRegex = /\/\*\s*(.+)\s*\*\//;
 
-	/**
-	 * Regole di parsing:
-	 *		1) Uso un solo ciclo
-	 *		2) Accumulo il cursore finché non trovo "\n" oppure il contenuto non è finito
-	 *		3) Quando questo succede, parso il blocco. Ho due blocchi possibili: commento e riga
-	 *
-	 */
-
 	let translations: [placeholder: string, value: string][] = [];
 	let comments: string[] = [];
 

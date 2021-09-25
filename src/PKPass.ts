@@ -26,17 +26,19 @@ const LOCALIZED_FILE_REGEX_BASE = "(?<lang>[a-zA-Z-]{2,}).lproj/";
 export default class PKPass extends Bundle {
 	private certificates: Certificates;
 	private [fieldKeysPoolSymbol] = new Set<string>();
-	private [propsSymbol]: Schemas.ValidPass = {};
+	private [propsSymbol]: Schemas.ValidPass = {
+		primaryFields /*****/: new FieldsArray(this[fieldKeysPoolSymbol]),
+		secondaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
+		auxiliaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
+		headerFields /******/: new FieldsArray(this[fieldKeysPoolSymbol]),
+		backFields /********/: new FieldsArray(this[fieldKeysPoolSymbol]),
+	};
 	private [localizationSymbol]: {
 		[lang: string]: {
 			[placeholder: string]: string;
 		};
 	} = {};
-	public primaryFields /*****/ = new FieldsArray(this[fieldKeysPoolSymbol]);
-	public secondaryFields /***/ = new FieldsArray(this[fieldKeysPoolSymbol]);
-	public auxiliaryFields /***/ = new FieldsArray(this[fieldKeysPoolSymbol]);
-	public headerFields /******/ = new FieldsArray(this[fieldKeysPoolSymbol]);
-	public backFields /********/ = new FieldsArray(this[fieldKeysPoolSymbol]);
+	public type: string = undefined; /** @TODO change type */
 
 	/**
 	 * Either create a pass from another one
@@ -179,6 +181,46 @@ export default class PKPass extends Bundle {
 		return this[propsSymbol]["boardingPass"]?.transitType;
 	}
 
+	/**
+	 * Allows accessing to primaryFields object
+	 */
+
+	get primaryFields(): Schemas.Field[] {
+		return this[propsSymbol][this.type].primaryFields;
+	}
+
+	/**
+	 * Allows accessing to secondaryFields object
+	 */
+
+	get secondaryFields(): Schemas.Field[] {
+		return this[propsSymbol][this.type].secondaryFields;
+	}
+
+	/**
+	 * Allows accessing to auxiliaryFields object
+	 */
+
+	get auxiliaryFields(): Schemas.Field[] {
+		return this[propsSymbol][this.type].auxiliaryFields;
+	}
+
+	/**
+	 * Allows accessing to headerFields object
+	 */
+
+	get headerFields(): Schemas.Field[] {
+		return this[propsSymbol][this.type].headerFields;
+	}
+
+	/**
+	 * Allows accessing to backFields object
+	 */
+
+	get backFields(): Schemas.Field[] {
+		return this[propsSymbol][this.type].backFields;
+	}
+
 	// **************************** //
 	// *** ASSETS SETUP METHODS *** //
 	// **************************** //
@@ -255,9 +297,9 @@ export default class PKPass extends Bundle {
 			"generic",
 		] as string[]; /** @TODO fix this type */
 
-		const type = possibleTypes.find((type) => Boolean(data[type]));
+		this.type = possibleTypes.find((type) => Boolean(data[type]));
 
-		if (!type) {
+		if (!this.type) {
 			/**
 			 * @TODO improve message
 			 */
@@ -265,11 +307,11 @@ export default class PKPass extends Bundle {
 			throw new Error("Cannot find a valid type in this pass.json");
 		}
 
-		this.headerFields.push(...data[type]?.headerFields);
-		this.primaryFields.push(...data[type]?.primaryFields);
-		this.secondaryFields.push(...data[type]?.secondaryFields);
-		this.auxiliaryFields.push(...data[type]?.auxiliaryFields);
-		this.backFields.push(...data[type]?.backFields);
+		this.headerFields.push(...data[this.type]?.headerFields);
+		this.primaryFields.push(...data[this.type]?.primaryFields);
+		this.secondaryFields.push(...data[this.type]?.secondaryFields);
+		this.auxiliaryFields.push(...data[this.type]?.auxiliaryFields);
+		this.backFields.push(...data[this.type]?.backFields);
 	}
 
 	// ************************* //

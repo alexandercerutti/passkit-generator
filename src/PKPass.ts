@@ -118,24 +118,7 @@ export default class PKPass extends Bundle {
 		super("application/vnd.apple.pkpass");
 
 		for (let [key, value] of Object.entries(buffers)) {
-			const isManifestOrSignature = /manifest|signature/.test(key);
-			const isPassJson = /pass\.json/.test(key);
-
-			if (!isManifestOrSignature) {
-				if (isPassJson) {
-					this[importMetadataSymbol](readPassMetadata(value));
-
-					/**
-					 * Adding an empty buffer just for reference
-					 * that we received a valid pass.json file.
-					 * It will be reconciliated in export phase.
-					 */
-
-					this.addBuffer("pass.json", Buffer.alloc(0));
-				} else {
-					this.addBuffer(key, value);
-				}
-			}
+			this.addBuffer(key, value);
 		}
 		/**
 		 * @TODO Validate options against Joi Schema
@@ -232,8 +215,12 @@ export default class PKPass extends Bundle {
 			this[importMetadataSymbol](readPassMetadata(buffer));
 
 			/**
-			 * @TODO parse pass.json
+			 * Adding an empty buffer just for reference
+			 * that we received a valid pass.json file.
+			 * It will be reconciliated in export phase.
 			 */
+
+			return super.addBuffer(pathName, Buffer.alloc(0));
 		}
 
 		/**

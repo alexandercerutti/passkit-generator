@@ -134,7 +134,7 @@ export default class PKPass extends Bundle {
 	 * that are composing your pass instance.
 	 */
 
-	get props(): Readonly<Schemas.ValidPass> {
+	public get props(): Readonly<Schemas.ValidPass> {
 		return freezeRecusive(this[propsSymbol]);
 	}
 
@@ -146,7 +146,7 @@ export default class PKPass extends Bundle {
 	 * @param value
 	 */
 
-	set transitType(value: TransitTypes) {
+	public set transitType(value: TransitTypes) {
 		if (!this[propsSymbol].boardingPass) {
 			throw new TypeError(
 				"Cannot set transitType on a pass with type different from 'boardingPass'.",
@@ -172,7 +172,7 @@ export default class PKPass extends Bundle {
 	 * from pass props
 	 */
 
-	get transitType(): TransitTypes {
+	public get transitType(): TransitTypes {
 		return this[propsSymbol]["boardingPass"]?.transitType;
 	}
 
@@ -184,7 +184,7 @@ export default class PKPass extends Bundle {
 	 * anyway, if it has not a valid type.
 	 */
 
-	get primaryFields(): Schemas.Field[] {
+	public get primaryFields(): Schemas.Field[] {
 		return this[propsSymbol][this.type].primaryFields;
 	}
 
@@ -196,7 +196,7 @@ export default class PKPass extends Bundle {
 	 * anyway, if it has not a valid type.
 	 */
 
-	get secondaryFields(): Schemas.Field[] {
+	public get secondaryFields(): Schemas.Field[] {
 		return this[propsSymbol][this.type].secondaryFields;
 	}
 
@@ -208,7 +208,7 @@ export default class PKPass extends Bundle {
 	 * anyway, if it has not a valid type.
 	 */
 
-	get auxiliaryFields(): Schemas.Field[] {
+	public get auxiliaryFields(): Schemas.Field[] {
 		return this[propsSymbol][this.type].auxiliaryFields;
 	}
 
@@ -220,7 +220,7 @@ export default class PKPass extends Bundle {
 	 * anyway, if it has not a valid type.
 	 */
 
-	get headerFields(): Schemas.Field[] {
+	public get headerFields(): Schemas.Field[] {
 		return this[propsSymbol][this.type].headerFields;
 	}
 
@@ -232,7 +232,7 @@ export default class PKPass extends Bundle {
 	 * anyway, if it has not a valid type.
 	 */
 
-	get backFields(): Schemas.Field[] {
+	public get backFields(): Schemas.Field[] {
 		return this[propsSymbol][this.type].backFields;
 	}
 

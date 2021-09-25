@@ -1,5 +1,4 @@
 import FieldsArray from "./fieldsArray";
-import { Certificates } from "./schemas";
 import { default as Bundle, filesSymbol } from "./Bundle";
 import { getModelFolderContents } from "./parser";
 import * as Schemas from "./schemas";
@@ -16,6 +15,14 @@ interface NamedBuffers {
 	[key: string]: Buffer;
 }
 
+namespace PKPass {
+	export interface Template {
+		model: string;
+		certificates: Schemas.Certificates;
+		overrides?: Schemas.OverridesSupportedOptions;
+	}
+}
+
 type TransitTypes = `PKTransitType${
 	| "Air"
 	| "Boat"
@@ -26,7 +33,7 @@ type TransitTypes = `PKTransitType${
 const LOCALIZED_FILE_REGEX_BASE = "(?<lang>[a-zA-Z-]{2,}).lproj/";
 
 export default class PKPass extends Bundle {
-	private certificates: Certificates;
+	private certificates: Schemas.Certificates;
 	private [fieldKeysPoolSymbol] = new Set<string>();
 	private [propsSymbol]: Schemas.ValidPass = {};
 	private [localizationSymbol]: {
@@ -44,9 +51,15 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	static async from(source: PKPass | string): Promise<PKPass> {
-		let certificates: Certificates = undefined;
+	static async from(source: PKPass | PKPass.Template): Promise<PKPass> {
+		let certificates: Schemas.Certificates = undefined;
 		let buffers: NamedBuffers = undefined;
+
+		if (!source) {
+			throw new TypeError(
+				`Cannot create PKPass from source: source is '${source}'`,
+			);
+		}
 
 		if (source instanceof PKPass) {
 			/** Cloning is happening here */
@@ -63,6 +76,12 @@ export default class PKPass extends Bundle {
 				contentBuffer.copy(buffers[fileName]);
 			}
 		} else {
+			if (!source.model || typeof source.model !== "string") {
+				throw new TypeError(
+					"Cannot create PKPass from source: unknown model but expected a string.",
+				);
+			}
+
 			/** Disk model reading is happening here */
 
 			/**
@@ -70,12 +89,10 @@ export default class PKPass extends Bundle {
 			 * @TODO determine how to use localized files
 			 */
 
-			const { bundle, l10nBundle } = await getModelFolderContents(source);
-
-			buffers = bundle;
+			buffers = await getModelFolderContents(source.model);
 		}
 
-		return new PKPass(buffers, certificates);
+		return new PKPass(buffers, certificates, {});
 	}
 
 	/**

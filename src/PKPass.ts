@@ -117,9 +117,6 @@ export default class PKPass extends Bundle {
 	constructor(buffers: NamedBuffers, certificates: Certificates) {
 		super("application/vnd.apple.pkpass");
 
-		for (let [key, value] of Object.entries(buffers)) {
-			this.addBuffer(key, value);
-		}
 		/**
 		 * @TODO Validate options against Joi Schema
 		 */

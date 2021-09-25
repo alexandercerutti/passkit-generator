@@ -9,11 +9,10 @@ import {
 	hasFilesWithName,
 	deletePersonalization,
 } from "./utils";
-import fs from "fs";
+import { promises as fs } from "fs";
 import debug from "debug";
 
 const prsDebug = debug("Personalization");
-const { readdir: readDir, readFile } = fs.promises;
 
 /**
  * Performs checks on the passed model to
@@ -93,26 +92,28 @@ export async function getModelContents(model: Schemas.FactoryOptions["model"]) {
 }
 
 /**
- * Reads and model contents and creates a splitted
- * bundles-object.
+ * Reads the model folder contents
+ *
  * @param model
+ * @returns A promise of an object containing all
+ * 		filePaths and the relative buffer
  */
 
 export async function getModelFolderContents(
 	model: string,
-): Promise<Schemas.PartitionedBundle> {
+): Promise<{ [filePath: string]: Buffer }> {
 	try {
 		const modelPath = `${model}${(!path.extname(model) && ".pass") || ""}`;
-		const modelFilesList = await readDir(modelPath);
+		const modelFilesList = await fs.readdir(modelPath);
 
 		// No dot-starting files, manifest and signature
-		const filteredFiles = removeHidden(modelFilesList).filter(
+		const filteredModelRecords = removeHidden(modelFilesList).filter(
 			(f) =>
 				!/(manifest|signature)/i.test(f) &&
 				/.+$/.test(path.parse(f).ext),
 		);
 
-		const isModelInitialized =
+		/* 		const isModelInitialized =
 			filteredFiles.length &&
 			hasFilesWithName("icon", filteredFiles, "startsWith");
 
@@ -124,85 +125,32 @@ export async function getModelFolderContents(
 					path.parse(model).name,
 				),
 			);
-		}
+		} */
 
-		// Splitting files from localization folders
-		const rawBundleFiles = filteredFiles.filter(
-			(entry) => !entry.includes(".lproj"),
-		);
-		const l10nFolders = filteredFiles.filter((entry) =>
-			entry.includes(".lproj"),
-		);
-
-		const rawBundleBuffers = await Promise.all(
-			rawBundleFiles.map((file) =>
-				readFile(path.resolve(modelPath, file)),
-			),
-		);
-
-		const bundle: Schemas.BundleUnit = Object.assign(
-			{},
-			...rawBundleFiles.map((fileName, index) => ({
-				[fileName]: rawBundleBuffers[index],
-			})),
-		);
-
-		// Reading concurrently localizations folder
-		// and their files and their buffers
-		const L10N_FilesListByFolder: Array<Schemas.BundleUnit> =
+		const modelRecords = (
 			await Promise.all(
-				l10nFolders.map(async (folderPath) => {
-					// Reading current folder
-					const currentLangPath = path.join(modelPath, folderPath);
+				/**
+				 * Obtaining flattened array of buffer records
+				 * containing file name and the buffer itself.
+				 *
+				 * This goes also to read every nested l10n
+				 * subfolder.
+				 */
 
-					const files = await readDir(currentLangPath);
-					// Transforming files path to a model-relative path
-					const validFiles = removeHidden(files).map((file) =>
-						path.join(currentLangPath, file),
+				filteredModelRecords.map((fileOrDirectoryPath) => {
+					const fullPath = path.resolve(
+						modelPath,
+						fileOrDirectoryPath,
 					);
 
-					// Getting all the buffers from file paths
-					const buffers = await Promise.all(
-						validFiles.map((file) =>
-							readFile(file).catch(() => Buffer.alloc(0)),
-						),
-					);
-
-					// Assigning each file path to its buffer
-					// and discarding the empty ones
-
-					return validFiles.reduce<Schemas.BundleUnit>(
-						(acc, file, index) => {
-							if (!buffers[index].length) {
-								return acc;
-							}
-
-							const fileComponents = file.split(path.sep);
-							const fileName =
-								fileComponents[fileComponents.length - 1];
-
-							return {
-								...acc,
-								[fileName]: buffers[index],
-							};
-						},
-						{},
-					);
+					return readFileOrDirectory(fullPath);
 				}),
-			);
+			)
+		)
+			.flat(1)
+			.reduce((acc, current) => ({ ...acc, ...current }), {});
 
-		const l10nBundle: Schemas.PartitionedBundle["l10nBundle"] =
-			Object.assign(
-				{},
-				...L10N_FilesListByFolder.map((folder, index) => ({
-					[l10nFolders[index]]: folder,
-				})),
-			);
-
-		return {
-			bundle,
-			l10nBundle,
-		};
+		return modelRecords;
 	} catch (err) {
 		if (err?.code === "ENOENT") {
 			if (err.syscall === "open") {
@@ -224,6 +172,62 @@ export async function getModelFolderContents(
 
 		throw err;
 	}
+}
+
+/**
+ * Reads sequentially
+ * @param filePath
+ * @returns
+ */
+
+async function readFileOrDirectory(filePath: string) {
+	if ((await fs.lstat(filePath)).isDirectory()) {
+		return Promise.all(await readDirectory(filePath));
+	} else {
+		return fs
+			.readFile(filePath)
+			.then((content) => getObjectFromModelFile(filePath, content, 1));
+	}
+}
+
+/**
+ * Returns an object containing the parsed fileName
+ * from a path along with its content.
+ *
+ * @param filePath
+ * @param content
+ * @param depthFromEnd - used to preserve localization lproj content
+ * @returns
+ */
+
+function getObjectFromModelFile(
+	filePath: string,
+	content: Buffer,
+	depthFromEnd: number,
+) {
+	const fileComponents = filePath.split(path.sep);
+	const fileName = fileComponents
+		.slice(fileComponents.length - depthFromEnd)
+		.join(path.sep);
+
+	return { [fileName]: content };
+}
+
+/**
+ * Reads a directory and returns all the files in it
+ * as an Array<Promise>
+ *
+ * @param filePath
+ * @returns
+ */
+
+async function readDirectory(filePath: string) {
+	const dirContent = await fs.readdir(filePath).then(removeHidden);
+
+	return dirContent.map(async (fileName) => {
+		const content = await fs.readFile(path.resolve(filePath, fileName));
+		return getObjectFromModelFile(filePath, content, 1);
+	});
 }
 
 /**
@@ -310,7 +314,7 @@ export async function readCertificatesFromOptions(
 
 		if (!!path.parse(content).ext) {
 			// The content is a path to the document
-			return readFile(path.resolve(content), { encoding: "utf8" });
+			return fs.readFile(path.resolve(content), { encoding: "utf8" });
 		} else {
 			// Content is the real document content
 			return Promise.resolve(content);

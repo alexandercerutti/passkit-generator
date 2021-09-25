@@ -1,4 +1,8 @@
-import { default as PKPass } from "../lib/PKPass";
+import {
+	default as PKPass,
+	localizationSymbol,
+	propsSymbol,
+} from "../lib/PKPass";
 
 describe("PKPass", () => {
 	describe("setBeacons", () => {
@@ -387,6 +391,50 @@ describe("PKPass", () => {
 				"Cannot set transitType on a pass with type different from 'boardingPass'.",
 			);
 			expect(passCP.transitType).toBeUndefined(); */
+		});
+	});
+
+	describe("localize", () => {
+		const pass = new PKPass({}, {}, {});
+
+		it("should create a new language record inside class props", () => {
+			pass.localize("en");
+
+			expect(pass[localizationSymbol]["en"]).toEqual({});
+		});
+
+		it("should save some translations to be exported later", () => {
+			pass.localize("it", {
+				say_hi: "ciao",
+				say_gb: "arrivederci",
+			});
+
+			expect(pass[localizationSymbol]["it"]).toEqual({
+				say_hi: "ciao",
+				say_gb: "arrivederci",
+			});
+		});
+
+		it("should accept later translations and merge them with existing ones", () => {
+			pass.localize("it", {
+				say_good_morning: "buongiorno",
+				say_good_evening: "buonasera",
+			});
+
+			expect(pass[localizationSymbol]["it"]).toEqual({
+				say_hi: "ciao",
+				say_gb: "arrivederci",
+				say_good_morning: "buongiorno",
+				say_good_evening: "buonasera",
+			});
+		});
+
+		it("should delete a language and its all translations when null is passed as parameter", () => {
+			pass.localize("it", null);
+			pass.localize("en", null);
+
+			expect(pass[localizationSymbol]["it"]).toBeUndefined();
+			expect(pass[localizationSymbol]["en"]).toBeUndefined();
 		});
 	});
 });

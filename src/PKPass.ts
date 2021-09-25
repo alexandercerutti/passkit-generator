@@ -5,10 +5,12 @@ import { getModelFolderContents } from "./parser";
 import * as Schemas from "./schemas";
 import { Stream } from "stream";
 
+/** Exporting for tests specs */
+export const propsSymbol = Symbol("props");
+export const localizationSymbol = Symbol("pass.l10n");
+
 const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
-const propsSymbol = Symbol("props");
 const importMetadataSymbol = Symbol("import.pass.metadata");
-const localizationSymbol = Symbol("pass.l10n");
 
 interface NamedBuffers {
 	[key: string]: Buffer;
@@ -363,6 +365,7 @@ export default class PKPass extends Bundle {
 		 * @TODO compile this pass into something usable
 		 * @TODO like _patch on old version
 		 * @TODO share implementation with getAsStream
+		 * @TODO Build back translations
 		 */
 
 		return super.getAsBuffer();
@@ -381,6 +384,7 @@ export default class PKPass extends Bundle {
 		 * @TODO compile this pass into something usable
 		 * @TODO like _patch on old version
 		 * @TODO share implementation with getAsBuffer
+		 * @TODO Build back translations
 		 */
 
 		return super.getAsStream();
@@ -392,24 +396,33 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows to specify a language to be added to the
-	 * final bundle, along with some optionals / additional
-	 * translations.
+	 * final bundle, along with some optionals translations.
 	 *
-	 * If the language already exists in the origin source,
-	 * translations will be added to the existing ones.
+	 * If the language already exists, translations will be
+	 * merged with the existing ones.
+	 *
+	 * Setting `translations` to `null`, fully deletes a language
+	 * and its translations.
 	 *
 	 * @see https://developer.apple.com/documentation/walletpasses/creating_the_source_for_a_pass#3736718
 	 * @param lang
 	 * @param translations
 	 */
 
-	localize(lang: string, translations?: any): this {
-		/**
-		 * @TODO change translations format
-		 * @TODO specify a way to get current ones deleted
-		 * @TODO Default languages from source
-		 * @TODO print warning if lang is already in selection?
-		 */
+	localize(
+		lang: string,
+		translations?: { [key: string]: string } | null,
+	): this {
+		if (translations === null) {
+			delete this[localizationSymbol][lang];
+			return this;
+		}
+
+		this[localizationSymbol][lang] ??= {};
+
+		if (typeof translations === "object" && !Array.isArray(translations)) {
+			Object.assign(this[localizationSymbol][lang], translations);
+		}
 
 		return this;
 	}

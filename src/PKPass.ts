@@ -59,7 +59,8 @@ export default class PKPass extends Bundle {
 			for (let i = 0; i < buffersEntries.length; i++) {
 				const [fileName, contentBuffer] = buffersEntries[i];
 
-				buffers[fileName] = Buffer.from(contentBuffer);
+				buffers[fileName] = Buffer.alloc(contentBuffer.length);
+				contentBuffer.copy(buffers[fileName]);
 			}
 		} else {
 			/** Disk model reading is happening here */

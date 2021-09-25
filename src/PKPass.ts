@@ -26,13 +26,7 @@ const LOCALIZED_FILE_REGEX_BASE = "(?<lang>[a-zA-Z-]{2,}).lproj/";
 export default class PKPass extends Bundle {
 	private certificates: Certificates;
 	private [fieldKeysPoolSymbol] = new Set<string>();
-	private [propsSymbol]: Schemas.ValidPass = {
-		primaryFields /*****/: new FieldsArray(this[fieldKeysPoolSymbol]),
-		secondaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
-		auxiliaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
-		headerFields /******/: new FieldsArray(this[fieldKeysPoolSymbol]),
-		backFields /********/: new FieldsArray(this[fieldKeysPoolSymbol]),
-	};
+	private [propsSymbol]: Schemas.ValidPass = {};
 	private [localizationSymbol]: {
 		[lang: string]: {
 			[placeholder: string]: string;
@@ -146,7 +140,8 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows setting a transitType property
-	 * for a boardingPass
+	 * for a boardingPass. Throws an error if
+	 * the current type is not a boardingPass.
 	 *
 	 * @param value
 	 */
@@ -182,7 +177,11 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
-	 * Allows accessing to primaryFields object
+	 * Allows accessing to primaryFields object.
+	 *
+	 * It will (automatically) throw an error if
+	 * no valid pass.json has been parsed yet or,
+	 * anyway, if it has not a valid type.
 	 */
 
 	get primaryFields(): Schemas.Field[] {
@@ -191,6 +190,10 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows accessing to secondaryFields object
+	 *
+	 * It will (automatically) throw an error if
+	 * no valid pass.json has been parsed yet or,
+	 * anyway, if it has not a valid type.
 	 */
 
 	get secondaryFields(): Schemas.Field[] {
@@ -199,6 +202,10 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows accessing to auxiliaryFields object
+	 *
+	 * It will (automatically) throw an error if
+	 * no valid pass.json has been parsed yet or,
+	 * anyway, if it has not a valid type.
 	 */
 
 	get auxiliaryFields(): Schemas.Field[] {
@@ -207,6 +214,10 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows accessing to headerFields object
+	 *
+	 * It will (automatically) throw an error if
+	 * no valid pass.json has been parsed yet or,
+	 * anyway, if it has not a valid type.
 	 */
 
 	get headerFields(): Schemas.Field[] {
@@ -215,6 +226,10 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows accessing to backFields object
+	 *
+	 * It will (automatically) throw an error if
+	 * no valid pass.json has been parsed yet or,
+	 * anyway, if it has not a valid type.
 	 */
 
 	get backFields(): Schemas.Field[] {
@@ -307,11 +322,28 @@ export default class PKPass extends Bundle {
 			throw new Error("Cannot find a valid type in this pass.json");
 		}
 
-		this.headerFields.push(...data[this.type]?.headerFields);
-		this.primaryFields.push(...data[this.type]?.primaryFields);
-		this.secondaryFields.push(...data[this.type]?.secondaryFields);
-		this.auxiliaryFields.push(...data[this.type]?.auxiliaryFields);
-		this.backFields.push(...data[this.type]?.backFields);
+		this[propsSymbol][this.type] = {
+			primaryFields /*****/: new FieldsArray(
+				this[fieldKeysPoolSymbol],
+				...data[this.type]?.primaryFields,
+			),
+			secondaryFields /***/: new FieldsArray(
+				this[fieldKeysPoolSymbol],
+				...data[this.type]?.secondaryFields,
+			),
+			auxiliaryFields /***/: new FieldsArray(
+				this[fieldKeysPoolSymbol],
+				...data[this.type]?.auxiliaryFields,
+			),
+			headerFields /******/: new FieldsArray(
+				this[fieldKeysPoolSymbol],
+				...data[this.type]?.headerFields,
+			),
+			backFields /********/: new FieldsArray(
+				this[fieldKeysPoolSymbol],
+				...data[this.type]?.backFields,
+			),
+		};
 	}
 
 	// ************************* //

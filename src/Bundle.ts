@@ -61,12 +61,21 @@ export default class Bundle {
 	 */
 
 	protected freeze() {
-		if (this[bundleStateSymbol] === BundleState.CLOSED) {
+		if (this.isFrozen) {
 			return;
 		}
 
 		this[bundleStateSymbol] = BundleState.CLOSED;
 		this[archiveSymbol].end();
+	}
+
+	/**
+	 * Tells if this bundle still allows files to be added
+	 * @returns
+	 */
+
+	public get isFrozen() {
+		return this[bundleStateSymbol] === BundleState.CLOSED;
 	}
 
 	/**
@@ -78,7 +87,7 @@ export default class Bundle {
 	 */
 
 	public addBuffer(fileName: string, buffer: Buffer) {
-		if (this[bundleStateSymbol] === BundleState.CLOSED) {
+		if (this.isFrozen) {
 			throw new Error("Cannot add file. Bundle is closed.");
 		}
 

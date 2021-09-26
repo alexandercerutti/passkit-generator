@@ -465,7 +465,9 @@ export default class PKPass extends Bundle {
 		 * @TODO warning if no icon files
 		 */
 
-		this[closePassSymbol]();
+		if (!this.isFrozen) {
+			this[closePassSymbol]();
+		}
 
 		return super.getAsBuffer();
 	}
@@ -486,7 +488,9 @@ export default class PKPass extends Bundle {
 		 * @TODO warning if no icon files
 		 */
 
-		this[closePassSymbol]();
+		if (!this.isFrozen) {
+			this[closePassSymbol]();
+		}
 
 		return super.getAsStream();
 	}

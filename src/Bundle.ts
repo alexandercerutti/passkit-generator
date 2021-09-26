@@ -1,7 +1,7 @@
 import { Stream } from "stream";
 import { ZipFile } from "yazl";
 
-export const filesSymbol = Symbol("bundleFiles");
+const filesSymbol = Symbol("bundleFiles");
 const bundleStateSymbol = Symbol("state");
 const archiveSymbol = Symbol("zip");
 
@@ -76,6 +76,14 @@ export default class Bundle {
 
 	public get isFrozen() {
 		return this[bundleStateSymbol] === BundleState.CLOSED;
+	}
+
+	/**
+	 * Returns the list of files added to the bundle
+	 */
+
+	public get files() {
+		return this[filesSymbol];
 	}
 
 	/**

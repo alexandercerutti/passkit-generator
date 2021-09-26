@@ -3,6 +3,10 @@ import { default as Bundle, filesSymbol } from "./Bundle";
 import { getModelFolderContents } from "./parser";
 import * as Schemas from "./schemas";
 import { Stream } from "stream";
+import { processDate } from "./processDate";
+import forge from "node-forge";
+import * as Signature from "./signature";
+import { EOL } from "os";
 
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
@@ -10,6 +14,8 @@ export const localizationSymbol = Symbol("pass.l10n");
 
 const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
 const importMetadataSymbol = Symbol("import.pass.metadata");
+const createManifestSymbol = Symbol("pass.manifest");
+const closePassSymbol = Symbol("pass.close");
 
 interface NamedBuffers {
 	[key: string]: Buffer;
@@ -826,5 +832,5 @@ function createStringFile(translations: { [key: string]: string }): Buffer {
 		stringContents.push(`"${key}" = "${value}";`);
 	}
 
-	return Buffer.from(stringContents.join("\n"));
+	return Buffer.from(stringContents.join(EOL));
 }

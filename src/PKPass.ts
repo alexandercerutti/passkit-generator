@@ -7,6 +7,7 @@ import { processDate } from "./processDate";
 import forge from "node-forge";
 import * as Signature from "./signature";
 import { EOL } from "os";
+import { isValidRGB } from "./utils";
 
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
@@ -389,6 +390,30 @@ export default class PKPass extends Bundle {
 	}
 
 	private [closePassSymbol]() {
+		/**
+		 * Filtering colors props that have an
+		 * invalid RGB value
+		 */
+
+		const passColors = [
+			"backgroundColor",
+			"foregroundColor",
+			"labelColor",
+		] as Array<keyof Schemas.PassColors>;
+
+		for (let i = 0; i < passColors.length; i++) {
+			const colorProperty = passColors[i];
+			const colorInProps = this[propsSymbol][colorProperty];
+
+			if (colorInProps && !isValidRGB(colorInProps)) {
+				console.warn(
+					`'${colorProperty}' property has been removed from pass.json as it has not a valid RGB-strin value.`,
+				);
+
+				delete this[propsSymbol][colorProperty];
+			}
+		}
+
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
 		super.addBuffer("pass.json", passJson);
 

@@ -2,13 +2,7 @@ import { Stream } from "stream";
 import { ZipFile } from "yazl";
 
 export const filesSymbol = Symbol("bundleFiles");
-const bundleStateSymbol = Symbol("state");
 const archiveSymbol = Symbol("zip");
-
-enum BundleState {
-	CLOSED = 0,
-	OPEN = 1,
-}
 
 namespace Mime {
 	export type type = string;
@@ -22,7 +16,6 @@ namespace Mime {
  */
 
 export default class Bundle {
-	private [bundleStateSymbol]: BundleState = BundleState.OPEN;
 	private [filesSymbol]: { [key: string]: Buffer } = {};
 	private [archiveSymbol] = new ZipFile();
 
@@ -56,7 +49,7 @@ export default class Bundle {
 	}
 
 	/**
-	 * Freezes / Closes the bundle so no more files
+	 * Freezes the bundle so no more files
 	 * can be added any further.
 	 */
 
@@ -65,7 +58,7 @@ export default class Bundle {
 			return;
 		}
 
-		this[bundleStateSymbol] = BundleState.CLOSED;
+		Object.freeze(this[filesSymbol]);
 		this[archiveSymbol].end();
 	}
 
@@ -75,7 +68,7 @@ export default class Bundle {
 	 */
 
 	public get isFrozen() {
-		return this[bundleStateSymbol] === BundleState.CLOSED;
+		return Object.isFrozen(this[filesSymbol]);
 	}
 
 	/**

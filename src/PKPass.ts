@@ -22,14 +22,6 @@ interface NamedBuffers {
 	[key: string]: Buffer;
 }
 
-namespace PKPass {
-	export interface Template {
-		model: string;
-		certificates: Schemas.Certificates;
-		overrides?: Schemas.OverridesSupportedOptions;
-	}
-}
-
 type TransitTypes = `PKTransitType${
 	| "Air"
 	| "Boat"
@@ -58,8 +50,8 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	static async from(source: PKPass | PKPass.Template): Promise<PKPass> {
-		let certificates: Schemas.Certificates = undefined;
+	static async from(source: PKPass | Schemas.Template): Promise<PKPass> {
+		let certificates: Schemas.CertificatesSchema = undefined;
 		let buffers: NamedBuffers = undefined;
 
 		if (!source) {

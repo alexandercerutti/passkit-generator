@@ -78,15 +78,15 @@ export const CertificatesSchema = Joi.object<CertificatesSchema>()
 	})
 	.required();
 
-export interface PassInstance {
-	model: PartitionedBundle;
+export interface Template {
+	model: string;
 	certificates: CertificatesSchema;
 	overrides?: OverridesSupportedOptions;
 }
 
-export const PassInstance = Joi.object<PassInstance>().keys({
-	model: Joi.alternatives(Joi.object(), Joi.string()).required(),
-	certificates: Joi.object(),
+export const Template = Joi.object<Template>({
+	model: Joi.string().required(),
+	certificates: Joi.object().required(),
 	overrides: Joi.object(),
 });
 
@@ -181,7 +181,7 @@ type AvailableSchemas =
 	| typeof PassFields
 	| typeof Personalization
 	| typeof TransitType
-	| typeof PassInstance
+	| typeof Template
 	| typeof CertificatesSchema
 	| typeof OverridesSupportedOptions;
 

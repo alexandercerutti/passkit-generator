@@ -396,10 +396,11 @@ export default class PKPass extends Bundle {
 		) {
 			const [lang, translations] = entry;
 
-			super.addBuffer(
-				`${lang}.lproj/pass.strings`,
-				createStringFile(translations),
-			);
+			const stringsFile = createStringFile(translations);
+
+			if (stringsFile.length) {
+				super.addBuffer(`${lang}.lproj/pass.strings`, stringsFile);
+			}
 		}
 
 		/**

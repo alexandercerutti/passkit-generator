@@ -366,6 +366,53 @@ export default class PKPass extends Bundle {
 		};
 	}
 
+	private [createManifestSymbol]() {
+		return Object.entries(this[filesSymbol]).reduce<Schemas.Manifest>(
+			(acc, [fileName, buffer]) => {
+				const hashFlow = forge.md.sha1.create();
+
+				hashFlow.update(buffer.toString("binary"));
+
+				return {
+					...acc,
+					[fileName]: hashFlow.digest().toHex(),
+				};
+			},
+			{},
+		);
+	}
+
+	private [closePassSymbol]() {
+		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
+		super.addBuffer("pass.json", passJson);
+
+		const localizationEntries = Object.entries(this[localizationSymbol]);
+
+		for (
+			let i = localizationEntries.length,
+				entry: [string, { [key: string]: string }];
+			(entry = localizationEntries[--i]);
+
+		) {
+			const [lang, translations] = entry;
+
+			super.addBuffer(
+				`${lang}.lproj/pass.strings`,
+				createStringFile(translations),
+			);
+		}
+
+		/**
+		 * @TODO pack out fields from FieldsArray
+		 */
+
+		const manifest = this[createManifestSymbol]();
+		super.addBuffer("manifest.json", Buffer.from(JSON.stringify(manifest)));
+
+		const signatureBuffer = Signature.create(manifest, this.certificates);
+		super.addBuffer("signature", signatureBuffer);
+	}
+
 	// ************************* //
 	// *** EXPORTING METHODS *** //
 	// ************************* //
@@ -383,8 +430,10 @@ export default class PKPass extends Bundle {
 		 * @TODO compile this pass into something usable
 		 * @TODO like _patch on old version
 		 * @TODO share implementation with getAsStream
-		 * @TODO Build back translations
+		 * @TODO warning if no icon files
 		 */
+
+		this[closePassSymbol]();
 
 		return super.getAsBuffer();
 	}
@@ -402,8 +451,10 @@ export default class PKPass extends Bundle {
 		 * @TODO compile this pass into something usable
 		 * @TODO like _patch on old version
 		 * @TODO share implementation with getAsBuffer
-		 * @TODO Build back translations
+		 * @TODO warning if no icon files
 		 */
+
+		this[closePassSymbol]();
 
 		return super.getAsStream();
 	}
@@ -761,4 +812,18 @@ function parseStringsFile(buffer: Buffer) {
 		translations,
 		comments,
 	};
+}
+
+function createStringFile(translations: { [key: string]: string }): Buffer {
+	const stringContents = [];
+
+	const translationsEntries = Object.entries(translations);
+
+	for (let i = 0; i < translationsEntries.length; i++) {
+		const [key, value] = translationsEntries[i];
+
+		stringContents.push(`"${key}" = "${value}";`);
+	}
+
+	return Buffer.from(stringContents.join("\n"));
 }

@@ -1,5 +1,5 @@
 import FieldsArray from "./fieldsArray";
-import { default as Bundle } from "./Bundle";
+import { default as Bundle, filesSymbol } from "./Bundle";
 import { getModelFolderContents } from "./parser";
 import * as Schemas from "./schemas";
 import { Stream } from "stream";
@@ -73,7 +73,7 @@ export default class PKPass extends Bundle {
 			certificates = source.certificates;
 			buffers = {};
 
-			const buffersEntries = Object.entries(source.files);
+			const buffersEntries = Object.entries(source[filesSymbol]);
 
 			/** Cloning all the buffers to prevent unwanted edits */
 			for (let i = 0; i < buffersEntries.length; i++) {
@@ -285,7 +285,7 @@ export default class PKPass extends Bundle {
 		}
 
 		if (/pass\.json/.test(pathName)) {
-			if (this.files["pass.json"]) {
+			if (this[filesSymbol]["pass.json"]) {
 				/**
 				 * Ignoring any further addition. In a
 				 * future we might consider merging instead
@@ -374,7 +374,7 @@ export default class PKPass extends Bundle {
 	}
 
 	private [createManifestSymbol]() {
-		return Object.entries(this.files).reduce<Schemas.Manifest>(
+		return Object.entries(this[filesSymbol]).reduce<Schemas.Manifest>(
 			(acc, [fileName, buffer]) => {
 				const hashFlow = forge.md.sha1.create();
 

@@ -1,5 +1,5 @@
 import { Stream } from "stream";
-import { default as Bundle } from "../lib/Bundle";
+import { default as Bundle, filesSymbol } from "../lib/Bundle";
 
 describe("Bundle", () => {
 	let bundle: InstanceType<typeof Bundle>;
@@ -24,7 +24,7 @@ describe("Bundle", () => {
 		const buffer = Buffer.alloc(0);
 		bundle.addBuffer("pass.json", buffer);
 
-		expect(bundle.files).toEqual({ "pass.json": buffer });
+		expect(bundle[filesSymbol]).toEqual({ "pass.json": buffer });
 	});
 
 	it("should throw error if freezed", async () => {

@@ -81,13 +81,6 @@ export default class PKPass extends Bundle {
 				);
 			}
 
-			/** Disk model reading is happening here */
-
-			/**
-			 * @TODO Rename bundles in something else.
-			 * @TODO determine how to use localized files
-			 */
-
 			buffers = await getModelFolderContents(source.model);
 		}
 
@@ -413,7 +406,7 @@ export default class PKPass extends Bundle {
 
 			if (colorInProps && !isValidRGB(colorInProps)) {
 				console.warn(
-					`'${colorProperty}' property has been removed from pass.json as it has not a valid RGB-strin value.`,
+					`'${colorProperty}' property has been removed from pass.json as it has not a valid RGB-string value.`,
 				);
 
 				delete this[propsSymbol][colorProperty];

@@ -265,16 +265,17 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows adding a new asset inside the pass / bundle;
+	 * If an empty buffer is passed, it won't be added to
+	 * the bundle.
 	 *
 	 * @param pathName
 	 * @param buffer
 	 */
 
 	public addBuffer(pathName: string, buffer: Buffer): void {
-		/**
-		 * @TODO implement
-		 * @TODO exclude pass.json, manifest, signature files
-		 */
+		if (!buffer) {
+			return;
+		}
 
 		if (/manifest|signature/.test(pathName)) {
 			return;

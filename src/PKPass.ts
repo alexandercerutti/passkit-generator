@@ -362,7 +362,7 @@ export default class PKPass extends Bundle {
 				this[fieldKeysPoolSymbol],
 				...data[this.type]?.backFields,
 			),
-			transitType: undefined /** Setter + Getter */,
+			transitType: this.transitType /** Setter + Getter */,
 		};
 	}
 

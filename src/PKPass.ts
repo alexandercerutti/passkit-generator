@@ -40,7 +40,7 @@ export default class PKPass extends Bundle {
 			[placeholder: string]: string;
 		};
 	} = {};
-	public type: string = undefined; /** @TODO change type */
+	public type: Schemas.PassTypesProps = undefined;
 
 	/**
 	 * Either create a pass from another one
@@ -150,6 +150,14 @@ export default class PKPass extends Bundle {
 			const [fileName, contentBuffer] = buffer;
 			this.addBuffer(fileName, contentBuffer);
 		}
+
+		/** Overrides validation and pushing in props */
+		const overridesValidation = Schemas.getValidated(
+			overrides,
+			Schemas.OverridablePassProps,
+		);
+
+		Object.assign(this[propsSymbol], overridesValidation);
 	}
 
 	/**
@@ -334,7 +342,7 @@ export default class PKPass extends Bundle {
 			"eventTicket",
 			"storeCard",
 			"generic",
-		] as string[]; /** @TODO fix this type */
+		] as Schemas.PassTypesProps[];
 
 		this.type = possibleTypes.find((type) => Boolean(data[type]));
 
@@ -367,6 +375,7 @@ export default class PKPass extends Bundle {
 				this[fieldKeysPoolSymbol],
 				...data[this.type]?.backFields,
 			),
+			transitType: undefined /** Setter + Getter */,
 		};
 	}
 

@@ -20,8 +20,18 @@ export function create(
 		"utf8",
 	);
 
-	signature.addCertificate(certificates.wwdr);
-	signature.addCertificate(certificates.signerCert);
+	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = certificates;
+
+	const wwdrString = wwdr instanceof Buffer ? wwdr.toString("utf-8") : wwdr;
+	const signerCertString =
+		signerCert instanceof Buffer
+			? signerCert.toString("utf-8")
+			: signerCert;
+	const signerKeyString =
+		signerKey instanceof Buffer ? signerKey.toString("utf-8") : signerKey;
+
+	signature.addCertificate(wwdrString);
+	signature.addCertificate(signerCertString);
 
 	/**
 	 * authenticatedAttributes belong to PKCS#9 standard.
@@ -33,8 +43,8 @@ export function create(
 	 */
 
 	signature.addSigner({
-		key: certificates.signerKey,
-		certificate: certificates.signerCert,
+		key: signerKeyString,
+		certificate: signerCertString,
 		digestAlgorithm: forge.pki.oids.sha1,
 		authenticatedAttributes: [
 			{

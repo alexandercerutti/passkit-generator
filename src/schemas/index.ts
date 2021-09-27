@@ -25,7 +25,7 @@ export interface Manifest {
 	[key: string]: string;
 }
 
-export interface Certificates {
+/* export interface Certificates {
 	wwdr?: string;
 	signerCert?: string;
 	signerKey?:
@@ -34,54 +34,28 @@ export interface Certificates {
 				passphrase?: string;
 		  }
 		| string;
-}
-
-export interface FactoryOptions {
-	model: BundleUnit | string;
-	certificates: Certificates;
-	overrides?: OverridesSupportedOptions;
-}
-
-export interface BundleUnit {
-	[key: string]: Buffer;
-}
-
-export interface PartitionedBundle {
-	bundle: BundleUnit;
-	l10nBundle: {
-		[key: string]: BundleUnit;
-	};
-}
+}*/
 
 export interface CertificatesSchema {
-	wwdr: string;
-	signerCert: string;
-	signerKey: string;
+	wwdr: string | Buffer;
+	signerCert: string | Buffer;
+	signerKey: string | Buffer;
+	signerKeyPassphrase?: string;
 }
 
 export const CertificatesSchema = Joi.object<CertificatesSchema>()
 	.keys({
 		wwdr: Joi.alternatives(Joi.binary(), Joi.string()).required(),
 		signerCert: Joi.alternatives(Joi.binary(), Joi.string()).required(),
-		signerKey: Joi.alternatives()
-			.try(
-				Joi.object().keys({
-					keyFile: Joi.alternatives(
-						Joi.binary(),
-						Joi.string(),
-					).required(),
-					passphrase: Joi.string().required(),
-				}),
-				Joi.alternatives(Joi.binary(), Joi.string()),
-			)
-			.required(),
+		signerKey: Joi.alternatives(Joi.binary(), Joi.string()).required(),
+		signerKeyPassphrase: Joi.string(),
 	})
 	.required();
 
 export interface Template {
 	model: string;
 	certificates: CertificatesSchema;
-	overrides?: OverridesSupportedOptions;
+	overrides?: OverridablePassProps;
 }
 
 export const Template = Joi.object<Template>({
@@ -90,56 +64,37 @@ export const Template = Joi.object<Template>({
 	overrides: Joi.object(),
 });
 
-export interface OverridesSupportedOptions {
+export interface PassProps {
 	serialNumber?: string;
 	description?: string;
 	organizationName?: string;
 	passTypeIdentifier?: string;
 	teamIdentifier?: string;
 	appLaunchURL?: string;
-	associatedStoreIdentifiers?: Array<number>;
+	voided?: boolean;
 	userInfo?: { [key: string]: any };
-	webServiceURL?: string;
-	authenticationToken?: string;
 	sharingProhibited?: boolean;
-	backgroundColor?: string;
-	foregroundColor?: string;
-	labelColor?: string;
 	groupingIdentifier?: string;
 	suppressStripShine?: boolean;
 	logoText?: string;
 	maxDistance?: number;
 	semantics?: Semantics;
-}
 
-export const OverridesSupportedOptions = Joi.object<OverridesSupportedOptions>()
-	.keys({
-		serialNumber: Joi.string(),
-		description: Joi.string(),
-		organizationName: Joi.string(),
-		passTypeIdentifier: Joi.string(),
-		teamIdentifier: Joi.string(),
-		appLaunchURL: Joi.string(),
-		associatedStoreIdentifiers: Joi.array().items(Joi.number()),
-		userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
-		// parsing url as set of words and nums followed by dots, optional port and any possible path after
-		webServiceURL: Joi.string().regex(
-			/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
-		),
-		authenticationToken: Joi.string().min(16),
-		sharingProhibited: Joi.boolean(),
-		backgroundColor: Joi.string().min(10).max(16),
-		foregroundColor: Joi.string().min(10).max(16),
-		labelColor: Joi.string().min(10).max(16),
-		groupingIdentifier: Joi.string(),
-		suppressStripShine: Joi.boolean(),
-		logoText: Joi.string(),
-		maxDistance: Joi.number().positive(),
-		semantics: Semantics,
-	})
-	.with("webServiceURL", "authenticationToken");
+	webServiceURL?: string;
+	associatedStoreIdentifiers?: Array<number>;
+	authenticationToken?: string;
 
-export interface ValidPassType {
+	backgroundColor?: string;
+	foregroundColor?: string;
+	labelColor?: string;
+
+	nfc?: NFC;
+	beacons?: Beacon[];
+	barcodes?: Barcode[];
+	relevantDate?: string;
+	expirationDate?: string;
+	locations?: Location[];
+
 	boardingPass?: PassFields & { transitType: TransitType };
 	eventTicket?: PassFields;
 	coupon?: PassFields;
@@ -147,28 +102,88 @@ export interface ValidPassType {
 	storeCard?: PassFields;
 }
 
-interface PassInterfacesProps {
-	barcode?: Barcode;
-	barcodes?: Barcode[];
-	beacons?: Beacon[];
-	locations?: Location[];
-	maxDistance?: number;
-	relevantDate?: string;
-	nfc?: NFC;
-	expirationDate?: string;
-	voided?: boolean;
-}
+/**
+ * These are the properties passkit-generator will
+ * handle through its methods
+ */
 
-type AllPassProps = PassInterfacesProps &
-	ValidPassType &
-	OverridesSupportedOptions;
-export type ValidPass = {
-	[K in keyof AllPassProps]: AllPassProps[K];
-};
+type PassMethodsProps =
+	| "nfc"
+	| "beacons"
+	| "barcodes"
+	| "relevantDate"
+	| "expirationDate"
+	| "locations";
+
+export type PassTypesProps =
+	| "boardingPass"
+	| "eventTicket"
+	| "coupon"
+	| "generic"
+	| "storeCard";
+
+export type OverridablePassProps = Omit<
+	PassProps,
+	PassMethodsProps | PassTypesProps
+>;
+export type PassPropsFromMethods = { [K in PassMethodsProps]: PassProps[K] };
+export type PassKindsProps = { [K in PassTypesProps]: PassProps[K] };
+
 export type PassColors = Pick<
-	OverridesSupportedOptions,
+	OverridablePassProps,
 	"backgroundColor" | "foregroundColor" | "labelColor"
 >;
+
+export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
+	nfc: NFC,
+	beacons: Joi.array().items(Beacon),
+	barcodes: Joi.array().items(Barcode),
+	relevantDate: Joi.string().isoDate(),
+	expirationDate: Joi.string().isoDate(),
+	locations: Joi.array().items(Location),
+});
+
+export const PassKindsProps = Joi.object<PassKindsProps>({
+	coupon: Joi.array().items(Field),
+	generic: Joi.array().items(Field),
+	storeCard: Joi.array().items(Field),
+	eventTicket: Joi.array().items(Field),
+	boardingPass: Joi.array().items(
+		Field.concat(Joi.object({ transitType: TransitType })),
+	),
+});
+
+export const OverridablePassProps = Joi.object<OverridablePassProps>({
+	semantics: Semantics,
+	voided: Joi.boolean(),
+	logoText: Joi.string(),
+	description: Joi.string(),
+	serialNumber: Joi.string(),
+	appLaunchURL: Joi.string(),
+	teamIdentifier: Joi.string(),
+	organizationName: Joi.string(),
+	passTypeIdentifier: Joi.string(),
+	sharingProhibited: Joi.boolean(),
+	groupingIdentifier: Joi.string(),
+	suppressStripShine: Joi.boolean(),
+	maxDistance: Joi.number().positive(),
+	labelColor: Joi.string().min(10).max(16),
+	authenticationToken: Joi.string().min(16),
+	backgroundColor: Joi.string().min(10).max(16),
+	foregroundColor: Joi.string().min(10).max(16),
+	associatedStoreIdentifiers: Joi.array().items(Joi.number()),
+	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
+	// parsing url as set of words and nums followed by dots, optional port and any possible path after
+	webServiceURL: Joi.string().regex(
+		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
+	),
+}).with("webServiceURL", "authenticationToken");
+
+export const PassProps = Joi.object({
+	...OverridablePassProps,
+	...PassKindsProps,
+	...PassPropsFromMethods,
+});
 
 // --------- UTILITIES ---------- //
 
@@ -183,7 +198,7 @@ type AvailableSchemas =
 	| typeof TransitType
 	| typeof Template
 	| typeof CertificatesSchema
-	| typeof OverridesSupportedOptions;
+	| typeof OverridablePassProps;
 
 export type ArrayPassSchema = Beacon | Location | Barcode;
 

@@ -32,9 +32,9 @@ type TransitTypes = `PKTransitType${
 const LOCALIZED_FILE_REGEX_BASE = "(?<lang>[a-zA-Z-]{2,}).lproj/";
 
 export default class PKPass extends Bundle {
-	private certificates: Schemas.Certificates;
+	private certificates: Schemas.CertificatesSchema;
 	private [fieldKeysPoolSymbol] = new Set<string>();
-	private [propsSymbol]: Schemas.ValidPass = {};
+	private [propsSymbol]: Schemas.PassProps = {};
 	private [localizationSymbol]: {
 		[lang: string]: {
 			[placeholder: string]: string;
@@ -129,7 +129,11 @@ export default class PKPass extends Bundle {
 	// *** INSTANCE *** //
 	// **************** //
 
-	constructor(buffers: NamedBuffers, certificates: Certificates) {
+	constructor(
+		buffers: NamedBuffers,
+		certificates: Schemas.CertificatesSchema,
+		overrides: Schemas.OverridablePassProps,
+	) {
 		super("application/vnd.apple.pkpass");
 
 		/**
@@ -153,7 +157,7 @@ export default class PKPass extends Bundle {
 	 * that are composing your pass instance.
 	 */
 
-	public get props(): Readonly<Schemas.ValidPass> {
+	public get props(): Readonly<Schemas.PassProps> {
 		return freezeRecusive(this[propsSymbol]);
 	}
 
@@ -322,7 +326,7 @@ export default class PKPass extends Bundle {
 		return super.addBuffer(pathName, buffer);
 	}
 
-	private [importMetadataSymbol](data: Schemas.ValidPass) {
+	private [importMetadataSymbol](data: Schemas.PassProps) {
 		const possibleTypes = [
 			"boardingPass",
 			"coupon",
@@ -768,11 +772,11 @@ function readPassMetadata(buffer: Buffer) {
 	try {
 		const contentAsJSON = JSON.parse(
 			buffer.toString("utf8"),
-		) as Schemas.ValidPass;
+		) as Schemas.PassProps;
 
 		const validation = Schemas.getValidated(
 			contentAsJSON,
-			Schemas.ValidPass,
+			Schemas.PassProps,
 		);
 
 		/**

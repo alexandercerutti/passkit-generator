@@ -22,12 +22,6 @@ interface NamedBuffers {
 	[key: string]: Buffer;
 }
 
-type TransitTypes = `PKTransitType${
-	| "Air"
-	| "Boat"
-	| "Bus"
-	| "Generic"
-	| "Train"}`;
 
 const LOCALIZED_FILE_REGEX_BASE = "(?<lang>[a-zA-Z-]{2,}).lproj/";
 
@@ -170,7 +164,7 @@ export default class PKPass extends Bundle {
 	 * @param value
 	 */
 
-	public set transitType(value: TransitTypes) {
+	public set transitType(value: Schemas.TransitType) {
 		if (!this[propsSymbol].boardingPass) {
 			throw new TypeError(
 				"Cannot set transitType on a pass with type different from 'boardingPass'.",
@@ -196,7 +190,7 @@ export default class PKPass extends Bundle {
 	 * from pass props
 	 */
 
-	public get transitType(): TransitTypes {
+	public get transitType() {
 		return this[propsSymbol]["boardingPass"]?.transitType;
 	}
 

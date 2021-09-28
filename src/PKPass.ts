@@ -22,9 +22,6 @@ interface NamedBuffers {
 	[key: string]: Buffer;
 }
 
-
-const LOCALIZED_FILE_REGEX_BASE = "(?<lang>[a-zA-Z-]{2,}).lproj/";
-
 export default class PKPass extends Bundle {
 	private certificates: Schemas.CertificatesSchema;
 	private [fieldKeysPoolSymbol] = new Set<string>();
@@ -336,13 +333,12 @@ export default class PKPass extends Bundle {
 
 		/**
 		 * If a new pass.strings file is added, we want to
-		 * prevent if from being merged and, instead, save
+		 * prevent it from being merged and, instead, save
 		 * its translations for later
 		 */
 
-		const translationsFileRegexp = new RegExp(
-			`${LOCALIZED_FILE_REGEX_BASE}pass.strings`,
-		);
+		const translationsFileRegexp =
+			/(?<lang>[a-zA-Z-]{2,}).lproj\/pass\.strings/;
 
 		let match: RegExpMatchArray;
 

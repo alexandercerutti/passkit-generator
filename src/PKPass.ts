@@ -296,6 +296,31 @@ export default class PKPass extends Bundle {
 			return super.addBuffer(pathName, Buffer.alloc(0));
 		}
 
+		if (/personalization\.json/.test(pathName)) {
+			/**
+			 * We are still allowing `personalizationLogo@XX.png`
+			 * to be added to the bundle, but we'll delete it
+			 * once the pass is getting closed, if needed.
+			 */
+
+			const prsJSON = JSON.parse(
+				buffer.toString(),
+			) as Schemas.Personalization;
+			const personalizationValidation = Schemas.getValidated(
+				prsJSON,
+				Schemas.Personalization,
+			);
+
+			if (!personalizationValidation) {
+				console.warn(
+					"Personalization.json file has been omitted as invalid.",
+				);
+				return;
+			}
+
+			return super.addBuffer(pathName, buffer);
+		}
+
 		/**
 		 * If a new pass.strings file is added, we want to
 		 * prevent if from being merged and, instead, save
@@ -424,6 +449,31 @@ export default class PKPass extends Bundle {
 
 			if (stringsFile.length) {
 				super.addBuffer(`${lang}.lproj/pass.strings`, stringsFile);
+			}
+		}
+
+		const fileNames = Object.keys(this[filesSymbol]);
+		const meetsPersonalizationRequirements = Boolean(
+			this[filesSymbol]["personalization.json"] &&
+				fileNames.find((file) =>
+					/personalizationLogo@(?:.{2})/.test(file),
+				),
+		);
+
+		if (this[propsSymbol]["nfc"] && !meetsPersonalizationRequirements) {
+			/**
+			 * Looking for every personalization file
+			 * and removing it
+			 */
+
+			for (let i = 0; i < fileNames.length; i++) {
+				if (/personalization/.test(fileNames[i])) {
+					console.warn(
+						`Personalization file '${fileNames[i]}' have been removed from the bundle as the requirements for personalization are not met.`,
+					);
+
+					delete this[propsSymbol][fileNames[i]];
+				}
 			}
 		}
 

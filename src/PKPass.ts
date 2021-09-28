@@ -47,6 +47,7 @@ export default class PKPass extends Bundle {
 	static async from(source: PKPass | Schemas.Template): Promise<PKPass> {
 		let certificates: Schemas.CertificatesSchema = undefined;
 		let buffers: NamedBuffers = undefined;
+		let overrides: Schemas.OverridablePassProps = {};
 
 		if (!source) {
 			throw new TypeError(
@@ -68,6 +69,16 @@ export default class PKPass extends Bundle {
 				buffers[fileName] = Buffer.alloc(contentBuffer.length);
 				contentBuffer.copy(buffers[fileName]);
 			}
+
+			/**
+			 * Moving props to pass.json instead of overrides
+			 * because many might get excluded when passing
+			 * through validation
+			 */
+
+			buffers["pass.json"] = Buffer.from(
+				JSON.stringify(source[propsSymbol]),
+			);
 		} else {
 			if (!source.model || typeof source.model !== "string") {
 				throw new TypeError(
@@ -76,9 +87,11 @@ export default class PKPass extends Bundle {
 			}
 
 			buffers = await getModelFolderContents(source.model);
+			certificates = source.certificates;
+			overrides = source.overrides || {};
 		}
 
-		return new PKPass(buffers, certificates, {});
+		return new PKPass(buffers, certificates, overrides);
 	}
 
 	/**

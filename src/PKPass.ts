@@ -566,7 +566,10 @@ export default class PKPass extends Bundle {
 	 * @param translations
 	 */
 
-	localize(lang: string, translations?: { [key: string]: string } | null) {
+	public localize(
+		lang: string,
+		translations?: { [key: string]: string } | null,
+	) {
 		if (typeof lang !== "string") {
 			throw new TypeError(
 				`Cannot set localization. Expected a string for 'lang' but received a ${typeof lang}`,
@@ -592,7 +595,7 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setExpirationDate(date: Date | null) {
+	public setExpirationDate(date: Date | null) {
 		if (date === null) {
 			delete this[propsSymbol]["expirationDate"];
 			return;
@@ -630,9 +633,9 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setBeacons(beacons: null): void;
-	setBeacons(...beacons: Schemas.Beacon[]): void;
-	setBeacons(...beacons: (Schemas.Beacon | null)[]) {
+	public setBeacons(beacons: null): void;
+	public setBeacons(...beacons: Schemas.Beacon[]): void;
+	public setBeacons(...beacons: (Schemas.Beacon | null)[]) {
 		if (beacons[0] === null) {
 			delete this[propsSymbol]["beacons"];
 			return;
@@ -664,9 +667,9 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setLocations(locations: null): void;
-	setLocations(...locations: Schemas.Location[]): void;
-	setLocations(...locations: (Schemas.Location | null)[]): void {
+	public setLocations(locations: null): void;
+	public setLocations(...locations: Schemas.Location[]): void;
+	public setLocations(...locations: (Schemas.Location | null)[]): void {
 		if (locations[0] === null) {
 			delete this[propsSymbol]["locations"];
 			return;
@@ -685,7 +688,7 @@ export default class PKPass extends Bundle {
 	 * @param date
 	 */
 
-	setRelevantDate(date: Date): void {
+	public setRelevantDate(date: Date): void {
 		if (date === null) {
 			delete this[propsSymbol]["relevantDate"];
 			return;
@@ -713,10 +716,10 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setBarcodes(barcodes: null): void;
-	setBarcodes(message: string): void;
-	setBarcodes(...barcodes: Schemas.Barcode[]): void;
-	setBarcodes(...barcodes: (Schemas.Barcode | string | null)[]): void {
+	public setBarcodes(barcodes: null): void;
+	public setBarcodes(message: string): void;
+	public setBarcodes(...barcodes: Schemas.Barcode[]): void;
+	public setBarcodes(...barcodes: (Schemas.Barcode | string | null)[]): void {
 		if (!barcodes.length) {
 			return;
 		}
@@ -771,7 +774,7 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setNFCCapability(nfc: Schemas.NFC | null): void {
+	public setNFCCapability(nfc: Schemas.NFC | null): void {
 		if (nfc === null) {
 			delete this[propsSymbol]["nfc"];
 			return;

@@ -409,6 +409,37 @@ export default class PKPass extends Bundle {
 
 		const type = possibleTypes.find((type) => Boolean(data[type]));
 
+		const {
+			boardingPass,
+			coupon,
+			storeCard,
+			generic,
+			eventTicket,
+			...otherPassData
+		} = data;
+
+		/**
+		 * Validating the rest of the data and
+		 * importing all the props. They are going
+		 * to overwrite props setted by user but
+		 * we can't do much about.
+		 */
+
+		const validation = Schemas.getValidated(
+			otherPassData,
+			Schemas.PassProps,
+		);
+
+		if (validation) {
+			if (Object.keys(this[propsSymbol]).length) {
+				console.warn(
+					"The imported pass.json's properties will be joined with the current setted props. You might lose some data.",
+				);
+			}
+
+			Object.assign(this[propsSymbol], validation);
+		}
+
 		if (!type) {
 			if (!this[passTypeSymbol]) {
 				console.warn(
@@ -422,11 +453,19 @@ export default class PKPass extends Bundle {
 		} else {
 			this.type = type;
 
-			this.headerFields.push(...data[type]?.headerFields);
-			this.primaryFields.push(...data[type]?.primaryFields);
-			this.secondaryFields.push(...data[type]?.secondaryFields);
-			this.auxiliaryFields.push(...data[type]?.auxiliaryFields);
-			this.backFields.push(...data[type]?.backFields);
+			const {
+				headerFields = [],
+				primaryFields = [],
+				secondaryFields = [],
+				auxiliaryFields = [],
+				backFields = [],
+			} = data[type];
+
+			this.headerFields.push(...headerFields);
+			this.primaryFields.push(...primaryFields);
+			this.secondaryFields.push(...secondaryFields);
+			this.auxiliaryFields.push(...auxiliaryFields);
+			this.backFields.push(...backFields);
 		}
 	}
 

@@ -183,7 +183,9 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	),
 }).with("webServiceURL", "authenticationToken");
 
-export const PassProps = Joi.object({
+export const PassProps = Joi.object<
+	OverridablePassProps & PassKindsProps & PassPropsFromMethods
+>({
 	...OverridablePassProps,
 	...PassKindsProps,
 	...PassPropsFromMethods,

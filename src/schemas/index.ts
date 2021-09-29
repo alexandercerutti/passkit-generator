@@ -153,6 +153,10 @@ export const PassKindsProps = Joi.object<PassKindsProps>({
 	),
 });
 
+export const PassType = Joi.string().regex(
+	/(boardingPass|coupon|eventTicket|storeCard|generic)/,
+);
+
 export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	semantics: Semantics,
 	voided: Joi.boolean(),

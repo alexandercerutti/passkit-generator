@@ -17,6 +17,7 @@ const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
 const importMetadataSymbol = Symbol("import.pass.metadata");
 const createManifestSymbol = Symbol("pass.manifest");
 const closePassSymbol = Symbol("pass.close");
+const passTypeSymbol = Symbol("pass.type");
 
 interface NamedBuffers {
 	[key: string]: Buffer;
@@ -264,6 +265,47 @@ export default class PKPass extends Bundle {
 		return this[propsSymbol][this.type].backFields;
 	}
 
+	/**
+	 * Allows setting a pass type.
+	 *
+	 * **Warning**: setting a type with this setter,
+	 * will reset all the imported or manually
+	 * setted fields (primaryFields, secondaryFields,
+	 * headerFields, auxiliaryFields, backFields)
+	 */
+
+	public set type(type: Schemas.PassTypesProps) {
+		if (!Schemas.isValid(type, Schemas.PassType)) {
+			throw new TypeError(
+				`Invalid type. Expected one of 'boardingPass' | 'coupon' | 'storeCard' | 'eventTicket' | 'generic' but received '${type}'`,
+			);
+		}
+
+		if (this.type) {
+			/**
+			 * Removing reference to previous type and its content because
+			 * we might have some differences between types. It is way easier
+			 * to reset everything instead of making checks.
+			 */
+
+			this[propsSymbol][this.type] = undefined;
+		}
+
+		this[passTypeSymbol] = type;
+		this[propsSymbol][this[passTypeSymbol]] = {
+			headerFields /******/: new FieldsArray(this[fieldKeysPoolSymbol]),
+			primaryFields /*****/: new FieldsArray(this[fieldKeysPoolSymbol]),
+			secondaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
+			auxiliaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
+			backFields /********/: new FieldsArray(this[fieldKeysPoolSymbol]),
+			transitType: undefined,
+		};
+	}
+
+	public get type(): Schemas.PassTypesProps | undefined {
+		return this[passTypeSymbol] ?? undefined;
+	}
+
 	// **************************** //
 	// *** ASSETS SETUP METHODS *** //
 	// **************************** //
@@ -365,39 +407,27 @@ export default class PKPass extends Bundle {
 			"generic",
 		] as Schemas.PassTypesProps[];
 
-		this.type = possibleTypes.find((type) => Boolean(data[type]));
+		const type = possibleTypes.find((type) => Boolean(data[type]));
 
-		if (!this.type) {
-			/**
-			 * @TODO improve message
-			 */
+		if (!type) {
+			if (!this[passTypeSymbol]) {
+				console.warn(
+					"Cannot find a valid type in pass.json. You won't be able to set fields until you won't set explicitly one.",
+				);
+			} else {
+				console.warn(
+					"Cannot find a new valid type in pass.json. Fields have not been resetted.",
+				);
+			}
+		} else {
+			this.type = type;
 
-			throw new Error("Cannot find a valid type in this pass.json");
+			this.headerFields.push(...data[type]?.headerFields);
+			this.primaryFields.push(...data[type]?.primaryFields);
+			this.secondaryFields.push(...data[type]?.secondaryFields);
+			this.auxiliaryFields.push(...data[type]?.auxiliaryFields);
+			this.backFields.push(...data[type]?.backFields);
 		}
-
-		this[propsSymbol][this.type] = {
-			primaryFields /*****/: new FieldsArray(
-				this[fieldKeysPoolSymbol],
-				...data[this.type]?.primaryFields,
-			),
-			secondaryFields /***/: new FieldsArray(
-				this[fieldKeysPoolSymbol],
-				...data[this.type]?.secondaryFields,
-			),
-			auxiliaryFields /***/: new FieldsArray(
-				this[fieldKeysPoolSymbol],
-				...data[this.type]?.auxiliaryFields,
-			),
-			headerFields /******/: new FieldsArray(
-				this[fieldKeysPoolSymbol],
-				...data[this.type]?.headerFields,
-			),
-			backFields /********/: new FieldsArray(
-				this[fieldKeysPoolSymbol],
-				...data[this.type]?.backFields,
-			),
-			transitType: this.transitType /** Setter + Getter */,
-		};
 	}
 
 	private [createManifestSymbol]() {

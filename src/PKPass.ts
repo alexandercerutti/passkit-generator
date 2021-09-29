@@ -566,13 +566,16 @@ export default class PKPass extends Bundle {
 	 * @param translations
 	 */
 
-	localize(
-		lang: string,
-		translations?: { [key: string]: string } | null,
-	): this {
+	localize(lang: string, translations?: { [key: string]: string } | null) {
+		if (typeof lang !== "string") {
+			throw new TypeError(
+				`Cannot set localization. Expected a string for 'lang' but received a ${typeof lang}`,
+			);
+		}
+
 		if (translations === null) {
 			delete this[localizationSymbol][lang];
-			return this;
+			return;
 		}
 
 		this[localizationSymbol][lang] ??= {};
@@ -580,8 +583,6 @@ export default class PKPass extends Bundle {
 		if (typeof translations === "object" && !Array.isArray(translations)) {
 			Object.assign(this[localizationSymbol][lang], translations);
 		}
-
-		return this;
 	}
 
 	/**
@@ -591,17 +592,21 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setExpirationDate(date: Date | null): this {
+	setExpirationDate(date: Date | null) {
 		if (date === null) {
 			delete this[propsSymbol]["expirationDate"];
-			return this;
+			return;
 		}
 
 		const parsedDate = processDate("expirationDate", date);
 
-		if (parsedDate) {
-			this[propsSymbol]["expirationDate"] = parsedDate;
+		if (!parsedDate) {
+			throw new TypeError(
+				`Cannot set expirationDate. Invalid date ${date}`,
+			);
 		}
+
+		this[propsSymbol]["expirationDate"] = parsedDate;
 
 		return this;
 	}
@@ -641,20 +646,18 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setBeacons(beacons: null): this;
-	setBeacons(...beacons: Schemas.Beacon[]): this;
-	setBeacons(...beacons: (Schemas.Beacon | null)[]): this {
+	setBeacons(beacons: null): void;
+	setBeacons(...beacons: Schemas.Beacon[]): void;
+	setBeacons(...beacons: (Schemas.Beacon | null)[]) {
 		if (beacons[0] === null) {
 			delete this[propsSymbol]["beacons"];
-			return this;
+			return;
 		}
 
 		this[propsSymbol]["beacons"] = Schemas.filterValid(
 			beacons,
 			Schemas.Beacon,
 		);
-
-		return this;
 	}
 
 	/**
@@ -677,20 +680,18 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setLocations(locations: null): this;
-	setLocations(...locations: Schemas.Location[]): this;
-	setLocations(...locations: (Schemas.Location | null)[]): this {
+	setLocations(locations: null): void;
+	setLocations(...locations: Schemas.Location[]): void;
+	setLocations(...locations: (Schemas.Location | null)[]): void {
 		if (locations[0] === null) {
 			delete this[propsSymbol]["locations"];
-			return this;
+			return;
 		}
 
 		this[propsSymbol]["locations"] = Schemas.filterValid(
 			locations,
 			Schemas.Location,
 		);
-
-		return this;
 	}
 
 	/**
@@ -700,19 +701,21 @@ export default class PKPass extends Bundle {
 	 * @param date
 	 */
 
-	setRelevantDate(date: Date): this {
+	setRelevantDate(date: Date): void {
 		if (date === null) {
 			delete this[propsSymbol]["relevantDate"];
-			return this;
+			return;
 		}
 
 		const parsedDate = processDate("relevantDate", date);
 
-		if (parsedDate) {
-			this[propsSymbol]["relevantDate"] = parsedDate;
+		if (!parsedDate) {
+			throw new TypeError(
+				`Cannot set relevantDate. Invalid date ${date}`,
+			);
 		}
 
-		return this;
+		this[propsSymbol]["relevantDate"] = parsedDate;
 	}
 
 	/**
@@ -726,17 +729,17 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setBarcodes(barcodes: null): this;
-	setBarcodes(message: string): this;
-	setBarcodes(...barcodes: Schemas.Barcode[]): this;
-	setBarcodes(...barcodes: (Schemas.Barcode | string | null)[]): this {
+	setBarcodes(barcodes: null): void;
+	setBarcodes(message: string): void;
+	setBarcodes(...barcodes: Schemas.Barcode[]): void;
+	setBarcodes(...barcodes: (Schemas.Barcode | string | null)[]): void {
 		if (!barcodes.length) {
-			return this;
+			return;
 		}
 
 		if (barcodes[0] === null) {
 			delete this[propsSymbol]["barcodes"];
-			return this;
+			return;
 		}
 
 		let finalBarcodes: Schemas.Barcode[];
@@ -771,8 +774,6 @@ export default class PKPass extends Bundle {
 		}
 
 		this[propsSymbol]["barcodes"] = finalBarcodes;
-
-		return this;
 	}
 
 	/**
@@ -786,16 +787,14 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	setNFCCapability(nfc: Schemas.NFC | null): this {
+	setNFCCapability(nfc: Schemas.NFC | null): void {
 		if (nfc === null) {
 			delete this[propsSymbol]["nfc"];
-			return this;
+			return;
 		}
 
 		this[propsSymbol]["nfc"] =
 			Schemas.getValidated(nfc, Schemas.NFC) ?? undefined;
-
-		return this;
 	}
 }
 

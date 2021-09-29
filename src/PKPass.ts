@@ -612,22 +612,6 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
-	 * Allows to set the Pass directly as voided.
-	 * Useful for updates.
-	 *
-	 * @TODO REMOVE, can be passed in overrides. It doesn't require any validation.
-	 * 			It is just a boolean
-	 */
-
-	void(): this {
-		/**
-		 * @TODO implement
-		 */
-
-		return this;
-	}
-
-	/**
 	 * Allows setting some beacons the OS should
 	 * react to and show this pass.
 	 *

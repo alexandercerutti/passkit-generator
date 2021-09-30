@@ -19,10 +19,6 @@ const createManifestSymbol = Symbol("pass.manifest");
 const closePassSymbol = Symbol("pass.close");
 const passTypeSymbol = Symbol("pass.type");
 
-interface NamedBuffers {
-	[key: string]: Buffer;
-}
-
 export default class PKPass extends Bundle {
 	private certificates: Schemas.CertificatesSchema;
 	private [fieldKeysPoolSymbol] = new Set<string>();
@@ -44,7 +40,7 @@ export default class PKPass extends Bundle {
 
 	static async from(source: PKPass | Schemas.Template): Promise<PKPass> {
 		let certificates: Schemas.CertificatesSchema = undefined;
-		let buffers: NamedBuffers = undefined;
+		let buffers: Schemas.FileBuffers = undefined;
 		let overrides: Schemas.OverridablePassProps = {};
 
 		if (!source) {
@@ -128,7 +124,7 @@ export default class PKPass extends Bundle {
 	// **************** //
 
 	constructor(
-		buffers: NamedBuffers,
+		buffers: Schemas.FileBuffers,
 		certificates: Schemas.CertificatesSchema,
 		overrides: Schemas.OverridablePassProps,
 	) {

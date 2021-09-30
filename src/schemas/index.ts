@@ -21,6 +21,9 @@ import { Semantics } from "./SemanticTags";
 
 const schemaDebug = debug("Schema");
 
+export interface FileBuffers {
+	[key: string]: Buffer;
+}
 
 /* export interface Certificates {
 	wwdr?: string;

@@ -38,7 +38,10 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	static async from(source: PKPass | Schemas.Template): Promise<PKPass> {
+	static async from(
+		source: PKPass | Schemas.Template,
+		additionalProps: Schemas.OverridablePassProps = {},
+	): Promise<PKPass> {
 		let certificates: Schemas.CertificatesSchema = undefined;
 		let buffers: Schemas.FileBuffers = undefined;
 		let overrides: Schemas.OverridablePassProps = {};
@@ -85,7 +88,21 @@ export default class PKPass extends Bundle {
 			overrides = source.overrides || {};
 		}
 
-		return new PKPass(buffers, certificates, overrides);
+		if (additionalProps && Object.keys(additionalProps).length) {
+			const validation = Schemas.getValidated(
+				additionalProps,
+				Schemas.OverridablePassProps,
+			);
+
+			if (validation) {
+				Object.assign(overrides, validation);
+			}
+		}
+
+		return new PKPass(buffers, certificates, {
+			...overrides,
+			...additionalProps,
+		});
 	}
 
 	/**
@@ -129,7 +146,7 @@ export default class PKPass extends Bundle {
 	constructor(
 		buffers: Schemas.FileBuffers,
 		certificates: Schemas.CertificatesSchema,
-		overrides: Schemas.OverridablePassProps,
+		props: Schemas.OverridablePassProps,
 	) {
 		super("application/vnd.apple.pkpass");
 
@@ -150,7 +167,7 @@ export default class PKPass extends Bundle {
 
 		/** Overrides validation and pushing in props */
 		const overridesValidation = Schemas.getValidated(
-			overrides,
+			props,
 			Schemas.OverridablePassProps,
 		);
 

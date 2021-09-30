@@ -93,6 +93,9 @@ export default class PKPass extends Bundle {
 	 * as a `.pkpasses` zip file. Returns a Bundle instance
 	 * so it can be outputted both as stream or as a buffer.
 	 *
+	 * Using this will freeze all the instances passed as
+	 * parameter.
+	 *
 	 * Throws if not all the files are instance of PKPass.
 	 *
 	 * @TODO test autofreezing

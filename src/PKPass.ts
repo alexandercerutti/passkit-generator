@@ -315,6 +315,17 @@ export default class PKPass extends Bundle {
 	 * If an empty buffer is passed, it won't be added to
 	 * the bundle.
 	 *
+	 * `manifest.json` and `signature` files will be ignored.
+	 *
+	 * If a `pass.json` is passed to this method (and it has
+	 * not been added previously), it will be read, validated
+	 * and merged in the current instance. Its properties
+	 * will overwrite the ones setted through methods.
+	 *
+	 * If a `pass.strings` file is passed, it will be read, parsed
+	 * and merged with the translations added previously.
+	 * Comments will be ignored.
+	 *
 	 * @param pathName
 	 * @param buffer
 	 */
@@ -389,7 +400,7 @@ export default class PKPass extends Bundle {
 
 			Object.assign(
 				(this[localizationSymbol][lang] ??= {}),
-				parseStringsFile(buffer),
+				Object.fromEntries(parseStringsFile(buffer).translations),
 			);
 
 			return;

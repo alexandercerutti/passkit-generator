@@ -52,18 +52,6 @@ export const CertificatesSchema = Joi.object<CertificatesSchema>()
 	})
 	.required();
 
-export interface Template {
-	model: string;
-	certificates: CertificatesSchema;
-	overrides?: OverridablePassProps;
-}
-
-export const Template = Joi.object<Template>({
-	model: Joi.string().required(),
-	certificates: Joi.object().required(),
-	overrides: Joi.object(),
-});
-
 export interface PassProps {
 	serialNumber?: string;
 	description?: string;
@@ -189,6 +177,18 @@ export const PassProps = Joi.object<
 	...OverridablePassProps,
 	...PassKindsProps,
 	...PassPropsFromMethods,
+});
+
+export interface Template {
+	model: string;
+	certificates: CertificatesSchema;
+	props?: OverridablePassProps;
+}
+
+export const Template = Joi.object<Template>({
+	model: Joi.string().required(),
+	certificates: Joi.object().required(),
+	props: OverridablePassProps,
 });
 
 // --------- UTILITIES ---------- //

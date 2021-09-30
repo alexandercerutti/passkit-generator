@@ -481,19 +481,18 @@ export default class PKPass extends Bundle {
 	}
 
 	private [createManifestSymbol]() {
-		return Object.entries(this[filesSymbol]).reduce<Schemas.Manifest>(
-			(acc, [fileName, buffer]) => {
-				const hashFlow = forge.md.sha1.create();
+		return Object.entries(this[filesSymbol]).reduce<{
+			[key: string]: string;
+		}>((acc, [fileName, buffer]) => {
+			const hashFlow = forge.md.sha1.create();
 
-				hashFlow.update(buffer.toString("binary"));
+			hashFlow.update(buffer.toString("binary"));
 
-				return {
-					...acc,
-					[fileName]: hashFlow.digest().toHex(),
-				};
-			},
-			{},
-		);
+			return {
+				...acc,
+				[fileName]: hashFlow.digest().toHex(),
+			};
+		}, {});
 	}
 
 	private [closePassSymbol]() {

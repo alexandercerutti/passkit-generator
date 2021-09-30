@@ -5,12 +5,12 @@ import type * as Schemas from "./schemas";
  * Generates the PKCS #7 cryptografic signature for the manifest file.
  *
  * @method create
- * @params {Object} manifest - Manifest content.
- * @returns {Buffer}
+ * @params manifest - Manifest content.
+ * @returns
  */
 
 export function create(
-	manifest: Schemas.Manifest,
+	manifest: { [key: string]: string },
 	certificates: Schemas.CertificatesSchema,
 ): Buffer {
 	const signature = forge.pkcs7.createSignedData();

@@ -38,13 +38,15 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	static async from(
-		source: PKPass | Schemas.Template,
-		additionalProps: Schemas.OverridablePassProps = {},
+	static async from<S extends PKPass | Schemas.Template>(
+		source: S,
+		additionalProps: S extends PKPass
+			? Schemas.OverridablePassProps
+			: never,
 	): Promise<PKPass> {
 		let certificates: Schemas.CertificatesSchema = undefined;
 		let buffers: Schemas.FileBuffers = undefined;
-		let overrides: Schemas.OverridablePassProps = {};
+		let props: Schemas.OverridablePassProps = {};
 
 		if (!source) {
 			throw new TypeError(
@@ -85,7 +87,7 @@ export default class PKPass extends Bundle {
 
 			buffers = await getModelFolderContents(source.model);
 			certificates = source.certificates;
-			overrides = source.overrides || {};
+			props = source.props ?? {};
 		}
 
 		if (additionalProps && Object.keys(additionalProps).length) {
@@ -95,14 +97,11 @@ export default class PKPass extends Bundle {
 			);
 
 			if (validation) {
-				Object.assign(overrides, validation);
+				Object.assign(props, validation);
 			}
 		}
 
-		return new PKPass(buffers, certificates, {
-			...overrides,
-			...additionalProps,
-		});
+		return new PKPass(buffers, certificates, props);
 	}
 
 	/**

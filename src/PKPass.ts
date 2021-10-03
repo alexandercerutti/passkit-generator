@@ -18,9 +18,10 @@ const importMetadataSymbol = Symbol("import.pass.metadata");
 const createManifestSymbol = Symbol("pass.manifest");
 const closePassSymbol = Symbol("pass.close");
 const passTypeSymbol = Symbol("pass.type");
+const certificatesSymbol = Symbol("pass.certificates");
 
 export default class PKPass extends Bundle {
-	private certificates: Schemas.CertificatesSchema;
+	private [certificatesSymbol]: Schemas.CertificatesSchema;
 	private [fieldKeysPoolSymbol] = new Set<string>();
 	private [propsSymbol]: Schemas.PassProps = {};
 	private [localizationSymbol]: {
@@ -56,7 +57,7 @@ export default class PKPass extends Bundle {
 
 		if (source instanceof PKPass) {
 			/** Cloning is happening here */
-			certificates = source.certificates;
+			certificates = source[certificatesSymbol];
 			buffers = {};
 
 			const buffersEntries = Object.entries(source[filesSymbol]);
@@ -167,8 +168,24 @@ export default class PKPass extends Bundle {
 		);
 
 		Object.assign(this[propsSymbol], overridesValidation);
-
 		this.certificates = certificates;
+	}
+
+	/**
+	 * Allows changing the certificates, if needed.
+	 * They are actually expected to be received in
+	 * the constructor, but they can get overridden
+	 * here for whatever purpose.
+	 *
+	 * @param certs
+	 */
+
+	public set certificates(certs: Schemas.CertificatesSchema) {
+		if (!Schemas.isValid(certs, Schemas.CertificatesSchema)) {
+			throw new TypeError("Cannot set certificates: invalid");
+		}
+
+		this[certificatesSymbol] = certs;
 	}
 
 	/**
@@ -585,7 +602,7 @@ export default class PKPass extends Bundle {
 
 		const signatureBuffer = Signature.create(
 			manifestBuffer,
-			this.certificates,
+			this[certificatesSymbol],
 		);
 		super.addBuffer("signature", signatureBuffer);
 	}

@@ -4,7 +4,7 @@ import { getModelFolderContents } from "./parser";
 import * as Schemas from "./schemas";
 import { Stream } from "stream";
 import { processDate } from "./processDate";
-import * as Signature from "./signature";
+import * as Signature from "./Signature";
 import * as Strings from "./StringsUtils";
 import { isValidRGB } from "./utils";
 

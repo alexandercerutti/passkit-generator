@@ -6,7 +6,7 @@ import { Stream } from "stream";
 import { processDate } from "./processDate";
 import forge from "node-forge";
 import * as Signature from "./signature";
-import { EOL } from "os";
+import * as Strings from "./StringsUtils";
 import { isValidRGB } from "./utils";
 
 /** Exporting for tests specs */
@@ -430,7 +430,7 @@ export default class PKPass extends Bundle {
 
 			Object.assign(
 				(this[localizationSymbol][lang] ??= {}),
-				Object.fromEntries(parseStringsFile(buffer).translations),
+				Object.fromEntries(Strings.parse(buffer).translations),
 			);
 
 			return;
@@ -565,7 +565,7 @@ export default class PKPass extends Bundle {
 		) {
 			const [lang, translations] = entry;
 
-			const stringsFile = createStringFile(translations);
+			const stringsFile = Strings.create(translations);
 
 			if (stringsFile.length) {
 				super.addBuffer(`${lang}.lproj/pass.strings`, stringsFile);
@@ -945,69 +945,4 @@ function readPassMetadata(buffer: Buffer) {
 	} catch (err) {
 		console.error(err);
 	}
-}
-
-function parseStringsFile(buffer: Buffer) {
-	const fileAsString = buffer.toString("utf8");
-	const translationRowRegex = /"(?<key>.+)"\s+=\s+"(?<value>.+)";\n?/;
-	const commentRowRegex = /\/\*\s*(.+)\s*\*\//;
-
-	let translations: [placeholder: string, value: string][] = [];
-	let comments: string[] = [];
-
-	let blockStartPoint = 0;
-	let blockEndPoint = 0;
-
-	do {
-		if (
-			/** New Line, new life */
-			/\n/.test(fileAsString[blockEndPoint]) ||
-			/** EOF  */
-			blockEndPoint === fileAsString.length
-		) {
-			let match: RegExpMatchArray;
-
-			const section = fileAsString.substring(
-				blockStartPoint,
-				blockEndPoint + 1,
-			);
-
-			if ((match = section.match(translationRowRegex))) {
-				const {
-					groups: { key, value },
-				} = match;
-
-				translations.push([key, value]);
-			} else if ((match = section.match(commentRowRegex))) {
-				const [, content] = match;
-
-				comments.push(content.trimEnd());
-			}
-
-			/** Skipping \n and going to the next block. */
-			blockEndPoint += 2;
-			blockStartPoint = blockEndPoint - 1;
-		} else {
-			blockEndPoint += 1;
-		}
-	} while (blockEndPoint <= fileAsString.length);
-
-	return {
-		translations,
-		comments,
-	};
-}
-
-function createStringFile(translations: { [key: string]: string }): Buffer {
-	const stringContents = [];
-
-	const translationsEntries = Object.entries(translations);
-
-	for (let i = 0; i < translationsEntries.length; i++) {
-		const [key, value] = translationsEntries[i];
-
-		stringContents.push(`"${key}" = "${value}";`);
-	}
-
-	return Buffer.from(stringContents.join(EOL));
 }

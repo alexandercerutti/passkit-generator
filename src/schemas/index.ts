@@ -6,6 +6,7 @@ export * from "./NFC";
 export * from "./SemanticTags";
 export * from "./PassFields";
 export * from "./Personalize";
+export * from "./Certificates";
 
 import Joi from "joi";
 import debug from "debug";
@@ -18,39 +19,13 @@ import { Field } from "./PassFieldContent";
 import { PassFields, TransitType } from "./PassFields";
 import { Personalization } from "./Personalize";
 import { Semantics } from "./SemanticTags";
+import { CertificatesSchema } from "./Certificates";
 
 const schemaDebug = debug("Schema");
 
 export interface FileBuffers {
 	[key: string]: Buffer;
 }
-
-/* export interface Certificates {
-	wwdr?: string;
-	signerCert?: string;
-	signerKey?:
-		| {
-				keyFile: string;
-				passphrase?: string;
-		  }
-		| string;
-}*/
-
-export interface CertificatesSchema {
-	wwdr: string | Buffer;
-	signerCert: string | Buffer;
-	signerKey: string | Buffer;
-	signerKeyPassphrase?: string;
-}
-
-export const CertificatesSchema = Joi.object<CertificatesSchema>()
-	.keys({
-		wwdr: Joi.alternatives(Joi.binary(), Joi.string()).required(),
-		signerCert: Joi.alternatives(Joi.binary(), Joi.string()).required(),
-		signerKey: Joi.alternatives(Joi.binary(), Joi.string()).required(),
-		signerKeyPassphrase: Joi.string(),
-	})
-	.required();
 
 export interface PassProps {
 	serialNumber?: string;
@@ -206,12 +181,6 @@ type AvailableSchemas =
 	| typeof CertificatesSchema
 	| typeof OverridablePassProps;
 
-export type ArrayPassSchema = Beacon | Location | Barcode;
-
-/* function resolveSchemaName(name: Schema) {
-	return schemas[name] || undefined;
-}
- */
 /**
  * Checks if the passed options are compliant with the indicated schema
  * @param {any} opts - options to be checks

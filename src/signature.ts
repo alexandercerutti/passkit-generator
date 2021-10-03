@@ -5,33 +5,25 @@ import type * as Schemas from "./schemas";
  * Generates the PKCS #7 cryptografic signature for the manifest file.
  *
  * @method create
- * @params manifest - Manifest content.
+ * @params manifest
+ * @params certificates
  * @returns
  */
 
 export function create(
-	manifest: { [key: string]: string },
+	manifestBuffer: Buffer,
 	certificates: Schemas.CertificatesSchema,
 ): Buffer {
 	const signature = forge.pkcs7.createSignedData();
 
-	signature.content = forge.util.createBuffer(
-		JSON.stringify(manifest),
-		"utf8",
+	signature.content = forge.util.createBuffer(manifestBuffer.buffer, "utf8");
+
+	const { wwdr, signerCert, signerKey } = parseCertificates(
+		getStringCertificates(certificates),
 	);
 
-	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = certificates;
-
-	const wwdrString = wwdr instanceof Buffer ? wwdr.toString("utf-8") : wwdr;
-	const signerCertString =
-		signerCert instanceof Buffer
-			? signerCert.toString("utf-8")
-			: signerCert;
-	const signerKeyString =
-		signerKey instanceof Buffer ? signerKey.toString("utf-8") : signerKey;
-
-	signature.addCertificate(wwdrString);
-	signature.addCertificate(signerCertString);
+	signature.addCertificate(wwdr);
+	signature.addCertificate(signerCert);
 
 	/**
 	 * authenticatedAttributes belong to PKCS#9 standard.
@@ -43,8 +35,8 @@ export function create(
 	 */
 
 	signature.addSigner({
-		key: signerKeyString,
-		certificate: signerCertString,
+		key: signerKey,
+		certificate: signerCert,
 		digestAlgorithm: forge.pki.oids.sha1,
 		authenticatedAttributes: [
 			{
@@ -85,4 +77,36 @@ export function create(
 		forge.asn1.toDer(signature.toAsn1()).getBytes(),
 		"binary",
 	);
+}
+
+/**
+ * Parses the PEM-formatted passed text (certificates)
+ *
+ * @param element - Text content of .pem files
+ * @param passphrase - passphrase for the key
+ * @returns The parsed certificate or key in node forge format
+ */
+
+function parseCertificates(certificates: Schemas.CertificatesSchema) {
+	const { signerCert, signerKey, wwdr, signerKeyPassphrase } = certificates;
+
+	return {
+		signerCert: forge.pki.certificateFromPem(signerCert.toString("utf-8")),
+		wwdr: forge.pki.certificateFromPem(wwdr.toString("utf-8")),
+		signerKey: forge.pki.decryptRsaPrivateKey(
+			signerKey.toString("utf-8"),
+			signerKeyPassphrase,
+		),
+	};
+}
+
+function getStringCertificates(
+	certificates: Schemas.CertificatesSchema,
+): Record<keyof Schemas.CertificatesSchema, string> {
+	return {
+		signerKeyPassphrase: certificates.signerKeyPassphrase,
+		wwdr: Buffer.from(certificates.wwdr).toString("utf-8"),
+		signerCert: Buffer.from(certificates.wwdr).toString("utf-8"),
+		signerKey: Buffer.from(certificates.wwdr).toString("utf-8"),
+	};
 }

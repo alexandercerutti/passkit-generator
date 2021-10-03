@@ -167,6 +167,8 @@ export default class PKPass extends Bundle {
 		);
 
 		Object.assign(this[propsSymbol], overridesValidation);
+
+		this.certificates = certificates;
 	}
 
 	/**
@@ -491,8 +493,8 @@ export default class PKPass extends Bundle {
 		}
 	}
 
-	private [createManifestSymbol]() {
-		return Object.entries(this[filesSymbol]).reduce<{
+	private [createManifestSymbol](): Buffer {
+		const manifest = Object.entries(this[filesSymbol]).reduce<{
 			[key: string]: string;
 		}>((acc, [fileName, buffer]) => {
 			const hashFlow = forge.md.sha1.create();
@@ -504,6 +506,8 @@ export default class PKPass extends Bundle {
 				[fileName]: hashFlow.digest().toHex(),
 			};
 		}, {});
+
+		return Buffer.from(JSON.stringify(manifest));
 	}
 
 	private [closePassSymbol]() {
@@ -576,10 +580,13 @@ export default class PKPass extends Bundle {
 			}
 		}
 
-		const manifest = this[createManifestSymbol]();
-		super.addBuffer("manifest.json", Buffer.from(JSON.stringify(manifest)));
+		const manifestBuffer = this[createManifestSymbol]();
+		super.addBuffer("manifest.json", manifestBuffer);
 
-		const signatureBuffer = Signature.create(manifest, this.certificates);
+		const signatureBuffer = Signature.create(
+			manifestBuffer,
+			this.certificates,
+		);
 		super.addBuffer("signature", signatureBuffer);
 	}
 

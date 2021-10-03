@@ -4,7 +4,6 @@ import { getModelFolderContents } from "./parser";
 import * as Schemas from "./schemas";
 import { Stream } from "stream";
 import { processDate } from "./processDate";
-import forge from "node-forge";
 import * as Signature from "./signature";
 import * as Strings from "./StringsUtils";
 import { isValidRGB } from "./utils";
@@ -513,16 +512,13 @@ export default class PKPass extends Bundle {
 	private [createManifestSymbol](): Buffer {
 		const manifest = Object.entries(this[filesSymbol]).reduce<{
 			[key: string]: string;
-		}>((acc, [fileName, buffer]) => {
-			const hashFlow = forge.md.sha1.create();
-
-			hashFlow.update(buffer.toString("binary"));
-
-			return {
+		}>(
+			(acc, [fileName, buffer]) => ({
 				...acc,
-				[fileName]: hashFlow.digest().toHex(),
-			};
-		}, {});
+				[fileName]: Signature.createHash(buffer),
+			}),
+			{},
+		);
 
 		return Buffer.from(JSON.stringify(manifest));
 	}

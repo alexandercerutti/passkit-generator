@@ -2,6 +2,20 @@ import forge from "node-forge";
 import type * as Schemas from "./schemas";
 
 /**
+ * Creates an hash for a buffer. Used by manifest
+ *
+ * @param buffer
+ * @returns
+ */
+
+export function createHash(buffer: Buffer) {
+	const hashFlow = forge.md.sha1.create();
+	hashFlow.update(buffer.toString("binary"));
+
+	return hashFlow.digest().toHex();
+}
+
+/**
  * Generates the PKCS #7 cryptografic signature for the manifest file.
  *
  * @method create

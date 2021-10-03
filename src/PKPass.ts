@@ -149,10 +149,6 @@ export default class PKPass extends Bundle {
 	) {
 		super("application/vnd.apple.pkpass");
 
-		/**
-		 * @TODO Validate options against Joi Schema
-		 */
-
 		const buffersEntries = Object.entries(buffers);
 
 		for (
@@ -579,10 +575,6 @@ export default class PKPass extends Bundle {
 				}
 			}
 		}
-
-		/**
-		 * @TODO pack out fields from FieldsArray
-		 */
 
 		const manifest = this[createManifestSymbol]();
 		super.addBuffer("manifest.json", Buffer.from(JSON.stringify(manifest)));

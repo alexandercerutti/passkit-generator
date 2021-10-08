@@ -9,7 +9,6 @@ export * from "./Personalize";
 export * from "./Certificates";
 
 import Joi from "joi";
-import debug from "debug";
 
 import { Barcode } from "./Barcodes";
 import { Location } from "./Location";
@@ -17,11 +16,8 @@ import { Beacon } from "./Beacons";
 import { NFC } from "./NFC";
 import { Field } from "./PassFieldContent";
 import { PassFields, TransitType } from "./PassFields";
-import { Personalization } from "./Personalize";
 import { Semantics } from "./SemanticTags";
 import { CertificatesSchema } from "./Certificates";
-
-const schemaDebug = debug("Schema");
 
 export interface FileBuffers {
 	[key: string]: Buffer;
@@ -168,19 +164,6 @@ export const Template = Joi.object<Template>({
 
 // --------- UTILITIES ---------- //
 
-type AvailableSchemas =
-	| typeof Barcode
-	| typeof Location
-	| typeof Beacon
-	| typeof NFC
-	| typeof Field
-	| typeof PassFields
-	| typeof Personalization
-	| typeof TransitType
-	| typeof Template
-	| typeof CertificatesSchema
-	| typeof OverridablePassProps;
-
 /**
  * Checks if the passed options are compliant with the indicated schema
  * @param {any} opts - options to be checks
@@ -188,69 +171,77 @@ type AvailableSchemas =
  * @returns {boolean} - result of the check
  */
 
-export function isValid(opts: any, schema: AvailableSchemas): boolean {
-	if (!schema) {
-		schemaDebug(
-			`validation failed due to missing or mispelled schema name`,
-		);
-		return false;
-	}
-
+export function isValid<T extends Object>(
+	opts: T,
+	schema: Joi.ObjectSchema<T>,
+): boolean {
 	const validation = schema.validate(opts);
 
 	if (validation.error) {
-		schemaDebug(
-			`validation failed due to error: ${validation.error.message}`,
-		);
+		throw new TypeError(validation.error.message);
 	}
 
 	return !validation.error;
 }
 
 /**
- * Executes the validation in verbose mode, exposing the value or an empty object
- * @param {object} opts - to be validated
- * @param {*} schemaName - selected schema
- * @returns {object} the filtered value or empty object
+ * Performs validation of a schema on an object.
+ * If it fails, will throw an error.
+ *
+ * @param schema
+ * @param data
  */
 
-export function getValidated<T extends Object>(
-	opts: T,
-	schema: AvailableSchemas,
-): T | null {
-	if (!schema) {
-		schemaDebug(`validation failed due to missing schema`);
-
-		return null;
-	}
-
-	const validation = schema.validate(opts, { stripUnknown: true });
+export function assertValidity<T>(
+	schema: Joi.ObjectSchema<T> | Joi.StringSchema,
+	data: T,
+): void {
+	const validation = schema.validate(data);
 
 	if (validation.error) {
-		schemaDebug(
-			`Validation failed in getValidated due to error: ${validation.error.message}`,
-		);
-		return null;
+		throw new TypeError(validation.error.message);
+	}
+}
+
+/**
+ * Performs validation and throws the error if there's one.
+ * Otherwise returns a (possibly patched) version of the specified
+ * options (it depends on the schema)
+ *
+ * @param schema
+ * @param options
+ * @returns
+ */
+
+export function validate<T extends Object>(
+	schema: Joi.ObjectSchema<T> | Joi.StringSchema,
+	options: T,
+): T {
+	const validationResult = schema.validate(options, {
+		stripUnknown: true,
+		abortEarly: true,
+	});
+
+	if (validationResult.error) {
+		throw validationResult.error;
 	}
 
-	return validation.value;
+	return validationResult.value;
 }
 
 export function filterValid<T extends Object>(
+	schema: Joi.ObjectSchema<T>,
 	source: T[],
-	schema: AvailableSchemas,
 ): T[] {
 	if (!source) {
 		return [];
 	}
 
 	return source.reduce((acc, current) => {
-		const validation = getValidated(current, schema);
-
-		if (!validation) {
-			return acc;
+		try {
+			return [...acc, validate(schema, current)];
+		} catch {
+			return [...acc];
 		}
-
-		return [...acc, validation];
 	}, []);
 }

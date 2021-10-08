@@ -87,18 +87,14 @@ export default class PKPass extends Bundle {
 
 			buffers = await getModelFolderContents(source.model);
 			certificates = source.certificates;
-			props = source.props ?? {};
+			props = Schemas.validate(Schemas.OverridablePassProps, props);
 		}
 
 		if (additionalProps && Object.keys(additionalProps).length) {
-			const validation = Schemas.getValidated(
-				additionalProps,
-				Schemas.OverridablePassProps,
+			Object.assign(
+				props,
+				Schemas.validate(Schemas.OverridablePassProps, additionalProps),
 			);
-
-			if (validation) {
-				Object.assign(props, validation);
-			}
 		}
 
 		return new PKPass(buffers, certificates, props);
@@ -161,9 +157,9 @@ export default class PKPass extends Bundle {
 		}
 
 		/** Overrides validation and pushing in props */
-		const overridesValidation = Schemas.getValidated(
-			props,
+		const overridesValidation = Schemas.validate(
 			Schemas.OverridablePassProps,
+			props,
 		);
 
 		Object.assign(this[propsSymbol], overridesValidation);
@@ -180,10 +176,7 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set certificates(certs: Schemas.CertificatesSchema) {
-		if (!Schemas.isValid(certs, Schemas.CertificatesSchema)) {
-			throw new TypeError("Cannot set certificates: invalid");
-		}
-
+		Schemas.assertValidity(Schemas.CertificatesSchema, certs);
 		this[certificatesSymbol] = certs;
 	}
 
@@ -211,17 +204,7 @@ export default class PKPass extends Bundle {
 			);
 		}
 
-		/**
-		 * @TODO Make getValidated more explicit in case of error.
-		 * @TODO maybe make an automated error.
-		 */
-
-		if (!Schemas.getValidated(value, Schemas.TransitType)) {
-			throw new TypeError(
-				`Cannot set transitType to '${value}': invalid type. Expected one of PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain.`,
-			);
-		}
-
+		Schemas.assertValidity(Schemas.TransitType, value);
 		this[propsSymbol]["boardingPass"].transitType = value;
 	}
 
@@ -304,11 +287,7 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set type(type: Schemas.PassTypesProps) {
-		if (!Schemas.isValid(type, Schemas.PassType)) {
-			throw new TypeError(
-				`Invalid type. Expected one of 'boardingPass' | 'coupon' | 'storeCard' | 'eventTicket' | 'generic' but received '${type}'`,
-			);
-		}
+		Schemas.assertValidity(Schemas.PassType, type);
 
 		if (this.type) {
 			/**
@@ -398,12 +377,10 @@ export default class PKPass extends Bundle {
 			const prsJSON = JSON.parse(
 				buffer.toString(),
 			) as Schemas.Personalization;
-			const personalizationValidation = Schemas.getValidated(
-				prsJSON,
-				Schemas.Personalization,
-			);
 
-			if (!personalizationValidation) {
+			try {
+				Schemas.assertValidity(Schemas.Personalization, prsJSON);
+			} catch (err) {
 				console.warn(
 					"Personalization.json file has been omitted as invalid.",
 				);
@@ -458,27 +435,13 @@ export default class PKPass extends Bundle {
 			...otherPassData
 		} = data;
 
-		/**
-		 * Validating the rest of the data and
-		 * importing all the props. They are going
-		 * to overwrite props setted by user but
-		 * we can't do much about.
-		 */
-
-		const validation = Schemas.getValidated(
-			otherPassData,
-			Schemas.PassProps,
-		);
-
-		if (validation) {
-			if (Object.keys(this[propsSymbol]).length) {
-				console.warn(
-					"The imported pass.json's properties will be joined with the current setted props. You might lose some data.",
-				);
-			}
-
-			Object.assign(this[propsSymbol], validation);
+		if (Object.keys(this[propsSymbol]).length) {
+			console.warn(
+				"The imported pass.json's properties will be joined with the current setted props. You might lose some data.",
+			);
 		}
+
+		Object.assign(this[propsSymbol], otherPassData);
 
 		if (!type) {
 			if (!this[passTypeSymbol]) {
@@ -748,8 +711,8 @@ export default class PKPass extends Bundle {
 		}
 
 		this[propsSymbol]["beacons"] = Schemas.filterValid(
-			beacons,
 			Schemas.Beacon,
+			beacons,
 		);
 	}
 
@@ -782,8 +745,8 @@ export default class PKPass extends Bundle {
 		}
 
 		this[propsSymbol]["locations"] = Schemas.filterValid(
-			locations,
 			Schemas.Location,
+			locations,
 		);
 	}
 
@@ -848,15 +811,15 @@ export default class PKPass extends Bundle {
 			];
 
 			finalBarcodes = supportedFormats.map((format) =>
-				Schemas.getValidated(
-					{ format, message: barcodes[0] } as Schemas.Barcode,
-					Schemas.Barcode,
-				),
+				Schemas.validate(Schemas.Barcode, {
+					format,
+					message: barcodes[0],
+				} as Schemas.Barcode),
 			);
 		} else {
 			finalBarcodes = Schemas.filterValid(
-				barcodes as Schemas.Barcode[],
 				Schemas.Barcode,
+				barcodes as Schemas.Barcode[],
 			);
 
 			if (!finalBarcodes.length) {
@@ -887,7 +850,7 @@ export default class PKPass extends Bundle {
 		}
 
 		this[propsSymbol]["nfc"] =
-			Schemas.getValidated(nfc, Schemas.NFC) ?? undefined;
+			Schemas.validate(Schemas.NFC, nfc) ?? undefined;
 	}
 }
 
@@ -917,28 +880,15 @@ function freezeRecusive(object: Object) {
 }
 
 function readPassMetadata(buffer: Buffer) {
+	let contentAsJSON: Schemas.PassProps;
+
 	try {
-		const contentAsJSON = JSON.parse(
+		contentAsJSON = JSON.parse(
 			buffer.toString("utf8"),
 		) as Schemas.PassProps;
-
-		const validation = Schemas.getValidated(
-			contentAsJSON,
-			Schemas.PassProps,
-		);
-
-		/**
-		 * @TODO validation.error?
-		 */
-
-		if (!validation) {
-			throw new Error(
-				"Cannot validate pass.json file. Not conformant to",
-			);
-		}
-
-		return validation;
 	} catch (err) {
-		console.error(err);
+		throw new TypeError("Cannot validat Pass.json: invalid JSON");
 	}
+
+	return Schemas.validate(Schemas.PassProps, contentAsJSON);
 }

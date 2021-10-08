@@ -26,23 +26,22 @@ export default class FieldsArray extends Array {
 	push(...fieldsData: Schemas.Field[]): number {
 		const validFields = fieldsData.reduce(
 			(acc: Schemas.Field[], current: Schemas.Field) => {
-				if (
-					!(typeof current === "object") ||
-					!Schemas.isValid(current, Schemas.Field)
-				) {
+				try {
+					Schemas.assertValidity(Schemas.Field, current);
+				} catch (err) {
+					console.warn(`Cannot add field: ${err}`);
 					return acc;
 				}
 
 				if (this[poolSymbol].has(current.key)) {
-					fieldsDebug(
-						`Field with key "${current.key}" discarded: fields must be unique in pass scope.`,
+					console.warn(
+						`Cannot add field with key '${current.key}': another field already owns this key. Ignored.`,
 					);
-				} else {
-					this[poolSymbol].add(current.key);
-					acc.push(current);
+					return acc;
 				}
 
-				return acc;
+				this[poolSymbol].add(current.key);
+				return [...acc, current];
 			},
 			[],
 		);

@@ -1,4 +1,4 @@
-import FieldsArray from "./fieldsArray";
+import FieldsArray from "./FieldsArray";
 import { default as Bundle, filesSymbol } from "./Bundle";
 import { getModelFolderContents } from "./parser";
 import * as Schemas from "./schemas";

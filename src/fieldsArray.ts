@@ -10,10 +10,10 @@ const fieldsDebug = debug("passkit:fields");
 
 const poolSymbol = Symbol("pool");
 
-export default class FieldsArray extends Array {
+export default class FieldsArray extends Array<Schemas.Field> {
 	private [poolSymbol]: Set<string>;
 
-	constructor(pool: Set<string>, ...args: any[]) {
+	constructor(pool: Set<string>, ...args: Schemas.Field[]) {
 		super(...args);
 		this[poolSymbol] = pool;
 	}
@@ -46,7 +46,7 @@ export default class FieldsArray extends Array {
 			[],
 		);
 
-		return Array.prototype.push.call(this, ...validFields);
+		return super.push(...validFields);
 	}
 
 	/**
@@ -55,7 +55,7 @@ export default class FieldsArray extends Array {
 	 */
 
 	pop(): Schemas.Field {
-		const element: Schemas.Field = Array.prototype.pop.call(this);
+		const element: Schemas.Field = super.pop();
 		this[poolSymbol].delete(element.key);
 		return element;
 	}
@@ -73,7 +73,7 @@ export default class FieldsArray extends Array {
 		const removeList = this.slice(start, deleteCount + start);
 		removeList.forEach((item) => this[poolSymbol].delete(item.key));
 
-		return Array.prototype.splice.call(this, start, deleteCount, items);
+		return super.splice(start, deleteCount, ...items);
 	}
 
 	get length(): number {

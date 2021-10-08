@@ -413,6 +413,18 @@ export default class PKPass extends Bundle {
 		return super.addBuffer(pathName, buffer);
 	}
 
+	/**
+	 * Given data from a pass.json, reads them to bring them
+	 * into the current pass instance.
+	 *
+	 * **Warning**: if this file contains a type (boardingPass,
+	 * coupon, and so on), it will replace the current one,
+	 * causing, therefore, the destroy of the fields added
+	 * previously.
+	 *
+	 * @param data
+	 */
+
 	private [importMetadataSymbol](data: Schemas.PassProps) {
 		const possibleTypes = [
 			"boardingPass",
@@ -470,6 +482,11 @@ export default class PKPass extends Bundle {
 		}
 	}
 
+	/**
+	 * Creates the manifest starting from files
+	 * added to the bundle
+	 */
+
 	private [createManifestSymbol](): Buffer {
 		const manifest = Object.entries(this[filesSymbol]).reduce<{
 			[key: string]: string;
@@ -483,6 +500,13 @@ export default class PKPass extends Bundle {
 
 		return Buffer.from(JSON.stringify(manifest));
 	}
+
+	/**
+	 * Applies the last validation checks against props,
+	 * applies the props to pass.json and creates l10n
+	 * files and folders and creates manifest and
+	 * signature files
+	 */
 
 	private [closePassSymbol]() {
 		/**
@@ -512,6 +536,10 @@ export default class PKPass extends Bundle {
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
 		super.addBuffer("pass.json", passJson);
 
+		// *********************************** //
+		// *** LOCALIZATION FILES CREATION *** //
+		// *********************************** //
+
 		const localizationEntries = Object.entries(this[localizationSymbol]);
 
 		for (
@@ -528,6 +556,10 @@ export default class PKPass extends Bundle {
 				super.addBuffer(`${lang}.lproj/pass.strings`, stringsFile);
 			}
 		}
+
+		// *********************** //
+		// *** PERSONALIZATION *** //
+		// *********************** //
 
 		const fileNames = Object.keys(this[filesSymbol]);
 		const meetsPersonalizationRequirements = Boolean(
@@ -553,6 +585,10 @@ export default class PKPass extends Bundle {
 				}
 			}
 		}
+
+		// ****************************** //
+		// *** SIGNATURE AND MANIFEST *** //
+		// ****************************** //
 
 		const manifestBuffer = this[createManifestSymbol]();
 		super.addBuffer("manifest.json", manifestBuffer);
@@ -799,7 +835,10 @@ export default class PKPass extends Bundle {
 		let finalBarcodes: Schemas.Barcode[];
 
 		if (typeof barcodes[0] === "string") {
-			/** A string has been received instead of objects. We can only auto-fill them all with the same data. */
+			/**
+			 * A string has been received instead of objects. We can
+			 * only auto-fill them all with the same data.
+			 */
 
 			const supportedFormats: Array<Schemas.BarcodeFormat> = [
 				"PKBarcodeFormatQR",

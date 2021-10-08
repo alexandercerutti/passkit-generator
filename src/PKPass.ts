@@ -356,7 +356,9 @@ export default class PKPass extends Bundle {
 				return;
 			}
 
-			this[importMetadataSymbol](readPassMetadata(buffer));
+			this[importMetadataSymbol](
+				validateJSONBuffer(buffer, Schemas.PassProps),
+			);
 
 			/**
 			 * Adding an empty buffer just for reference
@@ -374,12 +376,8 @@ export default class PKPass extends Bundle {
 			 * once the pass is getting closed, if needed.
 			 */
 
-			const prsJSON = JSON.parse(
-				buffer.toString(),
-			) as Schemas.Personalization;
-
 			try {
-				Schemas.assertValidity(Schemas.Personalization, prsJSON);
+				validateJSONBuffer(buffer, Schemas.Personalization);
 			} catch (err) {
 				console.warn(
 					"Personalization.json file has been omitted as invalid.",
@@ -879,16 +877,17 @@ function freezeRecusive(object: Object) {
 	return Object.freeze(objectCopy);
 }
 
-function readPassMetadata(buffer: Buffer) {
-	let contentAsJSON: Schemas.PassProps;
+function validateJSONBuffer(
+	buffer: Buffer,
+	schema: Parameters<typeof Schemas.validate>[0],
+) {
+	let contentAsJSON: unknown;
 
 	try {
-		contentAsJSON = JSON.parse(
-			buffer.toString("utf8"),
-		) as Schemas.PassProps;
+		contentAsJSON = JSON.parse(buffer.toString("utf8"));
 	} catch (err) {
 		throw new TypeError("Cannot validat Pass.json: invalid JSON");
 	}
 
-	return Schemas.validate(Schemas.PassProps, contentAsJSON);
+	return Schemas.validate(schema, contentAsJSON);
 }

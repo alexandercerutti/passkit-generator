@@ -125,11 +125,15 @@ export default class PKPass extends Bundle {
 			passes.map((pass) => pass.getAsBuffer()),
 		);
 
-		const bundle = Bundle.autoFreezable("application/vnd.apple.pkpasses");
+		const [bundle, freezeBundle] = Bundle.freezable(
+			"application/vnd.apple.pkpasses",
+		);
 
 		for (let i = 0; i < buffers.length; i++) {
 			bundle.addBuffer(`packed-pass-${i + 1}.pkpass`, buffers[i]);
 		}
+
+		freezeBundle();
 
 		return bundle;
 	}
@@ -509,6 +513,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	private [closePassSymbol]() {
+		const fileNames = Object.keys(this[filesSymbol]);
+
 		/**
 		 * Filtering colors props that have an
 		 * invalid RGB value
@@ -536,6 +542,13 @@ export default class PKPass extends Bundle {
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
 		super.addBuffer("pass.json", passJson);
 
+		const ICON_REGEX = /icon(?:@\d{1}x)?/;
+		if (!fileNames.some(ICON_REGEX.test)) {
+			console.warn(
+				"At least one icon file is missing in your bundle. Your pass won't be openable by any Apple Device.",
+			);
+		}
+
 		// *********************************** //
 		// *** LOCALIZATION FILES CREATION *** //
 		// *********************************** //
@@ -561,7 +574,6 @@ export default class PKPass extends Bundle {
 		// *** PERSONALIZATION *** //
 		// *********************** //
 
-		const fileNames = Object.keys(this[filesSymbol]);
 		const meetsPersonalizationRequirements = Boolean(
 			this[filesSymbol]["personalization.json"] &&
 				fileNames.find((file) =>

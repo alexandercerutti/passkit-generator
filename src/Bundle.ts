@@ -2,6 +2,7 @@ import { Stream } from "stream";
 import { ZipFile } from "yazl";
 
 export const filesSymbol = Symbol("bundleFiles");
+const freezeSymbol = Symbol("bundleFreeze");
 const archiveSymbol = Symbol("zip");
 
 namespace Mime {
@@ -26,26 +27,31 @@ export default class Bundle {
 	}
 
 	/**
-	 * @EXPERIMENTAL
+	 * Creates a bundle and exposes the
+	 * function to freeze it manually once
+	 * completed.
+	 *
+	 * This was made to not expose freeze
+	 * function outside of Bundle class.
+	 *
+	 * Normally, a bundle would get freezed
+	 * when using getAsBuffer or getAsStream
+	 * but when creating a PKPasses archive,
+	 * we need to freeze the bundle so the
+	 * user cannot add more files (we want to
+	 * allow them to only the selected files)
+	 * but also letting them choose how to
+	 * export it.
 	 *
 	 * @param mimeType
+	 * @returns
 	 */
 
-	static autoFreezable(mimeType: `${Mime.type}/${Mime.subtype}`): Bundle {
+	static freezable(
+		mimeType: `${Mime.type}/${Mime.subtype}`,
+	): [Bundle, Function] {
 		const bundle = new Bundle(mimeType);
-
-		/**
-		 * @TODO
-		 * Might not be the best idea I might have had.
-		 * I have to test this further more to check if
-		 * actually we can leverage of this event loop feature
-		 * to freeze it automatically once we processed every
-		 * promise for bundling;
-		 */
-
-		setTimeout(bundle.freeze, 0);
-
-		return bundle;
+		return [bundle, bundle[freezeSymbol]];
 	}
 
 	/**
@@ -53,7 +59,7 @@ export default class Bundle {
 	 * can be added any further.
 	 */
 
-	protected freeze() {
+	protected [freezeSymbol]() {
 		if (this.isFrozen) {
 			return;
 		}
@@ -118,7 +124,7 @@ export default class Bundle {
 	 */
 
 	public getAsStream(): Stream {
-		this.freeze();
+		this[freezeSymbol]();
 		return this[archiveSymbol].outputStream;
 	}
 }

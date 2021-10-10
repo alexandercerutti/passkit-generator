@@ -575,13 +575,14 @@ export default class PKPass extends Bundle {
 		// *********************** //
 
 		const meetsPersonalizationRequirements = Boolean(
-			this[filesSymbol]["personalization.json"] &&
+			this[propsSymbol]["nfc"] &&
+				this[filesSymbol]["personalization.json"] &&
 				fileNames.find((file) =>
 					/personalizationLogo@(?:.{2})/.test(file),
 				),
 		);
 
-		if (this[propsSymbol]["nfc"] && !meetsPersonalizationRequirements) {
+		if (!meetsPersonalizationRequirements) {
 			/**
 			 * Looking for every personalization file
 			 * and removing it

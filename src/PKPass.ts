@@ -172,6 +172,10 @@ export default class PKPass extends Bundle {
 	 * the constructor, but they can get overridden
 	 * here for whatever purpose.
 	 *
+	 * When using this setter, all certificates are
+	 * expected to be received, or an exception will
+	 * be thrown.
+	 *
 	 * @param certs
 	 */
 

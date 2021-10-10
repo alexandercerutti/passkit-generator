@@ -712,8 +712,6 @@ export default class PKPass extends Bundle {
 		}
 
 		this[propsSymbol]["expirationDate"] = parsedDate;
-
-		return this;
 	}
 
 	/**

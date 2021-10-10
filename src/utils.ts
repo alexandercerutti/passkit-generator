@@ -26,6 +26,21 @@ export function isValidRGB(value?: string): boolean {
 	return rgb.slice(1, 4).every((v) => Math.abs(Number(v)) <= 255);
 }
 
+export function processDate(key: string, date: Date): string | null {
+	if (!(date instanceof Date)) {
+		return null;
+	}
+
+	const dateParse = dateToW3CString(date);
+
+	if (!dateParse) {
+		console.warn(formatMessage(DEBUG.DATE_FORMAT_UNMATCH, key));
+		return null;
+	}
+
+	return dateParse;
+}
+
 /**
  * Converts a date to W3C Standard format
  *
@@ -35,7 +50,7 @@ export function isValidRGB(value?: string): boolean {
  * 	 undefined otherwise
  */
 
-export function dateToW3CString(date: Date) {
+function dateToW3CString(date: Date) {
 	if (!(date instanceof Date)) {
 		return "";
 	}

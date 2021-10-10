@@ -79,11 +79,7 @@ export default class PKPass extends Bundle {
 				JSON.stringify(source[propsSymbol]),
 			);
 		} else {
-			if (!source.model || typeof source.model !== "string") {
-				throw new TypeError(
-					"Cannot create PKPass from source: unknown model but expected a string.",
-				);
-			}
+			Schemas.assertValidity(Schemas.Template, source);
 
 			buffers = await getModelFolderContents(source.model);
 			certificates = source.certificates;

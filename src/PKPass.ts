@@ -626,13 +626,6 @@ export default class PKPass extends Bundle {
 	 */
 
 	public async getAsBuffer(): Promise<Buffer> {
-		/**
-		 * @TODO compile this pass into something usable
-		 * @TODO like _patch on old version
-		 * @TODO share implementation with getAsStream
-		 * @TODO warning if no icon files
-		 */
-
 		if (!this.isFrozen) {
 			this[closePassSymbol]();
 		}
@@ -649,13 +642,6 @@ export default class PKPass extends Bundle {
 	 */
 
 	public getAsStream(): Stream {
-		/**
-		 * @TODO compile this pass into something usable
-		 * @TODO like _patch on old version
-		 * @TODO share implementation with getAsBuffer
-		 * @TODO warning if no icon files
-		 */
-
 		if (!this.isFrozen) {
 			this[closePassSymbol]();
 		}

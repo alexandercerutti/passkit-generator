@@ -462,10 +462,6 @@ export default class PKPass extends Bundle {
 				console.warn(
 					"Cannot find a valid type in pass.json. You won't be able to set fields until you won't set explicitly one.",
 				);
-			} else {
-				console.warn(
-					"Cannot find a new valid type in pass.json. Fields have not been resetted.",
-				);
 			}
 		} else {
 			this.type = type;

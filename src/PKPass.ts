@@ -913,7 +913,7 @@ function validateJSONBuffer(
 	try {
 		contentAsJSON = JSON.parse(buffer.toString("utf8"));
 	} catch (err) {
-		throw new TypeError("Cannot validat Pass.json: invalid JSON");
+		throw new TypeError("Cannot validate Pass.json: invalid JSON");
 	}
 
 	return Schemas.validate(schema, contentAsJSON);

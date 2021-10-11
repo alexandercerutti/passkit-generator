@@ -134,9 +134,9 @@ describe("PKPass", () => {
 		});
 	});
 
-	describe("setNFCCapability", () => {
+	describe("setNFC", () => {
 		it("should reset instance.props['nfc'] if 'null' is passed as value", () => {
-			pass.setNFCCapability({
+			pass.setNFC({
 				encryptionPublicKey: "mimmo",
 				message: "No message for you here",
 			});
@@ -146,14 +146,14 @@ describe("PKPass", () => {
 				message: "No message for you here",
 			});
 
-			pass.setNFCCapability(null);
+			pass.setNFC(null);
 
 			expect(pass.props["nfc"]).toBeUndefined();
 		});
 
 		it("should throw on invalid objects received", () => {
 			expect(() =>
-				pass.setNFCCapability({
+				pass.setNFC({
 					// @ts-expect-error
 					requiresAuth: false,
 					encryptionPublicKey: "Nope",
@@ -162,9 +162,9 @@ describe("PKPass", () => {
 		});
 
 		it("should always return undefined", () => {
-			expect(pass.setNFCCapability(null)).toBeUndefined();
+			expect(pass.setNFC(null)).toBeUndefined();
 			expect(
-				pass.setNFCCapability({
+				pass.setNFC({
 					encryptionPublicKey: "mimmo",
 					message: "No message for you here",
 				}),

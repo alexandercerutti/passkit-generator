@@ -872,7 +872,7 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	public setNFCCapability(nfc: Schemas.NFC | null): void {
+	public setNFC(nfc: Schemas.NFC | null): void {
 		if (nfc === null) {
 			delete this[propsSymbol]["nfc"];
 			return;

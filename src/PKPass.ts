@@ -1,10 +1,10 @@
 import FieldsArray from "./FieldsArray";
-import { default as Bundle, filesSymbol } from "./Bundle";
-import { getModelFolderContents } from "./parser";
+import Bundle, { filesSymbol } from "./Bundle";
 import * as Schemas from "./schemas";
-import { Stream } from "stream";
 import * as Signature from "./Signature";
 import * as Strings from "./StringsUtils";
+import { getModelFolderContents } from "./parser";
+import { Stream } from "stream";
 import { isValidRGB, processDate } from "./utils";
 
 /** Exporting for tests specs */
@@ -105,7 +105,6 @@ export default class PKPass extends Bundle {
 	 *
 	 * Throws if not all the files are instance of PKPass.
 	 *
-	 * @TODO test autofreezing
 	 * @param passes
 	 */
 

@@ -43,10 +43,26 @@ describe("Bundle", () => {
 		expect(bundle.getAsStream()).toBeInstanceOf(Stream);
 	});
 
+	it("should freeze the bundle when using 'getAsStream'", () => {
+		bundle.getAsStream();
+		expect(bundle.isFrozen).toBe(true);
+	});
+
 	it("should return a buffer with 'getAsBuffer'", async () => {
 		addEmptyFilesToBundle(bundle);
 
 		expect(await bundle.getAsBuffer()).toBeInstanceOf(Buffer);
+	});
+
+	it("should freeze the bundle when using 'getAsBuffer'", async () => {
+		await bundle.getAsBuffer();
+		expect(bundle.isFrozen).toBe(true);
+	});
+
+	it("freezables should expose freezable and bundle itself to be frozen", () => {
+		const [bundle, freeze] = Bundle.freezable("any/any");
+		freeze();
+		expect(bundle.isFrozen).toBe(true);
 	});
 });
 

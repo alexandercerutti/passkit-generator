@@ -5,10 +5,24 @@ import {
 } from "../lib/PKPass";
 
 describe("PKPass", () => {
+	let pass: PKPass;
+
+	beforeEach(() => {
+		pass = new PKPass(
+			{},
+			/** @ts-ignore - We don't need certificates here*/
+			{
+				signerCert: "",
+				signerKey: "",
+				wwdr: "",
+				signerKeyPassphrase: "p477w0rb",
+			},
+			{},
+		);
+	});
+
 	describe("setBeacons", () => {
 		it("should reset instance.props['beacons'] if 'null' is passed as value", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setBeacons({
 				proximityUUID: "0000000000-00000000",
 				major: 4,
@@ -24,8 +38,6 @@ describe("PKPass", () => {
 		});
 
 		it("should filter out invalid beacons objects", () => {
-			const pass = new PKPass({}, {});
-
 			/** This is invalid, major should be greater than minor */
 			pass.setBeacons(
 				{
@@ -48,12 +60,22 @@ describe("PKPass", () => {
 
 			expect(pass.props["beacons"].length).toBe(1);
 		});
+
+		it("should always return undefined", () => {
+			expect(pass.setBeacons(null)).toBeUndefined();
+			expect(
+				pass.setBeacons({
+					proximityUUID: "0000000000-00000000",
+					major: 2,
+					minor: 3,
+					relevantText: "This is not the Kevin you are looking for.",
+				}),
+			).toBeUndefined();
+		});
 	});
 
 	describe("setLocations", () => {
 		it("should reset instance.props['locations'] if 'null' is passed as value", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setLocations({
 				longitude: 0.25456342344,
 				latitude: 0.26665773234,
@@ -67,8 +89,6 @@ describe("PKPass", () => {
 		});
 
 		it("should filter out invalid beacons objects", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setLocations(
 				{
 					// @ts-expect-error
@@ -98,12 +118,21 @@ describe("PKPass", () => {
 				"Ciao mamma, guarda come volooo!",
 			);
 		});
+
+		it("should always return undefined", () => {
+			expect(pass.setLocations(null)).toBeUndefined();
+			expect(
+				pass.setLocations({
+					longitude: 0.25456342344,
+					latitude: 0.26665773234,
+					altitude: 12552.31233321,
+				}),
+			).toBeUndefined();
+		});
 	});
 
 	describe("setNFCCapability", () => {
 		it("should reset instance.props['nfc'] if 'null' is passed as value", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setNFCCapability({
 				encryptionPublicKey: "mimmo",
 				message: "No message for you here",
@@ -119,23 +148,29 @@ describe("PKPass", () => {
 			expect(pass.props["nfc"]).toBeUndefined();
 		});
 
-		it("should not accept invalid objects", () => {
-			const pass = new PKPass({}, {});
+		it("should throw on invalid objects received", () => {
+			expect(() =>
+				pass.setNFCCapability({
+					// @ts-expect-error
+					requiresAuth: false,
+					encryptionPublicKey: "Nope",
+				}),
+			).toThrow();
+		});
 
-			pass.setNFCCapability({
-				// @ts-expect-error
-				requiresAuth: false,
-				encryptionPublicKey: "Nope",
-			});
-
-			expect(pass.props["nfc"]).toBeUndefined();
+		it("should always return undefined", () => {
+			expect(pass.setNFCCapability(null)).toBeUndefined();
+			expect(
+				pass.setNFCCapability({
+					encryptionPublicKey: "mimmo",
+					message: "No message for you here",
+				}),
+			).toBeUndefined();
 		});
 	});
 
 	describe("setExpirationDate", () => {
 		it("should reset instance.props['expirationDate'] if 'null' is passed as value", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setExpirationDate(new Date(2020, 6, 1, 0, 0, 0, 0));
 			// Month starts from 0 in Date Object when used this way, therefore
 			// we expect one month more
@@ -146,44 +181,48 @@ describe("PKPass", () => {
 			expect(pass.props["expirationDate"]).toBeUndefined();
 		});
 
-		it("Won't apply changes without a valid argument", () => {
-			const pass = new PKPass({}, {});
-
-			// @ts-expect-error
-			pass.setExpirationDate();
-			expect(pass.props["expirationDate"]).toBe(undefined);
-
-			// @ts-expect-error
-			pass.setExpirationDate(42);
-			expect(pass.props["expirationDate"]).toBe(undefined);
-		});
-
 		it("expects a Date object as the only argument", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setExpirationDate(new Date(2020, 6, 1, 0, 0, 0, 0));
 			// Month starts from 0 in Date Object when used this way, therefore
 			// we expect one month more
 			expect(pass.props["expirationDate"]).toBe("2020-07-01T00:00:00Z");
 		});
 
-		it("An invalid date, will not apply changes", () => {
-			const pass = new PKPass({}, {});
+		it("should throw if an invalid date is received", () => {
+			// @ts-expect-error
+			expect(() => pass.setExpirationDate("32/18/228317")).toThrowError(
+				TypeError,
+				"Cannot set expirationDate. Invalid date 32/18/228317",
+			);
+
+			expect(() => pass.setExpirationDate(undefined)).toThrowError(
+				TypeError,
+				"Cannot set expirationDate. Invalid date undefined",
+			);
 
 			// @ts-expect-error
-			pass.setExpirationDate("32/18/228317");
-			expect(pass.props["expirationDate"]).toBe(undefined);
+			expect(() => pass.setExpirationDate(5)).toThrowError(
+				TypeError,
+				"Cannot set expirationDate. Invalid date 5",
+			);
 
 			// @ts-expect-error
-			pass.setExpirationDate("32/18/228317");
-			expect(pass.props["expirationDate"]).toBe(undefined);
+			expect(() => pass.setExpirationDate({})).toThrowError(
+				TypeError,
+				"Cannot set expirationDate. Invalid date [object Object]",
+			);
+		});
+
+		it("should always return undefined", () => {
+			expect(pass.setExpirationDate(null)).toBeUndefined();
+			expect(
+				pass.setExpirationDate(new Date(2020, 6, 1, 0, 0, 0, 0)),
+			).toBeUndefined();
 		});
 	});
 
 	describe("setRelevantDate", () => {
 		it("should reset instance.props['relevantDate'] if 'null' is passed as value", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setRelevantDate(new Date(2020, 6, 1, 0, 0, 0, 0));
 			// Month starts from 0 in Date Object when used this way, therefore
 			// we expect one month more
@@ -194,42 +233,46 @@ describe("PKPass", () => {
 			expect(pass.props["relevantDate"]).toBeUndefined();
 		});
 
-		it("Won't apply changes without a valid argument", () => {
-			const pass = new PKPass({}, {});
-
-			// @ts-expect-error
-			pass.setRelevantDate();
-			expect(pass.props["relevantDate"]).toBe(undefined);
-
-			// @ts-expect-error
-			pass.setRelevantDate(42);
-			expect(pass.props["relevantDate"]).toBe(undefined);
-		});
-
 		it("expects a Date object as the only argument", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setRelevantDate(new Date("10-04-2021"));
 			expect(pass.props["relevantDate"]).toBe("2021-10-04T00:00:00Z");
 		});
 
-		it("An invalid date, will not apply changes", () => {
-			const pass = new PKPass({}, {});
+		it("should throw if an invalid date is received", () => {
+			// @ts-expect-error
+			expect(() => pass.setRelevantDate("32/18/228317")).toThrowError(
+				TypeError,
+				"Cannot set relevantDate. Invalid date 32/18/228317",
+			);
+
+			expect(() => pass.setRelevantDate(undefined)).toThrowError(
+				TypeError,
+				"Cannot set relevantDate. Invalid date undefined",
+			);
 
 			// @ts-expect-error
-			pass.setRelevantDate("32/18/228317");
-			expect(pass.props["relevantDate"]).toBe(undefined);
+			expect(() => pass.setRelevantDate(5)).toThrowError(
+				TypeError,
+				"Cannot set relevantDate. Invalid date 5",
+			);
 
 			// @ts-expect-error
-			pass.setRelevantDate("32/18/228317");
-			expect(pass.props["relevantDate"]).toBe(undefined);
+			expect(() => pass.setRelevantDate({})).toThrowError(
+				TypeError,
+				"Cannot set relevantDate. Invalid date [object Object]",
+			);
+		});
+
+		it("should always return undefined", () => {
+			expect(pass.setRelevantDate(null)).toBeUndefined();
+			expect(
+				pass.setRelevantDate(new Date(2020, 6, 1, 0, 0, 0, 0)),
+			).toBeUndefined();
 		});
 	});
 
 	describe("setBarcodes", () => {
 		it("shouldn't apply changes if no data is passed", () => {
-			const pass = new PKPass({}, {});
-
 			const props = pass.props["barcodes"] || [];
 			const oldAmountOfBarcodes = props?.length ?? 0;
 
@@ -240,8 +283,6 @@ describe("PKPass", () => {
 		});
 
 		it("should throw error if a boolean parameter is received", () => {
-			const pass = new PKPass({}, {});
-
 			// @ts-expect-error
 			expect(() => pass.setBarcodes(true)).toThrowError(
 				TypeError,
@@ -250,8 +291,6 @@ describe("PKPass", () => {
 		});
 
 		it("should ignore if a number parameter is received", () => {
-			const pass = new PKPass({}, {});
-
 			// @ts-expect-error
 			expect(() => pass.setBarcodes(42)).toThrowError(
 				TypeError,
@@ -260,15 +299,11 @@ describe("PKPass", () => {
 		});
 
 		it("should autogenerate all the barcodes objects if a string is provided as message", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setBarcodes("28363516282");
 			expect(pass.props["barcodes"].length).toBe(4);
 		});
 
 		it("should save changes if object conforming to Schemas.Barcode are provided", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setBarcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
@@ -279,8 +314,6 @@ describe("PKPass", () => {
 		});
 
 		it("should add 'messageEncoding' if missing in valid Schema.Barcode parameters", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setBarcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
@@ -292,8 +325,6 @@ describe("PKPass", () => {
 		});
 
 		it("should ignore objects without 'message' property in Schema.Barcode", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setBarcodes(
 				{
 					format: "PKBarcodeFormatCode128",
@@ -309,8 +340,6 @@ describe("PKPass", () => {
 		});
 
 		it("should ignore objects and values that not comply with Schema.Barcodes", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setBarcodes(
 				// @ts-expect-error
 				5,
@@ -328,8 +357,6 @@ describe("PKPass", () => {
 		});
 
 		it("should reset barcodes content if parameter is null", () => {
-			const pass = new PKPass({}, {});
-
 			pass.setBarcodes({
 				message: "28363516282",
 				format: "PKBarcodeFormatPDF417",
@@ -340,6 +367,17 @@ describe("PKPass", () => {
 
 			pass.setBarcodes(null);
 			expect(pass.props["barcodes"]).toBe(undefined);
+		});
+
+		it("should always return undefined", () => {
+			expect(pass.setBarcodes(null)).toBeUndefined();
+			expect(
+				pass.setBarcodes({
+					message: "28363516282",
+					format: "PKBarcodeFormatPDF417",
+					messageEncoding: "utf8",
+				}),
+			).toBeUndefined();
 		});
 	});
 
@@ -361,6 +399,12 @@ describe("PKPass", () => {
 				{
 					"pass.json": mockBPPassJSON,
 				},
+				{
+					signerCert: "",
+					signerKey: "",
+					wwdr: "",
+					signerKeyPassphrase: "p477w0rb",
+				},
 				{},
 			);
 
@@ -368,34 +412,58 @@ describe("PKPass", () => {
 				{
 					"pass.json": mockCPPassJSON,
 				},
+				{
+					signerCert: "",
+					signerKey: "",
+					wwdr: "",
+					signerKeyPassphrase: "p477w0rb",
+				},
 				{},
 			);
 
-			/**
-			 * @TODO fix this test when props setup
-			 * will be complete
-			 */
+			passBP.transitType = "PKTransitTypeAir";
+			expect(passBP.transitType).toBe("PKTransitTypeAir");
 
-			/* 			expect(() => {
-				passBP.transitType = "PKTransitTypeAir";
-			}).toThrowError(
-				TypeError,
-				"Cannot set transitType on a pass with type different from 'boardingPass'.",
-			); */
-			// expect(passBP.transitType).toBe("PKTransitTypeAir");
-
-			/* 			expect(
+			expect(
 				() => (passCP.transitType = "PKTransitTypeAir"),
 			).toThrowError(
 				TypeError,
 				"Cannot set transitType on a pass with type different from 'boardingPass'.",
 			);
-			expect(passCP.transitType).toBeUndefined(); */
+			expect(passCP.transitType).toBeUndefined();
 		});
 	});
 
 	describe("localize", () => {
-		const pass = new PKPass({}, {}, {});
+		it("should fail throw if lang is not a string", () => {
+			expect(() => pass.localize(null)).toThrowError(
+				TypeError,
+				"Cannot set localization. Expected a string for 'lang' but received a object",
+			);
+
+			expect(() => pass.localize(undefined)).toThrowError(
+				TypeError,
+				"Cannot set localization. Expected a string for 'lang' but received a undefined",
+			);
+
+			// @ts-expect-error
+			expect(() => pass.localize(5)).toThrowError(
+				TypeError,
+				"Cannot set localization. Expected a string for 'lang' but received a number",
+			);
+
+			// @ts-expect-error
+			expect(() => pass.localize(true)).toThrowError(
+				TypeError,
+				"Cannot set localization. Expected a string for 'lang' but received a boolean",
+			);
+
+			// @ts-expect-error
+			expect(() => pass.localize({})).toThrowError(
+				TypeError,
+				"Cannot set localization. Expected a string for 'lang' but received a object",
+			);
+		});
 
 		it("should create a new language record inside class props", () => {
 			pass.localize("en");
@@ -403,19 +471,12 @@ describe("PKPass", () => {
 			expect(pass[localizationSymbol]["en"]).toEqual({});
 		});
 
-		it("should save some translations to be exported later", () => {
+		it("should accept later translations and merge them with existing ones", () => {
 			pass.localize("it", {
 				say_hi: "ciao",
 				say_gb: "arrivederci",
 			});
 
-			expect(pass[localizationSymbol]["it"]).toEqual({
-				say_hi: "ciao",
-				say_gb: "arrivederci",
-			});
-		});
-
-		it("should accept later translations and merge them with existing ones", () => {
 			pass.localize("it", {
 				say_good_morning: "buongiorno",
 				say_good_evening: "buonasera",
@@ -435,6 +496,12 @@ describe("PKPass", () => {
 
 			expect(pass[localizationSymbol]["it"]).toBeUndefined();
 			expect(pass[localizationSymbol]["en"]).toBeUndefined();
+		});
+
+		it("should always return undefined", () => {
+			expect(pass.localize("it", undefined)).toBeUndefined();
+			expect(pass.localize("it", null)).toBeUndefined();
+			expect(pass.localize("it", {})).toBeUndefined();
 		});
 	});
 });

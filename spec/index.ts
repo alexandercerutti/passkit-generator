@@ -1,11 +1,11 @@
-import { createPass, Pass } from "..";
+/* import { createPass, Pass } from "..";
 import * as path from "path";
-
+ */
 /**
  * Tests created upon Jasmine testing suite.
  */
 
-describe("Passkit-generator", function () {
+/*describe("Passkit-generator", function () {
 	let pass: Pass;
 	beforeEach(async () => {
 		pass = await createPass({
@@ -315,4 +315,4 @@ describe("Passkit-generator", function () {
 			expect(pass.props["barcode"]).toEqual(oldBarcode);
 		});
 	});
-});
+});*/

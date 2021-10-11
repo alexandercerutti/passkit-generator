@@ -51,7 +51,7 @@ export default class Bundle {
 		mimeType: `${Mime.type}/${Mime.subtype}`,
 	): [Bundle, Function] {
 		const bundle = new Bundle(mimeType);
-		return [bundle, bundle[freezeSymbol]];
+		return [bundle, () => bundle[freezeSymbol]()];
 	}
 
 	/**
@@ -69,8 +69,8 @@ export default class Bundle {
 	}
 
 	/**
-	 * Tells if this bundle still allows files to be added
-	 * @returns
+	 * Tells if this bundle still allows files to be added.
+	 * @returns false if files are allowed, true otherwise
 	 */
 
 	public get isFrozen() {

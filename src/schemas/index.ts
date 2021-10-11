@@ -103,13 +103,11 @@ export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
 });
 
 export const PassKindsProps = Joi.object<PassKindsProps>({
-	coupon: Joi.array().items(Field),
-	generic: Joi.array().items(Field),
-	storeCard: Joi.array().items(Field),
-	eventTicket: Joi.array().items(Field),
-	boardingPass: Joi.array().items(
-		Field.concat(Joi.object({ transitType: TransitType })),
-	),
+	coupon: PassFields.disallow("transitType"),
+	generic: PassFields.disallow("transitType"),
+	storeCard: PassFields.disallow("transitType"),
+	eventTicket: PassFields.disallow("transitType"),
+	boardingPass: PassFields,
 });
 
 export const PassType = Joi.string().regex(
@@ -144,11 +142,10 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 
 export const PassProps = Joi.object<
 	OverridablePassProps & PassKindsProps & PassPropsFromMethods
->({
-	...OverridablePassProps,
-	...PassKindsProps,
-	...PassPropsFromMethods,
-});
+>()
+	.concat(OverridablePassProps)
+	.concat(PassKindsProps)
+	.concat(PassPropsFromMethods);
 
 export interface Template {
 	model: string;

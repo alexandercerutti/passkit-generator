@@ -698,15 +698,13 @@ export default class PKPass extends Bundle {
 			return;
 		}
 
-		const parsedDate = processDate("expirationDate", date);
-
-		if (!parsedDate) {
+		try {
+			this[propsSymbol]["expirationDate"] = processDate(date);
+		} catch (err) {
 			throw new TypeError(
 				`Cannot set expirationDate. Invalid date ${date}`,
 			);
 		}
-
-		this[propsSymbol]["expirationDate"] = parsedDate;
 	}
 
 	/**
@@ -789,15 +787,13 @@ export default class PKPass extends Bundle {
 			return;
 		}
 
-		const parsedDate = processDate("relevantDate", date);
-
-		if (!parsedDate) {
+		try {
+			this[propsSymbol]["relevantDate"] = processDate(date);
+		} catch (err) {
 			throw new TypeError(
 				`Cannot set relevantDate. Invalid date ${date}`,
 			);
 		}
-
-		this[propsSymbol]["relevantDate"] = parsedDate;
 	}
 
 	/**

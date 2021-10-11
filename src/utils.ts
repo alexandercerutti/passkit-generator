@@ -26,16 +26,15 @@ export function isValidRGB(value?: string): boolean {
 	return rgb.slice(1, 4).every((v) => Math.abs(Number(v)) <= 255);
 }
 
-export function processDate(key: string, date: Date): string | null {
+export function processDate(date: Date): string | null {
 	if (!(date instanceof Date)) {
-		return null;
+		throw "Invalid date";
 	}
 
 	const dateParse = dateToW3CString(date);
 
 	if (!dateParse) {
-		console.warn(formatMessage(DEBUG.DATE_FORMAT_UNMATCH, key));
-		return null;
+		throw "Invalid date";
 	}
 
 	return dateParse;

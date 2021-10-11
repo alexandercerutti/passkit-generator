@@ -10,13 +10,12 @@ import { isValidRGB, processDate } from "./utils";
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
 export const localizationSymbol = Symbol("pass.l10n");
-
-const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
-const importMetadataSymbol = Symbol("import.pass.metadata");
-const createManifestSymbol = Symbol("pass.manifest");
-const closePassSymbol = Symbol("pass.close");
-const passTypeSymbol = Symbol("pass.type");
-const certificatesSymbol = Symbol("pass.certificates");
+export const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
+export const importMetadataSymbol = Symbol("import.pass.metadata");
+export const createManifestSymbol = Symbol("pass.manifest");
+export const closePassSymbol = Symbol("pass.close");
+export const passTypeSymbol = Symbol("pass.type");
+export const certificatesSymbol = Symbol("pass.certificates");
 
 export default class PKPass extends Bundle {
 	private [certificatesSymbol]: Schemas.CertificatesSchema;

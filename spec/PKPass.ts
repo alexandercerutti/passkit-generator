@@ -1,3 +1,4 @@
+import { filesSymbol } from "../lib/Bundle";
 import {
 	default as PKPass,
 	localizationSymbol,
@@ -522,6 +523,118 @@ describe("PKPass", () => {
 			expect(pass.localize("it", undefined)).toBeUndefined();
 			expect(pass.localize("it", null)).toBeUndefined();
 			expect(pass.localize("it", {})).toBeUndefined();
+		});
+	});
+
+	describe("addBuffer", () => {
+		it("should filter out silently manifest and signature files", () => {
+			pass.addBuffer("manifest.json", Buffer.alloc(0));
+			pass.addBuffer("signature", Buffer.alloc(0));
+
+			expect(Object.keys(pass[filesSymbol]).length).toBe(0);
+		});
+
+		it("should accept a pass.json only if not yet imported", () => {
+			pass.addBuffer(
+				"pass.json",
+				Buffer.from(
+					JSON.stringify({
+						boardingPass: {},
+						serialNumber: "555555",
+					}),
+				),
+			);
+
+			expect(Object.keys(pass[filesSymbol]).length).toBe(1);
+
+			/** Adding it again */
+
+			pass.addBuffer(
+				"pass.json",
+				Buffer.from(
+					JSON.stringify({
+						boardingPass: {},
+						serialNumber: "555555",
+					}),
+				),
+			);
+
+			/** Expecting it to get ignored */
+			expect(Object.keys(pass[filesSymbol]).length).toBe(1);
+		});
+
+		it("should accept personalization.json only if it is a valid JSON", () => {
+			pass.addBuffer(
+				"personalization.json",
+				Buffer.from(
+					JSON.stringify({
+						description:
+							"A test description for a test personalization",
+						requiredPersonalizationFields: [
+							"PKPassPersonalizationFieldName",
+							"PKPassPersonalizationFieldPostalCode",
+							"PKPassPersonalizationFieldEmailAddress",
+						],
+					}),
+				),
+			);
+
+			expect(pass[filesSymbol]["personalization.json"]).toBeInstanceOf(
+				Buffer,
+			);
+		});
+
+		it("should reject invalid personalization.json", () => {
+			pass.addBuffer(
+				"personalization.json",
+				Buffer.from(
+					JSON.stringify({
+						requiredPersonalizationFields: [
+							"PKPassPersonalizationFieldName",
+							"PKPassPersonalizationFieldEmailAddressaworng",
+						],
+					}),
+				),
+			);
+
+			expect(pass[filesSymbol]["personalization.json"]).toBeUndefined(
+				Buffer,
+			);
+		});
+
+		it("should redirect .strings files to localization", () => {
+			const validTranslationStrings = `
+/* Insert Element menu item */
+"Insert Element" = "Insert Element";
+/* Error string used for unknown error types. */
+"ErrorString_1" = "An unknown error occurred.";
+			`;
+
+			pass.addBuffer(
+				"en.lproj/pass.strings",
+				Buffer.from(validTranslationStrings),
+			);
+
+			expect(pass[filesSymbol]["en.lproj/pass.string"]).toBeUndefined();
+			expect(pass[localizationSymbol]["en"]).toEqual({
+				"Insert Element": "Insert Element",
+				ErrorString_1: "An unknown error occurred.",
+			});
+		});
+
+		it("should ignore invalid .strings files", () => {
+			const invalidTranslationStrings = `
+"Insert Element"="Insert Element
+"ErrorString_1= "An unknown error occurred."
+			`;
+
+			pass.addBuffer(
+				"en.lproj/pass.strings",
+				Buffer.from(invalidTranslationStrings),
+			);
+
+			expect(pass[filesSymbol]["en.lproj/pass.string"]).toBeUndefined();
+			expect(pass[localizationSymbol]["en"]).toBeUndefined();
 		});
 	});
 });

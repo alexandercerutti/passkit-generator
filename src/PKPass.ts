@@ -403,9 +403,15 @@ export default class PKPass extends Bundle {
 		if ((match = pathName.match(translationsFileRegexp))) {
 			const [, lang] = match;
 
+			const parsedTranslations = Strings.parse(buffer).translations;
+
+			if (!parsedTranslations.length) {
+				return;
+			}
+
 			Object.assign(
 				(this[localizationSymbol][lang] ??= {}),
-				Object.fromEntries(Strings.parse(buffer).translations),
+				Object.fromEntries(parsedTranslations),
 			);
 
 			return;

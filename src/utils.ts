@@ -1,13 +1,8 @@
-import { EOL } from "os";
-import type * as Schemas from "./schemas";
-import { sep } from "path";
-
 /**
  * Checks if an rgb value is compliant with CSS-like syntax
  *
- * @function isValidRGB
- * @params {String} value - string to analyze
- * @returns {Boolean} True if valid rgb, false otherwise
+ * @params value - string to analyze
+ * @returns true if valid rgb, false otherwise
  */
 
 export function isValidRGB(value?: string): boolean {
@@ -25,6 +20,12 @@ export function isValidRGB(value?: string): boolean {
 
 	return rgb.slice(1, 4).every((v) => Math.abs(Number(v)) <= 255);
 }
+
+/**
+ * Acts as a wrapper for converting date to W3C string
+ * @param date
+ * @returns
+ */
 
 export function processDate(date: Date): string | null {
 	if (!(date instanceof Date)) {
@@ -50,10 +51,6 @@ export function processDate(date: Date): string | null {
  */
 
 function dateToW3CString(date: Date) {
-	if (!(date instanceof Date)) {
-		return "";
-	}
-
 	// if it is NaN, it is "Invalid Date"
 	if (isNaN(Number(date))) {
 		return undefined;
@@ -90,11 +87,10 @@ function padMeTwo(original: string | number) {
 }
 
 /**
- * Apply a filter to arg0 to remove hidden files names (starting with dot)
+ * Removes hidden files from a list (those starting with dot)
  *
- * @function removeHidden
- * @params {String[]} from - list of file names
- * @return {String[]}
+ * @params from - list of file names
+ * @return
  */
 
 export function removeHidden(from: Array<string>): Array<string> {

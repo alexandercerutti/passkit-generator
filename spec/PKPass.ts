@@ -1,22 +1,24 @@
 import {
 	default as PKPass,
 	localizationSymbol,
+	certificatesSymbol,
 	propsSymbol,
 } from "../lib/PKPass";
 
 describe("PKPass", () => {
 	let pass: PKPass;
+	const baseCerts = {
+		signerCert: "",
+		signerKey: "",
+		wwdr: "",
+		signerKeyPassphrase: "p477w0rb",
+	};
 
 	beforeEach(() => {
 		pass = new PKPass(
 			{},
 			/** @ts-ignore - We don't need certificates here*/
-			{
-				signerCert: "",
-				signerKey: "",
-				wwdr: "",
-				signerKeyPassphrase: "p477w0rb",
-			},
+			baseCerts,
 			{},
 		);
 	});
@@ -383,41 +385,27 @@ describe("PKPass", () => {
 
 	describe("transitType", () => {
 		it("should accept a new value only if the pass is a boarding pass", () => {
-			const mockBPPassJSON = Buffer.from(
-				JSON.stringify({
-					boardingPass: {},
-				}),
-			);
-
-			const mockCPPassJSON = Buffer.from(
-				JSON.stringify({
-					coupon: {},
-				}),
-			);
-
 			const passBP = new PKPass(
 				{
-					"pass.json": mockBPPassJSON,
+					"pass.json": Buffer.from(
+						JSON.stringify({
+							boardingPass: {},
+						}),
+					),
 				},
-				{
-					signerCert: "",
-					signerKey: "",
-					wwdr: "",
-					signerKeyPassphrase: "p477w0rb",
-				},
+				baseCerts,
 				{},
 			);
 
 			const passCP = new PKPass(
 				{
-					"pass.json": mockCPPassJSON,
+					"pass.json": Buffer.from(
+						JSON.stringify({
+							coupon: {},
+						}),
+					),
 				},
-				{
-					signerCert: "",
-					signerKey: "",
-					wwdr: "",
-					signerKeyPassphrase: "p477w0rb",
-				},
+				baseCerts,
 				{},
 			);
 
@@ -431,6 +419,38 @@ describe("PKPass", () => {
 				"Cannot set transitType on a pass with type different from 'boardingPass'.",
 			);
 			expect(passCP.transitType).toBeUndefined();
+		});
+	});
+
+	describe("certificates setter", () => {
+		it("should throw an error if certificates provided are not complete or invalid", () => {
+			expect(() => {
+				// @ts-expect-error
+				pass.certificates = {
+					signerCert: "",
+				};
+			}).toThrow();
+
+			expect(() => {
+				pass.certificates = {
+					// @ts-expect-error
+					signerCert: 5,
+					// @ts-expect-error
+					signerKey: 3,
+					wwdr: "",
+				};
+			}).toThrow();
+
+			expect(() => {
+				pass.certificates = {
+					signerCert: undefined,
+					signerKey: null,
+					wwdr: "",
+				};
+			}).toThrow();
+
+			/** Expecting previous result */
+			expect(pass[certificatesSymbol]).toEqual(baseCerts);
 		});
 	});
 

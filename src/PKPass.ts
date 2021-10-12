@@ -544,7 +544,7 @@ export default class PKPass extends Bundle {
 		super.addBuffer("pass.json", passJson);
 
 		const ICON_REGEX = /icon(?:@\d{1}x)?/;
-		if (!fileNames.some(ICON_REGEX.test)) {
+		if (!fileNames.some((fileName) => ICON_REGEX.test(fileName))) {
 			console.warn(
 				"At least one icon file is missing in your bundle. Your pass won't be openable by any Apple Device.",
 			);

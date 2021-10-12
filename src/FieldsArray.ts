@@ -1,7 +1,4 @@
 import * as Schemas from "./schemas";
-import debug from "debug";
-
-const fieldsDebug = debug("passkit:fields");
 
 /**
  * Class to represent lower-level keys pass fields

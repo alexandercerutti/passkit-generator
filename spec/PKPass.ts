@@ -5,6 +5,7 @@ import {
 	localizationSymbol,
 	certificatesSymbol,
 	propsSymbol,
+	passTypeSymbol,
 } from "../lib/PKPass";
 
 describe("PKPass", () => {
@@ -524,6 +525,69 @@ describe("PKPass", () => {
 			expect(pass.auxiliaryFields).toBeInstanceOf(FieldsArray);
 			expect(pass.headerFields).toBeInstanceOf(FieldsArray);
 			expect(pass.backFields).toBeInstanceOf(FieldsArray);
+		});
+	});
+
+	describe("type", () => {
+		describe("getter", () => {
+			it("should return undefined if no type have been setted", () => {
+				expect(pass.type).toBeUndefined();
+			});
+
+			it("should return a type if set through pass.json", () => {
+				pass.addBuffer(
+					"pass.json",
+					Buffer.from(
+						JSON.stringify({
+							boardingPass: {},
+						}),
+					),
+				);
+
+				expect(pass.type).toBe("boardingPass");
+			});
+		});
+
+		describe("setter", () => {
+			it("should throw error if a non recognized type is assigned", () => {
+				expect(
+					() =>
+						// @ts-expect-error
+						(pass.type = "asfdg"),
+				).toThrow();
+			});
+
+			it("should save the new type under a Symbol in class instance", () => {
+				pass.type = "boardingPass";
+				expect(pass[passTypeSymbol]).toBe("boardingPass");
+			});
+
+			it("should reset fields if they have been previously set", () => {
+				pass.type = "boardingPass";
+
+				const {
+					primaryFields,
+					secondaryFields,
+					auxiliaryFields,
+					headerFields,
+					backFields,
+				} = pass;
+
+				pass.type = "coupon";
+
+				expect(pass.primaryFields).not.toBe(primaryFields);
+				expect(pass.secondaryFields).not.toBe(secondaryFields);
+				expect(pass.auxiliaryFields).not.toBe(auxiliaryFields);
+				expect(pass.headerFields).not.toBe(headerFields);
+				expect(pass.backFields).not.toBe(backFields);
+			});
+
+			it("should delete the previous type if previously setted", () => {
+				pass.type = "boardingPass";
+				pass.type = "coupon";
+
+				expect(pass["boardingPass"]).toBeUndefined();
+			});
 		});
 	});
 

@@ -8,6 +8,7 @@ import {
 	propsSymbol,
 	passTypeSymbol,
 	importMetadataSymbol,
+	closePassSymbol,
 } from "../lib/PKPass";
 
 describe("PKPass", () => {
@@ -813,6 +814,167 @@ describe("PKPass", () => {
 			});
 			expect(pass.headerFields[0]).toEqual({ ...baseField, key: "hf0" });
 			expect(pass.backFields[0]).toEqual({ ...baseField, key: "bf0" });
+		});
+	});
+
+	describe("[closePassSymbol]", () => {
+		it("should add props to pass.json", () => {
+			pass.addBuffer(
+				"pass.json",
+				Buffer.from(
+					JSON.stringify({
+						boardingPass: {
+							headerFields: [],
+							primaryFields: [],
+							auxiliaryFields: [],
+							secondaryFields: [],
+							backFields: [],
+						},
+						serialNumber: "h12kj5b12k3331",
+					} as PassProps),
+				),
+			);
+
+			pass.setBarcodes({
+				format: "PKBarcodeFormatQR",
+				message: "meh a test barcode",
+			});
+
+			pass.addBuffer("icon@2x.png", Buffer.alloc(0));
+
+			pass[closePassSymbol](true);
+
+			expect(
+				JSON.parse(pass[filesSymbol]["pass.json"].toString("utf-8")),
+			).toEqual({
+				boardingPass: {
+					headerFields: [],
+					primaryFields: [],
+					auxiliaryFields: [],
+					secondaryFields: [],
+					backFields: [],
+				},
+				serialNumber: "h12kj5b12k3331",
+				barcodes: [
+					{
+						format: "PKBarcodeFormatQR",
+						message: "meh a test barcode",
+						messageEncoding: "iso-8859-1",
+					},
+				],
+			});
+		});
+
+		it("Should warn user if no icons have been added to bundle", () => {
+			console.warn = jasmine.createSpy("log");
+
+			pass.addBuffer(
+				"pass.json",
+				Buffer.from(
+					JSON.stringify({
+						boardingPass: {
+							headerFields: [],
+							primaryFields: [],
+							auxiliaryFields: [],
+							secondaryFields: [],
+							backFields: [],
+						},
+						serialNumber: "h12kj5b12k3331",
+					} as PassProps),
+				),
+			);
+
+			pass[closePassSymbol](true);
+
+			expect(console.warn).toHaveBeenCalledWith(
+				"At least one icon file is missing in your bundle. Your pass won't be openable by any Apple Device.",
+			);
+		});
+
+		it("should create back again pass.strings files", () => {
+			pass.addBuffer(
+				"pass.json",
+				Buffer.from(
+					JSON.stringify({
+						boardingPass: {
+							headerFields: [],
+							primaryFields: [],
+							auxiliaryFields: [],
+							secondaryFields: [],
+							backFields: [],
+						},
+						serialNumber: "h12kj5b12k3331",
+					} as PassProps),
+				),
+			);
+
+			pass.localize("it", {
+				home: "casa",
+				ciao: "hello",
+				cosa: "thing",
+			});
+
+			pass[closePassSymbol](true);
+
+			expect(pass[filesSymbol]["it.lproj/pass.strings"].length).not.toBe(
+				0,
+			);
+		});
+
+		it("should remove all personalisation if requirements are not met", () => {
+			pass.addBuffer(
+				"personalization.json",
+				Buffer.from(
+					JSON.stringify({
+						description:
+							"A test description for a test personalization",
+						requiredPersonalizationFields: [
+							"PKPassPersonalizationFieldName",
+							"PKPassPersonalizationFieldPostalCode",
+							"PKPassPersonalizationFieldEmailAddress",
+						],
+					}),
+				),
+			);
+
+			pass.addBuffer("personalizationLogo@2x.png", Buffer.alloc(0));
+
+			pass[closePassSymbol](true);
+
+			/** Pass is missing nfc data. */
+			expect(pass[filesSymbol]["personalization.json"]).toBeUndefined();
+			expect(
+				pass[filesSymbol]["personalizationLogo@2x.png"],
+			).toBeUndefined();
+
+			/** Next: pass will miss personalizationLogo */
+
+			pass.addBuffer(
+				"personalization.json",
+				Buffer.from(
+					JSON.stringify({
+						description:
+							"A test description for a test personalization",
+						requiredPersonalizationFields: [
+							"PKPassPersonalizationFieldName",
+							"PKPassPersonalizationFieldPostalCode",
+							"PKPassPersonalizationFieldEmailAddress",
+						],
+					}),
+				),
+			);
+
+			pass.setNFC({
+				message: "nfc-encrypted-message",
+				encryptionPublicKey: "none",
+			});
+
+			pass[closePassSymbol](true);
+
+			expect(pass[filesSymbol]["personalization.json"]).toBeUndefined();
+			expect(
+				pass[filesSymbol]["personalizationLogo@2x.png"],
+			).toBeUndefined();
 		});
 	});
 });

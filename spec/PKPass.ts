@@ -1,11 +1,13 @@
 import { filesSymbol } from "../lib/Bundle";
 import FieldsArray from "../lib/FieldsArray";
+import { PassProps } from "../lib/schemas";
 import {
 	default as PKPass,
 	localizationSymbol,
 	certificatesSymbol,
 	propsSymbol,
 	passTypeSymbol,
+	importMetadataSymbol,
 } from "../lib/PKPass";
 
 describe("PKPass", () => {
@@ -771,6 +773,46 @@ describe("PKPass", () => {
 
 			expect(pass[filesSymbol]["en.lproj/pass.string"]).toBeUndefined();
 			expect(pass[localizationSymbol]["en"]).toBeUndefined();
+		});
+	});
+
+	describe("[importMetadataSymbol]", () => {
+		it("should read data and set type", () => {
+			pass[importMetadataSymbol]({
+				boardingPass: {},
+			});
+
+			expect(pass.type).toBe("boardingPass");
+		});
+
+		it("should push fields to their own fields if a type is found", () => {
+			const baseField: PassProps["boardingPass"]["headerFields"][0] = {
+				key: "0",
+				value: "n/a",
+				label: "n/d",
+			};
+
+			pass[importMetadataSymbol]({
+				boardingPass: {
+					primaryFields: [{ ...baseField, key: "pf0" }],
+					secondaryFields: [{ ...baseField, key: "sf0" }],
+					auxiliaryFields: [{ ...baseField, key: "af0" }],
+					headerFields: [{ ...baseField, key: "hf0" }],
+					backFields: [{ ...baseField, key: "bf0" }],
+				},
+			} as PassProps);
+
+			expect(pass.primaryFields[0]).toEqual({ ...baseField, key: "pf0" });
+			expect(pass.secondaryFields[0]).toEqual({
+				...baseField,
+				key: "sf0",
+			});
+			expect(pass.auxiliaryFields[0]).toEqual({
+				...baseField,
+				key: "af0",
+			});
+			expect(pass.headerFields[0]).toEqual({ ...baseField, key: "hf0" });
+			expect(pass.backFields[0]).toEqual({ ...baseField, key: "bf0" });
 		});
 	});
 });

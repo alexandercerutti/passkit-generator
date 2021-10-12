@@ -511,7 +511,9 @@ export default class PKPass extends Bundle {
 	 * signature files
 	 */
 
-	private [closePassSymbol]() {
+	private [closePassSymbol](
+		__test_disable_manifest_signature_generation__: boolean = false,
+	) {
 		const fileNames = Object.keys(this[filesSymbol]);
 
 		/**
@@ -601,6 +603,10 @@ export default class PKPass extends Bundle {
 		// ****************************** //
 		// *** SIGNATURE AND MANIFEST *** //
 		// ****************************** //
+
+		if (__test_disable_manifest_signature_generation__) {
+			return;
+		}
 
 		const manifestBuffer = this[createManifestSymbol]();
 		super.addBuffer("manifest.json", manifestBuffer);

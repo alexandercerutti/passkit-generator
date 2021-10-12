@@ -5,7 +5,7 @@ import * as Signature from "./Signature";
 import * as Strings from "./StringsUtils";
 import { getModelFolderContents } from "./parser";
 import { Stream } from "stream";
-import { isValidRGB, processDate } from "./utils";
+import { processDate } from "./utils";
 
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
@@ -515,30 +515,6 @@ export default class PKPass extends Bundle {
 		__test_disable_manifest_signature_generation__: boolean = false,
 	) {
 		const fileNames = Object.keys(this[filesSymbol]);
-
-		/**
-		 * Filtering colors props that have an
-		 * invalid RGB value
-		 */
-
-		const passColors = [
-			"backgroundColor",
-			"foregroundColor",
-			"labelColor",
-		] as Array<keyof Schemas.PassColors>;
-
-		for (let i = 0; i < passColors.length; i++) {
-			const colorProperty = passColors[i];
-			const colorInProps = this[propsSymbol][colorProperty];
-
-			if (colorInProps && !isValidRGB(colorInProps)) {
-				console.warn(
-					`'${colorProperty}' property has been removed from pass.json as it has not a valid RGB-string value.`,
-				);
-
-				delete this[propsSymbol][colorProperty];
-			}
-		}
 
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
 		super.addBuffer("pass.json", passJson);

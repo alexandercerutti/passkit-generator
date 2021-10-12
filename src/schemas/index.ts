@@ -14,10 +14,12 @@ import { Barcode } from "./Barcodes";
 import { Location } from "./Location";
 import { Beacon } from "./Beacons";
 import { NFC } from "./NFC";
-import { Field } from "./PassFieldContent";
 import { PassFields, TransitType } from "./PassFields";
 import { Semantics } from "./SemanticTags";
 import { CertificatesSchema } from "./Certificates";
+
+const RGB_COLOR_REGEX =
+	/rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\)/;
 
 export interface FileBuffers {
 	[key: string]: Buffer;
@@ -128,10 +130,10 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	groupingIdentifier: Joi.string(),
 	suppressStripShine: Joi.boolean(),
 	maxDistance: Joi.number().positive(),
-	labelColor: Joi.string().min(10).max(16),
 	authenticationToken: Joi.string().min(16),
-	backgroundColor: Joi.string().min(10).max(16),
-	foregroundColor: Joi.string().min(10).max(16),
+	labelColor: Joi.string().regex(RGB_COLOR_REGEX),
+	backgroundColor: Joi.string().regex(RGB_COLOR_REGEX),
+	foregroundColor: Joi.string().regex(RGB_COLOR_REGEX),
 	associatedStoreIdentifiers: Joi.array().items(Joi.number()),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
 	// parsing url as set of words and nums followed by dots, optional port and any possible path after

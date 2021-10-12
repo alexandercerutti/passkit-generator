@@ -1,27 +1,4 @@
 /**
- * Checks if an rgb value is compliant with CSS-like syntax
- *
- * @params value - string to analyze
- * @returns true if valid rgb, false otherwise
- */
-
-export function isValidRGB(value?: string): boolean {
-	if (!value || typeof value !== "string") {
-		return false;
-	}
-
-	const rgb = value.match(
-		/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/,
-	);
-
-	if (!rgb) {
-		return false;
-	}
-
-	return rgb.slice(1, 4).every((v) => Math.abs(Number(v)) <= 255);
-}
-
-/**
  * Acts as a wrapper for converting date to W3C string
  * @param date
  * @returns

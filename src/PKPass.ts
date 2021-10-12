@@ -571,7 +571,7 @@ export default class PKPass extends Bundle {
 						`Personalization file '${fileNames[i]}' have been removed from the bundle as the requirements for personalization are not met.`,
 					);
 
-					delete this[propsSymbol][fileNames[i]];
+					delete this[filesSymbol][fileNames[i]];
 				}
 			}
 		}

@@ -1,4 +1,5 @@
 import { filesSymbol } from "../lib/Bundle";
+import FieldsArray from "../lib/FieldsArray";
 import {
 	default as PKPass,
 	localizationSymbol,
@@ -452,6 +453,77 @@ describe("PKPass", () => {
 
 			/** Expecting previous result */
 			expect(pass[certificatesSymbol]).toEqual(baseCerts);
+		});
+	});
+
+	describe("fields getters", () => {
+		it("should throw error if a type has not been defined", () => {
+			expect(() => pass.primaryFields).toThrowError(
+				TypeError,
+				"Cannot read properties of undefined (reading 'primaryFields')",
+			);
+			expect(() => pass.secondaryFields).toThrowError(
+				TypeError,
+				"Cannot read properties of undefined (reading 'secondaryFields')",
+			);
+			expect(() => pass.auxiliaryFields).toThrowError(
+				TypeError,
+				"Cannot read properties of undefined (reading 'auxiliaryFields')",
+			);
+			expect(() => pass.headerFields).toThrowError(
+				TypeError,
+				"Cannot read properties of undefined (reading 'headerFields')",
+			);
+			expect(() => pass.backFields).toThrowError(
+				TypeError,
+				"Cannot read properties of undefined (reading 'backFields')",
+			);
+		});
+
+		it("should return an instance of FieldsArray if a type have been set", () => {
+			pass.type = "boardingPass";
+
+			expect(pass.primaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.secondaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.auxiliaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.headerFields).toBeInstanceOf(FieldsArray);
+			expect(pass.backFields).toBeInstanceOf(FieldsArray);
+
+			/** Resetting Fields, when setting type */
+			pass.type = "coupon";
+
+			expect(pass.primaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.secondaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.auxiliaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.headerFields).toBeInstanceOf(FieldsArray);
+			expect(pass.backFields).toBeInstanceOf(FieldsArray);
+
+			/** Resetting Fields, when setting type */
+			pass.type = "storeCard";
+
+			expect(pass.primaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.secondaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.auxiliaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.headerFields).toBeInstanceOf(FieldsArray);
+			expect(pass.backFields).toBeInstanceOf(FieldsArray);
+
+			/** Resetting Fields, when setting type */
+			pass.type = "eventTicket";
+
+			expect(pass.primaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.secondaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.auxiliaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.headerFields).toBeInstanceOf(FieldsArray);
+			expect(pass.backFields).toBeInstanceOf(FieldsArray);
+
+			/** Resetting Fields, when setting type */
+			pass.type = "generic";
+
+			expect(pass.primaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.secondaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.auxiliaryFields).toBeInstanceOf(FieldsArray);
+			expect(pass.headerFields).toBeInstanceOf(FieldsArray);
+			expect(pass.backFields).toBeInstanceOf(FieldsArray);
 		});
 	});
 

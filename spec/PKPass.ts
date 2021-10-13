@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import * as path from "path";
-import { filesSymbol } from "../lib/Bundle";
+import { filesSymbol, freezeSymbol } from "../lib/Bundle";
 import FieldsArray from "../lib/FieldsArray";
 import { PassProps } from "../lib/schemas";
 import {
@@ -1102,6 +1102,44 @@ describe("PKPass", () => {
 
 				expect(newPass[propsSymbol]["voided"]).toBe(true);
 			});
+		});
+	});
+
+	describe("[static] pack", () => {
+		beforeEach(() => {
+			/** Bypass to avoid signature and manifest generation */
+			pass[freezeSymbol]();
+		});
+
+		it("should should throw error if not all the files passed are PKPasses", async () => {
+			await expectAsync(
+				// @ts-expect-error
+				PKPass.pack(pass, "pass.json", pass),
+			).toBeRejectedWithError(
+				Error,
+				"Cannot pack passes. Only PKPass instances allowed",
+			);
+		});
+
+		it("should output a frozen bundle of bundles", async () => {
+			const pkPassesBundle = await PKPass.pack(pass, pass);
+
+			expect(
+				pkPassesBundle[filesSymbol]["packed-pass-1.pkpass"],
+			).toBeInstanceOf(Buffer);
+			expect(
+				pkPassesBundle[filesSymbol]["packed-pass-2.pkpass"],
+			).toBeInstanceOf(Buffer);
+
+			expect(pkPassesBundle.isFrozen).toBe(true);
+		});
+
+		it("should output a bundle with pkpasses mimetype", async () => {
+			const pkPassesBundle = await PKPass.pack(pass, pass);
+
+			expect(pkPassesBundle.mimeType).toBe(
+				"application/vnd.apple.pkpasses",
+			);
 		});
 	});
 });

@@ -2,7 +2,7 @@ import { Stream } from "stream";
 import { ZipFile } from "yazl";
 
 export const filesSymbol = Symbol("bundleFiles");
-const freezeSymbol = Symbol("bundleFreeze");
+export const freezeSymbol = Symbol("bundleFreeze");
 const archiveSymbol = Symbol("zip");
 
 namespace Mime {

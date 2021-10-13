@@ -1,3 +1,5 @@
+import { promises as fs } from "fs";
+import * as path from "path";
 import { filesSymbol } from "../lib/Bundle";
 import FieldsArray from "../lib/FieldsArray";
 import { PassProps } from "../lib/schemas";
@@ -975,6 +977,131 @@ describe("PKPass", () => {
 			expect(
 				pass[filesSymbol]["personalizationLogo@2x.png"],
 			).toBeUndefined();
+		});
+	});
+
+	describe("[static] from", () => {
+		it("should throw if source is unavailable", async () => {
+			await expectAsync(
+				// @ts-expect-error
+				PKPass.from(),
+			).toBeRejectedWithError(
+				TypeError,
+				"Cannot create PKPass from source: source is 'undefined'",
+			);
+
+			await expectAsync(PKPass.from(null)).toBeRejectedWithError(
+				TypeError,
+				"Cannot create PKPass from source: source is 'null'",
+			);
+		});
+
+		describe("Prebuilt PKPass", () => {
+			it("should copy all source's buffers into current one", async () => {
+				pass.addBuffer(
+					"index@2x.png",
+					Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]),
+				);
+
+				const newPass = await PKPass.from(pass);
+
+				expect(
+					newPass[filesSymbol]["index@2x.png"].equals(
+						pass[filesSymbol]["index@2x.png"],
+					),
+				).toBe(true);
+				expect(newPass[filesSymbol]["index@2x.png"]).not.toBe(
+					pass[filesSymbol]["index@2x.png"],
+				);
+			});
+
+			it("should accept additional properties to be added to new buffer and ignore unknown props", async () => {
+				const newPass = await PKPass.from(pass, {
+					description: "mimmoh",
+					serialNumber: "626621523738123",
+					// @ts-expect-error
+					insert_here_invalid_unknown_parameter_name: false,
+				});
+
+				expect(newPass[propsSymbol]["description"]).toBe("mimmoh");
+				expect(newPass[propsSymbol]["serialNumber"]).toBe(
+					"626621523738123",
+				);
+				expect(
+					newPass[propsSymbol][
+						"insert_here_invalid_unknown_parameter_name"
+					],
+				).toBeUndefined();
+			});
+		});
+
+		describe("Template", () => {
+			it("should reject invalid templates", async () => {
+				await Promise.all([
+					expectAsync(
+						// @ts-expect-error
+						PKPass.from(5),
+					).toBeRejected(),
+					expectAsync(
+						// @ts-expect-error
+						PKPass.from({}),
+					).toBeRejected(),
+					expectAsync(
+						/** Missing certificates error */
+						// @ts-expect-error
+						PKPass.from({ model: "" }),
+					).toBeRejected(),
+					expectAsync(
+						/** Missing model error */
+						// @ts-expect-error
+						PKPass.from({ certificates: {} }),
+					).toBeRejected(),
+					expectAsync(
+						// @ts-expect-error
+						PKPass.from(""),
+					).toBeRejected(),
+					expectAsync(
+						// @ts-expect-error
+						PKPass.from(true),
+					).toBeRejected(),
+					expectAsync(
+						// @ts-expect-error
+						PKPass.from([]),
+					).toBeRejected(),
+				]);
+			});
+
+			it("should read model from fileSystem and props", async () => {
+				const footerFile = await fs.readFile(
+					path.resolve(
+						__dirname,
+						"../examples/models/exampleBooking.pass/footer.png",
+					),
+				);
+
+				const newPass = await PKPass.from({
+					model: path.resolve(
+						__dirname,
+						"../examples/models/exampleBooking.pass",
+					),
+					certificates: {
+						...baseCerts,
+					},
+					props: {
+						voided: true,
+					},
+				});
+
+				expect(Object.keys(newPass[filesSymbol]).length).toBe(7);
+
+				expect(newPass[filesSymbol]["footer.png"]).not.toBeUndefined();
+				expect(
+					newPass[filesSymbol]["footer.png"].equals(footerFile),
+				).toBe(true);
+				expect(newPass[filesSymbol]["footer.png"]).not.toBe(footerFile);
+
+				expect(newPass[propsSymbol]["voided"]).toBe(true);
+			});
 		});
 	});
 });

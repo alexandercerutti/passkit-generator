@@ -38,7 +38,7 @@ export default class PKPass extends Bundle {
 
 	static async from<S extends PKPass | Schemas.Template>(
 		source: S,
-		additionalProps: S extends PKPass
+		additionalProps?: S extends PKPass
 			? Schemas.OverridablePassProps
 			: never,
 	): Promise<PKPass> {
@@ -81,7 +81,7 @@ export default class PKPass extends Bundle {
 
 			buffers = await getModelFolderContents(source.model);
 			certificates = source.certificates;
-			props = Schemas.validate(Schemas.OverridablePassProps, props);
+			props = Schemas.validate(Schemas.OverridablePassProps, source.props);
 		}
 
 		if (additionalProps && Object.keys(additionalProps).length) {

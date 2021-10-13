@@ -25,7 +25,6 @@
 		"Pass"
 	],
 	"dependencies": {
-		"debug": "^4.3.2",
 		"joi": "^17.4.2",
 		"node-forge": "^0.10.0",
 		"tslib": "^2.3.1",
@@ -35,7 +34,6 @@
 		"node": ">=14.18.1"
 	},
 	"devDependencies": {
-		"@types/debug": "^4.1.7",
 		"@types/jasmine": "^3.9.1",
 		"@types/node": "^16.10.8",
 		"@types/node-forge": "^0.10.8",

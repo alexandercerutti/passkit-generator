@@ -73,3 +73,35 @@ function padMeTwo(original: string | number) {
 export function removeHidden(from: Array<string>): Array<string> {
 	return from.filter((e) => e.charAt(0) !== ".");
 }
+
+/**
+ * Freezes recursively an object and all of its properties
+ *
+ * @param object
+ * @returns
+ */
+
+export function freezeRecursive(object: Object) {
+	const objectCopy = {};
+	const objectEntries = Object.entries(object);
+
+	for (let i = 0; i < objectEntries.length; i++) {
+		const [key, value] = objectEntries[i];
+
+		if (value && typeof value === "object") {
+			if (Array.isArray(value)) {
+				objectCopy[key] = value.slice();
+
+				for (let j = 0; j < value.length; j++) {
+					objectCopy[key][j] = freezeRecursive(value[j]);
+				}
+			} else {
+				objectCopy[key] = freezeRecursive(value);
+			}
+		} else {
+			objectCopy[key] = value;
+		}
+	}
+
+	return Object.freeze(objectCopy);
+}

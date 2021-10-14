@@ -199,7 +199,7 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get props(): Readonly<Schemas.PassProps> {
-		return freezeRecusive(this[propsSymbol]);
+		return Utils.freezeRecursive(this[propsSymbol]);
 	}
 
 	/**
@@ -911,31 +911,6 @@ export default class PKPass extends Bundle {
 		this[propsSymbol]["nfc"] =
 			Schemas.validate(Schemas.NFC, nfc) ?? undefined;
 	}
-}
-
-function freezeRecusive(object: Object) {
-	const objectCopy = {};
-	const objectEntries = Object.entries(object);
-
-	for (let i = 0; i < objectEntries.length; i++) {
-		const [key, value] = objectEntries[i];
-
-		if (value && typeof value === "object") {
-			if (Array.isArray(value)) {
-				objectCopy[key] = value.slice();
-
-				for (let j = 0; j < value.length; j++) {
-					objectCopy[key][j] = freezeRecusive(value[j]);
-				}
-			} else {
-				objectCopy[key] = freezeRecusive(value);
-			}
-		} else {
-			objectCopy[key] = value;
-		}
-	}
-
-	return Object.freeze(objectCopy);
 }
 
 function validateJSONBuffer(

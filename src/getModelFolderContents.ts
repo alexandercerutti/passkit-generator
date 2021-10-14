@@ -1,6 +1,6 @@
 import * as path from "path";
+import * as Utils from "./utils";
 import formatMessage, { ERROR } from "./messages";
-import { removeHidden } from "./utils";
 import { promises as fs } from "fs";
 
 /**
@@ -19,7 +19,7 @@ export default async function getModelFolderContents(
 		const modelFilesList = await fs.readdir(modelPath);
 
 		// No dot-starting files, manifest and signature
-		const filteredModelRecords = removeHidden(modelFilesList).filter(
+		const filteredModelRecords = Utils.removeHidden(modelFilesList).filter(
 			(f) =>
 				!/(manifest|signature)/i.test(f) &&
 				/.+$/.test(path.parse(f).ext),
@@ -116,7 +116,7 @@ function getObjectFromModelFile(
  */
 
 async function readDirectory(filePath: string) {
-	const dirContent = await fs.readdir(filePath).then(removeHidden);
+	const dirContent = await fs.readdir(filePath).then(Utils.removeHidden);
 
 	return dirContent.map(async (fileName) => {
 		const content = await fs.readFile(path.resolve(filePath, fileName));

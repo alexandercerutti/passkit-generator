@@ -4,8 +4,8 @@ import getModelFolderContents from "./getModelFolderContents";
 import * as Schemas from "./schemas";
 import * as Signature from "./Signature";
 import * as Strings from "./StringsUtils";
+import * as Utils from "./utils";
 import { Stream } from "stream";
-import { processDate } from "./utils";
 
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
@@ -710,7 +710,7 @@ export default class PKPass extends Bundle {
 		}
 
 		try {
-			this[propsSymbol]["expirationDate"] = processDate(date);
+			this[propsSymbol]["expirationDate"] = Utils.processDate(date);
 		} catch (err) {
 			throw new TypeError(
 				`Cannot set expirationDate. Invalid date ${date}`,
@@ -799,7 +799,7 @@ export default class PKPass extends Bundle {
 		}
 
 		try {
-			this[propsSymbol]["relevantDate"] = processDate(date);
+			this[propsSymbol]["relevantDate"] = Utils.processDate(date);
 		} catch (err) {
 			throw new TypeError(
 				`Cannot set relevantDate. Invalid date ${date}`,

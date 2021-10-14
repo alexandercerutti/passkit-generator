@@ -11,7 +11,7 @@ import { promises as fs } from "fs";
  * 		filePaths and the relative buffer
  */
 
-export async function getModelFolderContents(
+export default async function getModelFolderContents(
 	model: string,
 ): Promise<{ [filePath: string]: Buffer }> {
 	try {
@@ -58,12 +58,8 @@ export async function getModelFolderContents(
 				);
 			} else if (err.syscall === "scandir") {
 				// directory reading failed
-				const pathContents = (err.path as string).split(/(\/|\\\?)/);
 				throw new Error(
-					formatMessage(
-						ERROR.MODELF_FILE_NOT_FOUND,
-						pathContents[pathContents.length - 1],
-					),
+					formatMessage(ERROR.MODELF_FILE_NOT_FOUND, err.path),
 				);
 			}
 		}

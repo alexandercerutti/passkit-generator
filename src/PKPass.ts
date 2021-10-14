@@ -1,9 +1,9 @@
 import FieldsArray from "./FieldsArray";
 import Bundle, { filesSymbol } from "./Bundle";
+import getModelFolderContents from "./getModelFolderContents";
 import * as Schemas from "./schemas";
 import * as Signature from "./Signature";
 import * as Strings from "./StringsUtils";
-import { getModelFolderContents } from "./parser";
 import { Stream } from "stream";
 import { processDate } from "./utils";
 

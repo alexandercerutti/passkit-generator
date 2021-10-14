@@ -85,6 +85,31 @@ describe("Bundle", () => {
 				).toThrowError(Error, "Cannot add file. Bundle is closed.");
 			});
 		});
+
+		describe("getAsRaw", () => {
+			it("should freeze the bundle", () => {
+				bundle.getAsRaw();
+				expect(bundle.isFrozen).toBe(true);
+			});
+
+			it("should return an object with filePath as key and Buffer as value", () => {
+				bundle.addBuffer("pass.json", Buffer.alloc(0));
+				bundle.addBuffer("signature", Buffer.alloc(0));
+				bundle.addBuffer("en.lproj/pass.strings", Buffer.alloc(0));
+				bundle.addBuffer("en.lproj/icon.png", Buffer.alloc(0));
+
+				const list = bundle.getAsRaw();
+
+				expect(list["pass.json"]).not.toBeUndefined();
+				expect(list["pass.json"]).toBeInstanceOf(Buffer);
+				expect(list["signature"]).not.toBeUndefined();
+				expect(list["signature"]).toBeInstanceOf(Buffer);
+				expect(list["en.lproj/pass.strings"]).not.toBeUndefined();
+				expect(list["en.lproj/pass.strings"]).toBeInstanceOf(Buffer);
+				expect(list["en.lproj/icon.png"]).not.toBeUndefined();
+				expect(list["en.lproj/icon.png"]).toBeInstanceOf(Buffer);
+			});
+		});
 	});
 });
 

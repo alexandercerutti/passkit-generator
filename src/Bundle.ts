@@ -127,4 +127,19 @@ export default class Bundle {
 		this[freezeSymbol]();
 		return this[archiveSymbol].outputStream;
 	}
+
+	/**
+	 * Closes the bundle and returns it as an object.
+	 * This allows developers to choose a different way
+	 * of serving, analyzing or zipping the file, outside the
+	 * default compression system.
+	 *
+	 * @returns a frozen object containing files paths as key
+	 * 		and Buffers as content.
+	 */
+
+	public getAsRaw(): { [filePath: string]: Buffer } {
+		this[freezeSymbol]();
+		return Object.freeze({ ...this[filesSymbol] });
+	}
 }

@@ -630,6 +630,28 @@ export default class PKPass extends Bundle {
 		return super.getAsStream();
 	}
 
+	/**
+	 * Exports the pass as a list of file paths and buffers.
+	 * When this method is invoked, the bundle will get
+	 * frozen and, thus, no files will be allowed to be
+	 * added any further.
+	 *
+	 * This allows developers to choose a different way
+	 * of serving, analyzing or zipping the file, outside the
+	 * default compression system.
+	 *
+	 * @returns a frozen object containing files paths as key
+	 * 		and Buffers as content.
+	 */
+
+	public getAsRaw(): { [filePath: string]: Buffer } {
+		if (!this.isFrozen) {
+			this[closePassSymbol]();
+		}
+
+		return super.getAsRaw();
+	}
+
 	// ************************** //
 	// *** DATA SETUP METHODS *** //
 	// ************************** //

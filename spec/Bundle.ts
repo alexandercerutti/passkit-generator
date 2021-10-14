@@ -8,61 +8,83 @@ describe("Bundle", () => {
 		bundle = new Bundle("application/vnd.apple.pkpass");
 	});
 
-	it("should throw an error if no mime-type is specified in the constructor", () => {
-		// @ts-expect-error
-		expect(() => new Bundle()).toThrowError(
-			Error,
-			"Cannot build Bundle. MimeType is missing",
-		);
+	describe("freezable", () => {
+		it("should expose freeze method and bundle itself to be frozen", () => {
+			const [bundle, freeze] = Bundle.freezable("any/any");
+			freeze();
+			expect(bundle.isFrozen).toBe(true);
+		});
 	});
 
-	it("should expose the mime-type as public property", () => {
-		expect(bundle.mimeType).toBe("application/vnd.apple.pkpass");
+	describe("mimeType", () => {
+		it("should throw an error if no mime-type is specified in the constructor", () => {
+			// @ts-expect-error
+			expect(() => new Bundle()).toThrowError(
+				Error,
+				"Cannot build Bundle. MimeType is missing",
+			);
+		});
+
+		it("should expose the mime-type as public property", () => {
+			expect(bundle.mimeType).toBe("application/vnd.apple.pkpass");
+		});
 	});
 
-	it("should allow to add buffers", () => {
-		const buffer = Buffer.alloc(0);
-		bundle.addBuffer("pass.json", buffer);
+	describe("addBuffer", () => {
+		it("should allow to add buffers", () => {
+			const buffer = Buffer.alloc(0);
+			bundle.addBuffer("pass.json", buffer);
 
-		expect(bundle[filesSymbol]).toEqual({ "pass.json": buffer });
+			expect(bundle[filesSymbol]).toEqual({ "pass.json": buffer });
+		});
 	});
 
-	it("should throw error if freezed", async () => {
-		addEmptyFilesToBundle(bundle);
+	describe("exporting", () => {
+		describe("getAsStream", () => {
+			it("should return a stream", () => {
+				addEmptyFilesToBundle(bundle);
 
-		await bundle.getAsBuffer();
+				expect(bundle.getAsStream()).toBeInstanceOf(Stream);
+			});
 
-		expect(() =>
-			bundle.addBuffer("icon.png", Buffer.alloc(0)),
-		).toThrowError(Error, "Cannot add file. Bundle is closed.");
-	});
+			it("should freeze the bundle", () => {
+				bundle.getAsStream();
+				expect(bundle.isFrozen).toBe(true);
+			});
 
-	it("should return a stream with 'getAsStream'", () => {
-		addEmptyFilesToBundle(bundle);
+			it("should throw error if a file is attempted to be added when bundle is frozen", () => {
+				addEmptyFilesToBundle(bundle);
 
-		expect(bundle.getAsStream()).toBeInstanceOf(Stream);
-	});
+				bundle.getAsStream();
 
-	it("should freeze the bundle when using 'getAsStream'", () => {
-		bundle.getAsStream();
-		expect(bundle.isFrozen).toBe(true);
-	});
+				expect(() =>
+					bundle.addBuffer("icon.png", Buffer.alloc(0)),
+				).toThrowError(Error, "Cannot add file. Bundle is closed.");
+			});
+		});
 
-	it("should return a buffer with 'getAsBuffer'", async () => {
-		addEmptyFilesToBundle(bundle);
+		describe("getAsBuffer", () => {
+			it("should return a buffer", async () => {
+				addEmptyFilesToBundle(bundle);
 
-		expect(await bundle.getAsBuffer()).toBeInstanceOf(Buffer);
-	});
+				expect(await bundle.getAsBuffer()).toBeInstanceOf(Buffer);
+			});
 
-	it("should freeze the bundle when using 'getAsBuffer'", async () => {
-		await bundle.getAsBuffer();
-		expect(bundle.isFrozen).toBe(true);
-	});
+			it("should freeze the bundle", async () => {
+				await bundle.getAsBuffer();
+				expect(bundle.isFrozen).toBe(true);
+			});
 
-	it("freezables should expose freezable and bundle itself to be frozen", () => {
-		const [bundle, freeze] = Bundle.freezable("any/any");
-		freeze();
-		expect(bundle.isFrozen).toBe(true);
+			it("should throw error if a file is attempted to be added when bundle is frozen", async () => {
+				addEmptyFilesToBundle(bundle);
+
+				await bundle.getAsBuffer();
+
+				expect(() =>
+					bundle.addBuffer("icon.png", Buffer.alloc(0)),
+				).toThrowError(Error, "Cannot add file. Bundle is closed.");
+			});
+		});
 	});
 });
 

@@ -1,71 +1,86 @@
-export const ERROR = {
-	CP_INIT:
-		"Something went really bad in the %s initialization! Look at the log below this message. It should contain all the infos about the problem: \n%s",
-	CP_NO_OPTS:
-		"Cannot initialize the pass or abstract model creation: no options were passed.",
-	CP_NO_CERTS:
-		"Cannot initialize the pass creation: no valid certificates were passed.",
-	PASSFILE_VALIDATION_FAILED:
-		"Validation of pass type failed. Pass file is not a valid buffer or (more probably) does not respect the schema.\nRefer to https://apple.co/2Nvshvn to build a correct pass.",
-	REQUIR_VALID_FAILED:
-		"The options passed to Pass constructor does not meet the requirements.\nRefer to the documentation to compile them correctly.",
-	MODEL_UNINITIALIZED:
-		"Provided model ( %s ) matched but unitialized or may not contain icon or a valid pass.json.\nRefer to https://apple.co/2IhJr0Q, https://apple.co/2Nvshvn and documentation to fill the model correctly.",
-	MODEL_NOT_VALID:
-		"A model must be provided in form of path (string) or object { 'fileName': Buffer } in order to continue.",
-	MODELF_NOT_FOUND: "Model %s not found. Provide a valid one to continue.",
-	MODELF_FILE_NOT_FOUND: "File %s not found.",
-	INVALID_CERTS:
-		"Invalid certificate(s) loaded: %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase).\nRefer to docs to obtain them.",
-	INVALID_CERT_PATH: "Invalid certificate loaded. %s does not exist.",
-	TRSTYPE_REQUIRED:
-		"Cannot proceed with pass creation. transitType field is required for boardingPasses.",
-	OVV_KEYS_BADFORMAT:
-		"Cannot proceed with pass creation due to bad keys format in overrides.",
-	NO_PASS_TYPE:
-		"Cannot proceed with pass creation. Model definition (pass.json) has no valid type in it.\nRefer to https://apple.co/2wzyL5J to choose a valid pass type.",
+export const CERTIFICATES = {
+	INVALID:
+		"Invalid certificate(s) loaded. %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase).\nRefer to docs to obtain them",
 } as const;
 
-export const DEBUG = {
-	TRSTYPE_NOT_VALID:
-		'Transit type changing rejected as not compliant with Apple Specifications. Transit type would become "%s" but should be in [PKTransitTypeAir, PKTransitTypeBoat, PKTransitTypeBus, PKTransitTypeGeneric, PKTransitTypeTrain]',
-	BRC_NOT_SUPPORTED:
-		"Format not found among barcodes. Cannot set backward compatibility.",
-	BRC_FORMATTYPE_UNMATCH:
-		"Format must be a string or null. Cannot set backward compatibility.",
-	BRC_AUTC_MISSING_DATA:
-		"Unable to autogenerate barcodes. Data is not a string.",
-	BRC_BW_FORMAT_UNSUPPORTED:
-		"This format is not supported (by Apple) for backward support. Please choose another one.",
-	BRC_NO_POOL:
-		"Cannot set barcode: no barcodes found. Please set barcodes first. Barcode is for retrocompatibility only.",
-	DATE_FORMAT_UNMATCH: "%s was not set due to incorrect date format.",
-	NFC_INVALID:
-		"Unable to set NFC properties: data not compliant with schema.",
-	PRS_INVALID:
-		"Unable to parse Personalization.json. File is not a valid JSON. Error: %s",
-	PRS_REMOVED:
-		"Personalization has been removed as it requires an NFC-enabled pass to work.",
+export const TRANSIT_TYPE = {
+	UNEXPECTED_PASS_TYPE:
+		"Cannot set transitType on a pass with type different from boardingPass.",
+	INVALID:
+		"Cannot set transitType because not compliant with Apple specifications. Refer to https://apple.co/3DHuAG4 for more - %s",
 } as const;
 
-type ERROR_OR_DEBUG_MESSAGE =
-	| typeof ERROR[keyof typeof ERROR]
-	| typeof DEBUG[keyof typeof DEBUG];
+export const PASS_TYPE = {
+	INVALID:
+		"Cannot set type because not compliant with Apple specifications. Refer to https://apple.co/3aFpSfg for a list of valid props - %s",
+} as const;
+
+export const TEMPLATE = {
+	INVALID: "Cannot create pass from a template. %s",
+} as const;
+
+export const FILTER_VALID = {
+	INVALID: "Cannot validate property. %s",
+} as const;
+
+export const FIELDS = {
+	INVALID: "Cannot add field. %s",
+	REPEATED_KEY:
+		"Cannot add field with key '%s': another field already owns this key. Ignored.",
+} as const;
+
+export const DATE = {
+	INVALID: "Cannot set %s. Invalid date %s",
+} as const;
+
+export const LANGUAGES = {
+	INVALID_TYPE:
+		"Cannot set localization. Expected a string for 'lang' but received %s",
+} as const;
+
+export const BARCODES = {
+	INVALID_POST: "",
+} as const;
+
+export const PASS_SOURCE = {
+	INVALID: "Cannot add pass.json to bundle because it is invalid. %s",
+	UNKNOWN_TYPE:
+		"Cannot find a valid type in pass.json. You won't be able to set fields until you won't set explicitly one.",
+	JOIN: "The imported pass.json's properties will be joined with the current setted props. You might lose some data.",
+} as const;
+
+export const PERSONALIZATION = {
+	INVALID:
+		"Cannot add personalization.json to bundle because it is invalid. %s",
+} as const;
+
+export const JSON = {
+	INVALID: "Cannot parse JSON. Invalid file",
+} as const;
+
+export const CLOSE = {
+	MISSING_TYPE: "Cannot proceed creating the pass because type is missing.",
+	MISSING_ICON:
+		"At least one icon file is missing in your bundle. Your pass won't be openable by any Apple Device.",
+	PERSONALIZATION_REMOVED:
+		"Personalization file '%s' have been removed from the bundle as the requirements for personalization are not met.",
+	MISSING_TRANSIT_TYPE:
+		"Cannot proceed creating the pass because transitType is missing on your boardingPass.",
+};
+
+export const MODELS = {
+	DIR_NOT_FOUND: "Cannot import model: directory %s not found.",
+	FILE_NO_OPEN: "Cannot open model file. %s",
+} as const;
 
 /**
  * Creates a message with replaced values
- * @param {string} messageName
- * @param  {any[]} values
+ * @param messageName
+ * @param values
  */
 
-export default function format(
-	messageName: ERROR_OR_DEBUG_MESSAGE,
-	...values: any[]
-) {
+export default function format(messageName: string, ...values: any[]) {
 	// reversing because it is better popping than shifting.
-	let replaceValues = values.reverse();
-	return messageName.replace(/%s/g, () => {
-		let next = replaceValues.pop();
-		return next !== undefined ? next : "<passedValueIsUndefined>";
-	});
+	const replaceValues = values.reverse();
+	return messageName.replace(/%s/g, () => replaceValues.pop());
 }

@@ -3,6 +3,7 @@ import * as path from "path";
 import { filesSymbol, freezeSymbol } from "../lib/Bundle";
 import FieldsArray from "../lib/FieldsArray";
 import { PassProps } from "../lib/schemas";
+import * as Messages from "../lib/messages";
 import {
 	default as PKPass,
 	localizationSymbol,
@@ -292,22 +293,6 @@ describe("PKPass", () => {
 			);
 		});
 
-		it("should throw error if a boolean parameter is received", () => {
-			// @ts-expect-error
-			expect(() => pass.setBarcodes(true)).toThrowError(
-				TypeError,
-				"Expected Schema.Barcode in setBarcodes but no one is valid.",
-			);
-		});
-
-		it("should ignore if a number parameter is received", () => {
-			// @ts-expect-error
-			expect(() => pass.setBarcodes(42)).toThrowError(
-				TypeError,
-				"Expected Schema.Barcode in setBarcodes but no one is valid.",
-			);
-		});
-
 		it("should autogenerate all the barcodes objects if a string is provided as message", () => {
 			pass.setBarcodes("28363516282");
 			expect(pass.props["barcodes"].length).toBe(4);
@@ -424,8 +409,9 @@ describe("PKPass", () => {
 				() => (passCP.transitType = "PKTransitTypeAir"),
 			).toThrowError(
 				TypeError,
-				"Cannot set transitType on a pass with type different from 'boardingPass'.",
+				Messages.TRANSIT_TYPE.UNEXPECTED_PASS_TYPE,
 			);
+
 			expect(passCP.transitType).toBeUndefined();
 		});
 	});
@@ -600,30 +586,30 @@ describe("PKPass", () => {
 		it("should fail throw if lang is not a string", () => {
 			expect(() => pass.localize(null)).toThrowError(
 				TypeError,
-				"Cannot set localization. Expected a string for 'lang' but received a object",
+				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "object"),
 			);
 
 			expect(() => pass.localize(undefined)).toThrowError(
 				TypeError,
-				"Cannot set localization. Expected a string for 'lang' but received a undefined",
+				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "undefined"),
 			);
 
 			// @ts-expect-error
 			expect(() => pass.localize(5)).toThrowError(
 				TypeError,
-				"Cannot set localization. Expected a string for 'lang' but received a number",
+				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "number"),
 			);
 
 			// @ts-expect-error
 			expect(() => pass.localize(true)).toThrowError(
 				TypeError,
-				"Cannot set localization. Expected a string for 'lang' but received a boolean",
+				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "boolean"),
 			);
 
 			// @ts-expect-error
 			expect(() => pass.localize({})).toThrowError(
 				TypeError,
-				"Cannot set localization. Expected a string for 'lang' but received a object",
+				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "object"),
 			);
 		});
 
@@ -820,12 +806,12 @@ describe("PKPass", () => {
 	});
 
 	describe("[closePassSymbol]", () => {
-		it("should add props to pass.json", () => {
+		beforeEach(() => {
 			pass.addBuffer(
 				"pass.json",
 				Buffer.from(
 					JSON.stringify({
-						boardingPass: {
+						coupon: {
 							headerFields: [],
 							primaryFields: [],
 							auxiliaryFields: [],
@@ -836,7 +822,9 @@ describe("PKPass", () => {
 					} as PassProps),
 				),
 			);
+		});
 
+		it("should add props to pass.json", () => {
 			pass.setBarcodes({
 				format: "PKBarcodeFormatQR",
 				message: "meh a test barcode",
@@ -849,7 +837,7 @@ describe("PKPass", () => {
 			expect(
 				JSON.parse(pass[filesSymbol]["pass.json"].toString("utf-8")),
 			).toEqual({
-				boardingPass: {
+				coupon: {
 					headerFields: [],
 					primaryFields: [],
 					auxiliaryFields: [],
@@ -869,23 +857,6 @@ describe("PKPass", () => {
 
 		it("Should warn user if no icons have been added to bundle", () => {
 			console.warn = jasmine.createSpy("log");
-
-			pass.addBuffer(
-				"pass.json",
-				Buffer.from(
-					JSON.stringify({
-						boardingPass: {
-							headerFields: [],
-							primaryFields: [],
-							auxiliaryFields: [],
-							secondaryFields: [],
-							backFields: [],
-						},
-						serialNumber: "h12kj5b12k3331",
-					} as PassProps),
-				),
-			);
-
 			pass[closePassSymbol](true);
 
 			expect(console.warn).toHaveBeenCalledWith(
@@ -894,22 +865,6 @@ describe("PKPass", () => {
 		});
 
 		it("should create back again pass.strings files", () => {
-			pass.addBuffer(
-				"pass.json",
-				Buffer.from(
-					JSON.stringify({
-						boardingPass: {
-							headerFields: [],
-							primaryFields: [],
-							auxiliaryFields: [],
-							secondaryFields: [],
-							backFields: [],
-						},
-						serialNumber: "h12kj5b12k3331",
-					} as PassProps),
-				),
-			);
-
 			pass.localize("it", {
 				home: "casa",
 				ciao: "hello",
@@ -977,6 +932,24 @@ describe("PKPass", () => {
 			expect(
 				pass[filesSymbol]["personalizationLogo@2x.png"],
 			).toBeUndefined();
+		});
+
+		it("should throw if no pass type have specified", () => {
+			pass.type = undefined; /** reset */
+
+			expect(() => pass[closePassSymbol](true)).toThrowError(
+				TypeError,
+				Messages.CLOSE.MISSING_TYPE,
+			);
+		});
+
+		it("should throw if a boarding pass is exported without a transitType", () => {
+			pass.type = "boardingPass";
+
+			expect(() => pass[closePassSymbol](true)).toThrowError(
+				TypeError,
+				Messages.CLOSE.MISSING_TRANSIT_TYPE,
+			);
 		});
 	});
 

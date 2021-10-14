@@ -1,4 +1,5 @@
 import * as Schemas from "./schemas";
+import formatMessage, * as Messages from "./messages";
 
 /**
  * Class to represent lower-level keys pass fields
@@ -24,15 +25,22 @@ export default class FieldsArray extends Array<Schemas.Field> {
 		const validFields = fieldsData.reduce(
 			(acc: Schemas.Field[], current: Schemas.Field) => {
 				try {
-					Schemas.assertValidity(Schemas.Field, current);
+					Schemas.assertValidity(
+						Schemas.Field,
+						current,
+						Messages.FIELDS.INVALID,
+					);
 				} catch (err) {
-					console.warn(`Cannot add field: ${err}`);
+					console.warn(err);
 					return acc;
 				}
 
 				if (this[poolSymbol].has(current.key)) {
 					console.warn(
-						`Cannot add field with key '${current.key}': another field already owns this key. Ignored.`,
+						formatMessage(
+							Messages.FIELDS.REPEATED_KEY,
+							current.key,
+						),
 					);
 					return acc;
 				}

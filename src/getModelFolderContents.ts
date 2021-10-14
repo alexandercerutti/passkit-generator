@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as Utils from "./utils";
-import formatMessage, { ERROR } from "./messages";
+import formatMessage, * as Messages from "./messages";
 import { promises as fs } from "fs";
 
 /**
@@ -54,12 +54,15 @@ export default async function getModelFolderContents(
 			if (err.syscall === "open") {
 				// file opening failed
 				throw new Error(
-					formatMessage(ERROR.MODELF_NOT_FOUND, err.path),
+					formatMessage(
+						Messages.MODELS.FILE_NO_OPEN,
+						JSON.stringify(err),
+					),
 				);
 			} else if (err.syscall === "scandir") {
 				// directory reading failed
 				throw new Error(
-					formatMessage(ERROR.MODELF_FILE_NOT_FOUND, err.path),
+					formatMessage(Messages.MODELS.DIR_NOT_FOUND, err.path),
 				);
 			}
 		}

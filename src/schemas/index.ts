@@ -18,6 +18,8 @@ import { PassFields, TransitType } from "./PassFields";
 import { Semantics } from "./SemanticTags";
 import { CertificatesSchema } from "./Certificates";
 
+import formatMessage, * as Messages from "../messages";
+
 const RGB_COLOR_REGEX =
 	/rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\)/;
 
@@ -194,10 +196,21 @@ export function isValid<T extends Object>(
 export function assertValidity<T>(
 	schema: Joi.ObjectSchema<T> | Joi.StringSchema,
 	data: T,
+	customErrorMessage?: string,
 ): void {
 	const validation = schema.validate(data);
 
 	if (validation.error) {
+		if (customErrorMessage) {
+			console.warn(validation.error);
+			throw new TypeError(
+				`${validation.error.name} happened. ${formatMessage(
+					customErrorMessage,
+					validation.error.message,
+				)}`,
+			);
+		}
+
 		throw new TypeError(validation.error.message);
 	}
 }
@@ -239,7 +252,8 @@ export function filterValid<T extends Object>(
 	return source.reduce((acc, current) => {
 		try {
 			return [...acc, validate(schema, current)];
-		} catch {
+		} catch (err) {
+			console.warn(formatMessage(Messages.FILTER_VALID.INVALID, err));
 			return [...acc];
 		}
 	}, []);

@@ -6,6 +6,7 @@ import * as Signature from "./Signature";
 import * as Strings from "./StringsUtils";
 import * as Utils from "./utils";
 import { Stream } from "stream";
+import formatMessage, * as Messages from "./messages";
 
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
@@ -77,7 +78,11 @@ export default class PKPass extends Bundle {
 				JSON.stringify(source[propsSymbol]),
 			);
 		} else {
-			Schemas.assertValidity(Schemas.Template, source);
+			Schemas.assertValidity(
+				Schemas.Template,
+				source,
+				Messages.TEMPLATE.INVALID,
+			);
 
 			buffers = await getModelFolderContents(source.model);
 			certificates = source.certificates;
@@ -180,7 +185,11 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set certificates(certs: Schemas.CertificatesSchema) {
-		Schemas.assertValidity(Schemas.CertificatesSchema, certs);
+		Schemas.assertValidity(
+			Schemas.CertificatesSchema,
+			certs,
+			Messages.CERTIFICATES.INVALID,
+		);
 		this[certificatesSymbol] = certs;
 	}
 
@@ -202,13 +211,15 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set transitType(value: Schemas.TransitType) {
-		if (!this[propsSymbol].boardingPass) {
-			throw new TypeError(
-				"Cannot set transitType on a pass with type different from 'boardingPass'.",
-			);
+		if (this.type !== "boardingPass") {
+			throw new TypeError(Messages.TRANSIT_TYPE.UNEXPECTED_PASS_TYPE);
 		}
 
-		Schemas.assertValidity(Schemas.TransitType, value);
+		Schemas.assertValidity(
+			Schemas.TransitType,
+			value,
+			Messages.TRANSIT_TYPE.INVALID,
+		);
 		this[propsSymbol]["boardingPass"].transitType = value;
 	}
 
@@ -291,7 +302,11 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set type(type: Schemas.PassTypesProps) {
-		Schemas.assertValidity(Schemas.PassType, type);
+		Schemas.assertValidity(
+			Schemas.PassType,
+			type,
+			Messages.PASS_TYPE.INVALID,
+		);
 
 		if (this.type) {
 			/**
@@ -360,9 +375,14 @@ export default class PKPass extends Bundle {
 				return;
 			}
 
-			this[importMetadataSymbol](
-				validateJSONBuffer(buffer, Schemas.PassProps),
-			);
+			try {
+				this[importMetadataSymbol](
+					validateJSONBuffer(buffer, Schemas.PassProps),
+				);
+			} catch (err) {
+				console.warn(formatMessage(Messages.PASS_SOURCE.INVALID, err));
+				return;
+			}
 
 			/**
 			 * Adding an empty buffer just for reference
@@ -384,7 +404,7 @@ export default class PKPass extends Bundle {
 				validateJSONBuffer(buffer, Schemas.Personalization);
 			} catch (err) {
 				console.warn(
-					"Personalization.json file has been omitted as invalid.",
+					formatMessage(Messages.PERSONALIZATION.INVALID, err),
 				);
 				return;
 			}
@@ -456,18 +476,14 @@ export default class PKPass extends Bundle {
 		} = data;
 
 		if (Object.keys(this[propsSymbol]).length) {
-			console.warn(
-				"The imported pass.json's properties will be joined with the current setted props. You might lose some data.",
-			);
+			console.warn(Messages.PASS_SOURCE.JOIN);
 		}
 
 		Object.assign(this[propsSymbol], otherPassData);
 
 		if (!type) {
 			if (!this[passTypeSymbol]) {
-				console.warn(
-					"Cannot find a valid type in pass.json. You won't be able to set fields until you won't set explicitly one.",
-				);
+				console.warn(Messages.PASS_SOURCE.UNKNOWN_TYPE);
 			}
 		} else {
 			this.type = type;
@@ -517,6 +533,10 @@ export default class PKPass extends Bundle {
 	private [closePassSymbol](
 		__test_disable_manifest_signature_generation__: boolean = false,
 	) {
+		if (!this.type) {
+			throw new TypeError(Messages.CLOSE.MISSING_TYPE);
+		}
+
 		const fileNames = Object.keys(this[filesSymbol]);
 
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
@@ -524,9 +544,7 @@ export default class PKPass extends Bundle {
 
 		const ICON_REGEX = /icon(?:@\d{1}x)?/;
 		if (!fileNames.some((fileName) => ICON_REGEX.test(fileName))) {
-			console.warn(
-				"At least one icon file is missing in your bundle. Your pass won't be openable by any Apple Device.",
-			);
+			console.warn(Messages.CLOSE.MISSING_ICON);
 		}
 
 		// *********************************** //
@@ -571,12 +589,23 @@ export default class PKPass extends Bundle {
 			for (let i = 0; i < fileNames.length; i++) {
 				if (/personalization/.test(fileNames[i])) {
 					console.warn(
-						`Personalization file '${fileNames[i]}' have been removed from the bundle as the requirements for personalization are not met.`,
+						formatMessage(
+							Messages.CLOSE.PERSONALIZATION_REMOVED,
+							fileNames[i],
+						),
 					);
 
 					delete this[filesSymbol][fileNames[i]];
 				}
 			}
+		}
+
+		// ******************************** //
+		// *** BOARDING PASS VALIDATION *** //
+		// ******************************** //
+
+		if (this.type === "boardingPass" && !this.transitType) {
+			throw new TypeError(Messages.CLOSE.MISSING_TRANSIT_TYPE);
 		}
 
 		// ****************************** //
@@ -680,7 +709,7 @@ export default class PKPass extends Bundle {
 	) {
 		if (typeof lang !== "string") {
 			throw new TypeError(
-				`Cannot set localization. Expected a string for 'lang' but received a ${typeof lang}`,
+				formatMessage(Messages.LANGUAGES.INVALID_TYPE, typeof lang),
 			);
 		}
 
@@ -713,7 +742,7 @@ export default class PKPass extends Bundle {
 			this[propsSymbol]["expirationDate"] = Utils.processDate(date);
 		} catch (err) {
 			throw new TypeError(
-				`Cannot set expirationDate. Invalid date ${date}`,
+				formatMessage(Messages.DATE.INVALID, "expirationDate", date),
 			);
 		}
 	}
@@ -802,7 +831,7 @@ export default class PKPass extends Bundle {
 			this[propsSymbol]["relevantDate"] = Utils.processDate(date);
 		} catch (err) {
 			throw new TypeError(
-				`Cannot set relevantDate. Invalid date ${date}`,
+				formatMessage(Messages.DATE.INVALID, "relevantDate", date),
 			);
 		}
 	}
@@ -857,12 +886,6 @@ export default class PKPass extends Bundle {
 				Schemas.Barcode,
 				barcodes as Schemas.Barcode[],
 			);
-
-			if (!finalBarcodes.length) {
-				throw new TypeError(
-					"Expected Schema.Barcode in setBarcodes but no one is valid.",
-				);
-			}
 		}
 
 		this[propsSymbol]["barcodes"] = finalBarcodes;
@@ -924,7 +947,7 @@ function validateJSONBuffer(
 	try {
 		contentAsJSON = JSON.parse(buffer.toString("utf8"));
 	} catch (err) {
-		throw new TypeError("Cannot validate Pass.json: invalid JSON");
+		throw new TypeError(Messages.JSON.INVALID);
 	}
 
 	return Schemas.validate(schema, contentAsJSON);

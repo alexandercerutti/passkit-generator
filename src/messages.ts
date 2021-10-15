@@ -73,6 +73,10 @@ export const MODELS = {
 	FILE_NO_OPEN: "Cannot open model file. %s",
 } as const;
 
+export const BUNDLE = {
+	CLOSED: "Cannot add file. Bundle is closed.",
+} as const;
+
 /**
  * Creates a message with replaced values
  * @param messageName

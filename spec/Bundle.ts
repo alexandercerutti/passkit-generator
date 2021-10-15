@@ -1,4 +1,5 @@
 import { Stream } from "stream";
+import * as Messages from "../lib/messages";
 import { default as Bundle, filesSymbol } from "../lib/Bundle";
 
 describe("Bundle", () => {
@@ -59,7 +60,7 @@ describe("Bundle", () => {
 
 				expect(() =>
 					bundle.addBuffer("icon.png", Buffer.alloc(0)),
-				).toThrowError(Error, "Cannot add file. Bundle is closed.");
+				).toThrowError(Error, Messages.BUNDLE.CLOSED);
 			});
 		});
 

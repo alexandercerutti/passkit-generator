@@ -1,4 +1,5 @@
 import { Stream } from "stream";
+import * as Messages from "./messages";
 import { ZipFile } from "yazl";
 
 export const filesSymbol = Symbol("bundleFiles");
@@ -87,7 +88,7 @@ export default class Bundle {
 
 	public addBuffer(fileName: string, buffer: Buffer) {
 		if (this.isFrozen) {
-			throw new Error("Cannot add file. Bundle is closed.");
+			throw new Error(Messages.BUNDLE.CLOSED);
 		}
 
 		this[filesSymbol][fileName] = buffer;

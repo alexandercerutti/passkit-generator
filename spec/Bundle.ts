@@ -22,7 +22,7 @@ describe("Bundle", () => {
 			// @ts-expect-error
 			expect(() => new Bundle()).toThrowError(
 				Error,
-				"Cannot build Bundle. MimeType is missing",
+				Messages.BUNDLE.MIME_TYPE_MISSING,
 			);
 		});
 

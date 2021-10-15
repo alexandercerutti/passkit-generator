@@ -21,7 +21,7 @@ export default class Bundle {
 
 	constructor(public mimeType: `${Mime.type}/${Mime.subtype}`) {
 		if (!mimeType) {
-			throw new Error("Cannot build Bundle. MimeType is missing");
+			throw new Error(Messages.BUNDLE.MIME_TYPE_MISSING);
 		}
 	}
 

@@ -10,16 +10,17 @@
  */
 
 import app from "./webserver";
-import { createPass } from "passkit-generator";
 import path from "path";
+import { PKPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
-	let passName =
+	const passName =
 		"exampleBooking" +
 		"_" +
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
+
 	try {
-		let pass = await createPass({
+		const pass = await PKPass.from({
 			model: path.resolve(__dirname, "../models/exampleBooking"),
 			certificates: {
 				wwdr: path.resolve(__dirname, "../../certificates/WWDR.pem"),
@@ -27,15 +28,13 @@ app.all(async function manageRequest(request, response) {
 					__dirname,
 					"../../certificates/signerCert.pem",
 				),
-				signerKey: {
-					keyFile: path.resolve(
-						__dirname,
-						"../../certificates/signerKey.pem",
-					),
-					passphrase: "123456",
-				},
+				signerKey: path.resolve(
+					__dirname,
+					"../../certificates/signerKey.pem",
+				),
+				signerKeyPassphrase: "123456",
 			},
-			overrides: request.body || request.params || request.query,
+			props: request.body || request.params || request.query,
 		});
 
 		pass.transitType = "PKTransitTypeAir";
@@ -134,8 +133,7 @@ app.all(async function manageRequest(request, response) {
 			{
 				key: "checkIn",
 				label: "",
-				value:
-					"Le uscite d'imbarco chiudono 30 minuti prima della partenza, quindi sii puntuale. In questo aeroporto puoi utilizzare la corsia Fast Track ai varchi di sicurezza.",
+				value: "Le uscite d'imbarco chiudono 30 minuti prima della partenza, quindi sii puntuale. In questo aeroporto puoi utilizzare la corsia Fast Track ai varchi di sicurezza.",
 				textAlignment: "PKTextAlignmentLeft",
 			},
 			{
@@ -147,8 +145,7 @@ app.all(async function manageRequest(request, response) {
 			{
 				key: "Require special assistance",
 				label: "Assistenza speciale",
-				value:
-					"Se hai richiesto assistenza speciale, presentati a un membro del personale nell'area di Consegna bagagli almeno 90 minuti prima del volo.",
+				value: "Se hai richiesto assistenza speciale, presentati a un membro del personale nell'area di Consegna bagagli almeno 90 minuti prima del volo.",
 				textAlignment: "PKTextAlignmentLeft",
 			},
 			{
@@ -160,22 +157,19 @@ app.all(async function manageRequest(request, response) {
 			{
 				key: "photoId",
 				label: "Un documento d’identità corredato di fotografia",
-				value:
-					"è obbligatorio su TUTTI i voli. Per un viaggio internazionale è necessario un passaporto valido o, dove consentita, una carta d’identità.",
+				value: "è obbligatorio su TUTTI i voli. Per un viaggio internazionale è necessario un passaporto valido o, dove consentita, una carta d’identità.",
 				textAlignment: "PKTextAlignmentLeft",
 			},
 			{
 				key: "yourSeat",
 				label: "Il tuo posto:",
-				value:
-					"verifica il tuo numero di posto nella parte superiore. Durante l’imbarco utilizza le scale anteriori e posteriori: per le file 1-10 imbarcati dalla parte anteriore; per le file 11-31 imbarcati dalla parte posteriore. Colloca le borse di dimensioni ridotte sotto il sedile davanti a te.",
+				value: "verifica il tuo numero di posto nella parte superiore. Durante l’imbarco utilizza le scale anteriori e posteriori: per le file 1-10 imbarcati dalla parte anteriore; per le file 11-31 imbarcati dalla parte posteriore. Colloca le borse di dimensioni ridotte sotto il sedile davanti a te.",
 				textAlignment: "PKTextAlignmentLeft",
 			},
 			{
 				key: "Pack safely",
 				label: "Bagaglio sicuro",
-				value:
-					"Fai clic http://easyjet.com/it/articoli-pericolosi per maggiori informazioni sulle merci pericolose oppure visita il sito CAA http://www.caa.co.uk/default.aspx?catid=2200",
+				value: "Fai clic http://easyjet.com/it/articoli-pericolosi per maggiori informazioni sulle merci pericolose oppure visita il sito CAA http://www.caa.co.uk/default.aspx?catid=2200",
 				textAlignment: "PKTextAlignmentLeft",
 			},
 			{
@@ -186,9 +180,10 @@ app.all(async function manageRequest(request, response) {
 			},
 		);
 
-		const stream = pass.generate();
+		const stream = pass.getAsStream();
+
 		response.set({
-			"Content-type": "application/vnd.apple.pkpass",
+			"Content-type": pass.mimeType,
 			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 

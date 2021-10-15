@@ -1,16 +1,15 @@
 /**
- * .void() and .expiration() methods example
+ * .expiration() method and voided prop example
  * To check if a ticket is void, look at the barcode;
  * If it is grayed, the ticket is voided. May not be showed on macOS.
  *
  * To check if a ticket has an expiration date, you'll
  * have to wait two minutes.
- *
  */
 
 import app from "./webserver";
-import { createPass } from "passkit-generator";
 import path from "path";
+import { PKPass } from "passkit-generator";
 
 app.all(async function manageRequest(request, response) {
 	if (!request.query.fn) {
@@ -20,13 +19,13 @@ app.all(async function manageRequest(request, response) {
 		return;
 	}
 
-	let passName =
+	const passName =
 		request.params.modelName +
 		"_" +
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
 	try {
-		let pass = await createPass({
+		const pass = await PKPass.from({
 			model: path.resolve(
 				__dirname,
 				`../models/${request.params.modelName}`,
@@ -37,31 +36,33 @@ app.all(async function manageRequest(request, response) {
 					__dirname,
 					"../../certificates/signerCert.pem",
 				),
-				signerKey: {
-					keyFile: path.resolve(
-						__dirname,
-						"../../certificates/signerKey.pem",
-					),
-					passphrase: "123456",
-				},
+				signerKey: path.resolve(
+					__dirname,
+					"../../certificates/signerKey.pem",
+				),
+				signerKeyPassphrase: "123456",
 			},
-			overrides: request.body || request.params || request.query,
+			props: Object.assign(
+				{
+					voided: request.query.fn === "void",
+				},
+				{ ...(request.body || request.params || request.query || {}) },
+			),
 		});
 
-		if (request.query.fn === "void") {
-			pass.void();
-		} else if (request.query.fn === "expiration") {
+		if (request.query.fn === "expiration") {
 			// 2 minutes later...
 			const d = new Date();
 			d.setMinutes(d.getMinutes() + 2);
 
 			// setting the expiration
-			pass.expiration(d);
+			pass.setExpirationDate(d);
 		}
 
-		const stream = pass.generate();
+		const stream = pass.getAsStream();
+
 		response.set({
-			"Content-type": "application/vnd.apple.pkpass",
+			"Content-type": pass.mimeType,
 			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 

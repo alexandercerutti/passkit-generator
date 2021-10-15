@@ -5,8 +5,10 @@
  */
 
 import app from "./webserver";
-import { createPass } from "passkit-generator";
 import path from "path";
+import { PKPass } from "passkit-generator";
+/** Symbols are exported just for tests and examples. Replicate only if really needed. */
+import { localizationSymbol } from "passkit-generator/lib/PKPass";
 
 app.all(async function manageRequest(request, response) {
 	const passName =
@@ -15,7 +17,7 @@ app.all(async function manageRequest(request, response) {
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
 	try {
-		const pass = await createPass({
+		const pass = await PKPass.from({
 			model: path.resolve(
 				__dirname,
 				`../models/${request.params.modelName}`,
@@ -26,36 +28,40 @@ app.all(async function manageRequest(request, response) {
 					__dirname,
 					"../../certificates/signerCert.pem",
 				),
-				signerKey: {
-					keyFile: path.resolve(
-						__dirname,
-						"../../certificates/signerKey.pem",
-					),
-					passphrase: "123456",
-				},
+				signerKey: path.resolve(
+					__dirname,
+					"../../certificates/signerKey.pem",
+				),
+				signerKeyPassphrase: "123456",
 			},
-			overrides: request.body || request.params || request.query,
+			props: request.body || request.params || request.query,
 		});
 
-		// For each language you include, an .lproj folder in pass bundle
-		// is created or included. You may not want to add translations but
-		// only images for a specific language. So you create manually
-		// an .lproj folder in your pass model then add the language here below.
-		// If no translations were added, the folder
-		// is included or created but without pass.strings file
+		/**
+		 * For each language you include, an .lproj folder in pass bundle
+		 * is created or included. You may not want to add translations
+		 * but only images for a specific language. So you create manually
+		 * an .lproj folder in your pass model then add the language here
+		 * below. If no translations does not get added, the folder is
+		 * included or created but without pass.strings file.
+		 *
+		 *
+		 * In this example, English does not have an .lproj folder yet and
+		 * doesn't have nor receive translations.
+		 *
+		 * Text placeholders may not be showed for the english language
+		 * (e.g. "Event" and "Location" as literal) and another language may be used instead
+		 */
 
-		// English, does not has an .lproj folder and no translation
-		// Text placeholders may not be showed for the english language
-		// (e.g. "Event" and "Location" as literal) and another language may be used instead
 		pass.localize("en");
 
-		// Italian, already has an .lproj which gets included
+		// Italian, already has an .lproj which gets included...
 		pass.localize("it", {
 			EVENT: "Evento",
 			LOCATION: "Dove",
 		});
 
-		// German, doesn't, so is created
+		// ...while German doesn't, so it gets created
 		pass.localize("de", {
 			EVENT: "Ereignis",
 			LOCATION: "Ort",
@@ -64,15 +70,15 @@ app.all(async function manageRequest(request, response) {
 		// This language does not exist but is still added as .lproj folder
 		pass.localize("zu", {});
 
-		// @ts-ignore - ignoring for logging purposes. Do not replicate
 		console.log(
 			"Added languages",
-			Object.keys(pass["l10nTranslations"]).join(", "),
+			Object.keys(pass[localizationSymbol]).join(", "),
 		);
 
-		const stream = pass.generate();
+		const stream = pass.getAsStream();
+
 		response.set({
-			"Content-type": "application/vnd.apple.pkpass",
+			"Content-type": pass.mimeType,
 			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 

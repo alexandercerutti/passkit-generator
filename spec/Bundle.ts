@@ -65,21 +65,21 @@ describe("Bundle", () => {
 		});
 
 		describe("getAsBuffer", () => {
-			it("should return a buffer", async () => {
+			it("should return a buffer", () => {
 				addEmptyFilesToBundle(bundle);
 
-				expect(await bundle.getAsBuffer()).toBeInstanceOf(Buffer);
+				expect(bundle.getAsBuffer()).toBeInstanceOf(Buffer);
 			});
 
-			it("should freeze the bundle", async () => {
-				await bundle.getAsBuffer();
+			it("should freeze the bundle", () => {
+				bundle.getAsBuffer();
 				expect(bundle.isFrozen).toBe(true);
 			});
 
-			it("should throw error if a file is attempted to be added when bundle is frozen", async () => {
+			it("should throw error if a file is attempted to be added when bundle is frozen", () => {
 				addEmptyFilesToBundle(bundle);
 
-				await bundle.getAsBuffer();
+				bundle.getAsBuffer();
 
 				expect(() =>
 					bundle.addBuffer("icon.png", Buffer.alloc(0)),

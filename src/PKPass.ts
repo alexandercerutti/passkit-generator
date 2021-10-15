@@ -638,7 +638,7 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	public async getAsBuffer(): Promise<Buffer> {
+	public getAsBuffer(): Buffer {
 		if (!this.isFrozen) {
 			this[closePassSymbol]();
 		}

@@ -1,10 +1,9 @@
-import { Stream } from "stream";
+import { Readable, Stream } from "stream";
 import * as Messages from "./messages";
-import { ZipFile } from "yazl";
+import * as zip from "do-not-zip";
 
 export const filesSymbol = Symbol("bundleFiles");
 export const freezeSymbol = Symbol("bundleFreeze");
-const archiveSymbol = Symbol("zip");
 
 namespace Mime {
 	export type type = string;
@@ -19,7 +18,6 @@ namespace Mime {
 
 export default class Bundle {
 	private [filesSymbol]: { [key: string]: Buffer } = {};
-	private [archiveSymbol] = new ZipFile();
 
 	constructor(public mimeType: `${Mime.type}/${Mime.subtype}`) {
 		if (!mimeType) {
@@ -66,7 +64,6 @@ export default class Bundle {
 		}
 
 		Object.freeze(this[filesSymbol]);
-		this[archiveSymbol].end();
 	}
 
 	/**
@@ -92,7 +89,6 @@ export default class Bundle {
 		}
 
 		this[filesSymbol][fileName] = buffer;
-		this[archiveSymbol].addBuffer(buffer, fileName);
 	}
 
 	/**
@@ -100,20 +96,17 @@ export default class Bundle {
 	 * Once closed, the bundle does not allow files
 	 * to be added any further.
 	 *
-	 * @returns Promise<Buffer>
+	 * @returns Buffer
 	 */
 
-	public getAsBuffer(): Promise<Buffer> {
-		const stream = this.getAsStream();
-		const chunks = [];
-
-		return new Promise((resolve) => {
-			stream.on("data", (data: Buffer) => {
-				chunks.push(data);
-			});
-
-			stream.on("end", () => resolve(Buffer.from(chunks)));
-		});
+	public getAsBuffer(): Buffer {
+		this[freezeSymbol]();
+		return zip.toBuffer(
+			Object.entries(this[filesSymbol]).map(([path, data]) => ({
+				path,
+				data,
+			})),
+		);
 	}
 
 	/**
@@ -125,8 +118,7 @@ export default class Bundle {
 	 */
 
 	public getAsStream(): Stream {
-		this[freezeSymbol]();
-		return this[archiveSymbol].outputStream;
+		return Readable.from(this.getAsBuffer());
 	}
 
 	/**

@@ -1,7 +1,10 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"outDir": "build"
+		"target": "ESNext",
+		"module": "ESNext",
+		"outDir": "build",
+		"moduleResolution": "node"
 	},
 	"exclude": ["node_modules"]
 }

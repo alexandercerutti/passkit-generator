@@ -146,7 +146,7 @@ export default class PKPass extends Bundle {
 	constructor(
 		buffers: Schemas.FileBuffers,
 		certificates: Schemas.CertificatesSchema,
-		props: Schemas.OverridablePassProps,
+		props?: Schemas.OverridablePassProps,
 	) {
 		super("application/vnd.apple.pkpass");
 
@@ -161,13 +161,16 @@ export default class PKPass extends Bundle {
 			this.addBuffer(fileName, contentBuffer);
 		}
 
-		/** Overrides validation and pushing in props */
-		const overridesValidation = Schemas.validate(
-			Schemas.OverridablePassProps,
-			props,
-		);
+		if (props) {
+			/** Overrides validation and pushing in props */
+			const overridesValidation = Schemas.validate(
+				Schemas.OverridablePassProps,
+				props,
+			);
 
-		Object.assign(this[propsSymbol], overridesValidation);
+			Object.assign(this[propsSymbol], overridesValidation);
+		}
+
 		this.certificates = certificates;
 	}
 

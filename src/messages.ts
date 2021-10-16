@@ -49,7 +49,7 @@ export const PASS_SOURCE = {
 	JOIN: "The imported pass.json's properties will be joined with the current setted props. You might lose some data.",
 } as const;
 
-export const PERSONALIZATION = {
+export const PERSONALIZE = {
 	INVALID:
 		"Cannot add personalization.json to bundle because it is invalid. %s",
 } as const;

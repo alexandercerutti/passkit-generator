@@ -394,11 +394,9 @@ export default class PKPass extends Bundle {
 			 */
 
 			try {
-				validateJSONBuffer(buffer, Schemas.Personalization);
+				validateJSONBuffer(buffer, Schemas.Personalize);
 			} catch (err) {
-				console.warn(
-					formatMessage(Messages.PERSONALIZATION.INVALID, err),
-				);
+				console.warn(formatMessage(Messages.PERSONALIZE.INVALID, err));
 				return;
 			}
 

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { Field } from "./PassFieldContent";
+import { Field } from "./Field";
 
 export type TransitType =
 	| "PKTransitTypeAir"

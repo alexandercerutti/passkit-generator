@@ -1,21 +1,21 @@
-export * from "./Barcodes";
-export * from "./Beacons";
+export * from "./Barcode";
+export * from "./Beacon";
 export * from "./Location";
-export * from "./PassFieldContent";
+export * from "./Field";
 export * from "./NFC";
-export * from "./SemanticTags";
+export * from "./Semantics";
 export * from "./PassFields";
 export * from "./Personalize";
 export * from "./Certificates";
 
 import Joi from "joi";
 
-import { Barcode } from "./Barcodes";
+import { Barcode } from "./Barcode";
 import { Location } from "./Location";
-import { Beacon } from "./Beacons";
+import { Beacon } from "./Beacon";
 import { NFC } from "./NFC";
 import { PassFields, TransitType } from "./PassFields";
-import { Semantics } from "./SemanticTags";
+import { Semantics } from "./Semantics";
 import { CertificatesSchema } from "./Certificates";
 
 import formatMessage, * as Messages from "../messages";

@@ -52,8 +52,8 @@ const CurrencyAmount = Joi.object<SemanticTagType.CurrencyAmount>().keys({
 	amount: Joi.string(),
 });
 
-const PersonNameComponent = Joi.object<SemanticTagType.PersonNameComponents>().keys(
-	{
+const PersonNameComponent =
+	Joi.object<SemanticTagType.PersonNameComponents>().keys({
 		givenName: Joi.string(),
 		familyName: Joi.string(),
 		middleName: Joi.string(),
@@ -61,8 +61,7 @@ const PersonNameComponent = Joi.object<SemanticTagType.PersonNameComponents>().k
 		nameSuffix: Joi.string(),
 		nickname: Joi.string(),
 		phoneticRepresentation: Joi.string(),
-	},
-);
+	});
 
 const seat = Joi.object<SemanticTagType.Seat>().keys({
 	seatSection: Joi.string(),

@@ -1,9 +1,8 @@
 import Joi from "joi";
-import { Semantics } from "./SemanticTags";
+import { Semantics } from "./Semantics";
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/passfieldcontent
- * @TODO Rename interface to PassFieldContent to conform to above. This will be done in v3.0
  */
 
 export interface Field {

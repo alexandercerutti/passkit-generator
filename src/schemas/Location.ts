@@ -2,7 +2,6 @@ import Joi from "joi";
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/pass/locations
- * @TODO Rename "Location" in "Locations". This will be done in v3.0
  */
 
 export interface Location {

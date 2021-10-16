@@ -25,30 +25,35 @@ app.all(async function manageRequest(request, response) {
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
 	try {
-		const pass = await PKPass.from({
-			model: path.resolve(
-				__dirname,
-				`../models/${request.params.modelName}`,
-			),
-			certificates: {
-				wwdr: path.resolve(__dirname, "../../certificates/WWDR.pem"),
-				signerCert: path.resolve(
+		const pass = await PKPass.from(
+			{
+				model: path.resolve(
 					__dirname,
-					"../../certificates/signerCert.pem",
+					`../models/${request.params.modelName}`,
 				),
-				signerKey: path.resolve(
-					__dirname,
-					"../../certificates/signerKey.pem",
-				),
-				signerKeyPassphrase: "123456",
+				certificates: {
+					wwdr: path.resolve(
+						__dirname,
+						"../../certificates/WWDR.pem",
+					),
+					signerCert: path.resolve(
+						__dirname,
+						"../../certificates/signerCert.pem",
+					),
+					signerKey: path.resolve(
+						__dirname,
+						"../../certificates/signerKey.pem",
+					),
+					signerKeyPassphrase: "123456",
+				},
 			},
-			props: Object.assign(
+			Object.assign(
 				{
 					voided: request.query.fn === "void",
 				},
 				{ ...(request.body || request.params || request.query || {}) },
 			),
-		});
+		);
 
 		if (request.query.fn === "expiration") {
 			// 2 minutes later...

@@ -1,2 +1,17 @@
-export { default as Bundle } from "./Bundle";
 export { default as PKPass } from "./PKPass";
+
+// ***************************************** //
+// *** Exporting only schemas interfaces *** //
+// ***************************************** //
+
+export type {
+	Barcode,
+	Beacon,
+	Field,
+	Location,
+	NFC,
+	PassProps,
+	Semantics,
+	TransitType,
+	Personalize,
+} from "./schemas";

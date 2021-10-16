@@ -5,7 +5,12 @@
 
 import app from "./webserver";
 import path from "path";
+import { promises as fs } from "fs";
 import { PKPass } from "passkit-generator";
+
+const iconFromModel = await fs.readFile(
+	path.resolve(__dirname, "models/exampleBooking.pass/icon.png"),
+);
 
 app.all(async function manageRequest(request, response) {
 	const passName =
@@ -55,6 +60,16 @@ app.all(async function manageRequest(request, response) {
 				value: "VCE",
 			},
 		);
+
+		/**
+		 * Required by Apple. If one is not available, a
+		 * pass might be openable on a Mac but not on a
+		 * specific iPhone model
+		 */
+
+		pass.addBuffer("icon.png", iconFromModel);
+		pass.addBuffer("icon@2x.png", iconFromModel);
+		pass.addBuffer("icon@3x.png", iconFromModel);
 
 		const stream = pass.getAsStream();
 

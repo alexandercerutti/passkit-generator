@@ -1052,18 +1052,20 @@ describe("PKPass", () => {
 					),
 				);
 
-				const newPass = await PKPass.from({
-					model: path.resolve(
-						__dirname,
-						"../examples/models/exampleBooking.pass",
-					),
-					certificates: {
-						...baseCerts,
+				const newPass = await PKPass.from(
+					{
+						model: path.resolve(
+							__dirname,
+							"../examples/models/exampleBooking.pass",
+						),
+						certificates: {
+							...baseCerts,
+						},
 					},
-					props: {
+					{
 						voided: true,
 					},
-				});
+				);
 
 				expect(Object.keys(newPass[filesSymbol]).length).toBe(7);
 

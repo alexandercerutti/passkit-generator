@@ -154,13 +154,11 @@ export const PassProps = Joi.object<
 export interface Template {
 	model: string;
 	certificates: CertificatesSchema;
-	props?: OverridablePassProps;
 }
 
 export const Template = Joi.object<Template>({
 	model: Joi.string().required(),
 	certificates: Joi.object().required(),
-	props: OverridablePassProps,
 });
 
 // --------- UTILITIES ---------- //

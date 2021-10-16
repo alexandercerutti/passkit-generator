@@ -27,7 +27,7 @@ export default class PKPass extends Bundle {
 			[placeholder: string]: string;
 		};
 	} = {};
-	public [passTypeSymbol]: Schemas.PassTypesProps = undefined;
+	private [passTypeSymbol]: Schemas.PassTypesProps = undefined;
 
 	/**
 	 * Either create a pass from another one

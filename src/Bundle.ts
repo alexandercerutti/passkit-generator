@@ -4,6 +4,7 @@ import * as zip from "do-not-zip";
 
 export const filesSymbol = Symbol("bundleFiles");
 export const freezeSymbol = Symbol("bundleFreeze");
+export const mimeTypeSymbol = Symbol("bundleMimeType");
 
 namespace Mime {
 	export type type = string;
@@ -18,11 +19,14 @@ namespace Mime {
 
 export default class Bundle {
 	private [filesSymbol]: { [key: string]: Buffer } = {};
+	private [mimeTypeSymbol]: string;
 
-	constructor(public mimeType: `${Mime.type}/${Mime.subtype}`) {
+	constructor(mimeType: `${Mime.type}/${Mime.subtype}`) {
 		if (!mimeType) {
 			throw new Error(Messages.BUNDLE.MIME_TYPE_MISSING);
 		}
+
+		this[mimeTypeSymbol] = mimeType;
 	}
 
 	/**
@@ -51,6 +55,14 @@ export default class Bundle {
 	): [Bundle, Function] {
 		const bundle = new Bundle(mimeType);
 		return [bundle, () => bundle[freezeSymbol]()];
+	}
+
+	/**
+	 * Retrieves bundle's mimeType
+	 */
+
+	public get mimeType() {
+		return this[mimeTypeSymbol];
 	}
 
 	/**

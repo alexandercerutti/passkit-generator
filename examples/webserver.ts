@@ -9,11 +9,11 @@ export const app = express();
 
 app.use(express.json());
 
-app.listen(8080, "0.0.0.0", function (request, response) {
+app.listen(8080, "0.0.0.0", () => {
 	console.log("Webserver started.");
 });
 
-app.all("/", function (request, response) {
+app.all("/", function (_, response) {
 	response.redirect("/gen/");
 });
 

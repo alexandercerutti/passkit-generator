@@ -66,7 +66,7 @@ export const CLOSE = {
 		"Personalization file '%s' have been removed from the bundle as the requirements for personalization are not met.",
 	MISSING_TRANSIT_TYPE:
 		"Cannot proceed creating the pass because transitType is missing on your boardingPass.",
-};
+} as const;
 
 export const MODELS = {
 	DIR_NOT_FOUND: "Cannot import model: directory %s not found.",

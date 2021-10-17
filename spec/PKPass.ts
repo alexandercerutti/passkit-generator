@@ -960,12 +960,12 @@ describe("PKPass", () => {
 				PKPass.from(),
 			).toBeRejectedWithError(
 				TypeError,
-				"Cannot create PKPass from source: source is 'undefined'",
+				Messages.FROM.MISSING_SOURCE.replace("%s", "undefined"),
 			);
 
 			await expectAsync(PKPass.from(null)).toBeRejectedWithError(
 				TypeError,
-				"Cannot create PKPass from source: source is 'null'",
+				Messages.FROM.MISSING_SOURCE.replace("%s", "null"),
 			);
 		});
 

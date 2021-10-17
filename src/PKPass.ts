@@ -46,7 +46,7 @@ export default class PKPass extends Bundle {
 
 		if (!source) {
 			throw new TypeError(
-				`Cannot create PKPass from source: source is '${source}'`,
+				formatMessage(Messages.FROM.MISSING_SOURCE, source),
 			);
 		}
 

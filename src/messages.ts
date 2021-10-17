@@ -36,6 +36,8 @@ export const DATE = {
 export const LANGUAGES = {
 	INVALID_TYPE:
 		"Cannot set localization. Expected a string for 'lang' but received %s",
+	NO_TRANSLATIONS:
+		"Cannot create or use language %s. If your itention was to just add a language (.lproj) folder to the bundle, both specify some translations or use .addBuffer to add some media.",
 } as const;
 
 export const BARCODES = {

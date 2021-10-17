@@ -669,8 +669,8 @@ export default class PKPass extends Bundle {
 	// ************************** //
 
 	/**
-	 * Allows to specify a language to be added to the
-	 * final bundle, along with some optionals translations.
+	 * Allows to add a localization details to the
+	 * final bundle with some translations.
 	 *
 	 * If the language already exists, translations will be
 	 * merged with the existing ones.
@@ -685,16 +685,23 @@ export default class PKPass extends Bundle {
 
 	public localize(
 		lang: string,
-		translations?: { [key: string]: string } | null,
+		translations: { [key: string]: string } | null,
 	) {
 		if (typeof lang !== "string") {
 			throw new TypeError(
-				formatMessage(Messages.LANGUAGES.INVALID_TYPE, typeof lang),
+				formatMessage(Messages.LANGUAGES.INVALID_LANG, typeof lang),
 			);
 		}
 
 		if (translations === null) {
 			delete this[localizationSymbol][lang];
+			return;
+		}
+
+		if (!translations || !Object.keys(translations).length) {
+			console.warn(
+				formatMessage(Messages.LANGUAGES.NO_TRANSLATIONS, lang),
+			);
 			return;
 		}
 

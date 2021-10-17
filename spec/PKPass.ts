@@ -584,39 +584,60 @@ describe("PKPass", () => {
 
 	describe("localize", () => {
 		it("should fail throw if lang is not a string", () => {
+			// @ts-expect-error
 			expect(() => pass.localize(null)).toThrowError(
 				TypeError,
-				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "object"),
+				Messages.LANGUAGES.INVALID_LANG.replace("%s", "object"),
 			);
 
+			// @ts-expect-error
 			expect(() => pass.localize(undefined)).toThrowError(
 				TypeError,
-				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "undefined"),
+				Messages.LANGUAGES.INVALID_LANG.replace("%s", "undefined"),
 			);
 
 			// @ts-expect-error
 			expect(() => pass.localize(5)).toThrowError(
 				TypeError,
-				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "number"),
+				Messages.LANGUAGES.INVALID_LANG.replace("%s", "number"),
 			);
 
 			// @ts-expect-error
 			expect(() => pass.localize(true)).toThrowError(
 				TypeError,
-				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "boolean"),
+				Messages.LANGUAGES.INVALID_LANG.replace("%s", "boolean"),
 			);
 
 			// @ts-expect-error
 			expect(() => pass.localize({})).toThrowError(
 				TypeError,
-				Messages.LANGUAGES.INVALID_TYPE.replace("%s", "object"),
+				Messages.LANGUAGES.INVALID_LANG.replace("%s", "object"),
 			);
 		});
 
-		it("should create a new language record inside class props", () => {
+		it("should warn developer if no translations have been passed", () => {
+			console.warn = jasmine.createSpy("log");
+			// @ts-expect-error
 			pass.localize("en");
+			pass.localize("en", {});
 
-			expect(pass[localizationSymbol]["en"]).toEqual({});
+			expect(console.warn).toHaveBeenCalledWith(
+				Messages.LANGUAGES.NO_TRANSLATIONS.replace("%s", "en"),
+			);
+
+			expect(console.warn).toHaveBeenCalledTimes(2);
+		});
+
+		it("should create a new language record if some translations are specifies", () => {
+			pass.localize("en", {
+				buon_giorno: "Good Morning",
+				buona_sera: "Good Evening",
+			});
+
+			expect(pass[localizationSymbol]["en"]).toEqual({
+				buon_giorno: "Good Morning",
+				buona_sera: "Good Evening",
+			});
 		});
 
 		it("should accept later translations and merge them with existing ones", () => {
@@ -647,9 +668,13 @@ describe("PKPass", () => {
 		});
 
 		it("should always return undefined", () => {
-			expect(pass.localize("it", undefined)).toBeUndefined();
 			expect(pass.localize("it", null)).toBeUndefined();
-			expect(pass.localize("it", {})).toBeUndefined();
+			expect(
+				pass.localize("it", {
+					say_good_morning: "buongiorno",
+					say_good_evening: "buonasera",
+				}),
+			).toBeUndefined();
 		});
 	});
 

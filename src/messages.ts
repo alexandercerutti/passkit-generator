@@ -78,6 +78,10 @@ export const BUNDLE = {
 	CLOSED: "Cannot add file. Bundle is closed.",
 } as const;
 
+export const PACK = {
+	INVALID: "Cannot pack passes. Only PKPass instances allowed",
+} as const;
+
 /**
  * Creates a message with replaced values
  * @param messageName

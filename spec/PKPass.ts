@@ -1086,18 +1086,15 @@ describe("PKPass", () => {
 			pass[freezeSymbol]();
 		});
 
-		it("should should throw error if not all the files passed are PKPasses", async () => {
-			await expectAsync(
+		it("should should throw error if not all the files passed are PKPasses", () => {
+			expect(
 				// @ts-expect-error
-				PKPass.pack(pass, "pass.json", pass),
-			).toBeRejectedWithError(
-				Error,
-				"Cannot pack passes. Only PKPass instances allowed",
-			);
+				() => PKPass.pack(pass, "pass.json", pass),
+			).toThrowError(Error, Messages.PACK.INVALID);
 		});
 
-		it("should output a frozen bundle of bundles", async () => {
-			const pkPassesBundle = await PKPass.pack(pass, pass);
+		it("should output a frozen bundle of bundles", () => {
+			const pkPassesBundle = PKPass.pack(pass, pass);
 
 			expect(
 				pkPassesBundle[filesSymbol]["packed-pass-1.pkpass"],
@@ -1109,8 +1106,8 @@ describe("PKPass", () => {
 			expect(pkPassesBundle.isFrozen).toBe(true);
 		});
 
-		it("should output a bundle with pkpasses mimetype", async () => {
-			const pkPassesBundle = await PKPass.pack(pass, pass);
+		it("should output a bundle with pkpasses mimetype", () => {
+			const pkPassesBundle = PKPass.pack(pass, pass);
 
 			expect(pkPassesBundle.mimeType).toBe(
 				"application/vnd.apple.pkpasses",

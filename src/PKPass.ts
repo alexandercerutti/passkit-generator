@@ -105,16 +105,12 @@ export default class PKPass extends Bundle {
 	 * @param passes
 	 */
 
-	static async pack(...passes: PKPass[]): Promise<Bundle> {
+	static pack(...passes: PKPass[]): Bundle {
 		if (!passes.every((pass) => pass instanceof PKPass)) {
-			throw new Error(
-				"Cannot pack passes. Only PKPass instances allowed",
-			);
+			throw new Error(Messages.PACK.INVALID);
 		}
 
-		const buffers = await Promise.all(
-			passes.map((pass) => pass.getAsBuffer()),
-		);
+		const buffers = passes.map((pass) => pass.getAsBuffer());
 
 		const [bundle, freezeBundle] = Bundle.freezable(
 			"application/vnd.apple.pkpasses",

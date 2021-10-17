@@ -659,12 +659,18 @@ describe("PKPass", () => {
 			});
 		});
 
-		it("should delete a language and its all translations when null is passed as parameter", () => {
+		it("should delete a language, all of its translations and all of its files, when null is passed as parameter", () => {
+			pass.addBuffer("it.lproj/icon@3x.png", Buffer.alloc(0));
+			pass.addBuffer("en.lproj/icon@3x.png", Buffer.alloc(0));
+
 			pass.localize("it", null);
 			pass.localize("en", null);
 
 			expect(pass[localizationSymbol]["it"]).toBeUndefined();
 			expect(pass[localizationSymbol]["en"]).toBeUndefined();
+
+			expect(pass[filesSymbol]["it.lproj/icon@3x.png"]).toBeUndefined();
+			expect(pass[filesSymbol]["en.lproj/icon@3x.png"]).toBeUndefined();
 		});
 
 		it("should always return undefined", () => {

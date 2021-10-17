@@ -675,8 +675,8 @@ export default class PKPass extends Bundle {
 	 * If the language already exists, translations will be
 	 * merged with the existing ones.
 	 *
-	 * Setting `translations` to `null`, fully deletes a language
-	 * and its translations.
+	 * Setting `translations` to `null`, fully deletes a language,
+	 * its translations and its files.
 	 *
 	 * @see https://developer.apple.com/documentation/walletpasses/creating_the_source_for_a_pass#3736718
 	 * @param lang
@@ -695,6 +695,20 @@ export default class PKPass extends Bundle {
 
 		if (translations === null) {
 			delete this[localizationSymbol][lang];
+
+			const allFilesKeys = Object.keys(this[filesSymbol]);
+			const langFolderIdentifier = `${lang}.lproj`;
+
+			for (
+				let i = allFilesKeys.length, filePath: string;
+				(filePath = allFilesKeys[--i]);
+
+			) {
+				if (filePath.startsWith(langFolderIdentifier)) {
+					delete this[filesSymbol][filePath];
+				}
+			}
+
 			return;
 		}
 

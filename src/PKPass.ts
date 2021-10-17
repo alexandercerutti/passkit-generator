@@ -415,10 +415,7 @@ export default class PKPass extends Bundle {
 				return;
 			}
 
-			Object.assign(
-				(this[localizationSymbol][lang] ??= {}),
-				Object.fromEntries(parsedTranslations),
-			);
+			this.localize(lang, Object.fromEntries(parsedTranslations));
 
 			return;
 		}

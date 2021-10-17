@@ -85,11 +85,7 @@ export default class PKPass extends Bundle {
 			certificates = source.certificates;
 		}
 
-		return new PKPass(
-			buffers,
-			certificates,
-			Schemas.validate(Schemas.OverridablePassProps, props),
-		);
+		return new PKPass(buffers, certificates, props);
 	}
 
 	/**

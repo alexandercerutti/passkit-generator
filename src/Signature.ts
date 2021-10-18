@@ -120,7 +120,7 @@ function getStringCertificates(
 	return {
 		signerKeyPassphrase: certificates.signerKeyPassphrase,
 		wwdr: Buffer.from(certificates.wwdr).toString("utf-8"),
-		signerCert: Buffer.from(certificates.wwdr).toString("utf-8"),
-		signerKey: Buffer.from(certificates.wwdr).toString("utf-8"),
+		signerCert: Buffer.from(certificates.signerCert).toString("utf-8"),
+		signerKey: Buffer.from(certificates.signerKey).toString("utf-8"),
 	};
 }

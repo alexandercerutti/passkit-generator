@@ -113,12 +113,7 @@ export default class Bundle {
 
 	public getAsBuffer(): Buffer {
 		this[freezeSymbol]();
-		return zip.toBuffer(
-			Object.entries(this[filesSymbol]).map(([path, data]) => ({
-				path,
-				data,
-			})),
-		);
+		return zip.toBuffer(createZipFilesMap(this[filesSymbol]));
 	}
 
 	/**
@@ -130,7 +125,10 @@ export default class Bundle {
 	 */
 
 	public getAsStream(): Stream {
-		return Readable.from(this.getAsBuffer());
+		this[freezeSymbol]();
+		return Readable.from(
+			zip.toBuffer(createZipFilesMap(this[filesSymbol])),
+		);
 	}
 
 	/**
@@ -147,4 +145,18 @@ export default class Bundle {
 		this[freezeSymbol]();
 		return Object.freeze({ ...this[filesSymbol] });
 	}
+}
+
+/**
+ * Creates a files map for do-not-zip
+ *
+ * @param files
+ * @returns
+ */
+
+function createZipFilesMap(files: { [key: string]: Buffer }) {
+	return Object.entries(files).map(([path, data]) => ({
+		path,
+		data,
+	}));
 }

@@ -7,10 +7,10 @@ Express.js has been inserted as "example package" dipendency.
 
 ```sh
 $ git clone https://github.com/alexandercerutti/passkit-generator.git;
-$ cd passkit-generator && npm install;
-$ cd examples && npm install;
-$ npm run build;
-$ npm run example <the-example-you-want-to-execute>.js
+$ cd passkit-generator;
+$ npm install;
+$ npm run example:install && npm run example:build;
+$ npm run example <the-example-you-want-to-execute>;
 ```
 
 Certificates paths in examples are linked to a folder `certificates` in the root of this project which is not provided.

@@ -7,11 +7,12 @@
 		"build": "npm run build:src",
 		"build:all": "npm run build:src && npm run build:examples && npm run build:spec",
 		"build:src": "rimraf lib && npx tsc -p tsconfig.dist.json",
-		"build:examples": "cd examples && npm run build",
 		"build:spec": "rimraf \"./spec/*.!(ts)\" && npx tsc -p tsconfig.spec.json",
 		"prepublishOnly": "npm run build",
 		"test": "npm run build:spec && npx jasmine",
 		"example": "npm run build:src && npm --prefix examples run example",
+		"example:install": "npm --prefix examples install",
+		"example:build": "npm --prefix examples run build",
 		"example:debug": "npm run build:src && npm --prefix examples run example:debug"
 	},
 	"author": "Alexander Patrick Cerutti",

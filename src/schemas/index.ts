@@ -145,8 +145,12 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<
-	OverridablePassProps & PassKindsProps & PassPropsFromMethods
->()
+	OverridablePassProps &
+		PassKindsProps &
+		PassPropsFromMethods & { formatVersion: 1 }
+>({
+	formatVersion: Joi.number(),
+})
 	.concat(OverridablePassProps)
 	.concat(PassKindsProps)
 	.concat(PassPropsFromMethods);

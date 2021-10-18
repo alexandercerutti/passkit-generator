@@ -123,6 +123,10 @@ async function readDirectory(filePath: string) {
 
 	return dirContent.map(async (fileName) => {
 		const content = await fs.readFile(path.resolve(filePath, fileName));
-		return getObjectFromModelFile(filePath, content, 1);
+		return getObjectFromModelFile(
+			path.resolve(filePath, fileName),
+			content,
+			2,
+		);
 	});
 }

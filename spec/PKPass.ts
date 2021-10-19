@@ -868,6 +868,7 @@ describe("PKPass", () => {
 			expect(
 				JSON.parse(pass[filesSymbol]["pass.json"].toString("utf-8")),
 			).toEqual({
+				formatVersion: 1,
 				coupon: {
 					headerFields: [],
 					primaryFields: [],

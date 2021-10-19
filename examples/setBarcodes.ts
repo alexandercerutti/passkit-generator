@@ -8,7 +8,7 @@
  * by a string
  */
 
-import app from "./webserver";
+import app, { getCertificates } from "./webserver";
 import { PKPass } from "passkit-generator";
 import path from "path";
 
@@ -18,6 +18,8 @@ app.all(async function manageRequest(request, response) {
 		"_" +
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
+	const certificates = await getCertificates();
+
 	try {
 		const pass = await PKPass.from(
 			{
@@ -26,19 +28,10 @@ app.all(async function manageRequest(request, response) {
 					`../models/${request.params.modelName}`,
 				),
 				certificates: {
-					wwdr: path.resolve(
-						__dirname,
-						"../../certificates/WWDR.pem",
-					),
-					signerCert: path.resolve(
-						__dirname,
-						"../../certificates/signerCert.pem",
-					),
-					signerKey: path.resolve(
-						__dirname,
-						"../../certificates/signerKey.pem",
-					),
-					signerKeyPassphrase: "123456",
+					wwdr: certificates.wwdr,
+					signerCert: certificates.signerCert,
+					signerKey: certificates.signerKey,
+					signerKeyPassphrase: certificates.signerKeyPassphrase,
 				},
 			},
 			request.body || request.params || request.query || {},
@@ -64,11 +57,6 @@ app.all(async function manageRequest(request, response) {
 				{
 					message: "Thank you for using this package <3",
 					format: "PKBarcodeFormatPDF417",
-				},
-				{
-					message: "Thank you for using this package <3",
-					// @ts-expect-error
-					format: "PKBarcodeFormatMock44617",
 				},
 			);
 		}

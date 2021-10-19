@@ -9,7 +9,7 @@
  * @Author: Alexander P. Cerutti
  */
 
-import app from "./webserver";
+import app, { getCertificates } from "./webserver";
 import path from "path";
 import { PKPass } from "passkit-generator";
 
@@ -19,24 +19,17 @@ app.all(async function manageRequest(request, response) {
 		"_" +
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
+	const certificates = await getCertificates();
+
 	try {
 		const pass = await PKPass.from(
 			{
 				model: path.resolve(__dirname, "../models/exampleBooking"),
 				certificates: {
-					wwdr: path.resolve(
-						__dirname,
-						"../../certificates/WWDR.pem",
-					),
-					signerCert: path.resolve(
-						__dirname,
-						"../../certificates/signerCert.pem",
-					),
-					signerKey: path.resolve(
-						__dirname,
-						"../../certificates/signerKey.pem",
-					),
-					signerKeyPassphrase: "123456",
+					wwdr: certificates.wwdr,
+					signerCert: certificates.signerCert,
+					signerKey: certificates.signerKey,
+					signerKeyPassphrase: certificates.signerKeyPassphrase,
 				},
 			},
 			request.body || request.params || request.query,

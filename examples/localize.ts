@@ -4,7 +4,7 @@
  * .pkpass file and check for .lproj folders
  */
 
-import app from "./webserver";
+import app, { getCertificates } from "./webserver";
 import path from "path";
 import { PKPass } from "passkit-generator";
 /** Symbols are exported just for tests and examples. Replicate only if really needed. */
@@ -16,6 +16,8 @@ app.all(async function manageRequest(request, response) {
 		"_" +
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
+	const certificates = await getCertificates();
+
 	try {
 		const pass = await PKPass.from(
 			{
@@ -24,41 +26,14 @@ app.all(async function manageRequest(request, response) {
 					`../models/${request.params.modelName}`,
 				),
 				certificates: {
-					wwdr: path.resolve(
-						__dirname,
-						"../../certificates/WWDR.pem",
-					),
-					signerCert: path.resolve(
-						__dirname,
-						"../../certificates/signerCert.pem",
-					),
-					signerKey: path.resolve(
-						__dirname,
-						"../../certificates/signerKey.pem",
-					),
-					signerKeyPassphrase: "123456",
+					wwdr: certificates.wwdr,
+					signerCert: certificates.signerCert,
+					signerKey: certificates.signerKey,
+					signerKeyPassphrase: certificates.signerKeyPassphrase,
 				},
 			},
 			request.body || request.params || request.query,
 		);
-
-		/**
-		 * For each language you include, an .lproj folder in pass bundle
-		 * is created or included. You may not want to add translations
-		 * but only images for a specific language. So you create manually
-		 * an .lproj folder in your pass model then add the language here
-		 * below. If no translations does not get added, the folder is
-		 * included or created but without pass.strings file.
-		 *
-		 *
-		 * In this example, English does not have an .lproj folder yet and
-		 * doesn't have nor receive translations.
-		 *
-		 * Text placeholders may not be showed for the english language
-		 * (e.g. "Event" and "Location" as literal) and another language may be used instead
-		 */
-
-		pass.localize("en");
 
 		// Italian, already has an .lproj which gets included...
 		pass.localize("it", {

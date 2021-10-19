@@ -3,14 +3,14 @@
  * by adding files later and not adding pass.json
  */
 
-import app from "./webserver";
+import app, { getCertificates } from "./webserver";
 import path from "path";
 import { promises as fs } from "fs";
 import { PKPass } from "passkit-generator";
 
-const iconFromModel = await fs.readFile(
-	path.resolve(__dirname, "models/exampleBooking.pass/icon.png"),
-);
+function getRandomColorPart() {
+	return Math.floor(Math.random() * 255);
+}
 
 app.all(async function manageRequest(request, response) {
 	const passName =
@@ -18,22 +18,33 @@ app.all(async function manageRequest(request, response) {
 		"_" +
 		new Date().toISOString().split("T")[0].replace(/-/gi, "");
 
+	const [iconFromModel, certificates] = await Promise.all([
+		fs.readFile(
+			path.resolve(__dirname, "../models/exampleBooking.pass/icon.png"),
+		),
+		await getCertificates(),
+	]);
+
 	try {
 		const pass = new PKPass(
 			{},
 			{
-				wwdr: path.resolve(__dirname, "../../certificates/WWDR.pem"),
-				signerCert: path.resolve(
-					__dirname,
-					"../../certificates/signerCert.pem",
-				),
-				signerKey: path.resolve(
-					__dirname,
-					"../../certificates/signerKey.pem",
-				),
-				signerKeyPassphrase: "123456",
+				wwdr: certificates.wwdr,
+				signerCert: certificates.signerCert,
+				signerKey: certificates.signerKey,
+				signerKeyPassphrase: certificates.signerKeyPassphrase,
 			},
-			request.body || request.params || request.query,
+			{
+				...(request.body || request.params || request.query),
+				description: "Example Apple Wallet Pass",
+				passTypeIdentifier: "pass.com.passkitgenerator",
+				serialNumber: "nmyuxofgna",
+				organizationName: `Test Organization ${Math.random()}`,
+				teamIdentifier: "F53WB8AE67",
+				foregroundColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,
+				labelColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,
+				backgroundColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,
+			},
 		);
 
 		pass.type = "boardingPass";

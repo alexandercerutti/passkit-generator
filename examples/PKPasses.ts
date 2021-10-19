@@ -4,41 +4,77 @@
  * Here it is showed manual model reading and
  * creating through another PKPass because in the other
  * examples, creation through templates is already shown
+ *
+ * PLEASE NOTE THAT, AT TIME OF WRITING, THIS EXAMPLE WORKS
+ * ONLY IF PASSES ARE DOWNLOADED FROM SAFARI, due to the
+ * support of PKPasses archives. To test this, you might
+ * need to open a tunnel through NGROK if you cannot access
+ * to your local machine (in my personal case, developing
+ * under WSL is a pretty big limitation sometimes).
+ *
+ * @TODO test again this example with next iOS 15 versions.
+ * Currently, pass viewer seems to be soooo bugged.
+ *
+ * https://imgur.com/bDTbcDg.jpg
+ * https://imgur.com/Y4GpuHT.jpg
+ * https://i.imgur.com/qbJMy1d.jpg
+ *
+ * Alberto, come to look at APPLE.
+ *
+ * MAMMA MIA!
+ *
+ * A feedback to Apple have been sent for this.
  */
 
-import app from "./webserver";
+import app, { getCertificates } from "./webserver";
 import path from "path";
 import { promises as fs } from "fs";
 import { PKPass } from "passkit-generator";
-
-const iconFromModel = await fs.readFile(
-	path.resolve(__dirname, "models/exampleBooking.pass/icon.png"),
-);
 
 // *************************** //
 // *** EXAMPLE FROM NOW ON *** //
 // *************************** //
 
+function getRandomColorPart() {
+	return Math.floor(Math.random() * 255);
+}
+
 async function generatePass(props: Object) {
+	const [iconFromModel, certificates] = await Promise.all([
+		fs.readFile(
+			path.resolve(__dirname, "../models/exampleBooking.pass/icon.png"),
+		),
+		getCertificates(),
+	]);
+
 	const pass = new PKPass(
 		{},
 		{
-			wwdr: path.resolve(__dirname, "../../certificates/WWDR.pem"),
-			signerCert: path.resolve(
-				__dirname,
-				"../../certificates/signerCert.pem",
-			),
-			signerKey: path.resolve(
-				__dirname,
-				"../../certificates/signerKey.pem",
-			),
-			signerKeyPassphrase: "123456",
+			wwdr: certificates.wwdr,
+			signerCert: certificates.signerCert,
+			signerKey: certificates.signerKey,
+			signerKeyPassphrase: certificates.signerKeyPassphrase,
 		},
-		props,
+		{
+			...props,
+			description: "Example Apple Wallet Pass",
+			passTypeIdentifier: "pass.com.passkitgenerator",
+			serialNumber: "nmyuxofgna",
+			organizationName: `Test Organization ${Math.random()}`,
+			teamIdentifier: "F53WB8AE67",
+			foregroundColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,
+			labelColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,
+			backgroundColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,
+		},
 	);
 
 	pass.type = "boardingPass";
 	pass.transitType = "PKTransitTypeAir";
+
+	pass.setBarcodes({
+		message: "123456789",
+		format: "PKBarcodeFormatQR",
+	});
 
 	pass.headerFields.push(
 		{
@@ -93,7 +129,7 @@ app.all(async function manageRequest(request, response) {
 
 		response.set({
 			"Content-type": pkpasses.mimeType,
-			"Content-disposition": `attachment; filename=${passName}.pkpass`,
+			"Content-disposition": `attachment; filename=${passName}.pkpasses`,
 		});
 
 		const stream = pkpasses.getAsStream();

@@ -7,7 +7,7 @@
  * have to wait two minutes.
  */
 
-import app from "./webserver";
+import app, { getCertificates } from "./webserver";
 import path from "path";
 import { PKPass } from "passkit-generator";
 
@@ -18,6 +18,8 @@ app.all(async function manageRequest(request, response) {
 		);
 		return;
 	}
+
+	const certificates = await getCertificates();
 
 	const passName =
 		request.params.modelName +
@@ -32,19 +34,10 @@ app.all(async function manageRequest(request, response) {
 					`../models/${request.params.modelName}`,
 				),
 				certificates: {
-					wwdr: path.resolve(
-						__dirname,
-						"../../certificates/WWDR.pem",
-					),
-					signerCert: path.resolve(
-						__dirname,
-						"../../certificates/signerCert.pem",
-					),
-					signerKey: path.resolve(
-						__dirname,
-						"../../certificates/signerKey.pem",
-					),
-					signerKeyPassphrase: "123456",
+					wwdr: certificates.wwdr,
+					signerCert: certificates.signerCert,
+					signerKey: certificates.signerKey,
+					signerKeyPassphrase: certificates.signerKeyPassphrase,
 				},
 			},
 			Object.assign(
@@ -62,6 +55,10 @@ app.all(async function manageRequest(request, response) {
 
 			// setting the expiration
 			pass.setExpirationDate(d);
+			console.log(
+				"EXPIRATION DATE EXPECTED:",
+				pass.props["expirationDate"],
+			);
 		}
 
 		const stream = pass.getAsStream();

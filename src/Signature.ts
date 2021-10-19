@@ -30,7 +30,7 @@ export function create(
 ): Buffer {
 	const signature = forge.pkcs7.createSignedData();
 
-	signature.content = forge.util.createBuffer(manifestBuffer.buffer, "utf8");
+	signature.content = new forge.util.ByteStringBuffer(manifestBuffer);
 
 	const { wwdr, signerCert, signerKey } = parseCertificates(
 		getStringCertificates(certificates),

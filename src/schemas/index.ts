@@ -28,6 +28,7 @@ export interface FileBuffers {
 }
 
 export interface PassProps {
+	formatVersion?: 1;
 	serialNumber?: string;
 	description?: string;
 	organizationName?: string;
@@ -119,6 +120,7 @@ export const PassType = Joi.string().regex(
 );
 
 export const OverridablePassProps = Joi.object<OverridablePassProps>({
+	formatVersion: Joi.number().default(1),
 	semantics: Semantics,
 	voided: Joi.boolean(),
 	logoText: Joi.string(),
@@ -145,12 +147,8 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<
-	OverridablePassProps &
-		PassKindsProps &
-		PassPropsFromMethods & { formatVersion: 1 }
->({
-	formatVersion: Joi.number(),
-})
+	OverridablePassProps & PassKindsProps & PassPropsFromMethods
+>()
 	.concat(OverridablePassProps)
 	.concat(PassKindsProps)
 	.concat(PassPropsFromMethods);

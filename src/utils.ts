@@ -81,7 +81,7 @@ export function removeHidden(from: Array<string>): Array<string> {
  * @returns
  */
 
-export function freezeRecursive(object: Object) {
+export function cloneRecursive(object: Object) {
 	const objectCopy = {};
 	const objectEntries = Object.entries(object);
 
@@ -93,15 +93,15 @@ export function freezeRecursive(object: Object) {
 				objectCopy[key] = value.slice();
 
 				for (let j = 0; j < value.length; j++) {
-					objectCopy[key][j] = freezeRecursive(value[j]);
+					objectCopy[key][j] = cloneRecursive(value[j]);
 				}
 			} else {
-				objectCopy[key] = freezeRecursive(value);
+				objectCopy[key] = cloneRecursive(value);
 			}
 		} else {
 			objectCopy[key] = value;
 		}
 	}
 
-	return Object.freeze(objectCopy);
+	return objectCopy;
 }

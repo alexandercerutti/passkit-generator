@@ -183,8 +183,8 @@ export default class PKPass extends Bundle {
 	 * that are composing your pass instance.
 	 */
 
-	public get props(): Readonly<Schemas.PassProps> {
-		return Utils.freezeRecursive(this[propsSymbol]);
+	public get props(): Schemas.PassProps {
+		return Utils.cloneRecursive(this[propsSymbol]);
 	}
 
 	/**

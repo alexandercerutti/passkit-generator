@@ -77,7 +77,7 @@ export const MODELS = {
 
 export const BUNDLE = {
 	MIME_TYPE_MISSING: "Cannot build Bundle. MimeType is missing",
-	CLOSED: "Cannot add file. Bundle is closed.",
+	CLOSED: "Cannot add file or set property. Bundle is closed.",
 } as const;
 
 export const FROM = {

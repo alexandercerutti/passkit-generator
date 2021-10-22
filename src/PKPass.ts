@@ -219,7 +219,7 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get transitType() {
-		return this[propsSymbol]["boardingPass"]?.transitType;
+		return this[propsSymbol]["boardingPass"].transitType;
 	}
 
 	/**

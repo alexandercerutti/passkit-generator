@@ -305,11 +305,11 @@ export default class PKPass extends Bundle {
 
 		this[passTypeSymbol] = type;
 		this[propsSymbol][this[passTypeSymbol]] = {
-			headerFields /******/: new FieldsArray(this[fieldKeysPoolSymbol]),
-			primaryFields /*****/: new FieldsArray(this[fieldKeysPoolSymbol]),
-			secondaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
-			auxiliaryFields /***/: new FieldsArray(this[fieldKeysPoolSymbol]),
-			backFields /********/: new FieldsArray(this[fieldKeysPoolSymbol]),
+			headerFields /******/: new FieldsArray(this),
+			primaryFields /*****/: new FieldsArray(this),
+			secondaryFields /***/: new FieldsArray(this),
+			auxiliaryFields /***/: new FieldsArray(this),
+			backFields /********/: new FieldsArray(this),
 			transitType: undefined,
 		};
 	}

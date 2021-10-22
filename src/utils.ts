@@ -1,3 +1,6 @@
+import * as Messages from "./messages";
+import type Bundle from "./Bundle";
+
 /**
  * Acts as a wrapper for converting date to W3C string
  * @param date
@@ -104,4 +107,10 @@ export function cloneRecursive(object: Object) {
 	}
 
 	return objectCopy;
+}
+
+export function assertUnfrozen(instance: InstanceType<typeof Bundle>) {
+	if (instance.isFrozen) {
+		throw new Error(Messages.BUNDLE.CLOSED);
+	}
 }

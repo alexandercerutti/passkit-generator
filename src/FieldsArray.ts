@@ -1,4 +1,7 @@
+import PKPass from "./PKPass";
+import { fieldKeysPoolSymbol } from "./PKPass";
 import * as Schemas from "./schemas";
+import * as Utils from "./utils";
 import formatMessage, * as Messages from "./messages";
 
 /**
@@ -6,14 +9,17 @@ import formatMessage, * as Messages from "./messages";
  * @see https://apple.co/2wkUBdh
  */
 
-const poolSymbol = Symbol("pool");
+const passInstanceSymbol = Symbol("passInstance");
 
 export default class FieldsArray extends Array<Schemas.Field> {
-	private [poolSymbol]: Set<string>;
+	private [passInstanceSymbol]: InstanceType<typeof PKPass>;
 
-	constructor(pool: Set<string>, ...args: Schemas.Field[]) {
+	constructor(
+		passInstance: InstanceType<typeof PKPass>,
+		...args: Schemas.Field[]
+	) {
 		super(...args);
-		this[poolSymbol] = pool;
+		this[passInstanceSymbol] = passInstance;
 	}
 
 	/**
@@ -22,6 +28,8 @@ export default class FieldsArray extends Array<Schemas.Field> {
 	 */
 
 	push(...fieldsData: Schemas.Field[]): number {
+		Utils.assertUnfrozen(this[passInstanceSymbol]);
+
 		const validFields = fieldsData.reduce(
 			(acc: Schemas.Field[], current: Schemas.Field) => {
 				try {
@@ -35,7 +43,9 @@ export default class FieldsArray extends Array<Schemas.Field> {
 					return acc;
 				}
 
-				if (this[poolSymbol].has(current.key)) {
+				const pool = this[passInstanceSymbol][fieldKeysPoolSymbol];
+
+				if (pool.has(current.key)) {
 					console.warn(
 						formatMessage(
 							Messages.FIELDS.REPEATED_KEY,
@@ -45,7 +55,7 @@ export default class FieldsArray extends Array<Schemas.Field> {
 					return acc;
 				}
 
-				this[poolSymbol].add(current.key);
+				pool.add(current.key);
 				return [...acc, current];
 			},
 			[],
@@ -60,8 +70,10 @@ export default class FieldsArray extends Array<Schemas.Field> {
 	 */
 
 	pop(): Schemas.Field {
+		Utils.assertUnfrozen(this[passInstanceSymbol]);
+
 		const element: Schemas.Field = super.pop();
-		this[poolSymbol].delete(element.key);
+		this[passInstanceSymbol][fieldKeysPoolSymbol].delete(element.key);
 		return element;
 	}
 
@@ -75,8 +87,12 @@ export default class FieldsArray extends Array<Schemas.Field> {
 		deleteCount: number,
 		...items: Schemas.Field[]
 	): Schemas.Field[] {
+		Utils.assertUnfrozen(this[passInstanceSymbol]);
+
 		const removeList = this.slice(start, deleteCount + start);
-		removeList.forEach((item) => this[poolSymbol].delete(item.key));
+		removeList.forEach((item) =>
+			this[passInstanceSymbol][fieldKeysPoolSymbol].delete(item.key),
+		);
 
 		return super.splice(start, deleteCount, ...items);
 	}

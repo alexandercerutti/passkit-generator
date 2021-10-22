@@ -170,11 +170,14 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set certificates(certs: Schemas.CertificatesSchema) {
+		Utils.assertUnfrozen(this);
+
 		Schemas.assertValidity(
 			Schemas.CertificatesSchema,
 			certs,
 			Messages.CERTIFICATES.INVALID,
 		);
+
 		this[certificatesSymbol] = certs;
 	}
 
@@ -196,6 +199,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set transitType(value: Schemas.TransitType) {
+		Utils.assertUnfrozen(this);
+
 		if (this.type !== "boardingPass") {
 			throw new TypeError(Messages.TRANSIT_TYPE.UNEXPECTED_PASS_TYPE);
 		}
@@ -287,6 +292,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public set type(type: Schemas.PassTypesProps) {
+		Utils.assertUnfrozen(this);
+
 		Schemas.assertValidity(
 			Schemas.PassType,
 			type,
@@ -687,6 +694,8 @@ export default class PKPass extends Bundle {
 		lang: string,
 		translations: { [key: string]: string } | null,
 	) {
+		Utils.assertUnfrozen(this);
+
 		if (typeof lang !== "string") {
 			throw new TypeError(
 				formatMessage(Messages.LANGUAGES.INVALID_LANG, typeof lang),
@@ -734,6 +743,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public setExpirationDate(date: Date | null) {
+		Utils.assertUnfrozen(this);
+
 		if (date === null) {
 			delete this[propsSymbol]["expirationDate"];
 			return;
@@ -770,6 +781,8 @@ export default class PKPass extends Bundle {
 	public setBeacons(beacons: null): void;
 	public setBeacons(...beacons: Schemas.Beacon[]): void;
 	public setBeacons(...beacons: (Schemas.Beacon | null)[]) {
+		Utils.assertUnfrozen(this);
+
 		if (beacons[0] === null) {
 			delete this[propsSymbol]["beacons"];
 			return;
@@ -804,6 +817,8 @@ export default class PKPass extends Bundle {
 	public setLocations(locations: null): void;
 	public setLocations(...locations: Schemas.Location[]): void;
 	public setLocations(...locations: (Schemas.Location | null)[]): void {
+		Utils.assertUnfrozen(this);
+
 		if (locations[0] === null) {
 			delete this[propsSymbol]["locations"];
 			return;
@@ -823,6 +838,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public setRelevantDate(date: Date): void {
+		Utils.assertUnfrozen(this);
+
 		if (date === null) {
 			delete this[propsSymbol]["relevantDate"];
 			return;
@@ -852,6 +869,8 @@ export default class PKPass extends Bundle {
 	public setBarcodes(message: string): void;
 	public setBarcodes(...barcodes: Schemas.Barcode[]): void;
 	public setBarcodes(...barcodes: (Schemas.Barcode | string | null)[]): void {
+		Utils.assertUnfrozen(this);
+
 		if (!barcodes.length) {
 			return;
 		}
@@ -904,6 +923,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public setNFC(nfc: Schemas.NFC | null): void {
+		Utils.assertUnfrozen(this);
+
 		if (nfc === null) {
 			delete this[propsSymbol]["nfc"];
 			return;

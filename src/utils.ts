@@ -78,7 +78,7 @@ export function removeHidden(from: Array<string>): Array<string> {
 }
 
 /**
- * Freezes recursively an object and all of its properties
+ * Clones recursively an object and all of its properties
  *
  * @param object
  * @returns

@@ -412,7 +412,8 @@ describe("PKPass", () => {
 				Messages.TRANSIT_TYPE.UNEXPECTED_PASS_TYPE,
 			);
 
-			expect(passCP.transitType).toBeUndefined();
+			/** boardingPass property doesn't exists, so it throws */
+			expect(() => passCP.transitType).toThrow();
 		});
 	});
 

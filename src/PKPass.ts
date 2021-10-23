@@ -1,3 +1,4 @@
+import { Stream } from "stream";
 import FieldsArray from "./FieldsArray";
 import Bundle, { filesSymbol } from "./Bundle";
 import getModelFolderContents from "./getModelFolderContents";
@@ -5,8 +6,7 @@ import * as Schemas from "./schemas";
 import * as Signature from "./Signature";
 import * as Strings from "./StringsUtils";
 import * as Utils from "./utils";
-import { Stream } from "stream";
-import formatMessage, * as Messages from "./messages";
+import * as Messages from "./messages";
 
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
@@ -44,7 +44,7 @@ export default class PKPass extends Bundle {
 
 		if (!source) {
 			throw new TypeError(
-				formatMessage(Messages.FROM.MISSING_SOURCE, source),
+				Messages.format(Messages.FROM.MISSING_SOURCE, source),
 			);
 		}
 
@@ -372,7 +372,9 @@ export default class PKPass extends Bundle {
 					validateJSONBuffer(buffer, Schemas.PassProps),
 				);
 			} catch (err) {
-				console.warn(formatMessage(Messages.PASS_SOURCE.INVALID, err));
+				console.warn(
+					Messages.format(Messages.PASS_SOURCE.INVALID, err),
+				);
 				return;
 			}
 
@@ -395,7 +397,9 @@ export default class PKPass extends Bundle {
 			try {
 				validateJSONBuffer(buffer, Schemas.Personalize);
 			} catch (err) {
-				console.warn(formatMessage(Messages.PERSONALIZE.INVALID, err));
+				console.warn(
+					Messages.format(Messages.PERSONALIZE.INVALID, err),
+				);
 				return;
 			}
 
@@ -576,7 +580,7 @@ export default class PKPass extends Bundle {
 			for (let i = 0; i < fileNames.length; i++) {
 				if (/personalization/.test(fileNames[i])) {
 					console.warn(
-						formatMessage(
+						Messages.format(
 							Messages.CLOSE.PERSONALIZATION_REMOVED,
 							fileNames[i],
 						),
@@ -698,7 +702,7 @@ export default class PKPass extends Bundle {
 
 		if (typeof lang !== "string") {
 			throw new TypeError(
-				formatMessage(Messages.LANGUAGES.INVALID_LANG, typeof lang),
+				Messages.format(Messages.LANGUAGES.INVALID_LANG, typeof lang),
 			);
 		}
 
@@ -723,7 +727,7 @@ export default class PKPass extends Bundle {
 
 		if (!translations || !Object.keys(translations).length) {
 			console.warn(
-				formatMessage(Messages.LANGUAGES.NO_TRANSLATIONS, lang),
+				Messages.format(Messages.LANGUAGES.NO_TRANSLATIONS, lang),
 			);
 			return;
 		}
@@ -754,7 +758,7 @@ export default class PKPass extends Bundle {
 			this[propsSymbol]["expirationDate"] = Utils.processDate(date);
 		} catch (err) {
 			throw new TypeError(
-				formatMessage(Messages.DATE.INVALID, "expirationDate", date),
+				Messages.format(Messages.DATE.INVALID, "expirationDate", date),
 			);
 		}
 	}
@@ -849,7 +853,7 @@ export default class PKPass extends Bundle {
 			this[propsSymbol]["relevantDate"] = Utils.processDate(date);
 		} catch (err) {
 			throw new TypeError(
-				formatMessage(Messages.DATE.INVALID, "relevantDate", date),
+				Messages.format(Messages.DATE.INVALID, "relevantDate", date),
 			);
 		}
 	}

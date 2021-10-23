@@ -94,7 +94,7 @@ export const PACK = {
  * @param values
  */
 
-export default function format(messageName: string, ...values: any[]) {
+export function format(messageName: string, ...values: any[]) {
 	// reversing because it is better popping than shifting.
 	const replaceValues = values.reverse();
 	return messageName.replace(/%s/g, () => replaceValues.pop());

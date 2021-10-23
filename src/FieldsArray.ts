@@ -1,7 +1,7 @@
-import PKPass from "./PKPass";
+import type PKPass from "./PKPass";
 import * as Schemas from "./schemas";
 import * as Utils from "./utils";
-import formatMessage, * as Messages from "./messages";
+import * as Messages from "./messages";
 
 /**
  * Class to represent lower-level keys pass fields
@@ -48,7 +48,7 @@ export default class FieldsArray extends Array<Schemas.Field> {
 
 				if (this[sharedKeysPoolSymbol].has(current.key)) {
 					console.warn(
-						formatMessage(
+						Messages.format(
 							Messages.FIELDS.REPEATED_KEY,
 							current.key,
 						),

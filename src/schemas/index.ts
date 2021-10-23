@@ -18,7 +18,7 @@ import { PassFields, TransitType } from "./PassFields";
 import { Semantics } from "./Semantics";
 import { CertificatesSchema } from "./Certificates";
 
-import formatMessage, * as Messages from "../messages";
+import * as Messages from "../messages";
 
 const RGB_COLOR_REGEX =
 	/rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\)/;
@@ -204,7 +204,7 @@ export function assertValidity<T>(
 		if (customErrorMessage) {
 			console.warn(validation.error);
 			throw new TypeError(
-				`${validation.error.name} happened. ${formatMessage(
+				`${validation.error.name} happened. ${Messages.format(
 					customErrorMessage,
 					validation.error.message,
 				)}`,
@@ -253,7 +253,7 @@ export function filterValid<T extends Object>(
 		try {
 			return [...acc, validate(schema, current)];
 		} catch (err) {
-			console.warn(formatMessage(Messages.FILTER_VALID.INVALID, err));
+			console.warn(Messages.format(Messages.FILTER_VALID.INVALID, err));
 			return [...acc];
 		}
 	}, []);

@@ -11,7 +11,6 @@ import formatMessage, * as Messages from "./messages";
 /** Exporting for tests specs */
 export const propsSymbol = Symbol("props");
 export const localizationSymbol = Symbol("pass.l10n");
-export const fieldKeysPoolSymbol = Symbol("fieldKeysPoolSymbol");
 export const importMetadataSymbol = Symbol("import.pass.metadata");
 export const createManifestSymbol = Symbol("pass.manifest");
 export const closePassSymbol = Symbol("pass.close");
@@ -20,7 +19,6 @@ export const certificatesSymbol = Symbol("pass.certificates");
 
 export default class PKPass extends Bundle {
 	private [certificatesSymbol]: Schemas.CertificatesSchema;
-	private [fieldKeysPoolSymbol] = new Set<string>();
 	private [propsSymbol]: Schemas.PassProps = {};
 	private [localizationSymbol]: {
 		[lang: string]: {
@@ -310,13 +308,15 @@ export default class PKPass extends Bundle {
 			this[propsSymbol][this.type] = undefined;
 		}
 
+		const sharedKeysPool = new Set<string>();
+
 		this[passTypeSymbol] = type;
 		this[propsSymbol][this[passTypeSymbol]] = {
-			headerFields /******/: new FieldsArray(this),
-			primaryFields /*****/: new FieldsArray(this),
-			secondaryFields /***/: new FieldsArray(this),
-			auxiliaryFields /***/: new FieldsArray(this),
-			backFields /********/: new FieldsArray(this),
+			headerFields /******/: new FieldsArray(this, sharedKeysPool),
+			primaryFields /*****/: new FieldsArray(this, sharedKeysPool),
+			secondaryFields /***/: new FieldsArray(this, sharedKeysPool),
+			auxiliaryFields /***/: new FieldsArray(this, sharedKeysPool),
+			backFields /********/: new FieldsArray(this, sharedKeysPool),
 			transitType: undefined,
 		};
 	}

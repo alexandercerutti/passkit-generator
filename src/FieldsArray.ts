@@ -1,5 +1,4 @@
 import PKPass from "./PKPass";
-import { fieldKeysPoolSymbol } from "./PKPass";
 import * as Schemas from "./schemas";
 import * as Utils from "./utils";
 import formatMessage, * as Messages from "./messages";
@@ -10,16 +9,20 @@ import formatMessage, * as Messages from "./messages";
  */
 
 const passInstanceSymbol = Symbol("passInstance");
+const sharedKeysPoolSymbol = Symbol("keysPool");
 
 export default class FieldsArray extends Array<Schemas.Field> {
 	private [passInstanceSymbol]: InstanceType<typeof PKPass>;
+	private [sharedKeysPoolSymbol]: Set<string>;
 
 	constructor(
 		passInstance: InstanceType<typeof PKPass>,
+		keysPool: Set<string>,
 		...args: Schemas.Field[]
 	) {
 		super(...args);
 		this[passInstanceSymbol] = passInstance;
+		this[sharedKeysPoolSymbol] = keysPool;
 	}
 
 	/**
@@ -43,9 +46,7 @@ export default class FieldsArray extends Array<Schemas.Field> {
 					return acc;
 				}
 
-				const pool = this[passInstanceSymbol][fieldKeysPoolSymbol];
-
-				if (pool.has(current.key)) {
+				if (this[sharedKeysPoolSymbol].has(current.key)) {
 					console.warn(
 						formatMessage(
 							Messages.FIELDS.REPEATED_KEY,
@@ -55,7 +56,7 @@ export default class FieldsArray extends Array<Schemas.Field> {
 					return acc;
 				}
 
-				pool.add(current.key);
+				this[sharedKeysPoolSymbol].add(current.key);
 				return [...acc, current];
 			},
 			[],
@@ -73,7 +74,7 @@ export default class FieldsArray extends Array<Schemas.Field> {
 		Utils.assertUnfrozen(this[passInstanceSymbol]);
 
 		const element: Schemas.Field = super.pop();
-		this[passInstanceSymbol][fieldKeysPoolSymbol].delete(element.key);
+		this[sharedKeysPoolSymbol].delete(element.key);
 		return element;
 	}
 
@@ -91,7 +92,7 @@ export default class FieldsArray extends Array<Schemas.Field> {
 
 		const removeList = this.slice(start, deleteCount + start);
 		removeList.forEach((item) =>
-			this[passInstanceSymbol][fieldKeysPoolSymbol].delete(item.key),
+			this[sharedKeysPoolSymbol].delete(item.key),
 		);
 
 		return super.splice(start, deleteCount, ...items);

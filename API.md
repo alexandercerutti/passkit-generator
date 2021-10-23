@@ -134,9 +134,10 @@ Use this is you have a saved model on your File System and want to read it and u
 
 The following are the arguments to be passed in the object in first position:
 
-| Key | Type | Description | Optional | Default Value |
-| model | string (path) | The path to your model on File System | `false` | - |
-| certificates | object | The object containing certificates data. Refer to PKPass's constructor for all the keys | `false` | - |
+| Key          | Type          | Description                                                                             | Optional | Default Value |
+| ------------ | ------------- | --------------------------------------------------------------------------------------- | :------: | :-----------: |
+| model        | string (path) | The path to your model on File System                                                   | `false`  |       -       |
+| certificates | object        | The object containing certificates data. Refer to PKPass's constructor for all the keys | `false`  |       -       |
 
 **Example**:
 
@@ -186,9 +187,10 @@ Throws if pass is frozen due to a previous export.
 
 **Arguments**:
 
-| Key | Type | Description | Optional | Default Value |
-| filePath | string (path) | The path, local to your pass.json, where the file should be added (if it is a localization file, it will be like `en.lproj/pass.strings`, otherwise just the name, like `personalization.json`) | `false` | - |
-| buffer | Buffer | The content of your file | `false` | - |
+| Key      | Type          | Description                                                                                                                                                                                     | Optional | Default Value |
+| -------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: | :-----------: |
+| filePath | string (path) | The path, local to your pass.json, where the file should be added (if it is a localization file, it will be like `en.lproj/pass.strings`, otherwise just the name, like `personalization.json`) | `false`  |       -       |
+| buffer   | Buffer        | The content of your file                                                                                                                                                                        | `false`  |       -       |
 
 ---
 

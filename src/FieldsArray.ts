@@ -25,63 +25,14 @@ export default class FieldsArray extends Array<Schemas.Field> {
 		this[sharedKeysPoolSymbol] = keysPool;
 	}
 
-	/**
-	 * Like `Array.prototype.push` but will alter
-	 * also uniqueKeys set.
-	 */
-
-	push(...fieldsData: Schemas.Field[]): number {
-		Utils.assertUnfrozen(this[passInstanceSymbol]);
-
-		const validFields = fieldsData.reduce(
-			(acc: Schemas.Field[], current: Schemas.Field) => {
-				try {
-					Schemas.assertValidity(
-						Schemas.Field,
-						current,
-						Messages.FIELDS.INVALID,
-					);
-				} catch (err) {
-					console.warn(err);
-					return acc;
-				}
-
-				if (this[sharedKeysPoolSymbol].has(current.key)) {
-					console.warn(
-						Messages.format(
-							Messages.FIELDS.REPEATED_KEY,
-							current.key,
-						),
-					);
-					return acc;
-				}
-
-				this[sharedKeysPoolSymbol].add(current.key);
-				return [...acc, current];
-			},
-			[],
-		);
-
-		return super.push(...validFields);
+	push(...items: Schemas.Field[]): number {
+		const validItems = registerWithValidation(this, ...items);
+		return super.push(...validItems);
 	}
-
-	/**
-	 * Like `Array.prototype.pop`, but will alter
-	 * also uniqueKeys set
-	 */
 
 	pop(): Schemas.Field {
-		Utils.assertUnfrozen(this[passInstanceSymbol]);
-
-		const element: Schemas.Field = super.pop();
-		this[sharedKeysPoolSymbol].delete(element.key);
-		return element;
+		return unregisterItems(this, () => super.pop());
 	}
-
-	/**
-	 * Like `Array.prototype.splice` but will alter
-	 * also uniqueKeys set
-	 */
 
 	splice(
 		start: number,
@@ -90,25 +41,61 @@ export default class FieldsArray extends Array<Schemas.Field> {
 	): Schemas.Field[] {
 		Utils.assertUnfrozen(this[passInstanceSymbol]);
 
-		const removeList = this.slice(start, deleteCount + start);
-		removeList.forEach((item) =>
-			this[sharedKeysPoolSymbol].delete(item.key),
-		);
-
-		let validItems = items ?? [];
-
-		if (validItems.length) {
-			validItems = Schemas.filterValid(Schemas.Field, items);
-
-			for (let i = 0; i < validItems.length; i++) {
-				this[sharedKeysPoolSymbol].add(validItems[i].key);
-			}
+		for (let i = start; i < start + deleteCount; i++) {
+			this[sharedKeysPoolSymbol].delete(this[i].key);
 		}
 
+		const validItems = registerWithValidation(this, ...items);
 		return super.splice(start, deleteCount, ...validItems);
 	}
 
-	get length(): number {
-		return this.length;
+	shift() {
+		return unregisterItems(this, () => super.shift());
 	}
+
+	unshift(...items: Schemas.Field[]) {
+		const validItems = registerWithValidation(this, ...items);
+		return super.unshift(...validItems);
+	}
+}
+
+function registerWithValidation(
+	instance: InstanceType<typeof FieldsArray>,
+	...items: Schemas.Field[]
+) {
+	Utils.assertUnfrozen(instance[passInstanceSymbol]);
+
+	let validItems: Schemas.Field[] = [];
+
+	for (let i = items.length, field: Schemas.Field; (field = items[--i]); ) {
+		try {
+			Schemas.assertValidity(
+				Schemas.Field,
+				field,
+				Messages.FIELDS.INVALID,
+			);
+
+			if (instance[sharedKeysPoolSymbol].has(field.key)) {
+				throw Messages.format(Messages.FIELDS.REPEATED_KEY, field.key);
+			}
+
+			instance[sharedKeysPoolSymbol].add(field.key);
+			validItems.push(field);
+		} catch (err) {
+			console.warn(err);
+		}
+	}
+
+	return validItems;
+}
+
+function unregisterItems(
+	instance: InstanceType<typeof FieldsArray>,
+	removeFn: Function,
+) {
+	Utils.assertUnfrozen(instance[passInstanceSymbol]);
+
+	const element: Schemas.Field = removeFn();
+	instance[sharedKeysPoolSymbol].delete(element.key);
+	return element;
 }

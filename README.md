@@ -76,7 +76,7 @@ It will output a .zip file that you can decompress and use as source.
 
 You can follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package Structure_) to build a correct pass model. The **icon is required** in order to make the pass work. Omitting an icon resolution, might make a pass work on a device (e.g. Mac) but not on another (e.g. iPhone). _Manifest.json_ and _signature_ will be automatically ignored from the model and generated in runtime.
 
-You can also create `.lproj` folders (e.g. _en.lproj_ or _it.lproj_) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#method_localize) in the API documentation.
+You can also create `.lproj` folders (e.g. _en.lproj_ or _it.lproj_) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#localizing-passes) in the API documentation.
 
 To include a file that belongs to an `.lproj` folder in buffers, you'll just have to name a key like `en.lproj/thumbnail.png`.
 

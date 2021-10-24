@@ -95,7 +95,17 @@ export default class FieldsArray extends Array<Schemas.Field> {
 			this[sharedKeysPoolSymbol].delete(item.key),
 		);
 
-		return super.splice(start, deleteCount, ...items);
+		let validItems = items ?? [];
+
+		if (validItems.length) {
+			validItems = Schemas.filterValid(Schemas.Field, items);
+
+			for (let i = 0; i < validItems.length; i++) {
+				this[sharedKeysPoolSymbol].add(validItems[i].key);
+			}
+		}
+
+		return super.splice(start, deleteCount, ...validItems);
 	}
 
 	get length(): number {

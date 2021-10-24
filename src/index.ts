@@ -14,4 +14,5 @@ export type {
 	Semantics,
 	TransitType,
 	Personalize,
+	OverridablePassProps,
 } from "./schemas";

@@ -166,26 +166,6 @@ export const Template = Joi.object<Template>({
 // --------- UTILITIES ---------- //
 
 /**
- * Checks if the passed options are compliant with the indicated schema
- * @param {any} opts - options to be checks
- * @param {string} schemaName - the indicated schema (will be converted)
- * @returns {boolean} - result of the check
- */
-
-export function isValid<T extends Object>(
-	opts: T,
-	schema: Joi.ObjectSchema<T>,
-): boolean {
-	const validation = schema.validate(opts);
-
-	if (validation.error) {
-		throw new TypeError(validation.error.message);
-	}
-
-	return !validation.error;
-}
-
-/**
  * Performs validation of a schema on an object.
  * If it fails, will throw an error.
  *

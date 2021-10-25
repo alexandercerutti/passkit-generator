@@ -39,13 +39,13 @@ export default class FieldsArray extends Array<Schemas.Field> {
 		deleteCount: number,
 		...items: Schemas.Field[]
 	): Schemas.Field[] {
-		Utils.assertUnfrozen(this[passInstanceSymbol]);
+		// Perfoming frozen check, validation and getting valid items
+		const validItems = registerWithValidation(this, ...items);
 
 		for (let i = start; i < start + deleteCount; i++) {
 			this[sharedKeysPoolSymbol].delete(this[i].key);
 		}
 
-		const validItems = registerWithValidation(this, ...items);
 		return super.splice(start, deleteCount, ...validItems);
 	}
 

@@ -102,37 +102,8 @@ Create a `pass.json` by taking example from examples folder models or the one pr
 The third step is about the developer and WWDR certificates. I suggest you to create a certificate-dedicated folder inside your working directory (e.g. `./certs`) to contain everything concerning the certificates.
 
 This is a standard procedure: you would have to do it also without using this library. We'll use OpenSSL to complete our work (or to do it entirely, if only on terminal), so be sure to have it installed.
-You'll need the following three elements:
 
--   Apple WWDR (_Worldwide Developer Relationship_) certificate
--   Signer certificate
--   Signer key
-
-While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certificateauthority/), to get the `signer key` and the `certificate`, [you'll have to issue first a `Certificate Signing Request` (`.certSigningRequest` file)](https://help.apple.com/developer-account/#/devbfa00fef7) and upload it to Apple Developers Portal when [creating a new certificate](https://developer.apple.com/account/resources/certificates/add) (open it, it's worth it 😜). Follow the procedure here below.
-
-<br>
-<hr>
-
-> **If you don't have access to macOS** (or you are a terminal enthusiast), **follow [these steps](./non-macOS-steps.md) instead.**
-
-<hr>
-
-1. Create a new pass type identifier ([direct link](https://developer.apple.com/account/resources/identifiers/passTypeId/add/)) and provide it with a description and a reverse-domain identifier (starting with "pass."). You will have to put this identifier as value for `passTypeIdentifier` in `pass.json` file.
-2. Confirm and register the new identifier.
-3. [In the list of your passTypeIds](https://developer.apple.com/account/resources/identifiers/list/passTypeId) (filter), click on your new pass id to edit it.
-4. Click "Create Certificate" button and follow the instructions (like providing the Certificate Signing Request, we talked about earlier) until you won't download a certificate like `pass.cer`.
-5. Open the downloaded certificate in macOS Keychain Access. Go in "Certificates" on left and `right-click > Export "\<certname\>"`. Choose a password (and write it down) and you will get a PKCS#12 file (`.p12`).
-6. Open terminal, place where you want to save the files and insert the following OpenSSL commands changing the contents between angular brackets. You'll have to choose a secret passphrase (and write it down) that you'll use also in the application.
-
-    ```sh
-    # Creating and changing dir
-    $ mkdir "certs" && cd $_
-    # Extracting key and cert from pkcs12
-    $ openssl pkcs12 -in <cert-name>.p12 -clcerts -nokeys -out signerCert.pem -passin pass:<your-password>
-    $ openssl pkcs12 -in <cert-name>.p12 -nocerts -out signerKey.pem -passin pass:<your-password> -passout pass:<secret-passphrase>
-    ```
-
-7. Execute step 5 also for the WWDR certificate (`.cer`) you downloaded from Apple PKI portal (default name: _AppleWWDRCA.cer_) but instead exporting it as PKCS#12 (`.p12` - you'll also be unable to do that), export it as PEM (`.pem`) file.
+[Follow the **FULL GUIDE in wiki** to get all the files you need to proceed](https://github.com/alexandercerutti/passkit-generator/wiki/Generating-Certificates).
 
 ---
 

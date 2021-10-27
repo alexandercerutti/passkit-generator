@@ -14,7 +14,7 @@
 </div>
 <br>
 
-### Architecture
+## Architecture
 
 This library was created with a specific architecture in mind: **application** and **model** (as preprocessed entity), to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...), while keeping an eye on the different possible execution contexts.
 
@@ -22,7 +22,7 @@ Pass creation and population might not fully happen in runtime. This library all
 
 Whenever adding files, through scratch, template or buffer, these will be read and pushed as they are in the resulting .zip file, while dynamic data will be patched (`pass.json` with props) or generated in runtime (`manifest.json`, `signature` and translation files).
 
-### Install
+### Installation
 
 ```sh
 $ npm install passkit-generator --save
@@ -32,7 +32,7 @@ $ npm install passkit-generator --save
 
 ### API Documentation
 
-This package comes with an [API documentation](./API.md), that makes available a series of methods to create and customize passes.
+This package comes with an [API Documentation Reference](https://github.com/alexandercerutti/passkit-generator/wiki/API-Documentation-Reference), available in wiki, that makes available a series of methods to create and customize passes.
 
 ---
 
@@ -48,7 +48,7 @@ Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-genera
 
 ---
 
-## Gettin Started
+## Getting Started
 
 ##### Model
 

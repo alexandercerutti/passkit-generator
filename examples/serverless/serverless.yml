@@ -1,0 +1,56 @@
+service: passkit-generator-test-lambda
+frameworkVersion: "2"
+
+plugins:
+    - serverless-offline
+    - serverless-plugin-typescript
+    - serverless-s3-local
+
+provider:
+    name: aws
+    runtime: nodejs14.x
+    lambdaHashingVersion: "20201221"
+
+functions:
+    fields:
+        handler: src/index.fields
+        events:
+            - httpApi:
+                  path: /fields
+                  method: get
+    expiration:
+        handler: src/index.expirationDate
+        events:
+            - httpApi:
+                  path: /expirationDate
+                  method: get
+    localize:
+        handler: src/index.localize
+        events:
+            - httpApi:
+                  path: /localize
+                  method: get
+    barcodes:
+        handler: src/index.barcodes
+        events:
+            - httpApi:
+                  path: /barcodes
+                  method: get
+    scratch:
+        handler: src/index.scratch
+        events:
+            - httpApi:
+                  path: /scratch
+                  method: get
+    pkpasses:
+        handler: src/index.pkpasses
+        events:
+            - httpApi:
+                  path: /pkpasses
+                  method: get
+
+custom:
+    serverless-offline:
+        httpPort: 8080
+    s3:
+        directory: /tmp

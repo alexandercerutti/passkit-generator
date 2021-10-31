@@ -180,6 +180,14 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
+	 * Allows retrieving current languages
+	 */
+
+	public get languages() {
+		return Object.keys(this[localizationSymbol]);
+	}
+
+	/**
 	 * Allows getting an image of the props
 	 * that are composing your pass instance.
 	 */

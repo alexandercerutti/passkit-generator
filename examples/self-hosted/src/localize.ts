@@ -8,8 +8,6 @@ import { app } from "./webserver";
 import { getCertificates } from "./shared";
 import path from "path";
 import { PKPass } from "passkit-generator";
-/** Symbols are exported just for tests and examples. Replicate only if really needed. */
-import { localizationSymbol } from "passkit-generator/lib/PKPass";
 
 app.route("/localize/:modelName").get(async (request, response) => {
 	const passName =
@@ -51,10 +49,7 @@ app.route("/localize/:modelName").get(async (request, response) => {
 		// This language does not exist but is still added as .lproj folder
 		pass.localize("zu", {});
 
-		console.log(
-			"Added languages",
-			Object.keys(pass[localizationSymbol]).join(", "),
-		);
+		console.log("Added languages", Object.keys(pass.languages).join(", "));
 
 		const stream = pass.getAsStream();
 

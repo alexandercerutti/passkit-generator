@@ -417,7 +417,7 @@ describe("PKPass", () => {
 		});
 	});
 
-	describe("certificates setter", () => {
+	describe("certificates", () => {
 		it("should throw an error if certificates provided are not complete or invalid", () => {
 			expect(() => {
 				// @ts-expect-error
@@ -580,6 +580,47 @@ describe("PKPass", () => {
 
 				expect(pass["boardingPass"]).toBeUndefined();
 			});
+		});
+	});
+
+	describe("languages", () => {
+		it("should get updated when translations gets added through localize", () => {
+			expect(pass.languages.length).toBe(0);
+			expect(pass.languages).toEqual([]);
+
+			pass.localize("en", {
+				buon_giorno: "Good Morning",
+				buona_sera: "Good Evening",
+			});
+
+			expect(pass.languages.length).toBe(1);
+			expect(pass.languages).toEqual(["en"]);
+		});
+
+		it("should get updated when translations are added through .addBuffer", () => {
+			const validTranslationStringsEN = `
+/* Insert Element menu item */
+"Insert Element" = "Insert Element";
+/* Error string used for unknown error types. */
+"ErrorString_1" = "An unknown error occurred.";
+			`;
+
+			pass.addBuffer(
+				"en.lproj/pass.strings",
+				Buffer.from(validTranslationStringsEN),
+			);
+
+			const validTranslationStringsIT = `
+"Insert Element" = "Inserisci elemento";
+"ErrorString_1" = "Un errore sconosciuto è accaduto";
+			`;
+
+			pass.addBuffer(
+				"it.lproj/pass.strings",
+				Buffer.from(validTranslationStringsIT),
+			);
+
+			expect(pass.languages).toEqual(["en", "it"]);
 		});
 	});
 

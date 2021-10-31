@@ -1,7 +1,6 @@
 import { finish400WithoutModelName, createPassGenerator } from "../shared";
 import type { ALBEvent, ALBResult } from "aws-lambda";
 import type { PKPass } from "passkit-generator";
-import { localizationSymbol } from "passkit-generator/lib/PKPass";
 
 /**
  * Lambda for localize example
@@ -36,10 +35,7 @@ export async function localize(event: ALBEvent) {
 		LOCATION: "plassering",
 	});
 
-	console.log(
-		"Added languages",
-		Object.keys(pass[localizationSymbol]).join(", "),
-	);
+	console.log("Added languages", Object.keys(pass.languages).join(", "));
 
 	return (await passGenerator.next(pass as PKPass)).value as ALBResult;
 }

@@ -5,7 +5,8 @@
  * examples, creation through templates is already shown
  */
 
-import app, { getCertificates } from "./webserver";
+import { app } from "./webserver";
+import { getCertificates } from "./shared";
 import path from "path";
 import { promises as fs } from "fs";
 import { PKPass } from "passkit-generator";
@@ -75,7 +76,7 @@ async function readDirectory(filePath: string) {
 // *************************** //
 
 const passTemplate = new Promise<PKPass>(async (resolve) => {
-	const modelPath = path.resolve(__dirname, `../models/examplePass.pass`);
+	const modelPath = path.resolve(__dirname, `../../models/examplePass.pass`);
 	const [modelFilesList, certificates] = await Promise.all([
 		fs.readdir(modelPath),
 		getCertificates(),
@@ -113,7 +114,7 @@ const passTemplate = new Promise<PKPass>(async (resolve) => {
 	);
 });
 
-app.all(async function manageRequest(request, response) {
+app.route("/pkpassfrom/:modelName").get(async (request, response) => {
 	const passName =
 		request.params.modelName +
 		"_" +

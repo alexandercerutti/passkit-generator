@@ -8,11 +8,12 @@
  * by a string
  */
 
-import app, { getCertificates } from "./webserver";
+import { app } from "./webserver";
+import { getCertificates } from "./shared";
 import { PKPass } from "passkit-generator";
 import path from "path";
 
-app.all(async function manageRequest(request, response) {
+app.route("/barcodes/:modelName").get(async (request, response) => {
 	const passName =
 		request.params.modelName +
 		"_" +
@@ -25,7 +26,7 @@ app.all(async function manageRequest(request, response) {
 			{
 				model: path.resolve(
 					__dirname,
-					`../models/${request.params.modelName}`,
+					`../../models/${request.params.modelName}`,
 				),
 				certificates: {
 					wwdr: certificates.wwdr,

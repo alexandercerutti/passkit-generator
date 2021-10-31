@@ -7,11 +7,12 @@
  * have to wait two minutes.
  */
 
-import app, { getCertificates } from "./webserver";
+import { app } from "./webserver";
+import { getCertificates } from "./shared";
 import path from "path";
 import { PKPass } from "passkit-generator";
 
-app.all(async function manageRequest(request, response) {
+app.route("/expirationDate/:modelName").get(async (request, response) => {
 	if (!request.query.fn) {
 		response.send(
 			"<a href='?fn=void'>Generate a voided pass.</a><br><a href='?fn=expiration'>Generate a pass with expiration date</a>",
@@ -31,7 +32,7 @@ app.all(async function manageRequest(request, response) {
 			{
 				model: path.resolve(
 					__dirname,
-					`../models/${request.params.modelName}`,
+					`../../models/${request.params.modelName}`,
 				),
 				certificates: {
 					wwdr: certificates.wwdr,

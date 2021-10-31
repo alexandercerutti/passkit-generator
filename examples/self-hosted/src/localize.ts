@@ -4,13 +4,14 @@
  * .pkpass file and check for .lproj folders
  */
 
-import app, { getCertificates } from "./webserver";
+import { app } from "./webserver";
+import { getCertificates } from "./shared";
 import path from "path";
 import { PKPass } from "passkit-generator";
 /** Symbols are exported just for tests and examples. Replicate only if really needed. */
 import { localizationSymbol } from "passkit-generator/lib/PKPass";
 
-app.all(async function manageRequest(request, response) {
+app.route("/localize/:modelName").get(async (request, response) => {
 	const passName =
 		request.params.modelName +
 		"_" +
@@ -23,7 +24,7 @@ app.all(async function manageRequest(request, response) {
 			{
 				model: path.resolve(
 					__dirname,
-					`../models/${request.params.modelName}`,
+					`../../models/${request.params.modelName}`,
 				),
 				certificates: {
 					wwdr: certificates.wwdr,

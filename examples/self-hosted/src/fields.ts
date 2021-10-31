@@ -9,11 +9,12 @@
  * @Author: Alexander P. Cerutti
  */
 
-import app, { getCertificates } from "./webserver";
+import { app } from "./webserver";
+import { getCertificates } from "./shared";
 import path from "path";
 import { PKPass } from "passkit-generator";
 
-app.all(async function manageRequest(request, response) {
+app.route("/fields/:modelName").get(async (request, response) => {
 	const passName =
 		"exampleBooking" +
 		"_" +
@@ -24,7 +25,7 @@ app.all(async function manageRequest(request, response) {
 	try {
 		const pass = await PKPass.from(
 			{
-				model: path.resolve(__dirname, "../models/exampleBooking"),
+				model: path.resolve(__dirname, "../../models/exampleBooking"),
 				certificates: {
 					wwdr: certificates.wwdr,
 					signerCert: certificates.signerCert,

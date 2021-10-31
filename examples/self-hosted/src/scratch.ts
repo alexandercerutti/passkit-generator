@@ -3,7 +3,8 @@
  * by adding files later and not adding pass.json
  */
 
-import app, { getCertificates } from "./webserver";
+import { app } from "./webserver";
+import { getCertificates } from "./shared";
 import path from "path";
 import { promises as fs } from "fs";
 import { PKPass } from "passkit-generator";
@@ -12,7 +13,7 @@ function getRandomColorPart() {
 	return Math.floor(Math.random() * 255);
 }
 
-app.all(async function manageRequest(request, response) {
+app.route("/scratch/:modelName").get(async (request, response) => {
 	const passName =
 		request.params.modelName +
 		"_" +
@@ -20,7 +21,10 @@ app.all(async function manageRequest(request, response) {
 
 	const [iconFromModel, certificates] = await Promise.all([
 		fs.readFile(
-			path.resolve(__dirname, "../models/exampleBooking.pass/icon.png"),
+			path.resolve(
+				__dirname,
+				"../../models/exampleBooking.pass/icon.png",
+			),
 		),
 		await getCertificates(),
 	]);

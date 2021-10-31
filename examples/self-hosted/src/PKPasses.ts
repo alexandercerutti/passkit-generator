@@ -26,9 +26,10 @@
  * A feedback to Apple have been sent for this.
  */
 
-import app, { getCertificates } from "./webserver";
-import path from "path";
+import { app } from "./webserver";
+import { getCertificates } from "./shared";
 import { promises as fs } from "fs";
+import path from "path";
 import { PKPass } from "passkit-generator";
 
 // *************************** //
@@ -42,7 +43,10 @@ function getRandomColorPart() {
 async function generatePass(props: Object) {
 	const [iconFromModel, certificates] = await Promise.all([
 		fs.readFile(
-			path.resolve(__dirname, "../models/exampleBooking.pass/icon.png"),
+			path.resolve(
+				__dirname,
+				"../../models/exampleBooking.pass/icon.png",
+			),
 		),
 		getCertificates(),
 	]);
@@ -111,7 +115,7 @@ async function generatePass(props: Object) {
 	return pass;
 }
 
-app.all(async function manageRequest(request, response) {
+app.route("/pkpasses/:modelName").get(async (request, response) => {
 	const passName =
 		request.params.modelName +
 		"_" +

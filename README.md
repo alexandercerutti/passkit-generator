@@ -14,7 +14,7 @@
 </div>
 <br>
 
-⚠ You are currently in the v2.0.0 branch. This is kept for reference only and its code is not supported anymore. You can move to the latest release (currently v3.0). It introduces new features and changes. Also, it has an interesting migration guide. Check it out!
+> ⚠ You are currently in the v2.0.0 branch. This is kept for reference only and its code is not supported anymore. You can move to the latest release (currently v3.0). It introduces new features and changes. Also, it has an interesting migration guide. Check it out!
 
 ### Architecture
 

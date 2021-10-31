@@ -14,6 +14,8 @@
 </div>
 <br>
 
+⚠ You are currently in the v2.0.0 branch. This is kept for reference only and its code is not supported anymore. You can move to the latest release (currently v3.0). It introduces new features and changes. Also, it has an interesting migration guide. Check it out!
+
 ### Architecture
 
 This package was created with a specific architecture in mind: **application** and **model** (as preprocessed entity), to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...).
@@ -22,8 +24,6 @@ Pass creation and population doesn't fully happen in runtime. Pass template (mod
 
 Both Pass template will be read and pushed as they are in the resulting .zip file, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
 All the static medias from both sources, will be read and pushed as they are in the resulting .zip file; dynamic object will be patched against `pass.json`, generated on runtime (`manifest.json`, `signature`) or merged if already existing (translation files).
-
-> ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
 
 ### Install
 

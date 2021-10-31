@@ -1,18 +1,15 @@
 {
 	"name": "passkit-generator",
-	"version": "2.0.8",
+	"version": "3.0.0",
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
 	"main": "lib/index.js",
 	"scripts": {
 		"build": "npm run build:src",
 		"build:all": "npm run build:src && npm run build:examples && npm run build:spec",
 		"build:src": "rimraf lib && npx tsc -p tsconfig.dist.json",
-		"build:examples": "cd examples && npm run build",
 		"build:spec": "rimraf \"./spec/*.!(ts)\" && npx tsc -p tsconfig.spec.json",
 		"prepublishOnly": "npm run build",
-		"test": "npm run build:spec && npx jasmine",
-		"example": "npm run build:src && npm --prefix examples run example",
-		"example:debug": "npm run build:src && npm --prefix examples run example:debug"
+		"test": "npm run build:spec && npx jasmine"
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",
@@ -25,25 +22,23 @@
 		"Pass"
 	],
 	"dependencies": {
-		"debug": "^4.3.1",
-		"joi": "^17.4.0",
+		"do-not-zip": "^1.0.0",
+		"joi": "^17.4.2",
 		"node-forge": "^0.10.0",
-		"tslib": "^2.3.0",
-		"yazl": "^2.5.1"
+		"tslib": "^2.3.1"
 	},
 	"engines": {
-		"node": ">=10.0.0"
+		"node": ">=14.18.1"
 	},
 	"devDependencies": {
-		"@types/debug": "^4.1.5",
-		"@types/jasmine": "^3.7.7",
-		"@types/node": "^14.17.3",
-		"@types/node-forge": "^0.10.0",
-		"@types/yazl": "^2.4.2",
-		"jasmine": "^3.7.0",
-		"prettier": "^2.3.1",
+		"@types/jasmine": "^3.10.1",
+		"@types/node": "^16.11.4",
+		"@types/node-forge": "^0.10.8",
+		"@types/do-not-zip": "^1.0.0",
+		"jasmine": "^3.10.0",
+		"prettier": "^2.4.1",
 		"rimraf": "^3.0.2",
-		"typescript": "^4.3.4"
+		"typescript": "^4.4.4"
 	},
 	"files": [
 		"lib/**/*.+(js|d.ts)!(*.map)"

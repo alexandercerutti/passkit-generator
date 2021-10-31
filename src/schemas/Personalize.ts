@@ -2,14 +2,7 @@ import Joi from "joi";
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/personalize
- * @TODO Rename "Personalization" in "Personalize". This will be done in v3.0
  */
-
-export interface Personalization {
-	description: string;
-	requiredPersonalizationFields: RequiredPersonalizationFields[];
-	termsAndConditions?: string;
-}
 
 type RequiredPersonalizationFields =
 	| "PKPassPersonalizationFieldName"
@@ -17,7 +10,13 @@ type RequiredPersonalizationFields =
 	| "PKPassPersonalizationFieldEmailAddress"
 	| "PKPassPersonalizationFieldPhoneNumber";
 
-export const Personalization = Joi.object<Personalization>().keys({
+export interface Personalize {
+	description: string;
+	requiredPersonalizationFields: RequiredPersonalizationFields[];
+	termsAndConditions?: string;
+}
+
+export const Personalize = Joi.object<Personalize>().keys({
 	description: Joi.string().required(),
 	requiredPersonalizationFields: Joi.array()
 		.items(

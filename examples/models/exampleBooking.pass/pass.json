@@ -1,6 +1,6 @@
 {
 	"formatVersion": 1,
-	"passTypeIdentifier": "pass.com.example.myapp",
+	"passTypeIdentifier": "pass.com.passkitgenerator",
 	"serialNumber": "nmyuxofgna",
 	"teamIdentifier": "F53WB8AE67",
 	"webServiceURL": "https://192.168.1.254:80/",
@@ -23,11 +23,6 @@
 			"messageEncoding": "iso-8859-1"
 		}
 	],
-	"barcode": {
-		"message": "123456789",
-		"format": "PKBarcodeFormatQR",
-		"messageEncoding": "iso-8859-1"
-	},
 	"organizationName": "Apple Inc.",
 	"description": "A Booking pass",
 	"foregroundColor": "rgb(255, 255, 255)",

@@ -1,5 +1,16 @@
 import Joi from "joi";
-import { Field } from "./PassFieldContent";
+import { Field } from "./Field";
+
+export type TransitType =
+	| "PKTransitTypeAir"
+	| "PKTransitTypeBoat"
+	| "PKTransitTypeBus"
+	| "PKTransitTypeGeneric"
+	| "PKTransitTypeTrain";
+
+export const TransitType = Joi.string().regex(
+	/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/,
+);
 
 export interface PassFields {
 	auxiliaryFields: (Field & { row?: number })[];
@@ -7,6 +18,7 @@ export interface PassFields {
 	headerFields: Field[];
 	primaryFields: Field[];
 	secondaryFields: Field[];
+	transitType?: TransitType;
 }
 
 export const PassFields = Joi.object<PassFields>().keys({
@@ -21,15 +33,5 @@ export const PassFields = Joi.object<PassFields>().keys({
 	headerFields: Joi.array().items(Field),
 	primaryFields: Joi.array().items(Field),
 	secondaryFields: Joi.array().items(Field),
+	transitType: TransitType,
 });
-
-export type TransitType =
-	| "PKTransitTypeAir"
-	| "PKTransitTypeBoat"
-	| "PKTransitTypeBus"
-	| "PKTransitTypeGeneric"
-	| "PKTransitTypeTrain";
-
-export const TransitType = Joi.string().regex(
-	/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/,
-);

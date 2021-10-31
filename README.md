@@ -4,7 +4,7 @@
 	<img width="600" src="https://github.com/alexandercerutti/passkit-generator/raw/master/assets/logo.svg?sanitize=true" alt="Node Passkit Generator logo">
 	<br>
 	<br>
-	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS.</p>
+	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS and WatchOS.</p>
 
 ![](https://img.shields.io/npm/v/passkit-generator.svg?label=passkit-generator)
 ![](https://img.shields.io/node/v/passkit-generator.svg)
@@ -14,18 +14,15 @@
 </div>
 <br>
 
-### Architecture
+## Architecture
 
-This package was created with a specific architecture in mind: **application** and **model** (as preprocessed entity), to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...).
+This library was created with a specific architecture in mind: **application** and **model** (as preprocessed entity), to split as much as possible static objects (such as logo, background, icon, etc.) from dynamic ones (translations, barcodes, serialNumber, ...), while keeping an eye on the different possible execution contexts.
 
-Pass creation and population doesn't fully happen in runtime. Pass template (model) can be one of a set of buffers or a folder, that will contain all the objects needed (static medias) and structure to make a pass work.
+Pass creation and population might not fully happen in runtime. This library allows to create a pass from scratch, specify a folder model (template) or specify a set of buffers. In the last two cases, both should contain all the objects needed (static medias) and structure to make a pass work.
 
-Both Pass template will be read and pushed as they are in the resulting .zip file, while dynamic objects will be patched against `pass.json` or generated in runtime (`manifest.json`, `signature` and translation files).
-All the static medias from both sources, will be read and pushed as they are in the resulting .zip file; dynamic object will be patched against `pass.json`, generated on runtime (`manifest.json`, `signature`) or merged if already existing (translation files).
+Whenever adding files, through scratch, template or buffer, these will be read and pushed as they are in the resulting .zip file, while dynamic data will be patched (`pass.json` with props) or generated in runtime (`manifest.json`, `signature` and translation files).
 
-> ⚠ Do not rely on branches outside "master", as might not be stable and will be removed once merged.
-
-### Install
+### Installation
 
 ```sh
 $ npm install passkit-generator --save
@@ -35,36 +32,34 @@ $ npm install passkit-generator --save
 
 ### API Documentation
 
-This package comes with an [API documentation](./API.md), that makes available a series of methods to create and customize passes.
+This package comes with an [API Documentation Reference](https://github.com/alexandercerutti/passkit-generator/wiki/API-Documentation-Reference), available in wiki, that makes available a series of methods to create and customize passes.
 
 ---
 
 ### Looking for the previous major version?
 
-Check the [v1 branch](https://github.com/alexandercerutti/passkit-generator/tree/v1.6.8). That branch is kept for reference only.
+Check the [v2 tag](https://github.com/alexandercerutti/passkit-generator/tree/v2.0.8). That tag is kept for reference only.
 
 ---
 
 ### Coming from the previous major version?
 
-Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v1-to-v2).
+Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-generator/wiki/Migrating-from-v2-to-v3).
 
 ---
 
-## Get Started
+## Getting Started
 
 ##### Model
 
-The first thing you'll have to do, is to start creating a model. A model contains all the basic pass data that compose the Pass identity.
-These data can be files (icon, thumbnails, ...), or pieces of information to be written in `pass.json` (Pass type identifier, Team Identifier, colors, ...).
+Assuming that you don't have a model yet, the first thing you'll have to do, is creating one. A model contains all the basic pass data that compose the Pass identity.
+These data can be files (icon, thumbnails, ...), or pieces of information to be written in `pass.json` (Pass type identifier, Team Identifier, colors, ...) and whatever you know that likely won't be customized on runtime.
 
-This package allows to use two kinds of models: **Folder Model** or **Buffer Model**. If starting from scratch, the preferred solution is to use the folder as model, as it will allow you to access easily all the files. Also, a buffer model is mainly designed for models that are ready to be used in your application.
+When starting from zero, the best suggested solution is to use a Template (folder) to start with, as it will allow an easier access to all the files and data. Nothing will prevent you using a buffer model or creating a pass from scratch, but they are meant for an advanced usage or different contexts (e.g. running a cloud function might require a scratch model for faster startup, without storing the model in a "data bucket").
 
 Let's suppose you have a file `model.zip` stored somewhere: you unzip it in runtime and then get the access to its files as buffers. Those buffers should be available for the rest of your application run-time and you shouldn't be in need to read them every time you are going to create a pass.
 
-> To keep a model in memory, the method [`createAbstractModel`](https://github.com/alexandercerutti/passkit-generator/blob/master/API.md#create-an-abstract-model) has been created.
-
----
+**To maintain a pass model available during the run-time, a PKPass instance can be created from whatever source, and then used as a template through `PKPass.from`**.
 
 > Using the .pass extension is a best practice, showing that the directory is a pass package.
 > ([Build your first pass - Apple Developer Portal](https://apple.co/2LYXWo3)).
@@ -75,18 +70,13 @@ If omitted in the configuration (as in [Usage Example](#usage_example), at "mode
 ---
 
 Model creation can be performed both manually or with the auxiliary of a web tool I developed, [Passkit Visual Designer](https://pkvd.app), which will let you design your model through a neat user interface.
-It will output a .zip file that you can decompress and use it as both file model and buffer model.
+It will output a .zip file that you can decompress and use as source.
 
-Since `.pass` extension is required, **it will be up to you to unzip the generated model in a .pass folder**.
+---
 
-```bash
-$ cd yourProjectDir;
-$ mkdir passModels && mkdir $_/myFirstModel.pass && cd $_;
-```
+You can follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package Structure_) to build a correct pass model. The **icon is required** in order to make the pass work. Omitting an icon resolution, might make a pass work on a device (e.g. Mac) but not on another (e.g. iPhone). _Manifest.json_ and _signature_ will be automatically ignored from the model and generated in runtime.
 
-Follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package Structure_) to build a correct pass model. The **icon is required** in order to make the pass work. _Manifest.json_ and _signature_ will be automatically ignored from the model and generated in runtime.
-
-You can also create `.lproj` folders (e.g. _en.lproj_ or _it.lproj_) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#method_localize) in the API documentation.
+You can also create `.lproj` folders (e.g. _en.lproj_ or _it.lproj_) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#localizing-passes) in the API documentation.
 
 To include a file that belongs to an `.lproj` folder in buffers, you'll just have to name a key like `en.lproj/thumbnail.png`.
 
@@ -98,7 +88,7 @@ Create a `pass.json` by taking example from examples folder models or the one pr
 {
 	"formatVersion": 1,
 	"passTypeIdentifier": "pass.<bundle id>",
-	"teamIdentifier": "<here your team identifier>",
+	"teamIdentifier": "<your team identifier>",
 	"organizationName": "<your organization name>",
 	"description": "A localizable description of your pass. To do so, put here a placeholder.",
 	"boardingPass": {}
@@ -112,37 +102,8 @@ Create a `pass.json` by taking example from examples folder models or the one pr
 The third step is about the developer and WWDR certificates. I suggest you to create a certificate-dedicated folder inside your working directory (e.g. `./certs`) to contain everything concerning the certificates.
 
 This is a standard procedure: you would have to do it also without using this library. We'll use OpenSSL to complete our work (or to do it entirely, if only on terminal), so be sure to have it installed.
-You'll need the following three elements:
 
--   Apple WWDR (_Worldwide Developer Relationship_) certificate
--   Signer certificate
--   Signer key
-
-While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certificateauthority/), to get the `signer key` and the `certificate`, you'll have to get first a `Certificate Signing Request` (`.certSigningRequest` file) and upload it to Apple Developers Portal, at [Pass Types Identifiers](https://developer.apple.com/account/ios/identifier/passTypeId) (open it, it's worth it 😜).
-
-<br>
-<hr>
-
-> **If you don't have access to macOS** (or you are a terminal enthusiast), **follow [these steps](./non-macOS-steps.md) instead.**
-
-<hr>
-
-1. Create a new pass type identifier and provide it with a Name and a reverse-domain bundle id (starting with "pass."). You will put this identifier as value for `passTypeIdentifier` in `pass.json` file.
-2. Confirm and register the new identifier.
-3. Go back to the pass type identifiers, click on your new pass id and edit it.
-4. Click "Create Certificate" button and follow the instructions until you won't download a certificate like `pass.cer`. (here you'll generate the `.certSigningRequest` file to be uploaded).
-5. Open the downloaded certificate. Go in "Certificates" on left in macOS Keychain access and `right-click > Export "\<certname\>"`. Choose a password (and write it down) and you will get a PKCS#12 file (`.p12`).
-6. Open terminal, place where you want to save the files and insert the following OpenSSL commands changing the contents between angular brackets. You'll have to choose a secret passphrase (and write it down) that you'll use also in the application.
-
-    ```sh
-    # Creating and changing dir
-    $ mkdir "certs" && cd $_
-    # Extracting key and cert from pkcs12
-    $ openssl pkcs12 -in <cert-name>.p12 -clcerts -nokeys -out signerCert.pem -passin pass:<your-password>
-    $ openssl pkcs12 -in <cert-name>.p12 -nocerts -out signerKey.pem -passin pass:<your-password> -passout pass:<secret-passphrase>
-    ```
-
-7. Execute step 5 also for the WWDR certificate (`.cer`) you downloaded from Apple PKI portal (default name: _AppleWWDRCA.cer_) but instead exporting it as PKCS#12 (`.p12` - you'll also be unable to do that), export it as PEM (`.pem`) file.
+[Follow the **FULL GUIDE in wiki** to get all the files you need to proceed](https://github.com/alexandercerutti/passkit-generator/wiki/Generating-Certificates).
 
 ---
 
@@ -154,37 +115,37 @@ While WWDR can be obtained from [Apple PKI Portal](https://www.apple.com/certifi
 
 ```typescript
 /**
- * Use `const { createPass } = require("passkit-generator");`
- * for usage in pure Node.js. Please note that `Pass` is only exported
- * as Typescript type.
+ * Use `const { PKPass } = require("passkit-generator");`
+ * for usage in pure Node.js
  */
-import { createPass, Pass } from "passkit-generator";
+import { PKPass } from "passkit-generator";
 
 try {
-	const examplePass = await createPass({
+	const pass = PKPass.from({
 		model: "./passModels/myFirstModel",
 		certificates: {
 			wwdr: "./certs/wwdr.pem",
 			signerCert: "./certs/signercert.pem",
-			signerKey: {
-				keyFile: "./certs/signerkey.pem",
-				passphrase: "123456"
-			}
+			signerKey: "./certs/signerkey.pem",
+			signerKeyPassphrase: "123456"
 		},
-		overrides: {
-			// keys to be added or overridden
-			serialNumber: "AAGH44625236dddaffbda"
-		}
+	}, {
+		// keys to be added or overridden
+		serialNumber: "AAGH44625236dddaffbda"
 	});
 
 	// Adding some settings to be written inside pass.json
-	examplePass.localize("en", { ... });
-	examplePass.barcode("36478105430"); // Random value
+	pass.localize("en", { ... });
+	pass.setBarcodes("36478105430"); // Random value
 
 	// Generate the stream .pkpass file stream
-	const stream: Stream = examplePass.generate();
-
+	const stream = pass.getAsStream();
 	doSomethingWithTheStream(stream);
+
+	// or
+
+	const buffer = pass.getAsBuffer();
+	doSomethingWithTheBuffer(buffer);
 } catch (err) {
 	doSomethingWithTheError(err);
 }
@@ -194,42 +155,41 @@ try {
 
 ```typescript
 /**
- * Use `const { createPass } = require("passkit-generator");`
- * for usage in pure Node.js. Please note that `Pass` is only exported
- * as Typescript type.
+ * Use `const { PKPass } = require("passkit-generator");`
+ * for usage in pure Node.js
  */
-import { createPass, Pass } from "passkit-generator";
+import { PKPass } from "passkit-generator";
 
 try {
-	const examplePass = await createPass({
-		model: {
-			"thumbnail": Buffer.from([ ... ]),
-			"icon": Buffer.from([ ... ]),
-			"pass.json": Buffer.from([ ... ]),
-			"it.lproj/pass.strings": Buffer.from([ ... ])
-		},
-		certificates: {
-			wwdr: "./certs/wwdr.pem",
-			signerCert: "./certs/signercert.pem",
-			signerKey: {
-				keyFile: "./certs/signerkey.pem",
-				passphrase: "123456"
-			}
-		},
-		overrides: {
-			// keys to be added or overridden
-			serialNumber: "AAGH44625236dddaffbda"
-		}
+	const examplePass = new PKPass({
+		"thumbnail": Buffer.from([ ... ]),
+		"icon": Buffer.from([ ... ]),
+		"pass.json": Buffer.from([ ... ]),
+		"it.lproj/pass.strings": Buffer.from([ ... ])
+	},
+	{
+		wwdr: "./certs/wwdr.pem",
+		signerCert: "./certs/signercert.pem",
+		signerKey: "./certs/signerkey.pem",
+		signerKeyPassphrase: "123456",
+	},
+	{
+		// keys to be added or overridden
+		serialNumber: "AAGH44625236dddaffbda"
 	});
 
 	// Adding some settings to be written inside pass.json
-	examplePass.localize("en", { ... });
-	examplePass.barcode("36478105430"); // Random value
+	pass.localize("en", { ... });
+	pass.setBarcodes("36478105430"); // Random value
 
 	// Generate the stream .pkpass file stream
-	const stream: Stream = examplePass.generate();
-
+	const stream = pass.getAsStream();
 	doSomethingWithTheStream(stream);
+
+	// or
+
+	const buffer = pass.getAsBuffer();
+	doSomethingWithTheBuffer(buffer);
 } catch (err) {
 	doSomethingWithTheError(err);
 }
@@ -242,7 +202,7 @@ For more complex usage examples, please refer to [examples](https://github.com/a
 
 ## Other
 
-If you used this package in any of your projects, feel free to open a topic in issues to tell me and include a project description or link (for companies). 😊 You'll make me feel like my time hasn't been wasted, even if it had not anyway because I learnt a lot of things by creating this.
+If you used this package in any of your projects, feel free to open a topic in issues to tell me and include a project description or link (for companies). 😊 You'll make me feel like my time hasn't been wasted, even if it had not anyway because I learnt and keep learning a lot of things by creating this.
 
 The idea to develop this package, was born during the Apple Developer Academy 17/18, in Naples, Italy, driven by the need to create an iOS app component regarding passes generation for events.
 
@@ -255,8 +215,8 @@ Made with ❤️ in Italy.
 
 ## Contributors
 
-A big thanks to all the people that contributed to improve this package. Any contribution is welcome. Do you have an idea to make this improve or something to say? Open a topic in the issues and we'll discuss together! Thank you ❤
-Also a big big big big thank you to all the financial contributors!
+A big thanks to all the people that contributed to improve this package. Any contribution is welcome. Do you have an idea to make this improve or something to say? Open a topic in the issues and we'll discuss together! Thank you ❤️
+Also a big big big big thank you to all the financial contributors, which help me maintain the development of this package ❤️!
 
 ### Code Contributors
 

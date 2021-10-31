@@ -1,5 +1,18 @@
-export type { Pass } from "./pass";
-export type { AbstractModel } from "./abstract";
+export { default as PKPass } from "./PKPass";
 
-export { createPass } from "./factory";
-export { createAbstractModel } from "./abstract";
+// ***************************************** //
+// *** Exporting only schemas interfaces *** //
+// ***************************************** //
+
+export type {
+	Barcode,
+	Beacon,
+	Field,
+	Location,
+	NFC,
+	PassProps,
+	Semantics,
+	TransitType,
+	Personalize,
+	OverridablePassProps,
+} from "./schemas";

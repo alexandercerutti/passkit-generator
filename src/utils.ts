@@ -1,29 +1,24 @@
-import { EOL } from "os";
-import type * as Schemas from "./schemas";
-import { sep } from "path";
+import * as Messages from "./messages";
+import type Bundle from "./Bundle";
 
 /**
- * Checks if an rgb value is compliant with CSS-like syntax
- *
- * @function isValidRGB
- * @params {String} value - string to analyze
- * @returns {Boolean} True if valid rgb, false otherwise
+ * Acts as a wrapper for converting date to W3C string
+ * @param date
+ * @returns
  */
 
-export function isValidRGB(value?: string): boolean {
-	if (!value || typeof value !== "string") {
-		return false;
+export function processDate(date: Date): string | null {
+	if (!(date instanceof Date)) {
+		throw "Invalid date";
 	}
 
-	const rgb = value.match(
-		/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/,
-	);
+	const dateParse = dateToW3CString(date);
 
-	if (!rgb) {
-		return false;
+	if (!dateParse) {
+		throw "Invalid date";
 	}
 
-	return rgb.slice(1, 4).every((v) => Math.abs(Number(v)) <= 255);
+	return dateParse;
 }
 
 /**
@@ -35,11 +30,7 @@ export function isValidRGB(value?: string): boolean {
  * 	 undefined otherwise
  */
 
-export function dateToW3CString(date: Date) {
-	if (!(date instanceof Date)) {
-		return "";
-	}
-
+function dateToW3CString(date: Date) {
 	// if it is NaN, it is "Invalid Date"
 	if (isNaN(Number(date))) {
 		return undefined;
@@ -76,11 +67,10 @@ function padMeTwo(original: string | number) {
 }
 
 /**
- * Apply a filter to arg0 to remove hidden files names (starting with dot)
+ * Removes hidden files from a list (those starting with dot)
  *
- * @function removeHidden
- * @params {String[]} from - list of file names
- * @return {String[]}
+ * @params from - list of file names
+ * @return
  */
 
 export function removeHidden(from: Array<string>): Array<string> {
@@ -88,102 +78,39 @@ export function removeHidden(from: Array<string>): Array<string> {
 }
 
 /**
- * Creates a buffer of translations in Apple .strings format
+ * Clones recursively an object and all of its properties
  *
- * @function generateStringFile
- * @params {Object} lang - structure containing related to ISO 3166 alpha-2 code for the language
- * @returns {Buffer} Buffer to be written in pass.strings for language in lang
- * @see https://apple.co/2M9LWVu - String Resources
+ * @param object
+ * @returns
  */
 
-export function generateStringFile(lang: { [index: string]: string }): Buffer {
-	if (!Object.keys(lang).length) {
-		return Buffer.from("", "utf8");
-	}
+export function cloneRecursive(object: Object) {
+	const objectCopy = {};
+	const objectEntries = Object.entries(object);
 
-	// Pass.strings format is the following one for each row:
-	// "key" = "value";
+	for (let i = 0; i < objectEntries.length; i++) {
+		const [key, value] = objectEntries[i];
 
-	const strings = Object.keys(lang).map(
-		(key) => `"${key}" = "${lang[key].replace(/"/g, '"')}";`,
-	);
+		if (value && typeof value === "object") {
+			if (Array.isArray(value)) {
+				objectCopy[key] = value.slice();
 
-	return Buffer.from(strings.join(EOL), "utf8");
-}
-
-/**
- * Applies a partition to split one bundle
- * to two
- * @param origin
- */
-
-type PartitionedBundleElements = [
-	Schemas.PartitionedBundle["l10nBundle"],
-	Schemas.PartitionedBundle["bundle"],
-];
-
-export function splitBufferBundle(
-	origin: Schemas.BundleUnit,
-): PartitionedBundleElements {
-	const initialValue: PartitionedBundleElements = [{}, {}];
-
-	if (!origin) {
-		return initialValue;
-	}
-
-	return Object.entries(origin).reduce<PartitionedBundleElements>(
-		([l10n, bundle], [key, buffer]) => {
-			if (!key.includes(".lproj")) {
-				return [
-					l10n,
-					{
-						...bundle,
-						[key]: buffer,
-					},
-				];
+				for (let j = 0; j < value.length; j++) {
+					objectCopy[key][j] = cloneRecursive(value[j]);
+				}
+			} else {
+				objectCopy[key] = cloneRecursive(value);
 			}
+		} else {
+			objectCopy[key] = value;
+		}
+	}
 
-			const pathComponents = key.split(sep);
-			const lang = pathComponents[0];
-			const file = pathComponents.slice(1).join("/");
-
-			(l10n[lang] || (l10n[lang] = {}))[file] = buffer;
-
-			return [l10n, bundle];
-		},
-		initialValue,
-	);
+	return objectCopy;
 }
 
-type StringSearchMode = "includes" | "startsWith" | "endsWith";
-
-export function getAllFilesWithName(
-	name: string,
-	source: string[],
-	mode: StringSearchMode = "includes",
-	forceLowerCase: boolean = false,
-): string[] {
-	return source.filter((file) =>
-		((forceLowerCase && file.toLowerCase()) || file)[mode](name),
-	);
-}
-
-export function hasFilesWithName(
-	name: string,
-	source: string[],
-	mode: StringSearchMode = "includes",
-	forceLowerCase: boolean = false,
-): boolean {
-	return source.some((file) =>
-		((forceLowerCase && file.toLowerCase()) || file)[mode](name),
-	);
-}
-
-export function deletePersonalization(
-	source: Schemas.BundleUnit,
-	logosNames: string[] = [],
-): void {
-	[...logosNames, "personalization.json"].forEach(
-		(file) => delete source[file],
-	);
+export function assertUnfrozen(instance: InstanceType<typeof Bundle>) {
+	if (instance.isFrozen) {
+		throw new Error(Messages.BUNDLE.CLOSED);
+	}
 }

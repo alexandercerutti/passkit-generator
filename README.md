@@ -123,13 +123,14 @@ import * as fs from "fs";
 import { PKPass } from "passkit-generator";
 
 try {
+	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificateData();
 	const pass = await PKPass.from({
 		model: "./passModels/myFirstModel",
 		certificates: {
-			wwdr: fs.readFileSync("./certs/wwdr.pem"),
-			signerCert: fs.readFileSync("./certs/signercert.pem"),
-			signerKey: fs.readFileSync("./certs/signerkey.pem"),
-			signerKeyPassphrase: "123456"
+			wwdr,
+			signerCert,
+			signerKey,
+			signerKeyPassphrase,
 		},
 	}, {
 		// keys to be added or overridden
@@ -151,6 +152,16 @@ try {
 } catch (err) {
 	doSomethingWithTheError(err);
 }
+
+// Certificate data is typically retrieved from your secrets management solution
+function getCertificateData() {
+	return {
+		wwdr: fs.readFileSync("./certs/wwdr.pem"),
+		signerCert: fs.readFileSync("./certs/signercert.pem"),
+		signerKey: fs.readFileSync("./certs/signerkey.pem"),
+		signerKeyPassphrase: "123456",
+	};
+}
 ```
 
 #### Buffer Model
@@ -163,6 +174,7 @@ try {
 import { PKPass } from "passkit-generator";
 
 try {
+	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificateData();
 	const examplePass = new PKPass({
 		"thumbnail": Buffer.from([ ... ]),
 		"icon": Buffer.from([ ... ]),
@@ -170,10 +182,10 @@ try {
 		"it.lproj/pass.strings": Buffer.from([ ... ])
 	},
 	{
-		wwdr: fs.readFileSync("./certs/wwdr.pem"),
-		signerCert: fs.readFileSync("./certs/signercert.pem"),
-		signerKey: fs.readFileSync("./certs/signerkey.pem"),
-		signerKeyPassphrase: "123456",
+		wwdr,
+		signerCert,
+		signerKey,
+		signerKeyPassphrase,
 	},
 	{
 		// keys to be added or overridden

@@ -116,18 +116,21 @@ This is a standard procedure: you would have to do it also without using this li
 ```typescript
 /**
  * Use `const { PKPass } = require("passkit-generator");`
- * for usage in pure Node.js
+ * for usage in CommonJS (Node.js)
  */
 import { PKPass } from "passkit-generator";
 
 try {
-	const pass = PKPass.from({
+	/** Each can be either a string or a Buffer. See API Documentation for more */
+	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificatesContentsSomehow();
+
+	const pass = await PKPass.from({
 		model: "./passModels/myFirstModel",
 		certificates: {
-			wwdr: "./certs/wwdr.pem",
-			signerCert: "./certs/signercert.pem",
-			signerKey: "./certs/signerkey.pem",
-			signerKeyPassphrase: "123456"
+			wwdr,
+			signerCert,
+			signerKey,
+			signerKeyPassphrase
 		},
 	}, {
 		// keys to be added or overridden
@@ -156,11 +159,14 @@ try {
 ```typescript
 /**
  * Use `const { PKPass } = require("passkit-generator");`
- * for usage in pure Node.js
+ * for usage in CommonJS (Node.js)
  */
 import { PKPass } from "passkit-generator";
 
 try {
+	/** Each can be either a string or a Buffer. See API Documentation for more */
+	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificatesContentsSomehow();
+
 	const examplePass = new PKPass({
 		"thumbnail": Buffer.from([ ... ]),
 		"icon": Buffer.from([ ... ]),
@@ -168,14 +174,14 @@ try {
 		"it.lproj/pass.strings": Buffer.from([ ... ])
 	},
 	{
-		wwdr: "./certs/wwdr.pem",
-		signerCert: "./certs/signercert.pem",
-		signerKey: "./certs/signerkey.pem",
-		signerKeyPassphrase: "123456",
+		wwdr,
+		signerCert,
+		signerKey,
+		signerKeyPassphrase,
 	},
 	{
 		// keys to be added or overridden
-		serialNumber: "AAGH44625236dddaffbda"
+		serialNumber: "AAGH44625236dddaffbda",
 	});
 
 	// Adding some settings to be written inside pass.json

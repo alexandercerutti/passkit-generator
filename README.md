@@ -114,6 +114,8 @@ This is a standard procedure: you would have to do it also without using this li
 #### Folder Model
 
 ```typescript
+import * as fs from "fs";
+
 /**
  * Use `const { PKPass } = require("passkit-generator");`
  * for usage in pure Node.js
@@ -121,12 +123,12 @@ This is a standard procedure: you would have to do it also without using this li
 import { PKPass } from "passkit-generator";
 
 try {
-	const pass = PKPass.from({
+	const pass = await PKPass.from({
 		model: "./passModels/myFirstModel",
 		certificates: {
-			wwdr: "./certs/wwdr.pem",
-			signerCert: "./certs/signercert.pem",
-			signerKey: "./certs/signerkey.pem",
+			wwdr: fs.readFileSync("./certs/wwdr.pem"),
+			signerCert: fs.readFileSync("./certs/signercert.pem"),
+			signerKey: fs.readFileSync("./certs/signerkey.pem"),
 			signerKeyPassphrase: "123456"
 		},
 	}, {
@@ -168,9 +170,9 @@ try {
 		"it.lproj/pass.strings": Buffer.from([ ... ])
 	},
 	{
-		wwdr: "./certs/wwdr.pem",
-		signerCert: "./certs/signercert.pem",
-		signerKey: "./certs/signerkey.pem",
+		wwdr: fs.readFileSync("./certs/wwdr.pem"),
+		signerCert: fs.readFileSync("./certs/signercert.pem"),
+		signerKey: fs.readFileSync("./certs/signerkey.pem"),
 		signerKeyPassphrase: "123456",
 	},
 	{

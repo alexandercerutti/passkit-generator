@@ -121,7 +121,7 @@ This is a standard procedure: you would have to do it also without using this li
 import { PKPass } from "passkit-generator";
 
 try {
-	/** Each can be either a string or a Buffer. See API Documentation for more */
+	/** Each, but last, can be either a string or a Buffer. See API Documentation for more */
 	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificatesContentsSomehow();
 
 	const pass = await PKPass.from({
@@ -164,7 +164,7 @@ try {
 import { PKPass } from "passkit-generator";
 
 try {
-	/** Each can be either a string or a Buffer. See API Documentation for more */
+	/** Each, but last, can be either a string or a Buffer. See API Documentation for more */
 	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificatesContentsSomehow();
 
 	const examplePass = new PKPass({

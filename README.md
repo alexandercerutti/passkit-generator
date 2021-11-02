@@ -125,7 +125,11 @@ try {
 	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificatesContentsSomehow();
 
 	const pass = await PKPass.from({
-		model: "./passModels/myFirstModel",
+		/**
+		 * Note: .pass extension is enforced when reading a
+		 * model from FS, even if not specified here below
+		 */
+		model: "./passModels/myFirstModel.pass",
 		certificates: {
 			wwdr,
 			signerCert,

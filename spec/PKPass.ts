@@ -463,26 +463,11 @@ describe("PKPass", () => {
 
 	describe("fields getters", () => {
 		it("should throw error if a type has not been defined", () => {
-			expect(() => pass.primaryFields).toThrowError(
-				TypeError,
-				"Cannot read properties of undefined (reading 'primaryFields')",
-			);
-			expect(() => pass.secondaryFields).toThrowError(
-				TypeError,
-				"Cannot read properties of undefined (reading 'secondaryFields')",
-			);
-			expect(() => pass.auxiliaryFields).toThrowError(
-				TypeError,
-				"Cannot read properties of undefined (reading 'auxiliaryFields')",
-			);
-			expect(() => pass.headerFields).toThrowError(
-				TypeError,
-				"Cannot read properties of undefined (reading 'headerFields')",
-			);
-			expect(() => pass.backFields).toThrowError(
-				TypeError,
-				"Cannot read properties of undefined (reading 'backFields')",
-			);
+			expect(() => pass.primaryFields).toThrowError(TypeError);
+			expect(() => pass.secondaryFields).toThrowError(TypeError);
+			expect(() => pass.auxiliaryFields).toThrowError(TypeError);
+			expect(() => pass.headerFields).toThrowError(TypeError);
+			expect(() => pass.backFields).toThrowError(TypeError);
 		});
 
 		it("should return an instance of FieldsArray if a type have been set", () => {

@@ -562,7 +562,7 @@ export default class PKPass extends Bundle {
 
 		for (
 			let i = localizationEntries.length,
-				entry: [string, { [key: string]: string }];
+				entry: typeof localizationEntries[0];
 			(entry = localizationEntries[--i]);
 
 		) {

@@ -1,3 +1,8 @@
+export const INIT = {
+	INVALID_BUFFERS:
+		"Cannot set buffers in constructor: expected object but received %s",
+} as const;
+
 export const CERTIFICATES = {
 	INVALID:
 		"Invalid certificate(s) loaded. %s. Please provide valid WWDR certificates and developer signer certificate and key (with passphrase).\nRefer to docs to obtain them",

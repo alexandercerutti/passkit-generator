@@ -130,15 +130,21 @@ export default class PKPass extends Bundle {
 	) {
 		super("application/vnd.apple.pkpass");
 
-		const buffersEntries = Object.entries(buffers);
+		if (buffers && typeof buffers === "object") {
+			const buffersEntries = Object.entries(buffers);
 
-		for (
-			let i = buffersEntries.length, buffer: [string, Buffer];
-			(buffer = buffersEntries[--i]);
+			for (
+				let i = buffersEntries.length, buffer: [string, Buffer];
+				(buffer = buffersEntries[--i]);
 
-		) {
-			const [fileName, contentBuffer] = buffer;
-			this.addBuffer(fileName, contentBuffer);
+			) {
+				const [fileName, contentBuffer] = buffer;
+				this.addBuffer(fileName, contentBuffer);
+			}
+		} else {
+			console.warn(
+				Messages.format(Messages.INIT.INVALID_BUFFERS, typeof buffers),
+			);
 		}
 
 		if (props) {

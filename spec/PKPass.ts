@@ -32,6 +32,18 @@ describe("PKPass", () => {
 		);
 	});
 
+	describe("constructor", () => {
+		it("should warn about a non-object buffer parameter", () => {
+			console.warn = jasmine.createSpy("warn");
+
+			pass = new PKPass(undefined, baseCerts);
+
+			expect(console.warn).toHaveBeenCalledWith(
+				Messages.INIT.INVALID_BUFFERS.replace("%s", "undefined"),
+			);
+		});
+	});
+
 	describe("setBeacons", () => {
 		it("should reset instance.props['beacons'] if 'null' is passed as value", () => {
 			pass.setBeacons({

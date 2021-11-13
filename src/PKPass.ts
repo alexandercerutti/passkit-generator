@@ -157,7 +157,9 @@ export default class PKPass extends Bundle {
 			Object.assign(this[propsSymbol], overridesValidation);
 		}
 
-		this.certificates = certificates;
+		if (certificates) {
+			this.certificates = certificates;
+		}
 	}
 
 	/**

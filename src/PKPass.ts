@@ -124,8 +124,8 @@ export default class PKPass extends Bundle {
 	// **************** //
 
 	constructor(
-		buffers: Schemas.FileBuffers,
-		certificates: Schemas.CertificatesSchema,
+		buffers?: Schemas.FileBuffers,
+		certificates?: Schemas.CertificatesSchema,
 		props?: Schemas.OverridablePassProps,
 	) {
 		super("application/vnd.apple.pkpass");

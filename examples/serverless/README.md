@@ -4,6 +4,13 @@ This is a sample project for showing passkit-generator being used on cloud funct
 
 Typescript compilation happens automatically through `serverless-plugin-typescript` when serverless is started.
 
+Before generating a new pass, you'll have to override the `passTypeIdentifier` and `teamIdentifier` for them to match the data in your certificates. This can be done in two ways:
+
+    a) Edit manually the `pass.json` of the model you are going to run;
+    b) Pass the two fields in the query string of the example you are running when querying it;
+
+Omitting this step, will make your pass unopenable.
+
 ## Configuration
 
 These examples are basically made for being executed locally. In the file `config.json`, some constants can be customized.

@@ -2,11 +2,18 @@
 
 This is examples folder. These examples are used to test new features and as sample showcases.
 
-Each example owns an endpoint where a pass can be reached. This project is build upon Express.js, which is required to be installed.
+Each example owns an endpoint where a pass can be reached. This project is built upon Express.js.
 
 Typescript compilation is done automatically through `ts-node`.
 
-Assuming you already have cloned this repository, installed its dependencies through `npm install` and moved to `examples/self-hosted`, run these commands:
+Before generating a new pass, you'll have to override the `passTypeIdentifier` and `teamIdentifier` for them to match the data in your certificates. This can be done in two ways:
+
+    a) Edit manually the `pass.json` of the model you are going to run;
+    b) Pass the two fields in the query string of the example you are running when querying it;
+
+Omitting this step, will make your pass unopenable.
+
+Assuming you already installed this project its dependencies through `npm install` and moved to `examples/self-hosted`, run these commands:
 
 ```sh
 $ npm install;

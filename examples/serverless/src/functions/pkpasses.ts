@@ -29,7 +29,8 @@ export async function pkpasses(event: ALBEvent) {
 		const pass = new PKPass({}, certificates, {
 			description: "Example Apple Wallet Pass",
 			passTypeIdentifier: "pass.com.passkitgenerator",
-			serialNumber: "nmyuxofgna",
+			// Be sure to issue different serialNumbers or you might incur into the bug explained above
+			serialNumber: `nmyuxofgna${Math.random()}`,
 			organizationName: `Test Organization ${Math.random()}`,
 			teamIdentifier: "F53WB8AE67",
 			foregroundColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,

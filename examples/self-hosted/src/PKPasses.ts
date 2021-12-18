@@ -12,16 +12,19 @@
  * to your local machine (in my personal case, developing
  * under WSL is a pretty big limitation sometimes).
  *
- * @TODO test again this example with next iOS 15 versions.
- * Currently, pass viewer seems to be soooo bugged.
+ * PLEASE ALSO NOTE that, AT TIME OF WRITING (iOS 15.0 - 15.2)
+ * Pass Viewer suffers of a really curious bug: issuing several
+ * passes within the same pkpasses archive, all with the same
+ * serialNumber, will lead to have a broken view and to add
+ * just one pass. You can see the screenshots below:
  *
  * https://imgur.com/bDTbcDg.jpg
  * https://imgur.com/Y4GpuHT.jpg
  * https://i.imgur.com/qbJMy1d.jpg
  *
- * Alberto, come to look at APPLE.
- *
- * MAMMA MIA!
+ * - "Alberto, come to look at APPLE."
+ * **Alberto looks**
+ * - "MAMMA MIA!""
  *
  * A feedback to Apple have been sent for this.
  */
@@ -63,7 +66,8 @@ async function generatePass(props: Object) {
 			...props,
 			description: "Example Apple Wallet Pass",
 			passTypeIdentifier: "pass.com.passkitgenerator",
-			serialNumber: "nmyuxofgna",
+			// Be sure to issue different serialNumbers or you might incur into the bug explained above
+			serialNumber: `nmyuxofgna${Math.random()}`,
 			organizationName: `Test Organization ${Math.random()}`,
 			teamIdentifier: "F53WB8AE67",
 			foregroundColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,

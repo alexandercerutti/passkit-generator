@@ -13,15 +13,15 @@
 		"run-offline": "npx serverless offline --host 0.0.0.0; :'specifying host due to WSL limits'"
 	},
 	"dependencies": {
-		"aws-sdk": "^2.1018.0",
+		"aws-sdk": "^2.1046.0",
 		"tslib": "^2.3.1"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.84",
-		"@types/express": "4.17.8",
-		"serverless-offline": "^8.2.0",
+		"@types/aws-lambda": "^8.10.88",
+		"@types/express": "4.17.13",
+		"serverless-offline": "^8.3.1",
 		"serverless-plugin-typescript": "^2.1.0",
 		"serverless-s3-local": "^0.6.20",
-		"typescript": "^4.4.4"
+		"typescript": "^4.5.4"
 	}
 }

@@ -49,7 +49,9 @@ export default async function getModelFolderContents(
 			.reduce((acc, current) => ({ ...acc, ...current }), {});
 
 		return modelRecords;
-	} catch (err) {
+	} catch (_err) {
+		const err = _err as NodeJS.ErrnoException;
+
 		if (err?.code === "ENOENT") {
 			if (err.syscall === "open") {
 				// file opening failed

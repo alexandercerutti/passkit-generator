@@ -7,7 +7,7 @@ import type Bundle from "./Bundle";
  * @returns
  */
 
-export function processDate(date: Date): string | null {
+export function processDate(date: Date): string | undefined {
 	if (!(date instanceof Date)) {
 		throw "Invalid date";
 	}
@@ -84,9 +84,9 @@ export function removeHidden(from: Array<string>): Array<string> {
  * @returns
  */
 
-export function cloneRecursive(object: Object) {
-	const objectCopy = {};
-	const objectEntries = Object.entries(object);
+export function cloneRecursive<T extends Object>(object: T) {
+	const objectCopy = {} as Record<keyof T, any>;
+	const objectEntries = Object.entries(object) as [keyof T, T[keyof T]][];
 
 	for (let i = 0; i < objectEntries.length; i++) {
 		const [key, value] = objectEntries[i];

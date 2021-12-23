@@ -229,7 +229,7 @@ export function filterValid<T extends Object>(
 		return [];
 	}
 
-	return source.reduce((acc, current) => {
+	return source.reduce<T[]>((acc, current) => {
 		try {
 			return [...acc, validate(schema, current)];
 		} catch (err) {

@@ -116,7 +116,10 @@ function parseCertificates(certificates: Schemas.CertificatesSchema) {
 
 function getStringCertificates(
 	certificates: Schemas.CertificatesSchema,
-): Record<keyof Schemas.CertificatesSchema, string> {
+): Record<
+	keyof Omit<Schemas.CertificatesSchema, "signerKeyPassphrase">,
+	string
+> & { signerKeyPassphrase?: string } {
 	return {
 		signerKeyPassphrase: certificates.signerKeyPassphrase,
 		wwdr: Buffer.from(certificates.wwdr).toString("utf-8"),

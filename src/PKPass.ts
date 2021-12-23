@@ -25,7 +25,7 @@ export default class PKPass extends Bundle {
 			[placeholder: string]: string;
 		};
 	} = {};
-	private [passTypeSymbol]: Schemas.PassTypesProps = undefined;
+	private [passTypeSymbol]: Schemas.PassTypesProps | undefined = undefined;
 
 	/**
 	 * Either create a pass from another one
@@ -39,8 +39,8 @@ export default class PKPass extends Bundle {
 		source: S,
 		props?: Schemas.OverridablePassProps,
 	): Promise<PKPass> {
-		let certificates: Schemas.CertificatesSchema = undefined;
-		let buffers: Schemas.FileBuffers = undefined;
+		let certificates: Schemas.CertificatesSchema | undefined = undefined;
+		let buffers: Schemas.FileBuffers | undefined = undefined;
 
 		if (!source) {
 			throw new TypeError(
@@ -206,8 +206,10 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows setting a transitType property
-	 * for a boardingPass. Throws an error if
-	 * the current type is not a boardingPass.
+	 * for a boardingPass.
+	 *
+	 * It will (automatically) throw an exception
+	 * if current type is not "boardingPass".
 	 *
 	 * @param value
 	 */
@@ -224,12 +226,16 @@ export default class PKPass extends Bundle {
 			value,
 			Messages.TRANSIT_TYPE.INVALID,
 		);
+
 		this[propsSymbol]["boardingPass"].transitType = value;
 	}
 
 	/**
 	 * Allows getting the current transitType
-	 * from pass props
+	 * from pass props.
+	 *
+	 * It will (automatically) throw an exception
+	 * if current type is not "boardingPass".
 	 */
 
 	public get transitType() {
@@ -239,9 +245,9 @@ export default class PKPass extends Bundle {
 	/**
 	 * Allows accessing to primaryFields object.
 	 *
-	 * It will (automatically) throw an error if
-	 * no valid pass.json has been parsed yet or,
-	 * anyway, if it has not a valid type.
+	 * It will (automatically) throw an exception
+	 * if no valid pass.json has been parsed yet
+	 * or, anyway, if it has not a valid type.
 	 */
 
 	public get primaryFields(): Schemas.Field[] {
@@ -251,9 +257,10 @@ export default class PKPass extends Bundle {
 	/**
 	 * Allows accessing to secondaryFields object
 	 *
-	 * It will (automatically) throw an error if
-	 * no valid pass.json has been parsed yet or,
-	 * anyway, if it has not a valid type.
+	 * It will (automatically) throw an exception
+	 * if no valid pass.json has been parsed yet
+	 * or, anyway, if a valid type has not been
+	 * set yet.
 	 */
 
 	public get secondaryFields(): Schemas.Field[] {
@@ -263,9 +270,10 @@ export default class PKPass extends Bundle {
 	/**
 	 * Allows accessing to auxiliaryFields object
 	 *
-	 * It will (automatically) throw an error if
-	 * no valid pass.json has been parsed yet or,
-	 * anyway, if it has not a valid type.
+	 * It will (automatically) throw an exception
+	 * if no valid pass.json has been parsed yet
+	 * or, anyway, if a valid type has not been
+	 * set yet.
 	 */
 
 	public get auxiliaryFields(): Schemas.Field[] {
@@ -275,9 +283,10 @@ export default class PKPass extends Bundle {
 	/**
 	 * Allows accessing to headerFields object
 	 *
-	 * It will (automatically) throw an error if
-	 * no valid pass.json has been parsed yet or,
-	 * anyway, if it has not a valid type.
+	 * It will (automatically) throw an exception
+	 * if no valid pass.json has been parsed yet
+	 * or, anyway, if a valid type has not been
+	 * set yet.
 	 */
 
 	public get headerFields(): Schemas.Field[] {
@@ -287,9 +296,10 @@ export default class PKPass extends Bundle {
 	/**
 	 * Allows accessing to backFields object
 	 *
-	 * It will (automatically) throw an error if
-	 * no valid pass.json has been parsed yet or,
-	 * anyway, if it has not a valid type.
+	 * It will (automatically) throw an exception
+	 * if no valid pass.json has been parsed yet
+	 * or, anyway, if a valid type has not been
+	 * set yet.
 	 */
 
 	public get backFields(): Schemas.Field[] {
@@ -305,14 +315,17 @@ export default class PKPass extends Bundle {
 	 * headerFields, auxiliaryFields, backFields)
 	 */
 
-	public set type(type: Schemas.PassTypesProps) {
+	public set type(maybeNewType: Schemas.PassTypesProps | undefined) {
 		Utils.assertUnfrozen(this);
 
 		Schemas.assertValidity(
 			Schemas.PassType,
-			type,
+			maybeNewType,
 			Messages.PASS_TYPE.INVALID,
 		);
+
+		/** Shut up, typescript strict mode! */
+		const type = maybeNewType as Schemas.PassTypesProps;
 
 		if (this.type) {
 			/**
@@ -431,7 +444,7 @@ export default class PKPass extends Bundle {
 		const translationsFileRegexp =
 			/(?<lang>[a-zA-Z-]{2,}).lproj\/pass\.strings/;
 
-		let match: RegExpMatchArray;
+		let match: RegExpMatchArray | null;
 
 		if ((match = pathName.match(translationsFileRegexp))) {
 			const [, lang] = match;
@@ -501,7 +514,7 @@ export default class PKPass extends Bundle {
 				secondaryFields = [],
 				auxiliaryFields = [],
 				backFields = [],
-			} = data[type];
+			} = data[type] || {};
 
 			this.headerFields.push(...headerFields);
 			this.primaryFields.push(...primaryFields);
@@ -810,7 +823,7 @@ export default class PKPass extends Bundle {
 
 		this[propsSymbol]["beacons"] = Schemas.filterValid(
 			Schemas.Beacon,
-			beacons,
+			beacons as Schemas.Beacon[],
 		);
 	}
 
@@ -846,7 +859,7 @@ export default class PKPass extends Bundle {
 
 		this[propsSymbol]["locations"] = Schemas.filterValid(
 			Schemas.Location,
-			locations,
+			locations as Schemas.Location[],
 		);
 	}
 
@@ -958,8 +971,8 @@ export default class PKPass extends Bundle {
 function validateJSONBuffer(
 	buffer: Buffer,
 	schema: Parameters<typeof Schemas.validate>[0],
-) {
-	let contentAsJSON: unknown;
+): Schemas.PassProps {
+	let contentAsJSON: Schemas.PassProps;
 
 	try {
 		contentAsJSON = JSON.parse(buffer.toString("utf8"));

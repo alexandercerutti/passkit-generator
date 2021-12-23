@@ -30,14 +30,14 @@ export function parse(buffer: Buffer) {
 			/** EOF  */
 			blockEndPoint === fileAsString.length
 		) {
-			let match: RegExpMatchArray;
+			let match: RegExpMatchArray | null;
 
 			const section = fileAsString.substring(
 				blockStartPoint,
 				blockEndPoint + 1,
 			);
 
-			if ((match = section.match(translationRowRegex))) {
+			if ((match = section.match(translationRowRegex)) && match.groups) {
 				const {
 					groups: { key, value },
 				} = match;

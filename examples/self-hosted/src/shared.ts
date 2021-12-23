@@ -1,16 +1,26 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-const certificatesCache: Partial<{
-	signerCert: Buffer;
-	signerKey: Buffer;
-	wwdr: Buffer;
-	signerKeyPassphrase: string;
-}> = {};
+interface Cache {
+	certificates:
+		| {
+				signerCert: Buffer | string;
+				signerKey: Buffer | string;
+				wwdr: Buffer | string;
+				signerKeyPassphrase: string;
+		  }
+		| undefined;
+}
 
-export async function getCertificates(): Promise<typeof certificatesCache> {
-	if (Object.keys(certificatesCache).length) {
-		return certificatesCache;
+const cache: Cache = {
+	certificates: undefined,
+};
+
+export async function getCertificates(): Promise<
+	Exclude<Cache["certificates"], undefined>
+> {
+	if (cache.certificates) {
+		return cache.certificates;
 	}
 
 	const [signerCert, signerKey, wwdr, signerKeyPassphrase] =
@@ -30,12 +40,12 @@ export async function getCertificates(): Promise<typeof certificatesCache> {
 			Promise.resolve("123456"),
 		]);
 
-	Object.assign(certificatesCache, {
+	cache.certificates = {
 		signerCert,
 		signerKey,
 		wwdr,
 		signerKeyPassphrase,
-	});
+	};
 
-	return certificatesCache;
+	return cache.certificates;
 }

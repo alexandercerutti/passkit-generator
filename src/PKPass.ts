@@ -315,17 +315,17 @@ export default class PKPass extends Bundle {
 	 * headerFields, auxiliaryFields, backFields)
 	 */
 
-	public set type(maybeNewType: Schemas.PassTypesProps | undefined) {
+	public set type(nextType: Schemas.PassTypesProps | undefined) {
 		Utils.assertUnfrozen(this);
 
 		Schemas.assertValidity(
 			Schemas.PassType,
-			maybeNewType,
+			nextType,
 			Messages.PASS_TYPE.INVALID,
 		);
 
 		/** Shut up, typescript strict mode! */
-		const type = maybeNewType as Schemas.PassTypesProps;
+		const type = nextType as Schemas.PassTypesProps;
 
 		if (this.type) {
 			/**

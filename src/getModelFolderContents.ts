@@ -107,7 +107,7 @@ function getObjectFromModelFile(
 	const fileComponents = filePath.split(path.sep);
 	const fileName = fileComponents
 		.slice(fileComponents.length - depthFromEnd)
-		.join('/');
+		.join("/");
 
 	return { [fileName]: content };
 }

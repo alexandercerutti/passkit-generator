@@ -833,6 +833,16 @@ describe("PKPass", () => {
 			expect(pass[filesSymbol]["en.lproj/pass.string"]).toBeUndefined();
 			expect(pass[localizationSymbol]["en"]).toBeUndefined();
 		});
+
+		it("should convert Windows paths to single UNIX slash", () => {
+			if (path.sep === "\\") {
+				pass.addBuffer("en.lproj\\icon@2x.png", Buffer.alloc(0));
+
+				expect(pass[filesSymbol]).toContain({
+					"en.lproj/icon@2x.png": Buffer.alloc(0),
+				});
+			}
+		});
 	});
 
 	describe("[importMetadataSymbol]", () => {

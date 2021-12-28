@@ -1,4 +1,5 @@
 import { Stream } from "stream";
+import path from "path";
 import FieldsArray from "./FieldsArray";
 import Bundle, { filesSymbol } from "./Bundle";
 import getModelFolderContents from "./getModelFolderContents";
@@ -436,6 +437,13 @@ export default class PKPass extends Bundle {
 		}
 
 		/**
+		 * Converting Windows path to Unix path
+		 * @example de.lproj\\icon.png => de.lproj/icon.png
+		 */
+
+		const normalizedPathName = pathName.replace(path.sep, "/");
+
+		/**
 		 * If a new pass.strings file is added, we want to
 		 * prevent it from being merged and, instead, save
 		 * its translations for later
@@ -446,7 +454,7 @@ export default class PKPass extends Bundle {
 
 		let match: RegExpMatchArray | null;
 
-		if ((match = pathName.match(translationsFileRegexp))) {
+		if ((match = normalizedPathName.match(translationsFileRegexp))) {
 			const [, lang] = match;
 
 			const parsedTranslations = Strings.parse(buffer).translations;
@@ -460,7 +468,7 @@ export default class PKPass extends Bundle {
 			return;
 		}
 
-		return super.addBuffer(pathName, buffer);
+		return super.addBuffer(normalizedPathName, buffer);
 	}
 
 	/**

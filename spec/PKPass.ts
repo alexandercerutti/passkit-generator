@@ -25,12 +25,7 @@ describe("PKPass", () => {
 	};
 
 	beforeEach(() => {
-		pass = new PKPass(
-			{},
-			/** @ts-ignore - We don't need certificates here*/
-			baseCerts,
-			{},
-		);
+		pass = new PKPass({});
 	});
 
 	describe("constructor", () => {
@@ -456,8 +451,13 @@ describe("PKPass", () => {
 					wwdr: "",
 				};
 			}).toThrow();
+		});
 
-			/** Expecting previous result */
+		it("should accept complete object", () => {
+			pass.certificates = baseCerts;
+			expect(pass[certificatesSymbol]).toEqual(baseCerts);
+
+			pass = new PKPass({}, baseCerts);
 			expect(pass[certificatesSymbol]).toEqual(baseCerts);
 		});
 	});
@@ -1134,12 +1134,11 @@ describe("PKPass", () => {
 						PKPass.from({}),
 					).toBeRejected(),
 					expectAsync(
-						/** Missing certificates error */
-						// @ts-expect-error
+						/** Empty model validation error */
 						PKPass.from({ model: "" }),
 					).toBeRejected(),
 					expectAsync(
-						/** Missing model error */
+						/** Missing model error and no certificates */
 						// @ts-expect-error
 						PKPass.from({ certificates: {} }),
 					).toBeRejected(),

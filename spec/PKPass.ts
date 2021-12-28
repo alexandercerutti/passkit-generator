@@ -12,6 +12,7 @@ import {
 	passTypeSymbol,
 	importMetadataSymbol,
 	closePassSymbol,
+	createManifestSymbol,
 } from "../lib/PKPass";
 
 describe("PKPass", () => {
@@ -1031,6 +1032,38 @@ describe("PKPass", () => {
 				TypeError,
 				Messages.CLOSE.MISSING_TRANSIT_TYPE,
 			);
+		});
+	});
+
+	describe("[createManifestSymbol]", () => {
+		it("should create a list of SHA-1s", () => {
+			pass.addBuffer("icon.png", Buffer.alloc(0));
+			pass.addBuffer("icon@2x.png", Buffer.alloc(0));
+			pass.addBuffer("icon@3x.png", Buffer.alloc(0));
+
+			expect(
+				JSON.parse(pass[createManifestSymbol]().toString("utf-8")),
+			).toEqual({
+				"icon.png": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+				"icon@2x.png": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+				"icon@3x.png": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+			});
+		});
+
+		it("List of Sha-1 of localized files should not contain Windows '\\' slash", () => {
+			if (path.sep === "\\") {
+				pass.addBuffer("en.lproj\\icon.png", Buffer.alloc(0));
+				pass.addBuffer("en.lproj\\icon@2x.png", Buffer.alloc(0));
+				pass.addBuffer("en.lproj\\icon@3x.png", Buffer.alloc(0));
+
+				const parsedResult = Object.keys(
+					JSON.parse(pass[createManifestSymbol]().toString("utf-8")),
+				);
+
+				expect(parsedResult[0]).toMatch(/en\.lproj\/icon\.png/);
+				expect(parsedResult[1]).toMatch(/en\.lproj\/icon@2x\.png/);
+				expect(parsedResult[1]).toMatch(/en\.lproj\/icon@3x\.png/);
+			}
 		});
 	});
 

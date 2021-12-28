@@ -839,9 +839,10 @@ describe("PKPass", () => {
 			if (path.sep === "\\") {
 				pass.addBuffer("en.lproj\\icon@2x.png", Buffer.alloc(0));
 
-				expect(pass[filesSymbol]).toContain({
-					"en.lproj/icon@2x.png": Buffer.alloc(0),
-				});
+				expect(pass[filesSymbol]["en.lproj/icon@2x.png"]).toBeDefined();
+				expect(
+					pass[filesSymbol]["en.lproj\\icon@2x.png"],
+				).toBeUndefined();
 			}
 		});
 	});
@@ -1062,7 +1063,7 @@ describe("PKPass", () => {
 
 				expect(parsedResult[0]).toMatch(/en\.lproj\/icon\.png/);
 				expect(parsedResult[1]).toMatch(/en\.lproj\/icon@2x\.png/);
-				expect(parsedResult[1]).toMatch(/en\.lproj\/icon@3x\.png/);
+				expect(parsedResult[2]).toMatch(/en\.lproj\/icon@3x\.png/);
 			}
 		});
 	});

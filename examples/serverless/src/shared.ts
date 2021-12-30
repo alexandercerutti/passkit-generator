@@ -143,6 +143,11 @@ export async function* createPassGenerator(
 		);
 	}
 
+	if (pass.type === "boardingPass" && !pass.transitType) {
+		// Just to not make crash the creation if we use a boardingPass
+		pass.transitType = "PKTransitTypeAir";
+	}
+
 	pass = yield pass;
 
 	const buffer = pass.getAsBuffer();

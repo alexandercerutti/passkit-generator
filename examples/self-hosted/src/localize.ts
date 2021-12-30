@@ -51,6 +51,11 @@ app.route("/localize/:modelName").get(async (request, response) => {
 
 		console.log("Added languages", Object.keys(pass.languages).join(", "));
 
+		if (pass.type === "boardingPass" && !pass.transitType) {
+			// Just to not make crash the creation if we use a boardingPass
+			pass.transitType = "PKTransitTypeAir";
+		}
+
 		const stream = pass.getAsStream();
 
 		response.set({

@@ -13,7 +13,7 @@ export async function barcodes(event: ALBEvent) {
 
 	const passGenerator = createPassGenerator(modelName, passOptions);
 
-	const pass = (await passGenerator.next()).value as PKPass;
+	const pass = (await passGenerator.next()).value as unknown as PKPass;
 
 	if (alt === "true") {
 		// After this, pass.props["barcodes"] will have support for all the formats
@@ -39,5 +39,5 @@ export async function barcodes(event: ALBEvent) {
 		);
 	}
 
-	return (await passGenerator.next(pass as PKPass)).value as ALBResult;
+	return (await passGenerator.next()).value as ALBResult;
 }

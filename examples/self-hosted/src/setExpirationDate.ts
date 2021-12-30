@@ -62,6 +62,11 @@ app.route("/expirationDate/:modelName").get(async (request, response) => {
 			);
 		}
 
+		if (pass.type === "boardingPass" && !pass.transitType) {
+			// Just to not make crash the creation if we use a boardingPass
+			pass.transitType = "PKTransitTypeAir";
+		}
+
 		const stream = pass.getAsStream();
 
 		response.set({

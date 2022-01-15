@@ -38,7 +38,7 @@ Install the dependencies and run serverless. Installing the dependencies will li
 
 ```sh
 $ npm install;
-$ npm run run-offline;
+$ npm run example;
 ```
 
 This will start `serverless offline` with an additional host option (mainly for WSL environment).

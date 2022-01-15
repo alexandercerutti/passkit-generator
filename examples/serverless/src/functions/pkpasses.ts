@@ -51,8 +51,6 @@ export async function pkpasses(event: ALBEvent) {
 		return err;
 	}
 
-	console.log(event.queryStringParameters);
-
 	const [certificates, iconFromModel, s3] = await Promise.all([
 		getCertificates(),
 		getSpecificFileInModel(

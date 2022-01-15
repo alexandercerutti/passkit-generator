@@ -10,7 +10,7 @@
 		"preinstall": "npm run clear:deps && npm unlink --no-save passkit-generator",
 		"postinstall": "npm --prefix ../.. run build && npm --prefix ../.. link && npm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
-		"run-offline": "npx serverless offline --host 0.0.0.0; :'specifying host due to WSL limits'"
+		"example": "npx serverless offline --host 0.0.0.0; :'specifying host due to WSL limits'"
 	},
 	"dependencies": {
 		"aws-sdk": "^2.1058.0",

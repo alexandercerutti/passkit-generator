@@ -1,3 +1,34 @@
+/**
+ * PKPasses generation through PKPass.pack static method
+ * example.
+ * Here it is showed manual model reading and
+ * creating through another PKPass because in the other
+ * examples, creation through templates is already shown
+ *
+ * PLEASE NOTE THAT, AT TIME OF WRITING, THIS EXAMPLE WORKS
+ * ONLY IF PASSES ARE DOWNLOADED FROM SAFARI, due to the
+ * support of PKPasses archives. To test this, you might
+ * need to open a tunnel through NGROK if you cannot access
+ * to your local machine (in my personal case, developing
+ * under WSL is a pretty big limitation sometimes).
+ *
+ * PLEASE ALSO NOTE that, AT TIME OF WRITING (iOS 15.0 - 15.2)
+ * Pass Viewer suffers of a really curious bug: issuing several
+ * passes within the same pkpasses archive, all with the same
+ * serialNumber, will lead to have a broken view and to add
+ * just one pass. You can see the screenshots below:
+ *
+ * https://imgur.com/bDTbcDg.jpg
+ * https://imgur.com/Y4GpuHT.jpg
+ * https://i.imgur.com/qbJMy1d.jpg
+ *
+ * - "Alberto, come to look at APPLE."
+ * **Alberto looks**
+ * - "MAMMA MIA!""
+ *
+ * A feedback to Apple have been sent for this.
+ */
+
 import { ALBEvent } from "aws-lambda";
 import { PKPass } from "passkit-generator";
 import {
@@ -5,7 +36,7 @@ import {
 	getSpecificFileInModel,
 	getS3Instance,
 	getRandomColorPart,
-	finish400WithoutModelName,
+	throwClientErrorWithoutModelName,
 } from "../shared";
 import config from "../../config.json";
 
@@ -14,7 +45,13 @@ import config from "../../config.json";
  */
 
 export async function pkpasses(event: ALBEvent) {
-	finish400WithoutModelName(event);
+	try {
+		throwClientErrorWithoutModelName(event);
+	} catch (err) {
+		return err;
+	}
+
+	console.log(event.queryStringParameters);
 
 	const [certificates, iconFromModel, s3] = await Promise.all([
 		getCertificates(),

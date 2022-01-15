@@ -1,14 +1,20 @@
-import { ALBEvent, ALBResult } from "aws-lambda";
-import { Context } from "vm";
+import { ALBEvent, ALBResult, Context } from "aws-lambda";
 import { PKPass } from "passkit-generator";
-import { finish400WithoutModelName, createPassGenerator } from "../shared";
+import {
+	throwClientErrorWithoutModelName,
+	createPassGenerator,
+} from "../shared";
 
 /**
  * Lambda for expirationDate example
  */
 
 export async function expirationDate(event: ALBEvent, context: Context) {
-	finish400WithoutModelName(event);
+	try {
+		throwClientErrorWithoutModelName(event);
+	} catch (err) {
+		return err;
+	}
 
 	const { modelName, ...passOptions } = event.queryStringParameters;
 

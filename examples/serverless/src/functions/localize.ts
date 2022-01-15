@@ -1,4 +1,7 @@
-import { finish400WithoutModelName, createPassGenerator } from "../shared";
+import {
+	throwClientErrorWithoutModelName,
+	createPassGenerator,
+} from "../shared";
 import type { ALBEvent, ALBResult } from "aws-lambda";
 import type { PKPass } from "passkit-generator";
 
@@ -7,7 +10,11 @@ import type { PKPass } from "passkit-generator";
  */
 
 export async function localize(event: ALBEvent) {
-	finish400WithoutModelName(event);
+	try {
+		throwClientErrorWithoutModelName(event);
+	} catch (err) {
+		return err;
+	}
 
 	const { modelName, ...passOptions } = event.queryStringParameters;
 

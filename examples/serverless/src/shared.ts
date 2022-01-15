@@ -7,17 +7,15 @@ import { PKPass } from "passkit-generator";
 
 const S3: { instance: AWS.S3 } = { instance: undefined };
 
-export function finish400WithoutModelName(event: ALBEvent) {
-	if (event.queryStringParameters?.modelName) {
-		return;
+export function throwClientErrorWithoutModelName(event: ALBEvent) {
+	if (!event.queryStringParameters?.modelName) {
+		throw {
+			statusCode: 400,
+			body: JSON.stringify({
+				message: "modelName is missing in query params",
+			}),
+		};
 	}
-
-	return {
-		statusCode: 400,
-		body: JSON.stringify({
-			message: "modelName is missing in query params",
-		}),
-	};
 }
 
 export function getRandomColorPart() {

@@ -1,13 +1,20 @@
 import { ALBEvent, ALBResult } from "aws-lambda";
 import { PKPass } from "../../../../lib";
-import { finish400WithoutModelName, createPassGenerator } from "../shared";
+import {
+	throwClientErrorWithoutModelName,
+	createPassGenerator,
+} from "../shared";
 
 /**
  * Lambda for barcodes example
  */
 
 export async function barcodes(event: ALBEvent) {
-	finish400WithoutModelName(event);
+	try {
+		throwClientErrorWithoutModelName(event);
+	} catch (err) {
+		return err;
+	}
 
 	const { modelName, alt, ...passOptions } = event.queryStringParameters;
 

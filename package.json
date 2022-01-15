@@ -23,7 +23,7 @@
 	],
 	"dependencies": {
 		"do-not-zip": "^1.0.0",
-		"joi": "^17.4.2",
+		"joi": "17.4.2",
 		"node-forge": "^1.2.1",
 		"tslib": "^2.3.1"
 	},

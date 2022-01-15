@@ -27,7 +27,16 @@ export async function getModel(
 ): Promise<string | { [key: string]: Buffer }> {
 	if (process.env.IS_OFFLINE === "true") {
 		console.log("model offline retrieving");
-		return path.resolve(__dirname, "../../../", `models/${modelName}`);
+
+		const standardModelName = modelName.endsWith(".pass")
+			? modelName
+			: `${modelName}.pass`;
+
+		return path.resolve(
+			__dirname,
+			"../../../",
+			`models/${standardModelName}`,
+		);
 	}
 
 	const s3 = await getS3Instance();
@@ -127,7 +136,7 @@ export async function getSpecificFileInModel(
 	const model = await getModel(modelName);
 
 	if (typeof model === "string") {
-		return fs.readFile(path.resolve(`${model}.pass`, fileName));
+		return fs.readFile(path.resolve(model, fileName));
 	}
 
 	return model[fileName];

@@ -27,7 +27,7 @@ export async function getModel(
 ): Promise<string | { [key: string]: Buffer }> {
 	if (process.env.IS_OFFLINE === "true") {
 		console.log("model offline retrieving");
-		return path.resolve(__dirname, `../../models/${modelName}`);
+		return path.resolve(__dirname, "../../../", `models/${modelName}`);
 	}
 
 	const s3 = await getS3Instance();
@@ -53,17 +53,33 @@ export async function getCertificates(): Promise<{
 	if (process.env.IS_OFFLINE) {
 		console.log("Fetching Certificates locally");
 
+		// ****************************************************************** //
+		// *** Execution path offline is `examples/serverless/.build/src` *** //
+		// ****************************************************************** //
+
 		[signerCert, signerKey, wwdr, signerKeyPassphrase] = await Promise.all([
 			fs.readFile(
-				path.resolve(__dirname, "../../../certificates/signerCert.pem"),
+				path.resolve(
+					__dirname,
+					"../../../../",
+					"certificates/signerCert.pem",
+				),
 				"utf-8",
 			),
 			fs.readFile(
-				path.resolve(__dirname, "../../../certificates/signerKey.pem"),
+				path.resolve(
+					__dirname,
+					"../../../../",
+					"certificates/signerKey.pem",
+				),
 				"utf-8",
 			),
 			fs.readFile(
-				path.resolve(__dirname, "../../../certificates/WWDR.pem"),
+				path.resolve(
+					__dirname,
+					"../../../../",
+					"certificates/WWDR.pem",
+				),
 				"utf-8",
 			),
 			Promise.resolve(config.SIGNER_KEY_PASSPHRASE),

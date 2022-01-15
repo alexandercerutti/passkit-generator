@@ -33,7 +33,7 @@ Please note that `field.js` example will force you to download `exampleBooking.p
 | fields         | `/fields`         | -                                                                                                                           |
 | expirationDate | `/expirationDate` | Accepts a required parameter in query string `fn`, which can be either `expiration` or `void`, to switch generated example. |
 | scratch        | `/scratch`        | -                                                                                                                           |
-| PKPass.from    | pkpassfrom        | -                                                                                                                           |
+| PKPass.from    | `/pkpassfrom`     | -                                                                                                                           |
 | barcodes       | `/barcodes`       | Using `?alt=true` query parameter, will lead to barcode string message usage instead of selected ones                       |
 | pkpasses       | `/pkpasses`       | -                                                                                                                           |
 

@@ -26,12 +26,11 @@ describe("PKPass", () => {
 
 	beforeEach(() => {
 		pass = new PKPass({});
+		console.warn = jasmine.createSpy("warn_logging");
 	});
 
 	describe("constructor", () => {
 		it("should warn about a non-object buffer parameter", () => {
-			console.warn = jasmine.createSpy("warn");
-
 			pass = new PKPass(undefined, baseCerts);
 
 			expect(console.warn).toHaveBeenCalledWith(
@@ -343,18 +342,25 @@ describe("PKPass", () => {
 		});
 
 		it("should ignore objects and values that not comply with Schema.Barcodes", () => {
-			pass.setBarcodes(
-				// @ts-expect-error
-				5,
-				10,
-				15,
-				{
-					message: "28363516282",
-					format: "PKBarcodeFormatPDF417",
-				},
-				7,
-				1,
-			);
+			const setBarcodesArguments: Parameters<typeof pass["setBarcodes"]> =
+				[
+					// @ts-expect-error
+					5,
+					// @ts-expect-error
+					10,
+					// @ts-expect-error
+					15,
+					{
+						message: "28363516282",
+						format: "PKBarcodeFormatPDF417",
+					},
+					// @ts-expect-error
+					7,
+					// @ts-expect-error
+					1,
+				];
+
+			pass.setBarcodes(...setBarcodesArguments);
 
 			expect(pass.props["barcodes"].length).toBe(1);
 		});
@@ -656,7 +662,6 @@ describe("PKPass", () => {
 		});
 
 		it("should warn developer if no translations have been passed", () => {
-			console.warn = jasmine.createSpy("log");
 			// @ts-expect-error
 			pass.localize("en");
 			pass.localize("en", {});
@@ -939,7 +944,6 @@ describe("PKPass", () => {
 		});
 
 		it("Should warn user if no icons have been added to bundle", () => {
-			console.warn = jasmine.createSpy("log");
 			pass[closePassSymbol](true);
 
 			expect(console.warn).toHaveBeenCalledWith(

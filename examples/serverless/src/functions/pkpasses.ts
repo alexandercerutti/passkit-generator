@@ -121,7 +121,7 @@ export async function pkpasses(event: ALBEvent) {
 	const pkpasses = PKPass.pack(...passes);
 
 	const buffer = pkpasses.getAsBuffer();
-	const passName = `GeneratedPass-${Math.random()}.pkpass`;
+	const passName = `GeneratedPass-${Math.random()}.pkpasses`;
 
 	const { Location } = await s3
 		.upload({

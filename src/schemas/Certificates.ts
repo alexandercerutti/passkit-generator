@@ -8,14 +8,14 @@ export interface CertificatesSchema {
 	signerKeyPassphrase?: string;
 }
 
-// Joi.binary is not available in the browser
-const maybeBinaryOrString = Joi.binary ? [Joi.binary(), Joi.string()] : [Joi.string()];
+// Joi.binary is not available in the browser so fallback to basic check
+const binary = Joi.binary ? Joi.binary() : Joi.custom((obj) => Buffer.isBuffer(obj));
 
 export const CertificatesSchema = Joi.object<CertificatesSchema>()
 	.keys({
-		wwdr: Joi.alternatives(...maybeBinaryOrString).required(),
-		signerCert: Joi.alternatives(...maybeBinaryOrString).required(),
-		signerKey: Joi.alternatives(...maybeBinaryOrString).required(),
+		wwdr: Joi.alternatives(binary, Joi.string()).required(),
+		signerCert: Joi.alternatives(binary, Joi.string()).required(),
+		signerKey: Joi.alternatives(binary, Joi.string()).required(),
 		signerKeyPassphrase: Joi.string(),
 	})
 	.required();

@@ -172,8 +172,8 @@ try {
 	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificatesContentsSomehow();
 
 	const examplePass = new PKPass({
-		"thumbnail": Buffer.from([ ... ]),
-		"icon": Buffer.from([ ... ]),
+		"thumbnail.png": Buffer.from([ ... ]),
+		"icon.png": Buffer.from([ ... ]),
 		"pass.json": Buffer.from([ ... ]),
 		"it.lproj/pass.strings": Buffer.from([ ... ])
 	},

@@ -9,8 +9,7 @@
 		"build:src": "rimraf lib && npx tsc -p tsconfig.dist.json",
 		"build:spec": "rimraf \"./spec/*.!(ts)\" && npx tsc -p tsconfig.spec.json",
 		"prepublishOnly": "npm run build",
-		"test": "npm run build:spec && npx jasmine",
-		"prepare": "npm run build"
+		"test": "npm run build:spec && npx jasmine"
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",

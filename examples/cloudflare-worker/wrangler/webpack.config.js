@@ -1,4 +1,5 @@
 const path = require("path");
+const TerserPlugin = require("terser-webpack-plugin");
 
 /**
  * @see https://developers.cloudflare.com/workers/cli-wrangler/webpack
@@ -8,6 +9,22 @@ module.exports = {
 	context: __dirname,
 	entry: "./src/index.ts",
 	target: "webworker",
+
+	/** Adding more minifization (for what it can apply... ) */
+	optimization: {
+		minimize: true,
+		minimizer: [
+			new TerserPlugin({
+				parallel: true,
+				terserOptions: {
+					format: {
+						comments: false,
+					},
+				},
+				extractComments: false,
+			}),
+		],
+	},
 
 	/**
 	 * "development" mode does not support the usage of eval

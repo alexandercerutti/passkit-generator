@@ -8,7 +8,7 @@
 		"preinstall": "npm run clear:deps && npm unlink --no-save passkit-generator",
 		"postinstall": "npm --prefix ../../.. run build && npm --prefix ../../.. link && npm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
-		"example": "npx wrangler dev",
+		"example": "npx wrangler dev --ip 0.0.0.0",
 		"build": "npx tsc"
 	},
 	"keywords": [],

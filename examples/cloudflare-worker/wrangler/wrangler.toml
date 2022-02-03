@@ -7,9 +7,3 @@ route = ""
 zone_id = ""
 compatibility_date = "2022-01-31"
 webpack_config = "webpack.config.js"
-
-[env.dev]
-IS_OFFLINE = true
-
-[env.production]
-IS_OFFLINE = false

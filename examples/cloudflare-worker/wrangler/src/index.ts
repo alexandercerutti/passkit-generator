@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { PKPass } from "passkit-generator";
 
 /** Assets are handled by Webpack url-loader */

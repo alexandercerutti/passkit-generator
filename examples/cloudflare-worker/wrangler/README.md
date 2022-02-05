@@ -9,10 +9,9 @@ Cloudflare Workers have a tool, wrangler, which comes out with Webpack 4 to bund
 This example offers just the generation of a single static `boardingPass`.
 
 > Please note that creating and publishing a Cloudflare Workers with passkit-generator, might require you to buy a plan.
-> With this example, we are bundling some data inline in the code and we have assets that might take a while for being processed.
 > Cloudflare limits are pretty low.
 
-## Set up
+## Setting up
 
 Install all the dependencies through `npm install`.
 Configure wrangler and your account [according to the guide](https://developers.cloudflare.com/workers/get-started/guide).
@@ -52,8 +51,6 @@ For this reason we also needed to add Webpack 4 (the one provided with Wrangler)
 
 Along with this, we needed to setup a different `webpack.config.js` and tell wrangler where to find it, through `wrangler.toml`.
 
-Also, we needed to install `url-loader` to load static assets (model files from models folder). Better ways to achieve this might be available (like [Durable Objects](https://developers.cloudflare.com/workers/runtime-apis/durable-objects), maybe).
+Also, we needed to install `url-loader` to load static assets (model files from models folder).
 
-To "conclude", we needed to set `type = "webpack"` on the top of `wrangler.toml`, as per [the documentation](https://developers.cloudflare.com/workers/cli-wrangler/webpack).
-
-Other details can be found inline as code comment.
+Lastly, we needed to set `type = "webpack"` on the top of `wrangler.toml`, as per [the documentation](https://developers.cloudflare.com/workers/cli-wrangler/webpack).

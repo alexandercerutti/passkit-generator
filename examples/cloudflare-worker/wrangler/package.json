@@ -5,13 +5,17 @@
 	"description": "",
 	"main": "src/index.ts",
 	"scripts": {
-		"preinstall": "npm run clear:deps && npm unlink --no-save passkit-generator",
-		"postinstall": "npm --prefix ../../.. run build && npm --prefix ../../.. link && npm link passkit-generator",
+		"service:link-pg": "cd ../../.. && npm run build && npm link",
+		"preinstall": "npm run clear:deps",
+		"postinstall": "npm run service:link-pg && npm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
 		"example": "npx wrangler dev --ip 0.0.0.0",
 		"build": "npx tsc"
 	},
 	"keywords": [],
+	"peerDependencies": {
+		"passkit-generator": "latest"
+	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^3.3.1",
 		"@cloudflare/wrangler": "^1.19.7",

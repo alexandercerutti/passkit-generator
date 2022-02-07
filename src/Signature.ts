@@ -1,5 +1,6 @@
 import forge from "node-forge";
 import type * as Schemas from "./schemas";
+import { Buffer } from "buffer";
 
 /**
  * Creates an hash for a buffer. Used by manifest

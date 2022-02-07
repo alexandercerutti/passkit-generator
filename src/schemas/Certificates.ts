@@ -1,4 +1,4 @@
-import type forge from "node-forge";
+import { Buffer } from "buffer";
 import Joi from "joi";
 
 export interface CertificatesSchema {

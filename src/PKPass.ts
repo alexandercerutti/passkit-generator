@@ -1,4 +1,5 @@
 import { Stream } from "stream";
+import { Buffer } from "buffer";
 import path from "path";
 import FieldsArray from "./FieldsArray";
 import Bundle, { filesSymbol } from "./Bundle";

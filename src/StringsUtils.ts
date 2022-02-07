@@ -1,4 +1,5 @@
 import { EOL } from "os";
+import { Buffer } from "buffer";
 
 // ************************************ //
 // *** UTILS FOR PASS.STRINGS FILES *** //

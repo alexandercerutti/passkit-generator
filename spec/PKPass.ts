@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import * as path from "path";
+import { Buffer } from "buffer";
 import { filesSymbol, freezeSymbol } from "../lib/Bundle";
 import FieldsArray from "../lib/FieldsArray";
 import { PassProps } from "../lib/schemas";

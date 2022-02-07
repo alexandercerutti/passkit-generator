@@ -1,4 +1,5 @@
 import { Stream } from "stream";
+import { Buffer } from "buffer";
 import * as Messages from "../lib/messages";
 import { default as Bundle, filesSymbol } from "../lib/Bundle";
 

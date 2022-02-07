@@ -2,6 +2,7 @@ import * as path from "path";
 import * as Utils from "./utils";
 import * as Messages from "./messages";
 import { promises as fs } from "fs";
+import type { Buffer } from "buffer";
 
 /**
  * Reads the model folder contents

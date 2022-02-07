@@ -8,8 +8,14 @@ export interface CertificatesSchema {
 	signerKeyPassphrase?: string;
 }
 
-// Joi.binary is not available in browser-like environments (like Cloudflare workers) so fallback to basic check
-const binary = Joi.binary ? Joi.binary() : Joi.custom((obj) => Buffer.isBuffer(obj));
+/**
+ * Joi.binary is not available in browser-like environments (like Cloudflare workers)
+ * so we fallback to manual checking. Buffer must be polyfilled.
+ */
+
+const binary = Joi.binary
+	? Joi.binary()
+	: Joi.custom((obj) => Buffer.isBuffer(obj));
 
 export const CertificatesSchema = Joi.object<CertificatesSchema>()
 	.keys({

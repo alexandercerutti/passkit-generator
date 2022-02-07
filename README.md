@@ -171,7 +171,7 @@ try {
 	/** Each, but last, can be either a string or a Buffer. See API Documentation for more */
 	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = getCertificatesContentsSomehow();
 
-	const examplePass = new PKPass({
+	const pass = new PKPass({
 		"thumbnail.png": Buffer.from([ ... ]),
 		"icon.png": Buffer.from([ ... ]),
 		"pass.json": Buffer.from([ ... ]),

@@ -40,6 +40,15 @@ describe("FieldsArray", () => {
 			expect(fa[0]).toEqual({ key: "t1", value: "v1" });
 		});
 
+		it("should preserve order of input items when adding fields", () => {
+			expect(
+				fa.push({ key: "t1", value: "v1" }, { key: "t2", value: "v2" })
+			).toBe(2);
+			expect(fa.length).toBe(2);
+			expect(fa[0]).toEqual({ key: "t1", value: "v1" });
+			expect(fa[1]).toEqual({ key: "t2", value: "v2" });
+		});
+
 		it("should add the key to the pool", () => {
 			fa.push({ key: "t1", value: "v1" });
 

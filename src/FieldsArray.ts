@@ -67,7 +67,7 @@ function registerWithValidation(
 
 	let validItems: Schemas.Field[] = [];
 
-	for (let i = items.length, field: Schemas.Field; (field = items[--i]); ) {
+	for (const field of items) {
 		try {
 			Schemas.assertValidity(
 				Schemas.Field,

@@ -68,6 +68,11 @@ function registerWithValidation(
 	let validItems: Schemas.Field[] = [];
 
 	for (const field of items) {
+		if (!field) {
+			console.warn(Messages.format(Messages.FIELDS.INVALID, field));
+			continue;
+		}
+
 		try {
 			Schemas.assertValidity(
 				Schemas.Field,
@@ -76,7 +81,9 @@ function registerWithValidation(
 			);
 
 			if (instance[sharedKeysPoolSymbol].has(field.key)) {
-				throw Messages.format(Messages.FIELDS.REPEATED_KEY, field.key);
+				throw new TypeError(
+					Messages.format(Messages.FIELDS.REPEATED_KEY, field.key),
+				);
 			}
 
 			instance[sharedKeysPoolSymbol].add(field.key);

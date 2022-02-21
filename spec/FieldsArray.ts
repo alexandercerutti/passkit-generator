@@ -68,6 +68,18 @@ describe("FieldsArray", () => {
 
 			expect(fa.length).toBe(1);
 		});
+
+		it("should log a warning if input items contain undefined and, then, ignore it", () => {
+			console.warn = jasmine.createSpy("log");
+
+			fa.push(undefined, { key: "t1", value: "v1" });
+
+			expect(console.warn).toHaveBeenCalledWith(
+				Messages.FIELDS.INVALID.replace("%s", "undefined"),
+			);
+
+			expect(fa.length).toBe(1);
+		});
 	});
 
 	describe("pop", () => {

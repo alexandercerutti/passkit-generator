@@ -17,10 +17,10 @@
 		"passkit-generator": "latest"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^3.3.1",
-		"@cloudflare/wrangler": "^1.19.7",
+		"@cloudflare/workers-types": "^3.4.0",
+		"@cloudflare/wrangler": "^1.19.8",
 		"terser-webpack-plugin": "^4.2.3",
-		"ts-loader": "^8.3.0",
+		"ts-loader": "8.3.0",
 		"typescript": "^4.5.5",
 		"url-loader": "^4.1.1",
 		"webpack": "^4.46.0",

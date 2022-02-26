@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+contact_links:
+    - name: Feature Request
+      about: Propose a new feature in discussions. Click the link to open one with a template
+      url: https://github.com/alexandercerutti/passkit-generator/discussions/new?category=ideas&title=[Feature%20Request]%20<!--%20Write%20Subject%20-->
+
+    - name: Security Issues
+      about: Contact me privately on Telegram for security issues
+      url: https://t.me/AlexandrCerutti

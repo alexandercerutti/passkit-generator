@@ -71,4 +71,4 @@ export const Field = Joi.object<Field>().keys({
 			is: Joi.number(),
 			otherwise: Joi.string().forbidden(),
 		}),
-}).or('value', 'attributedValue');
+}).or("value", "attributedValue");

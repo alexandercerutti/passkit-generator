@@ -580,13 +580,8 @@ export default class PKPass extends Bundle {
 
 		const localizationEntries = Object.entries(this[localizationSymbol]);
 
-		for (
-			let i = localizationEntries.length,
-				entry: typeof localizationEntries[0];
-			(entry = localizationEntries[--i]);
-
-		) {
-			const [lang, translations] = entry;
+		for (let i = localizationEntries.length - 1; i >= 0; i--) {
+			const [lang, translations] = localizationEntries[i];
 
 			const stringsFile = Strings.create(translations);
 

@@ -106,7 +106,9 @@ export default class PKPass extends Bundle {
 			"application/vnd.apple.pkpasses",
 		);
 
-		for (let i = 0, pass: PKPass; (pass = passes[i]); i++) {
+		for (let i = 0; i < passes.length; i++) {
+			const pass = passes[i];
+
 			if (!(pass instanceof PKPass)) {
 				throw new Error(Messages.PACK.INVALID);
 			}

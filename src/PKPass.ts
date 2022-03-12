@@ -743,11 +743,9 @@ export default class PKPass extends Bundle {
 			const allFilesKeys = Object.keys(this[filesSymbol]);
 			const langFolderIdentifier = `${lang}.lproj`;
 
-			for (
-				let i = allFilesKeys.length, filePath: string;
-				(filePath = allFilesKeys[--i]);
+			for (let i = allFilesKeys.length - 1; i >= 0; i--) {
+				const filePath = allFilesKeys[i];
 
-			) {
 				if (filePath.startsWith(langFolderIdentifier)) {
 					delete this[filesSymbol][filePath];
 				}

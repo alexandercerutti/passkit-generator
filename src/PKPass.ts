@@ -102,18 +102,16 @@ export default class PKPass extends Bundle {
 	 */
 
 	static pack(...passes: PKPass[]): Bundle {
-		if (!passes.every((pass) => pass instanceof PKPass)) {
-			throw new Error(Messages.PACK.INVALID);
-		}
-
-		const buffers = passes.map((pass) => pass.getAsBuffer());
-
 		const [bundle, freezeBundle] = Bundle.freezable(
 			"application/vnd.apple.pkpasses",
 		);
 
-		for (let i = 0; i < buffers.length; i++) {
-			bundle.addBuffer(`packed-pass-${i + 1}.pkpass`, buffers[i]);
+		for (let i = 0, pass: PKPass; (pass = passes[i]); i++) {
+			if (!(pass instanceof PKPass)) {
+				throw new Error(Messages.PACK.INVALID);
+			}
+
+			bundle.addBuffer(`packed-pass-${i + 1}.pkpass`, pass.getAsBuffer());
 		}
 
 		freezeBundle();

@@ -19,10 +19,10 @@
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^3.4.0",
-		"@cloudflare/wrangler": "^1.19.8",
+		"@cloudflare/wrangler": "^1.19.11",
 		"stream-browserify": "^3.0.0",
 		"ts-loader": "^9.2.8",
-		"typescript": "^4.6.2",
+		"typescript": "^4.6.3",
 		"webpack": "^5.70.0",
 		"webpack-cli": "^4.9.2",
 		"buffer": "^6.0.3",

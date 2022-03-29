@@ -19,6 +19,17 @@ export const closePassSymbol = Symbol("pass.close");
 export const passTypeSymbol = Symbol("pass.type");
 export const certificatesSymbol = Symbol("pass.certificates");
 
+const RegExps = {
+	PASS_JSON: /pass\.json/,
+	MANIFEST_OR_SIGNATURE: /manifest|signature/,
+	PERSONALIZATION: {
+		JSON: /personalization\.json/,
+		LOGO: /personalizationLogo@(?:.{2})/,
+	} as const,
+	PASS_STRINGS: /(?<lang>[a-zA-Z-]{2,}).lproj\/pass\.strings/,
+	PASS_ICON: /icon(?:@\d{1}x)?/,
+} as const;
+
 export default class PKPass extends Bundle {
 	private [certificatesSymbol]: Schemas.CertificatesSchema;
 	private [propsSymbol]: Schemas.PassProps = {};
@@ -385,11 +396,11 @@ export default class PKPass extends Bundle {
 			return;
 		}
 
-		if (/manifest|signature/.test(pathName)) {
+		if (RegExps.MANIFEST_OR_SIGNATURE.test(pathName)) {
 			return;
 		}
 
-		if (/pass\.json/.test(pathName)) {
+		if (RegExps.PASS_JSON.test(pathName)) {
 			if (this[filesSymbol]["pass.json"]) {
 				/**
 				 * Ignoring any further addition. In a
@@ -418,7 +429,7 @@ export default class PKPass extends Bundle {
 			return super.addBuffer(pathName, Buffer.alloc(0));
 		}
 
-		if (/personalization\.json/.test(pathName)) {
+		if (RegExps.PERSONALIZATION.JSON.test(pathName)) {
 			/**
 			 * We are still allowing `personalizationLogo@XX.png`
 			 * to be added to the bundle, but we'll delete it
@@ -450,12 +461,9 @@ export default class PKPass extends Bundle {
 		 * its translations for later
 		 */
 
-		const translationsFileRegexp =
-			/(?<lang>[a-zA-Z-]{2,}).lproj\/pass\.strings/;
-
 		let match: RegExpMatchArray | null;
 
-		if ((match = normalizedPathName.match(translationsFileRegexp))) {
+		if ((match = normalizedPathName.match(RegExps.PASS_STRINGS))) {
 			const [, lang] = match;
 
 			const parsedTranslations = Strings.parse(buffer).translations;
@@ -571,8 +579,7 @@ export default class PKPass extends Bundle {
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
 		super.addBuffer("pass.json", passJson);
 
-		const ICON_REGEX = /icon(?:@\d{1}x)?/;
-		if (!fileNames.some((fileName) => ICON_REGEX.test(fileName))) {
+		if (!fileNames.some((fileName) => RegExps.PASS_ICON.test(fileName))) {
 			console.warn(Messages.CLOSE.MISSING_ICON);
 		}
 
@@ -600,7 +607,7 @@ export default class PKPass extends Bundle {
 			this[propsSymbol]["nfc"] &&
 				this[filesSymbol]["personalization.json"] &&
 				fileNames.find((file) =>
-					/personalizationLogo@(?:.{2})/.test(file),
+					RegExps.PERSONALIZATION.LOGO.test(file),
 				),
 		);
 
@@ -611,7 +618,7 @@ export default class PKPass extends Bundle {
 			 */
 
 			for (let i = 0; i < fileNames.length; i++) {
-				if (/personalization/.test(fileNames[i])) {
+				if (fileNames[i].includes("personalization")) {
 					console.warn(
 						Messages.format(
 							Messages.CLOSE.PERSONALIZATION_REMOVED,

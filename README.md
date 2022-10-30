@@ -64,8 +64,9 @@ Let's suppose you have a file `model.zip` stored somewhere: you unzip it in runt
 > Using the .pass extension is a best practice, showing that the directory is a pass package.
 > ([Build your first pass - Apple Developer Portal](https://apple.co/2LYXWo3)).
 
-Following to this best practice, the package is set to require each folder-model to have a **_.pass_** extension.
-If omitted in the configuration (as in [Usage Example](#usage_example), at "model" key), it will be forcefully added.
+Following to this best practice, the package is set to **require** each folder-model to have a **_.pass_** extension.
+
+If omitted in the configuration (as in [Usage Example](#usage_example) below), it will be forcefully added, possibly resulting in a folder reading error, if your model folder doesn't have it.
 
 ---
 
@@ -74,15 +75,15 @@ It will output a .zip file that you can decompress and use as source.
 
 ---
 
-You can follow the [Apple Developer documentation](https://apple.co/2wuJLC1) (_Package Structure_) to build a correct pass model. The **icon is required** in order to make the pass work. Omitting an icon resolution, might make a pass work on a device (e.g. Mac) but not on another (e.g. iPhone). _Manifest.json_ and _signature_ will be automatically ignored from the model and generated in runtime.
+You can follow [_Create the Directory and add Files for the Pass_](https://apple.co/3zumjFI) at Apple Developer to build a correct pass model. The **icon is required** in order to make the pass work. Omitting an icon resolution, might make a pass work on a device (e.g. Mac) but not on another (e.g. iPhone). _Manifest.json_ and _signature_ will be automatically ignored from the model and generated in runtime.
 
-You can also create `.lproj` folders (e.g. _en.lproj_ or _it.lproj_) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](./API.md#localizing-passes) in the API documentation.
+You can also create `.lproj` folders (e.g. _en.lproj_ or _it.lproj_) containing localized media. To include a folder or translate texts inside the pass, please refer to [Localizing Passes](https://github.com/alexandercerutti/passkit-generator/wiki/API-Documentation-Reference#localizing-passes) in the wiki API documentation.
 
 To include a file that belongs to an `.lproj` folder in buffers, you'll just have to name a key like `en.lproj/thumbnail.png`.
 
 ##### Pass.json
 
-Create a `pass.json` by taking example from examples folder models or the one provided by Apple for the [first tutorial](https://apple.co/2NA2nus) and fill it with the basic informations, that are `teamIdentifier`, `passTypeIdentifier` and all the other basic keys like pass type. Please refer to [Top-Level Keys/Standard Keys](https://apple.co/2PRfSnu) and [Top-Level Keys/Style Keys](https://apple.co/2wzyL5J).
+Create a `pass.json` by taking example from examples folder models or the one provided by Apple for the [first tutorial](https://apple.co/2NA2nus) and fill it with the basic informations, that are `teamIdentifier`, `passTypeIdentifier` and all the other basic keys like pass type. Please refer to [Pass interface documentation on Apple Developers](https://apple.co/3DeKKYA).
 
 ```json
 {

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { Field } from "./Field";
+import { Field, FieldWithRow } from "./Field";
 
 export type TransitType =
 	| "PKTransitTypeAir"
@@ -13,7 +13,7 @@ export const TransitType = Joi.string().regex(
 );
 
 export interface PassFields {
-	auxiliaryFields: (Field & { row?: number })[];
+	auxiliaryFields: FieldWithRow[];
 	backFields: Field[];
 	headerFields: Field[];
 	primaryFields: Field[];
@@ -22,13 +22,7 @@ export interface PassFields {
 }
 
 export const PassFields = Joi.object<PassFields>().keys({
-	auxiliaryFields: Joi.array().items(
-		Joi.object()
-			.keys({
-				row: Joi.number().max(1).min(0),
-			})
-			.concat(Field),
-	),
+	auxiliaryFields: Joi.array().items(FieldWithRow),
 	backFields: Joi.array().items(Field),
 	headerFields: Joi.array().items(Field),
 	primaryFields: Joi.array().items(Field),

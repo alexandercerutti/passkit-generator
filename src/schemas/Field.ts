@@ -22,6 +22,10 @@ export interface Field {
 	numberStyle?: string;
 }
 
+export interface FieldWithRow extends Field {
+	row?: 0 | 1;
+}
+
 export const Field = Joi.object<Field>().keys({
 	attributedValue: Joi.alternatives(
 		Joi.string().allow(""),
@@ -72,3 +76,9 @@ export const Field = Joi.object<Field>().keys({
 			otherwise: Joi.string().forbidden(),
 		}),
 });
+
+export const FieldWithRow = Field.concat(
+	Joi.object<FieldWithRow>().keys({
+		row: Joi.number().min(0).max(1),
+	}),
+);

@@ -353,12 +353,32 @@ export default class PKPass extends Bundle {
 		const sharedKeysPool = new Set<string>();
 
 		this[passTypeSymbol] = type;
-		this[propsSymbol][this[passTypeSymbol]] = {
-			headerFields /******/: new FieldsArray(this, sharedKeysPool),
-			primaryFields /*****/: new FieldsArray(this, sharedKeysPool),
-			secondaryFields /***/: new FieldsArray(this, sharedKeysPool),
-			auxiliaryFields /***/: new FieldsArray(this, sharedKeysPool),
-			backFields /********/: new FieldsArray(this, sharedKeysPool),
+		this[propsSymbol][type] = {
+			headerFields /******/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			primaryFields /*****/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			secondaryFields /***/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			auxiliaryFields /***/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				type === "eventTicket" ? Schemas.FieldWithRow : Schemas.Field,
+			),
+			backFields /********/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
 			transitType: undefined,
 		};
 	}

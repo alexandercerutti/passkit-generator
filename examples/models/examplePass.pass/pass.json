@@ -41,6 +41,20 @@
 				"label": "LOCATION",
 				"value": "Moscone West"
 			}
+		],
+		"auxiliaryFields": [
+			{
+				"key": "Foo",
+				"value": "foo2",
+				"label": "Foo(l)",
+				"row": 0
+			},
+			{
+				"key": "Foo2",
+				"value": "foo3",
+				"label": "Foo(l)2",
+				"row": 1
+			}
 		]
 	}
 }

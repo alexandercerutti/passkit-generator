@@ -287,9 +287,14 @@ export default class PKPass extends Bundle {
 	 * if no valid pass.json has been parsed yet
 	 * or, anyway, if a valid type has not been
 	 * set yet.
+	 *
+	 * For Typescript users: this signature allows
+	 * in any case to add the 'row' field, but on
+	 * runtime they are only allowed on "eventTicket"
+	 * passes.
 	 */
 
-	public get auxiliaryFields(): Schemas.Field[] {
+	public get auxiliaryFields(): Schemas.FieldWithRow[] {
 		return this[propsSymbol][this.type].auxiliaryFields;
 	}
 

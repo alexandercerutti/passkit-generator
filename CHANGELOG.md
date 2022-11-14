@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.7 - 14 Nov 2022
+
+    Fixed generation of EventTicket with row fields (PR #118)
+
 ## 3.1.6 - 29 Mar 2022
 
     Optimizations for localizationEntries, PKPass.pack, localize and regexes;

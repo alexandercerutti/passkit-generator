@@ -10,6 +10,7 @@ import * as Messages from "./messages";
 
 const passInstanceSymbol = Symbol("passInstance");
 const sharedKeysPoolSymbol = Symbol("keysPool");
+const fieldSchemaSymbol = Symbol("fieldSchema");
 
 export default class FieldsArray extends Array<Schemas.Field> {
 	private [passInstanceSymbol]: InstanceType<typeof PKPass>;
@@ -18,9 +19,11 @@ export default class FieldsArray extends Array<Schemas.Field> {
 	constructor(
 		passInstance: InstanceType<typeof PKPass>,
 		keysPool: Set<string>,
+		fieldSchema: typeof Schemas.Field | typeof Schemas.FieldWithRow,
 		...args: Schemas.Field[]
 	) {
 		super(...args);
+		this[fieldSchemaSymbol] = fieldSchema;
 		this[passInstanceSymbol] = passInstance;
 		this[sharedKeysPoolSymbol] = keysPool;
 	}
@@ -75,7 +78,7 @@ function registerWithValidation(
 
 		try {
 			Schemas.assertValidity(
-				Schemas.Field,
+				instance[fieldSchemaSymbol],
 				field,
 				Messages.FIELDS.INVALID,
 			);

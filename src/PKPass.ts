@@ -287,9 +287,14 @@ export default class PKPass extends Bundle {
 	 * if no valid pass.json has been parsed yet
 	 * or, anyway, if a valid type has not been
 	 * set yet.
+	 *
+	 * For Typescript users: this signature allows
+	 * in any case to add the 'row' field, but on
+	 * runtime they are only allowed on "eventTicket"
+	 * passes.
 	 */
 
-	public get auxiliaryFields(): Schemas.Field[] {
+	public get auxiliaryFields(): Schemas.FieldWithRow[] {
 		return this[propsSymbol][this.type].auxiliaryFields;
 	}
 
@@ -353,12 +358,32 @@ export default class PKPass extends Bundle {
 		const sharedKeysPool = new Set<string>();
 
 		this[passTypeSymbol] = type;
-		this[propsSymbol][this[passTypeSymbol]] = {
-			headerFields /******/: new FieldsArray(this, sharedKeysPool),
-			primaryFields /*****/: new FieldsArray(this, sharedKeysPool),
-			secondaryFields /***/: new FieldsArray(this, sharedKeysPool),
-			auxiliaryFields /***/: new FieldsArray(this, sharedKeysPool),
-			backFields /********/: new FieldsArray(this, sharedKeysPool),
+		this[propsSymbol][type] = {
+			headerFields /******/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			primaryFields /*****/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			secondaryFields /***/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			auxiliaryFields /***/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				type === "eventTicket" ? Schemas.FieldWithRow : Schemas.Field,
+			),
+			backFields /********/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
 			transitType: undefined,
 		};
 	}

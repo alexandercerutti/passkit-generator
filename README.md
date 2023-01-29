@@ -12,7 +12,6 @@
 			src="https://github.com/alexandercerutti/passkit-generator/raw/master/assets/logo-light.svg?sanitize=true"
 		>
 	</picture>
-	<img width="600" src="https://github.com/alexandercerutti/passkit-generator/raw/master/assets/logo-light.svg?sanitize=true" alt="Node Passkit Generator logo">
 	<br>
 	<br>
 	<p align="center">Simple Node.js interface to generate customized <a href="https://developer.apple.com/wallet/">Apple Wallet Passes</a> for iOS and WatchOS.</p>

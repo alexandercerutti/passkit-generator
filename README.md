@@ -1,6 +1,17 @@
 <div align="center">
 	<br>
 	<br>
+	<picture>
+		<source media="(prefers-color-scheme: dark)"
+			srcset="https://github.com/alexandercerutti/passkit-generator/raw/master/assets/logo-dark.svg?sanitize=true"
+			width="600"
+		>
+		<img
+			width="600"
+			alt="Passkit-generator logo for light mode"
+			src="https://github.com/alexandercerutti/passkit-generator/raw/master/assets/logo-light.svg?sanitize=true"
+		>
+	</picture>
 	<img width="600" src="https://github.com/alexandercerutti/passkit-generator/raw/master/assets/logo-light.svg?sanitize=true" alt="Node Passkit Generator logo">
 	<br>
 	<br>

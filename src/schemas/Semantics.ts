@@ -176,7 +176,7 @@ export interface Semantics {
 	venuePhoneNumber?: string;
 	venueRoom?: string;
 
-	wifiAccess?: SemanticTagType.WifiNetwork;
+	wifiAccess?: SemanticTagType.WifiNetwork[];
 }
 
 export const Semantics = Joi.object<Semantics>().keys({

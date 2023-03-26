@@ -1,6 +1,7 @@
 import { PKPass } from "../lib";
 import FieldsArray from "../lib/FieldsArray";
 import * as Messages from "../lib/messages";
+import * as Schemas from "../lib/schemas";
 
 describe("FieldsArray", () => {
 	let fa: FieldsArray;
@@ -17,6 +18,7 @@ describe("FieldsArray", () => {
 				},
 			} as PKPass /** Fake pass. This is okay for testing */,
 			pool,
+			Schemas.Field,
 		);
 	});
 

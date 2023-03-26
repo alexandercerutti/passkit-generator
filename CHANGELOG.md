@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.8 - 26 Mar 2023
+
+    Fixed Typescript type for Semantics.WifiAccess (PR#136)
+
 ## 3.1.7 - 14 Nov 2022
 
     Fixed generation of EventTicket with row fields (PR #118)

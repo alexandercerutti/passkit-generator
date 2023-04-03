@@ -1,26 +1,26 @@
 import Joi from "joi";
 import { Semantics } from "./Semantics";
 
-export type FieldDataDetectorType =
+export type PKDataDetectorType =
 	| "PKDataDetectorTypePhoneNumber"
 	| "PKDataDetectorTypeLink"
 	| "PKDataDetectorTypeAddress"
 	| "PKDataDetectorTypeCalendarEvent";
 
-export type FieldTextAlignment =
+export type PKTextAlignmentType =
 	| "PKTextAlignmentLeft"
 	| "PKTextAlignmentCenter"
 	| "PKTextAlignmentRight"
 	| "PKTextAlignmentNatural";
 
-export type FieldDateStyle =
+export type PKDateStyleType =
 	| "PKDateStyleNone"
 	| "PKDateStyleShort"
 	| "PKDateStyleMedium"
 	| "PKDateStyleLong"
 	| "PKDateStyleFull";
 
-export type FieldNumberStyle =
+export type PKNumberStyleType =
 	| "PKNumberStyleDecimal"
 	| "PKNumberStylePercent"
 	| "PKNumberStyleScientific"
@@ -33,18 +33,18 @@ export type FieldNumberStyle =
 export interface Field {
 	attributedValue?: string | number | Date;
 	changeMessage?: string;
-	dataDetectorTypes?: FieldDataDetectorType[];
+	dataDetectorTypes?: PKDataDetectorType[];
 	label?: string;
-	textAlignment?: FieldTextAlignment;
+	textAlignment?: PKTextAlignmentType;
 	key: string;
 	value: string | number | Date;
 	semantics?: Semantics;
-	dateStyle?: FieldDateStyle;
+	dateStyle?: PKDateStyleType;
 	ignoresTimeZone?: boolean;
 	isRelative?: boolean;
 	timeStyle?: string;
 	currencyCode?: string;
-	numberStyle?: FieldNumberStyle;
+	numberStyle?: PKNumberStyleType;
 }
 
 export interface FieldWithRow extends Field {

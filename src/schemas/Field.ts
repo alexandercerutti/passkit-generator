@@ -1,6 +1,31 @@
 import Joi from "joi";
 import { Semantics } from "./Semantics";
 
+export type FieldDataDetectorType =
+	| "PKDataDetectorTypePhoneNumber"
+	| "PKDataDetectorTypeLink"
+	| "PKDataDetectorTypeAddress"
+	| "PKDataDetectorTypeCalendarEvent";
+
+export type FieldTextAlignment =
+	| "PKTextAlignmentLeft"
+	| "PKTextAlignmentCenter"
+	| "PKTextAlignmentRight"
+	| "PKTextAlignmentNatural";
+
+export type FieldDateStyle =
+	| "PKDateStyleNone"
+	| "PKDateStyleShort"
+	| "PKDateStyleMedium"
+	| "PKDateStyleLong"
+	| "PKDateStyleFull";
+
+export type FieldNumberStyle =
+	| "PKNumberStyleDecimal"
+	| "PKNumberStylePercent"
+	| "PKNumberStyleScientific"
+	| "PKNumberStyleSpellOut";
+
 /**
  * @see https://developer.apple.com/documentation/walletpasses/passfieldcontent
  */
@@ -8,18 +33,18 @@ import { Semantics } from "./Semantics";
 export interface Field {
 	attributedValue?: string | number | Date;
 	changeMessage?: string;
-	dataDetectorTypes?: string[];
+	dataDetectorTypes?: FieldDataDetectorType[];
 	label?: string;
-	textAlignment?: string;
+	textAlignment?: FieldTextAlignment;
 	key: string;
 	value: string | number | Date;
 	semantics?: Semantics;
-	dateStyle?: string;
+	dateStyle?: FieldDateStyle;
 	ignoresTimeZone?: boolean;
 	isRelative?: boolean;
 	timeStyle?: string;
 	currencyCode?: string;
-	numberStyle?: string;
+	numberStyle?: FieldNumberStyle;
 }
 
 export interface FieldWithRow extends Field {

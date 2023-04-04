@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.9 - 03 Apr 2023
+
+    Fixed transitType which wasn't being imported when a boardingPass was getting read (PR#138)
+    Improved types for property in Field type (PR#139)
+
 ## 3.1.8 - 26 Mar 2023
 
     Fixed Typescript type for Semantics.WifiAccess (PR#136)

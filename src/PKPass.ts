@@ -556,6 +556,7 @@ export default class PKPass extends Bundle {
 				secondaryFields = [],
 				auxiliaryFields = [],
 				backFields = [],
+				transitType,
 			} = data[type] || {};
 
 			this.headerFields.push(...headerFields);
@@ -563,6 +564,10 @@ export default class PKPass extends Bundle {
 			this.secondaryFields.push(...secondaryFields);
 			this.auxiliaryFields.push(...auxiliaryFields);
 			this.backFields.push(...backFields);
+
+			if (this.type === "boardingPass") {
+				this.transitType = transitType;
+			}
 		}
 	}
 

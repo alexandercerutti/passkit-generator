@@ -1,5 +1,4 @@
 // @ts-check
-/// <reference types="@jest/globals" />
 
 const {
 	describe,
@@ -7,6 +6,7 @@ const {
 	beforeEach,
 	it,
 	afterEach,
+	jest,
 } = require("@jest/globals");
 
 const fs = require("node:fs/promises");

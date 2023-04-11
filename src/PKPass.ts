@@ -10,14 +10,13 @@ import * as Strings from "./StringsUtils";
 import * as Utils from "./utils";
 import * as Messages from "./messages";
 
-/** Exporting for tests specs */
-export const propsSymbol = Symbol("props");
-export const localizationSymbol = Symbol("pass.l10n");
-export const importMetadataSymbol = Symbol("import.pass.metadata");
-export const createManifestSymbol = Symbol("pass.manifest");
-export const closePassSymbol = Symbol("pass.close");
-export const passTypeSymbol = Symbol("pass.type");
-export const certificatesSymbol = Symbol("pass.certificates");
+const propsSymbol = Symbol("props");
+const localizationSymbol = Symbol("pass.l10n");
+const importMetadataSymbol = Symbol("import.pass.metadata");
+const createManifestSymbol = Symbol("pass.manifest");
+const closePassSymbol = Symbol("pass.close");
+const passTypeSymbol = Symbol("pass.type");
+const certificatesSymbol = Symbol("pass.certificates");
 
 const RegExps = {
 	PASS_JSON: /pass\.json/,
@@ -597,9 +596,7 @@ export default class PKPass extends Bundle {
 	 * signature files
 	 */
 
-	private [closePassSymbol](
-		__test_disable_manifest_signature_generation__: boolean = false,
-	) {
+	private [closePassSymbol]() {
 		if (!this.type) {
 			throw new TypeError(Messages.CLOSE.MISSING_TYPE);
 		}
@@ -672,10 +669,6 @@ export default class PKPass extends Bundle {
 		// ****************************** //
 		// *** SIGNATURE AND MANIFEST *** //
 		// ****************************** //
-
-		if (__test_disable_manifest_signature_generation__) {
-			return;
-		}
 
 		const manifestBuffer = this[createManifestSymbol]();
 		super.addBuffer("manifest.json", manifestBuffer);

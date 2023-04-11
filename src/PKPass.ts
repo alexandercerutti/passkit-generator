@@ -899,10 +899,10 @@ export default class PKPass extends Bundle {
 	 * Allows setting a relevant date in which the OS
 	 * should show this pass.
 	 *
-	 * @param date
+	 * @param {Date | null} date
 	 */
 
-	public setRelevantDate(date: Date): void {
+	public setRelevantDate(date: Date | null): void {
 		Utils.assertUnfrozen(this);
 
 		if (date === null) {

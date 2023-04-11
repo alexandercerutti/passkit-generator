@@ -88,6 +88,21 @@ export default class Bundle {
 	}
 
 	/**
+	 * Returns a copy of the current list of buffers
+	 * that have been added to the class.
+	 *
+	 * It does not include translation files, manifest
+	 * and signature.
+	 *
+	 * Final files list might differ due to export
+	 * conditions.
+	 */
+
+	public get files() {
+		return Object.keys(this[filesSymbol]);
+	}
+
+	/**
 	 * Allows files to be added to the bundle.
 	 * If the bundle is closed, it will throw an error.
 	 *

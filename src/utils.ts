@@ -109,7 +109,9 @@ export function cloneRecursive<T extends Object>(object: T) {
 	return objectCopy;
 }
 
-export function assertUnfrozen(instance: InstanceType<typeof Bundle>) {
+export function assertUnfrozen(
+	instance: InstanceType<typeof Bundle>,
+): asserts instance is Bundle & { isFrozen: false } {
 	if (instance.isFrozen) {
 		throw new Error(Messages.BUNDLE.CLOSED);
 	}

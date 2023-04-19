@@ -50,28 +50,50 @@ export default async function getModelFolderContents(
 			.reduce((acc, current) => ({ ...acc, ...current }), {});
 
 		return modelRecords;
-	} catch (_err) {
-		const err = _err as NodeJS.ErrnoException;
+	} catch (err) {
+		if (!isErrorErrNoException(err) || !isMissingFileError(err)) {
+			throw err;
+		}
 
-		if (err?.code === "ENOENT") {
-			if (err.syscall === "open") {
-				// file opening failed
-				throw new Error(
-					Messages.format(
-						Messages.MODELS.FILE_NO_OPEN,
-						JSON.stringify(err),
-					),
-				);
-			} else if (err.syscall === "scandir") {
-				// directory reading failed
-				throw new Error(
-					Messages.format(Messages.MODELS.DIR_NOT_FOUND, err.path),
-				);
-			}
+		if (isFileReadingFailure(err)) {
+			throw new Error(
+				Messages.format(
+					Messages.MODELS.FILE_NO_OPEN,
+					JSON.stringify(err),
+				),
+			);
+		}
+
+		if (isDirectoryReadingFailure(err)) {
+			throw new Error(
+				Messages.format(Messages.MODELS.DIR_NOT_FOUND, err.path),
+			);
 		}
 
 		throw err;
 	}
+}
+
+function isErrorErrNoException(err: unknown): err is NodeJS.ErrnoException {
+	return Object.prototype.hasOwnProperty.call(err, "errno");
+}
+
+function isMissingFileError(
+	err: unknown,
+): err is NodeJS.ErrnoException & { code: "ENOENT" } {
+	return (err as NodeJS.ErrnoException).code === "ENOENT";
+}
+
+function isDirectoryReadingFailure(
+	err: NodeJS.ErrnoException,
+): err is NodeJS.ErrnoException & { syscall: "scandir" } {
+	return err.syscall === "scandir";
+}
+
+function isFileReadingFailure(
+	err: NodeJS.ErrnoException,
+): err is NodeJS.ErrnoException & { syscall: "open" } {
+	return err.syscall === "open";
 }
 
 /**

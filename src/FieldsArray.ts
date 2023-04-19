@@ -92,7 +92,11 @@ function registerWithValidation(
 			instance[sharedKeysPoolSymbol].add(field.key);
 			validItems.push(field);
 		} catch (err) {
-			console.warn(err.message ? err.message : err);
+			if (err instanceof Error) {
+				console.warn(err.message ? err.message : err);
+			} else {
+				console.warn(err);
+			}
 		}
 	}
 

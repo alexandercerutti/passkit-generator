@@ -388,6 +388,10 @@ describe("PKPass", () => {
 		expect(backFields.length).toBe(0);
 	});
 
+	it("should export a buffer when getAsBuffer is used", () => {
+		expect(pkpass.getAsBuffer()).toBeInstanceOf(Buffer);
+	});
+
 	describe("pkpass should get frozen once an export is done", () => {
 		it("getAsRaw", () => {
 			pkpass.getAsRaw();

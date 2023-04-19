@@ -19,37 +19,24 @@ export default async function getModelFolderContents(
 		const modelPath = `${model}${(!path.extname(model) && ".pass") || ""}`;
 		const modelFilesList = await fs.readdir(modelPath);
 
-		// No dot-starting files, manifest and signature
-		const filteredModelRecords = Utils.removeHidden(modelFilesList).filter(
+		// No dot-starting files, manifest and signature and only files with an extension
+		const modelSuitableRootPaths = Utils.removeHidden(
+			modelFilesList,
+		).filter(
 			(f) =>
 				!/(manifest|signature)/i.test(f) &&
 				/.+$/.test(path.parse(f).ext),
 		);
 
-		const modelRecords = (
-			await Promise.all(
-				/**
-				 * Obtaining flattened array of buffer records
-				 * containing file name and the buffer itself.
-				 *
-				 * This goes also to read every nested l10n
-				 * subfolder.
-				 */
+		const modelRecords = await Promise.all(
+			modelSuitableRootPaths.map((fileOrDirectoryPath) =>
+				readFileOrDirectory(
+					path.resolve(modelPath, fileOrDirectoryPath),
+				),
+			),
+		);
 
-				filteredModelRecords.map((fileOrDirectoryPath) => {
-					const fullPath = path.resolve(
-						modelPath,
-						fileOrDirectoryPath,
-					);
-
-					return readFileOrDirectory(fullPath);
-				}),
-			)
-		)
-			.flat(1)
-			.reduce((acc, current) => ({ ...acc, ...current }), {});
-
-		return modelRecords;
+		return Object.fromEntries(modelRecords.flat(1));
 	} catch (err) {
 		if (!isErrorErrNoException(err) || !isMissingFileError(err)) {
 			throw err;
@@ -97,61 +84,61 @@ function isFileReadingFailure(
 }
 
 /**
- * Reads sequentially
+ * Allows reading both a whole directory or a set of
+ * file in the same flow
+ *
  * @param filePath
  * @returns
  */
 
-async function readFileOrDirectory(filePath: string) {
-	if ((await fs.lstat(filePath)).isDirectory()) {
-		return Promise.all(await readDirectory(filePath));
+async function readFileOrDirectory(
+	filePath: string,
+): Promise<[key: string, content: Buffer][]> {
+	const stats = await fs.lstat(filePath);
+
+	if (stats.isDirectory()) {
+		return readFilesInDirectory(filePath);
 	} else {
-		return fs
-			.readFile(filePath)
-			.then((content) => getObjectFromModelFile(filePath, content, 1));
+		return getFileContents(filePath).then((result) => [result]);
 	}
 }
 
 /**
- * Returns an object containing the parsed fileName
- * from a path along with its content.
+ * Reads a directory and returns all
+ * the files in it
  *
  * @param filePath
- * @param content
- * @param depthFromEnd - used to preserve localization lproj content
  * @returns
  */
 
-function getObjectFromModelFile(
+async function readFilesInDirectory(
 	filePath: string,
-	content: Buffer,
-	depthFromEnd: number,
-) {
-	const fileComponents = filePath.split(path.sep);
-	const fileName = fileComponents
-		.slice(fileComponents.length - depthFromEnd)
-		.join("/");
+): Promise<Awaited<ReturnType<typeof getFileContents>>[]> {
+	const dirContent = await fs.readdir(filePath).then(Utils.removeHidden);
 
-	return { [fileName]: content };
+	return Promise.all(
+		dirContent
+			.map((fileName) => path.resolve(filePath, fileName))
+			.map((fileName) => getFileContents(fileName, 2)),
+	);
 }
 
 /**
- * Reads a directory and returns all the files in it
- * as an Array<Promise>
- *
  * @param filePath
+ * @param pathSlicesDepthFromEnd used to preserve localization lproj content
  * @returns
  */
 
-async function readDirectory(filePath: string) {
-	const dirContent = await fs.readdir(filePath).then(Utils.removeHidden);
+async function getFileContents(
+	filePath: string,
+	pathSlicesDepthFromEnd: number = 1,
+): Promise<[key: string, content: Buffer]> {
+	const fileComponents = filePath.split(path.sep);
+	const fileName = fileComponents
+		.slice(fileComponents.length - pathSlicesDepthFromEnd)
+		.join("/");
 
-	return dirContent.map(async (fileName) => {
-		const content = await fs.readFile(path.resolve(filePath, fileName));
-		return getObjectFromModelFile(
-			path.resolve(filePath, fileName),
-			content,
-			2,
-		);
-	});
+	const content = await fs.readFile(filePath);
+
+	return [fileName, content];
 }

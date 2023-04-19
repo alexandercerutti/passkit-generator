@@ -388,11 +388,27 @@ describe("PKPass", () => {
 		expect(backFields.length).toBe(0);
 	});
 
-	it("pkpass should get frozen once an export is done", () => {
-		pkpass.getAsRaw();
+	describe("pkpass should get frozen once an export is done", () => {
+		it("getAsRaw", () => {
+			pkpass.getAsRaw();
 
-		/** We might want to test all the methods, but methods might change... so should we? */
-		expect(() => pkpass.localize("en", { a: "b" })).toThrowError();
+			/** We might want to test all the methods, but methods might change... so should we? */
+			expect(() => pkpass.localize("en", { a: "b" })).toThrowError();
+		});
+
+		it("getAsBuffer", () => {
+			pkpass.getAsBuffer();
+
+			/** We might want to test all the methods, but methods might change... so should we? */
+			expect(() => pkpass.localize("en", { a: "b" })).toThrowError();
+		});
+
+		it("getAsStream", () => {
+			pkpass.getAsStream();
+
+			/** We might want to test all the methods, but methods might change... so should we? */
+			expect(() => pkpass.localize("en", { a: "b" })).toThrowError();
+		});
 	});
 
 	describe("localize and languages", () => {

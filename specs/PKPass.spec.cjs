@@ -989,8 +989,6 @@ describe("PKPass", () => {
 
 			const buffers = pkpass.getAsRaw();
 
-			console.log(buffers, modelFiles);
-
 			for (let fileName of Object.keys(buffers)) {
 				/** Skipping generated files */
 				if (
@@ -1004,6 +1002,35 @@ describe("PKPass", () => {
 				expect(modelFiles[fileName]).not.toBeUndefined();
 				expect(modelFiles[fileName]).toEqual(buffers[fileName]);
 			}
+		});
+
+		it("should throw an error if a model folder doesn't exist", () => {
+			expect(() =>
+				PKPass.from({
+					model: path.resolve(
+						__dirname,
+						"this/model/doesnt/exists.pass",
+					),
+				}),
+			).rejects.toBeInstanceOf(Error);
+		});
+
+		it("should enforce .pass model extension", async () => {
+			expect(
+				async () =>
+					await PKPass.from({
+						model: path.resolve(
+							__dirname,
+							"../examples/models/examplePass",
+						),
+						certificates: {
+							signerCert: SIGNER_CERT,
+							signerKey: SIGNER_KEY,
+							signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+							wwdr: WWDR,
+						},
+					}),
+			).not.toThrow();
 		});
 
 		it("should silently filter out manifest and signature files", async () => {

@@ -117,9 +117,9 @@ async function readFilesInDirectory(
 	const dirContent = await fs.readdir(filePath).then(Utils.removeHidden);
 
 	return Promise.all(
-		dirContent
-			.map((fileName) => path.resolve(filePath, fileName))
-			.map((fileName) => getFileContents(fileName, 2)),
+		dirContent.map((fileName) =>
+			getFileContents(path.resolve(filePath, fileName), 2),
+		),
 	);
 }
 

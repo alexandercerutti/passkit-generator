@@ -47,7 +47,7 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	static async from<S extends PKPass | Schemas.Template>(
+	public static async from<S extends PKPass | Schemas.Template>(
 		source: S,
 		props?: Schemas.OverridablePassProps,
 	): Promise<PKPass> {
@@ -111,7 +111,7 @@ export default class PKPass extends Bundle {
 	 * @param passes
 	 */
 
-	static pack(...passes: PKPass[]): Bundle {
+	public static pack(...passes: PKPass[]): Bundle {
 		const [bundle, freezeBundle] = Bundle.freezable(
 			"application/vnd.apple.pkpasses",
 		);
@@ -135,7 +135,7 @@ export default class PKPass extends Bundle {
 	// *** INSTANCE *** //
 	// **************** //
 
-	constructor(
+	public constructor(
 		buffers?: Schemas.FileBuffers,
 		certificates?: Schemas.CertificatesSchema,
 		props?: Schemas.OverridablePassProps,

@@ -7,7 +7,7 @@
 		"build": "npm run build:src",
 		"build:all": "npm run build:src && npm run build:examples",
 		"build:src": "rimraf lib && npx tsc -p tsconfig.dist.json",
-		"prepublishOnly": "npm run build",
+		"prepublishOnly": "npm run build && npm run test",
 		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" jest -c jest.config.cjs --silent"
 	},
 	"author": "Alexander Patrick Cerutti",

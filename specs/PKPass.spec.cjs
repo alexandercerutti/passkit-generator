@@ -10,6 +10,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { default: PKPass } = require("../lib/PKPass");
 
+/**
+ * SIGNER_CERT, SIGNER_KEY, WWDR and SIGNER_KEY_PASSPHRASE are also set
+ * as secrets in Github for run tests on Github Actions
+ */
+
 const SIGNER_CERT =
 	process.env.SIGNER_CERT ||
 	fs.readFileSync(path.resolve(__dirname, "../certificates/signerCert.pem"));

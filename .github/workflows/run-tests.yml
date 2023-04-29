@@ -1,0 +1,45 @@
+on:
+    push:
+        branches:
+            - master
+
+    pull_request:
+        types: [opened, edited]
+        branches:
+            - master
+
+    workflow_dispatch:
+
+jobs:
+    test-on-ubuntu:
+        name: Testing Workflow Linux
+        runs-on: ubuntu-latest
+        env:
+            SIGNER_CERT: ${{ secrets.SIGNER_CERT }}
+            SIGNER_KEY: ${{ secrets.SIGNER_KEY }}
+            WWDR: ${{ secrets.WWDR }}
+            SIGNER_KEY_PASSPHRASE: ${{ secrets.SIGNER_KEY_PASSPHRASE }}
+        steps:
+            - uses: actions/checkout@v3
+              - uses: actions/setup-node@v3
+                with:
+                    node-version: "14.x"
+                    check-latest: true
+            - run: |
+                  npm install
+                  npm run build
+                  npm run test
+
+    test-on-windows:
+        name: Testing Workflow Windows
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: "14.x"
+                  check-latest: true
+            - run: |
+                  npm install
+                  npm run build
+                  npm run test

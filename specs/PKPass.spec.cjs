@@ -291,6 +291,45 @@ describe("PKPass", () => {
 		});
 	});
 
+	it("should maintain fields addition order", () => {
+		/** Resetting fields */
+		pkpass.type = "eventTicket";
+
+		pkpass.primaryFields.push(
+			{
+				key: "testField-pf0",
+				value: "test",
+			},
+			{
+				key: "testField-pf1",
+				value: "test",
+			},
+			{
+				key: "testField-pf2",
+				value: "test",
+			},
+		);
+
+		const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+		const { primaryFields } = passjsonGenerated.eventTicket;
+
+		expect(primaryFields[0]).toEqual({
+			key: "testField-pf0",
+			value: "test",
+		});
+
+		expect(primaryFields[1]).toEqual({
+			key: "testField-pf1",
+			value: "test",
+		});
+
+		expect(primaryFields[2]).toEqual({
+			key: "testField-pf2",
+			value: "test",
+		});
+	});
+
 	it("should omit fields with the same keys in final pass.json", () => {
 		/** Resetting fields */
 		pkpass.type = "eventTicket";

@@ -149,7 +149,7 @@ export async function pkpasses(event: ALBEvent) {
 	return {
 		statusCode: 302,
 		headers: {
-			"Content-Type": "application/vnd.apple.pkpass",
+			"Content-Type": pkpasses.mimeType,
 			Location,
 		},
 	};

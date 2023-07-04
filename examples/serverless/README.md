@@ -49,11 +49,11 @@ Serverless will start, by default, on `0.0.0.0:8080`.
 All the examples, except fields ones, require a `modelName` to be passed in queryString. The name will be checked against local FS or S3 bucket if example is deployed.
 Pass in queryString all the pass props you want to apply them to the final result.
 
-| Example name   | Endpoint name     | Additional notes                                                                                      |
-| -------------- | ----------------- | ----------------------------------------------------------------------------------------------------- |
-| localize       | `/localize`       | -                                                                                                     |
-| fields         | `/fields`         | -                                                                                                     |
-| expirationDate | `/expirationDate` | -                                                                                                     |
-| scratch        | `/scratch`        | -                                                                                                     |
-| barcodes       | `/barcodes`       | Using `?alt=true` query parameter, will lead to barcode string message usage instead of selected ones |
-| pkpasses       | `/pkpasses`       | -                                                                                                     |
+| Example name   | Endpoint name     | Additional notes                                                                                                                  |
+| -------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| localize       | `/localize`       | -                                                                                                                                 |
+| fields         | `/fields`         | -                                                                                                                                 |
+| expirationDate | `/expirationDate` | -                                                                                                                                 |
+| scratch        | `/scratch`        | -                                                                                                                                 |
+| barcodes       | `/barcodes`       | Using `?alt=true` query parameter, will lead to barcode string message usage instead of selected ones                             |
+| pkpasses       | `/pkpasses`       | This example shows how to upload the pkpasses file on S3, even if it is discouraged. It has been done just to share the knowledge |

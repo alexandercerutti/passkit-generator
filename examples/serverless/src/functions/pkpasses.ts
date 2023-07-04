@@ -120,6 +120,11 @@ export async function pkpasses(event: ALBEvent) {
 
 	const pkpasses = PKPass.pack(...passes);
 
+	/**
+	 * Although the other passes are served as files, in this example
+	 * we are uploading on s3 (local) just see how it works.
+	 */
+
 	const buffer = pkpasses.getAsBuffer();
 	const passName = `GeneratedPass-${Math.random()}.pkpasses`;
 
@@ -136,7 +141,7 @@ export async function pkpasses(event: ALBEvent) {
 
 	/**
 	 * Please note that redirection to `Location` does not work
-	 * if you open this code in another device if this is run
+	 * if you open this code in another device if this is is running
 	 * offline. This because `Location` is on localhost. Didn't
 	 * find yet a way to solve this.
 	 */
@@ -145,7 +150,7 @@ export async function pkpasses(event: ALBEvent) {
 		statusCode: 302,
 		headers: {
 			"Content-Type": "application/vnd.apple.pkpass",
-			Location: Location,
+			Location,
 		},
 	};
 }

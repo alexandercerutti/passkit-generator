@@ -148,7 +148,9 @@ export async function* createPassGenerator(
 	passOptions?: Object,
 ): AsyncGenerator<PKPass, ALBResult, PKPass> {
 	const [template, certificates, s3] = await Promise.all([
-		modelName ? getModel(modelName) : Promise.resolve({}),
+		modelName
+			? getModel(modelName)
+			: Promise.resolve({} as ReturnType<typeof getModel>),
 		getCertificates(),
 		getS3Instance(),
 	]);
@@ -175,18 +177,6 @@ export async function* createPassGenerator(
 	pass = yield pass;
 
 	const buffer = pass.getAsBuffer();
-	const passName = `GeneratedPass-${Math.random()}.pkpass`;
-
-	const { Location } = await s3
-		.upload({
-			Bucket: config.PASSES_S3_TEMP_BUCKET,
-			Key: passName,
-			ContentType: pass.mimeType,
-			/** Marking it as expiring in 5 minutes, because passes should not be stored */
-			Expires: new Date(Date.now() + 5 * 60 * 1000),
-			Body: buffer,
-		})
-		.promise();
 
 	/**
 	 * Please note that redirection to `Location` does not work
@@ -196,10 +186,18 @@ export async function* createPassGenerator(
 	 */
 
 	return {
-		statusCode: 302,
+		statusCode: 200,
 		headers: {
-			"Content-Type": "application/vnd.apple.pkpass",
-			Location: Location,
+			"Content-Type": pass.mimeType,
 		},
+		/**
+		 * It is required for the file to be served
+		 * as base64, so it won't be altered in AWS.
+		 *
+		 * @see https://aws.amazon.com/it/blogs/compute/handling-binary-data-using-amazon-api-gateway-http-apis/
+		 * "For the response path, API Gateway inspects the isBase64Encoding flag returned from Lambda."
+		 */
+		body: buffer.toString("base64"),
+		isBase64Encoded: true,
 	};
 }

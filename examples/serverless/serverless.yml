@@ -1,5 +1,5 @@
 service: passkit-generator-test-lambda
-frameworkVersion: "2"
+frameworkVersion: "3"
 
 plugins:
     - serverless-offline

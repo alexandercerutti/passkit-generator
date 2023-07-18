@@ -6,7 +6,11 @@
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "service:link-pg": "cd ../.. && npm run build && npm link",
+    "preinstall": "npm run clear:deps",
+    "postinstall": "npm run service:link-pg && npm link passkit-generator",
+    "clear:deps": "rm -rf node_modules"
   },
   "engines": {
     "node": "16"
@@ -18,9 +22,11 @@
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.18.0",
     "os": "^0.1.2",
-    "passkit-generator": "^3.1.7",
     "path": "^0.12.7"
   },
+  "peerDependencies": {
+		"passkit-generator": "latest"
+	},
   "devDependencies": {
     "firebase-functions-test": "^0.2.0"
   },

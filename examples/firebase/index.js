@@ -26,8 +26,6 @@ exports.pass = functions.https.onRequest((request, response) => {
         }, 
     },
         {
-            authenticationToken: "AUTH_TOKEN",
-            webServiceURL: "https://us-central1-YOUR-FUNCTION.cloudfunctions.net/FUNCTION_NAME",
             serialNumber: request.body.serialNumber,
             description: "DESCRIPTION",
             logoText: request.body.logoText,
@@ -119,13 +117,13 @@ exports.pass = functions.https.onRequest((request, response) => {
                 try {
                     await storageRef.file(`thumbnails/${thumbnailFile}`).download({destination: tempPath1})
                 } catch (error) {
-                    //
+                    console.error(error)
                 }
                 let buffer = Buffer.alloc(0);
                 try {
                     buffer = fs.readFileSync(tempPath1)
                 } catch (error) {
-                    //
+                    console.error(error)
                 }
                 newPass.addBuffer("thumbnail.png", buffer)
                 newPass.addBuffer("thumbnail@2x.png", buffer)
@@ -136,13 +134,13 @@ exports.pass = functions.https.onRequest((request, response) => {
             try {
                 await storageRef.file(`logos/${logoFile}`).download({destination: tempPath2})
             } catch (error) {
-                //
+                console.error(error)
             }
             let buffer = Buffer.alloc(0);
             try {
                 buffer = fs.readFileSync(tempPath2)
             } catch (error) {
-                //
+                console.error(error)
             }
             newPass.addBuffer("logo.png", buffer)
             newPass.addBuffer("logo@2x.png", buffer)
@@ -157,15 +155,15 @@ exports.pass = functions.https.onRequest((request, response) => {
                 // Delete thumbnail file in Firebase Storage
                 storageRef.file(`thumbnails/${thumbnailFile}`).delete().then(() => {
                     console.log('Thumbnail file deleted successfully');
-                }).catch((err) => {
-                    console.error(err);
+                }).catch((error) => {
+                    console.error(error);
                 })
 
                 // Delete logo file in Firebase Storage
                 storageRef.file(`logos/${logoFile}`).delete().then(() => {
                     console.log('Logo file deleted successfully');
-                }).catch((err) => {
-                    console.error(err);
+                }).catch((error) => {
+                    console.error(error);
                 })
 
             } catch (error) {

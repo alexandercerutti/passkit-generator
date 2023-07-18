@@ -1,0 +1,28 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "16"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.2.6",
+    "file-system": "^2.2.2",
+    "firebase-admin": "^10.0.2",
+    "firebase-functions": "^3.18.0",
+    "os": "^0.1.2",
+    "passkit-generator": "^3.1.7",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}

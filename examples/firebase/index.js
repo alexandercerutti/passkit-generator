@@ -61,58 +61,78 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 		});
 	}
 
-	request.body.header.forEach((field, index) => {
-		if (field.label !== "" || field.value !== "") {
-			newPass.headerFields.push({
-				key: `header${index}`,
-				label: field.label,
-				value: field.value,
-			});
-		}
-	});
+	for (let i = 0; i < request.body.header.length; i++) {
+		const field = request.body.header[i];
 
-	request.body.primary.forEach((field, index) => {
-		if (field.label !== "" || field.value !== "") {
-			newPass.primaryFields.push({
-				key: `primary${index}`,
-				label: field.label,
-				value:
-					currentPassType == "boardingPass"
-						? field.value.toUpperCase()
-						: field.value,
-			});
+		if (!(field.label && field.value)) {
+			continue;
 		}
-	});
 
-	request.body.secondary.forEach((field, index) => {
-		if (field.label !== "" || field.value !== "") {
-			newPass.secondaryFields.push({
-				key: `secondary${index}`,
-				label: field.label,
-				value: field.value,
-				textAlignment:
-					index === request.body.secondary.length - 2 ||
-					index === request.body.secondary.length - 1
-						? "PKTextAlignmentRight"
-						: "PKTextAlignmentLeft",
-			});
-		}
-	});
+		newPass.headerFields.push({
+			key: `header${i}`,
+			label: field.label,
+			value: field.value,
+		});
+	}
 
-	request.body.auxiliary.forEach((field, index) => {
-		if (field.label !== "" || field.value !== "") {
-			newPass.auxiliaryFields.push({
-				key: `auxiliary${index}`,
-				label: field.label,
-				value: field.value,
-				textAlignment:
-					index === request.body.secondary.length - 2 ||
-					index === request.body.secondary.length - 1
-						? "PKTextAlignmentRight"
-						: "PKTextAlignmentLeft",
-			});
+	for (let i = 0; i < request.body.primary.length; i++) {
+		const field = request.body.primary[i];
+
+		if (!(field.label && field.value)) {
+			continue;
 		}
-	});
+
+		newPass.primaryFields.push({
+			key: `primary${i}`,
+			label: field.label,
+			value:
+				currentPassType == "boardingPass"
+					? field.value.toUpperCase()
+					: field.value,
+		});
+	}
+
+	for (let i = 0; i < request.body.secondary.length; i++) {
+		const field = request.body.secondary[i];
+
+		if (!(field.label && field.value)) {
+			continue;
+		}
+
+		const isElementInLastTwoPositions =
+			index === request.body.secondary.length - 2 ||
+			index === request.body.secondary.length - 1;
+
+		newPass.secondaryFields.push({
+			key: `secondary${i}`,
+			label: field.label,
+			value: field.value,
+			textAlignment: isElementInLastTwoPositions
+				? "PKTextAlignmentRight"
+				: "PKTextAlignmentLeft",
+		});
+	}
+
+	for (let i = 0; i < request.body.auxiliary.length; i++) {
+		const field = request.body.auxiliary[i];
+
+		if (!(field.label && field.value)) {
+			continue;
+		}
+
+		const isElementInLastTwoPositions =
+			index === request.body.auxiliary.length - 2 ||
+			index === request.body.auxiliary.length - 1;
+
+		newPass.auxiliaryFields.push({
+			key: `auxiliary${i}`,
+			label: field.label,
+			value: field.value,
+			textAlignment: isElementInLastTwoPositions
+				? "PKTextAlignmentRight"
+				: "PKTextAlignmentLeft",
+		});
+	}
 
 	if (!request.body.codeAlt || request.body.codeAlt.trim() === "") {
 		newPass.setBarcodes({

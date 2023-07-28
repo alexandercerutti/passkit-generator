@@ -1,34 +1,31 @@
 {
-  "name": "functions",
-  "description": "Cloud Functions for Firebase",
-  "scripts": {
-    "serve": "firebase emulators:start --only functions",
-    "shell": "firebase functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log",
-    "service:link-pg": "cd ../.. && npm run build && npm link",
-    "preinstall": "npm run clear:deps",
-    "postinstall": "npm run service:link-pg && npm link passkit-generator",
-    "clear:deps": "rm -rf node_modules"
-  },
-  "engines": {
-    "node": "16"
-  },
-  "main": "index.js",
-  "dependencies": {
-    "axios": "^1.2.6",
-    "file-system": "^2.2.2",
-    "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.18.0",
-    "os": "^0.1.2",
-    "path": "^0.12.7"
-  },
-  "peerDependencies": {
+	"name": "functions",
+	"description": "Cloud Functions for Firebase",
+	"scripts": {
+		"serve": "firebase emulators:start --only functions",
+		"shell": "firebase functions:shell",
+		"start": "npm run shell",
+		"deploy": "firebase deploy --only functions",
+		"logs": "firebase functions:log",
+		"service:link-pg": "cd ../.. && npm run build && npm link",
+		"preinstall": "npm run clear:deps",
+		"postinstall": "npm run service:link-pg && npm link passkit-generator",
+		"clear:deps": "rm -rf node_modules"
+	},
+	"engines": {
+		"node": "16"
+	},
+	"main": "index.js",
+	"dependencies": {
+		"axios": "^1.2.6",
+		"firebase-admin": "^10.3.0",
+		"firebase-functions": "^3.24.1"
+	},
+	"peerDependencies": {
 		"passkit-generator": "latest"
 	},
-  "devDependencies": {
-    "firebase-functions-test": "^0.2.0"
-  },
-  "private": true
+	"devDependencies": {
+		"firebase-functions-test": "^0.2.3"
+	},
+	"private": true
 }

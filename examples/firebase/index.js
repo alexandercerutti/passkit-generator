@@ -1,10 +1,10 @@
 const functions = require("firebase-functions");
-const { PKPass } = require("passkit-generator");
 const admin = require("firebase-admin");
-var fs = require("file-system");
-var path = require("path");
+const { PKPass } = require("passkit-generator");
+var fs = require("node:fs");
+var path = require("node:path");
 var axios = require("axios");
-var os = require("os");
+var os = require("node:os");
 
 // Firebase init
 admin.initializeApp({

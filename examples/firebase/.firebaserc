@@ -1,0 +1,5 @@
+{
+  "projects": {
+    "default": "passkit-generator-cloud-fn"
+  }
+}

@@ -2,11 +2,11 @@
 	"name": "functions",
 	"description": "Cloud Functions for Firebase",
 	"scripts": {
-		"serve": "firebase emulators:start --only functions",
-		"shell": "firebase functions:shell",
+		"serve": "npx firebase emulators:start --only functions",
+		"shell": "npx firebase functions:shell",
 		"start": "npm run shell",
-		"deploy": "firebase deploy --only functions",
-		"logs": "firebase functions:log",
+		"deploy": "npx firebase deploy --only functions",
+		"logs": "npx firebase functions:log",
 		"service:link-pg": "cd ../.. && npm run build && npm link",
 		"preinstall": "npm run clear:deps",
 		"postinstall": "npm run service:link-pg && npm link passkit-generator",
@@ -25,7 +25,8 @@
 		"passkit-generator": "latest"
 	},
 	"devDependencies": {
-		"firebase-functions-test": "^0.2.3"
+		"firebase-functions-test": "^0.2.3",
+		"firebase-tools": "^12.4.6"
 	},
 	"private": true
 }

@@ -228,47 +228,55 @@ export const pass = functions.https.onRequest(
 			});
 		}
 
+		const { thumbnailFile, logoFile } = request.body;
+
 		// Downloading thumbnail and logo files from Firebase Storage and adding to pass
 		if (newPass.type == "generic" || newPass.type == "eventTicket") {
-			const thumbnailFile = request.body.thumbnailFile;
-			const tempPath1 = path.join(os.tmpdir(), thumbnailFile);
+			if (thumbnailFile) {
+				const tempPath1 = path.join(os.tmpdir(), thumbnailFile);
+
+				try {
+					await storageRef
+						.file(`thumbnails/${thumbnailFile}`)
+						.download({ destination: tempPath1 });
+				} catch (error) {
+					console.error(error);
+				}
+
+				let buffer = Buffer.alloc(0);
+
+				try {
+					buffer = fs.readFileSync(tempPath1);
+				} catch (error) {
+					console.error(error);
+				}
+
+				newPass.addBuffer("thumbnail.png", buffer);
+				newPass.addBuffer("thumbnail@2x.png", buffer);
+			}
+		}
+
+		if (logoFile) {
+			const tempPath2 = path.join(os.tmpdir(), logoFile);
 
 			try {
 				await storageRef
-					.file(`thumbnails/${thumbnailFile}`)
-					.download({ destination: tempPath1 });
+					.file(`logos/${logoFile}`)
+					.download({ destination: tempPath2 });
 			} catch (error) {
 				console.error(error);
 			}
+
 			let buffer = Buffer.alloc(0);
 			try {
-				buffer = fs.readFileSync(tempPath1);
+				buffer = fs.readFileSync(tempPath2);
 			} catch (error) {
 				console.error(error);
 			}
-			newPass.addBuffer("thumbnail.png", buffer);
-			newPass.addBuffer("thumbnail@2x.png", buffer);
-		}
 
-		const logoFile = request.body.logoFile;
-		const tempPath2 = path.join(os.tmpdir(), logoFile);
-		try {
-			await storageRef
-				.file(`logos/${logoFile}`)
-				.download({ destination: tempPath2 });
-		} catch (error) {
-			console.error(error);
+			newPass.addBuffer("logo.png", buffer);
+			newPass.addBuffer("logo@2x.png", buffer);
 		}
-
-		let buffer = Buffer.alloc(0);
-		try {
-			buffer = fs.readFileSync(tempPath2);
-		} catch (error) {
-			console.error(error);
-		}
-
-		newPass.addBuffer("logo.png", buffer);
-		newPass.addBuffer("logo@2x.png", buffer);
 
 		const bufferData = newPass.getAsBuffer();
 		try {

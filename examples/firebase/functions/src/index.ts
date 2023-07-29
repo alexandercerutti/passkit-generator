@@ -58,6 +58,14 @@ declare global {
 
 export const pass = functions.https.onRequest(
 	async (request: RequestWithBody, response) => {
+		if (request.headers["content-type"] !== "application/json") {
+			response.status(400);
+			response.send({
+				error: `Payload with content-type ${request.headers["content-type"]} is not supported. Use "application/json"`,
+			});
+			return;
+		}
+
 		if (!request.body.passModel) {
 			response.status(400);
 			response.send({

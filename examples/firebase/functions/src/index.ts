@@ -1,23 +1,18 @@
 import * as functions from "firebase-functions";
-import admin from "firebase-admin";
+import { initializeApp } from "firebase-admin/app";
+import { getStorage } from "firebase-admin/storage";
 import passkit from "passkit-generator";
 import type { Barcode, TransitType } from "passkit-generator";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 
+// Please note this is experimental in NodeJS as
+// it is marked as Stage 3 in TC39
+// Should probably not be used in production
+import startData from "./startData.json" assert { "type": "json" };
+
 const PKPass = passkit.PKPass;
-
-// Firebase init
-admin
-	.initializeApp
-	// {
-	// 	credential: admin.credential.cert(require("CERTIFICATE_PATH")),
-	// 	storageBucket: "STORAGE_BUCKET_URL",
-	// }
-	();
-
-const storageRef = admin.storage().bucket();
 
 interface RequestWithBody extends functions.Request {
 	body: {
@@ -55,6 +50,13 @@ declare global {
 		}
 	}
 }
+
+// Firebase init
+initializeApp({
+	storageBucket: startData.FIREBASE_BUCKET_ADDR,
+});
+
+const storageRef = getStorage().bucket();
 
 export const pass = functions.https.onRequest(
 	async (request: RequestWithBody, response) => {
@@ -283,28 +285,6 @@ export const pass = functions.https.onRequest(
 
 			response.set("Content-Type", newPass.mimeType);
 			response.status(200).send(bufferData);
-
-			// Delete thumbnail file in Firebase Storage
-			storageRef
-				.file(`thumbnails/${request.body.thumbnailFile}`)
-				.delete()
-				.then(() => {
-					console.log("Thumbnail file deleted successfully");
-				})
-				.catch((error) => {
-					console.error(error);
-				});
-
-			// Delete logo file in Firebase Storage
-			storageRef
-				.file(`logos/${logoFile}`)
-				.delete()
-				.then(() => {
-					console.log("Logo file deleted successfully");
-				})
-				.catch((error) => {
-					console.error(error);
-				});
 		} catch (error) {
 			console.log("Error Uploading pass " + error);
 

@@ -24,6 +24,7 @@
 		"noImplicitOverride": true,
 		"noPropertyAccessFromIndexSignature": true,
 		"allowUnusedLabels": false,
-		"allowUnreachableCode": false
+		"allowUnreachableCode": false,
+		"resolveJsonModule": true
 	}
 }

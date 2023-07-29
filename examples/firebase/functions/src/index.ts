@@ -242,20 +242,14 @@ export const pass = functions.https.onRequest(
 						await storageRef
 							.file(`thumbnails/${thumbnailFile}`)
 							.download({ destination: tempPath1 });
+
+						const buffer = fs.readFileSync(tempPath1);
+
+						newPass.addBuffer("thumbnail.png", buffer);
+						newPass.addBuffer("thumbnail@2x.png", buffer);
 					} catch (error) {
 						console.error(error);
 					}
-
-					let buffer = Buffer.alloc(0);
-
-					try {
-						buffer = fs.readFileSync(tempPath1);
-					} catch (error) {
-						console.error(error);
-					}
-
-					newPass.addBuffer("thumbnail.png", buffer);
-					newPass.addBuffer("thumbnail@2x.png", buffer);
 				}
 			}
 
@@ -266,19 +260,14 @@ export const pass = functions.https.onRequest(
 					await storageRef
 						.file(`logos/${logoFile}`)
 						.download({ destination: tempPath2 });
+
+					const buffer = fs.readFileSync(tempPath2);
+
+					newPass.addBuffer("logo.png", buffer);
+					newPass.addBuffer("logo@2x.png", buffer);
 				} catch (error) {
 					console.error(error);
 				}
-
-				let buffer = Buffer.alloc(0);
-				try {
-					buffer = fs.readFileSync(tempPath2);
-				} catch (error) {
-					console.error(error);
-				}
-
-				newPass.addBuffer("logo.png", buffer);
-				newPass.addBuffer("logo@2x.png", buffer);
 			}
 
 			const bufferData = newPass.getAsBuffer();

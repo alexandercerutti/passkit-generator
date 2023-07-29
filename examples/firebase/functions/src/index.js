@@ -101,8 +101,8 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 		}
 
 		const isElementInLastTwoPositions =
-			index === request.body.secondary.length - 2 ||
-			index === request.body.secondary.length - 1;
+			i === request.body.secondary.length - 2 ||
+			i === request.body.secondary.length - 1;
 
 		newPass.secondaryFields.push({
 			key: `secondary${i}`,
@@ -122,8 +122,8 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 		}
 
 		const isElementInLastTwoPositions =
-			index === request.body.auxiliary.length - 2 ||
-			index === request.body.auxiliary.length - 1;
+			i === request.body.auxiliary.length - 2 ||
+			i === request.body.auxiliary.length - 1;
 
 		newPass.auxiliaryFields.push({
 			key: `auxiliary${i}`,

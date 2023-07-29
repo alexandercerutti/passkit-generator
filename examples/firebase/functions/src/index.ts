@@ -27,20 +27,20 @@ interface RequestWithBody extends functions.Request {
 		textColor: string;
 		backgroundColor: string;
 		labelColor: string;
-		relevantDate: string;
-		expiryDate: string;
-		relevantLocationLat: number | "Blank";
-		relevantLocationLong: number | "Blank";
-		header: { value: string; label: string }[];
-		primary: { value: string; label: string }[];
-		secondary: { value: string; label: string }[];
-		auxiliary: { value: string; label: string }[];
-		codeAlt: string;
-		qrText: string;
-		transitType: TransitType;
-		codeType: Barcode["format"];
-		thumbnailFile: string;
-		logoFile: string;
+		relevantDate?: string;
+		expiryDate?: string;
+		relevantLocationLat?: number;
+		relevantLocationLong?: number;
+		header?: { value: string; label: string }[];
+		primary?: { value: string; label: string }[];
+		secondary?: { value: string; label: string }[];
+		auxiliary?: { value: string; label: string }[];
+		codeAlt?: string;
+		qrText?: string;
+		transitType?: TransitType;
+		codeType?: Barcode["format"];
+		thumbnailFile?: string;
+		logoFile?: string;
 	};
 }
 
@@ -84,8 +84,11 @@ export const pass = functions.https.onRequest(
 
 		const newPass = await PKPass.from(
 			{
-				// Get relevant pass model from model folder (see passkit-generator/examples/models/)
-				model: `./model/${request.body.passModel}.pass`,
+				/**
+				 * Get relevant pass model from model folder (see passkit-generator/examples/models/)
+				 * Path seems to get read like the function is in "firebase/" folder and not in "firebase/functions/"
+				 */
+				model: `../../models/${request.body.passModel}.pass`,
 				certificates: {
 					// Assigning certificates from certs folder (you will need to provide these yourself)
 					wwdr: process.env.WWDR,
@@ -105,20 +108,29 @@ export const pass = functions.https.onRequest(
 		);
 
 		if (newPass.type == "boardingPass") {
+			if (!request.body.transitType) {
+				response.status(400);
+				response.send({
+					error: "transitType is required",
+				});
+
+				return;
+			}
+
 			newPass.transitType = request.body.transitType;
 		}
 
-		if (request.body.relevantDate !== "Blank") {
+		if (typeof request.body.relevantDate === "string") {
 			newPass.setRelevantDate(new Date(request.body.relevantDate));
 		}
 
-		if (request.body.expiryDate !== "Blank") {
+		if (typeof request.body.expiryDate === "string") {
 			newPass.setExpirationDate(new Date(request.body.expiryDate));
 		}
 
 		if (
-			request.body.relevantLocationLat !== "Blank" &&
-			request.body.relevantLocationLong !== "Blank"
+			request.body.relevantLocationLat &&
+			request.body.relevantLocationLong
 		) {
 			newPass.setLocations({
 				latitude: request.body.relevantLocationLat,
@@ -126,91 +138,93 @@ export const pass = functions.https.onRequest(
 			});
 		}
 
-		for (let i = 0; i < request.body.header.length; i++) {
-			const field = request.body.header[i];
+		if (Array.isArray(request.body.header)) {
+			for (let i = 0; i < request.body.header.length; i++) {
+				const field = request.body.header[i];
 
-			if (!(field?.label && field.value)) {
-				continue;
+				if (!(field?.label && field.value)) {
+					continue;
+				}
+
+				newPass.headerFields.push({
+					key: `header${i}`,
+					label: field.label,
+					value: field.value,
+				});
 			}
-
-			newPass.headerFields.push({
-				key: `header${i}`,
-				label: field.label,
-				value: field.value,
-			});
 		}
 
-		for (let i = 0; i < request.body.primary.length; i++) {
-			const field = request.body.primary[i];
+		if (Array.isArray(request.body.primary)) {
+			for (let i = 0; i < request.body.primary.length; i++) {
+				const field = request.body.primary[i];
 
-			if (!(field?.label && field.value)) {
-				continue;
+				if (!(field?.label && field.value)) {
+					continue;
+				}
+
+				newPass.primaryFields.push({
+					key: `primary${i}`,
+					label: field.label,
+					value:
+						newPass.type == "boardingPass"
+							? field.value.toUpperCase()
+							: field.value,
+				});
 			}
-
-			newPass.primaryFields.push({
-				key: `primary${i}`,
-				label: field.label,
-				value:
-					newPass.type == "boardingPass"
-						? field.value.toUpperCase()
-						: field.value,
-			});
 		}
 
-		for (let i = 0; i < request.body.secondary.length; i++) {
-			const field = request.body.secondary[i];
+		if (Array.isArray(request.body.secondary)) {
+			for (let i = 0; i < request.body.secondary.length; i++) {
+				const field = request.body.secondary[i];
 
-			if (!(field?.label && field.value)) {
-				continue;
+				if (!(field?.label && field.value)) {
+					continue;
+				}
+
+				const isElementInLastTwoPositions =
+					i === request.body.secondary.length - 2 ||
+					i === request.body.secondary.length - 1;
+
+				newPass.secondaryFields.push({
+					key: `secondary${i}`,
+					label: field.label,
+					value: field.value,
+					textAlignment: isElementInLastTwoPositions
+						? "PKTextAlignmentRight"
+						: "PKTextAlignmentLeft",
+				});
 			}
-
-			const isElementInLastTwoPositions =
-				i === request.body.secondary.length - 2 ||
-				i === request.body.secondary.length - 1;
-
-			newPass.secondaryFields.push({
-				key: `secondary${i}`,
-				label: field.label,
-				value: field.value,
-				textAlignment: isElementInLastTwoPositions
-					? "PKTextAlignmentRight"
-					: "PKTextAlignmentLeft",
-			});
 		}
 
-		for (let i = 0; i < request.body.auxiliary.length; i++) {
-			const field = request.body.auxiliary[i];
+		if (Array.isArray(request.body.auxiliary)) {
+			for (let i = 0; i < request.body.auxiliary.length; i++) {
+				const field = request.body.auxiliary[i];
 
-			if (!(field?.label && field.value)) {
-				continue;
+				if (!(field?.label && field.value)) {
+					continue;
+				}
+
+				const isElementInLastTwoPositions =
+					i === request.body.auxiliary.length - 2 ||
+					i === request.body.auxiliary.length - 1;
+
+				newPass.auxiliaryFields.push({
+					key: `auxiliary${i}`,
+					label: field.label,
+					value: field.value,
+					textAlignment: isElementInLastTwoPositions
+						? "PKTextAlignmentRight"
+						: "PKTextAlignmentLeft",
+				});
 			}
-
-			const isElementInLastTwoPositions =
-				i === request.body.auxiliary.length - 2 ||
-				i === request.body.auxiliary.length - 1;
-
-			newPass.auxiliaryFields.push({
-				key: `auxiliary${i}`,
-				label: field.label,
-				value: field.value,
-				textAlignment: isElementInLastTwoPositions
-					? "PKTextAlignmentRight"
-					: "PKTextAlignmentLeft",
-			});
 		}
 
-		if (!request.body.codeAlt || request.body.codeAlt.trim() === "") {
+		if (request.body.qrText && request.body.codeType) {
 			newPass.setBarcodes({
 				message: request.body.qrText,
 				format: request.body.codeType,
 				messageEncoding: "iso-8859-1",
-			});
-		} else {
-			newPass.setBarcodes({
-				message: request.body.qrText,
-				format: request.body.codeType,
-				messageEncoding: "iso-8859-1",
-				altText: request.body.codeAlt,
+				altText: request.body.codeAlt?.trim() ?? "",
 			});
 		}
 

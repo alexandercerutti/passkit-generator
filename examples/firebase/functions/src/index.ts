@@ -58,6 +58,15 @@ declare global {
 
 export const pass = functions.https.onRequest(
 	async (request: RequestWithBody, response) => {
+		if (!request.body.passModel) {
+			response.status(400);
+			response.send({
+				error: "Unspecified 'passModel' parameter: which model should be used?",
+			});
+
+			return;
+		}
+
 		const newPass = await PKPass.from(
 			{
 				// Get relevant pass model from model folder (see passkit-generator/examples/models/)

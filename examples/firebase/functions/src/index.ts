@@ -1,10 +1,12 @@
-import functions from "firebase-functions";
+import * as functions from "firebase-functions";
 import admin from "firebase-admin";
-import { PKPass } from "passkit-generator";
+import passkit from "passkit-generator";
 import type { Barcode, TransitType } from "passkit-generator";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+
+const PKPass = passkit.PKPass;
 
 // Firebase init
 admin
@@ -57,7 +59,7 @@ declare global {
 	}
 }
 
-exports.pass = functions.https.onRequest(async (request, response) => {
+export const pass = functions.https.onRequest(async (request, response) => {
 	const newPass = await PKPass.from(
 		{
 			// Get relevant pass model from model folder (see passkit-generator/examples/models/)

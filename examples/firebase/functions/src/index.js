@@ -40,9 +40,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 		},
 	);
 
-	let currentPassType = request.body.passType;
-
-	if (currentPassType == "boardingPass") {
+	if (newPass.type == "boardingPass") {
 		newPass.transitType = `PKTransitType${request.body.transitType}`;
 	}
 
@@ -89,7 +87,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 			key: `primary${i}`,
 			label: field.label,
 			value:
-				currentPassType == "boardingPass"
+				newPass.type == "boardingPass"
 					? field.value.toUpperCase()
 					: field.value,
 		});
@@ -153,7 +151,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	}
 
 	// Downloading thumbnail and logo files from Firebase Storage and adding to pass
-	if (currentPassType == "generic" || currentPassType == "eventTicket") {
+	if (newPass.type == "generic" || newPass.type == "eventTicket") {
 		const thumbnailFile = request.body.thumbnailFile;
 		const tempPath1 = path.join(os.tmpdir(), thumbnailFile);
 		try {

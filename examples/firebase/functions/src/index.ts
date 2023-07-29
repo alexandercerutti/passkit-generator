@@ -308,10 +308,18 @@ export const pass = functions.https.onRequest(
 		} catch (error) {
 			console.log("Error Uploading pass " + error);
 
+			const err = Object.assign(
+				{},
+				...Object.entries(Object.getOwnPropertyDescriptors(error)).map(
+					([key, descriptor]) => {
+						return { [key]: descriptor.value };
+					},
+				),
+			);
+
 			response.status(500);
 			response.send({
-				explanation: JSON.stringify(error),
-				result: "FAILED",
+				error: err,
 			});
 		}
 	},

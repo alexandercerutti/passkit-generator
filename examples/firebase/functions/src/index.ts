@@ -67,6 +67,13 @@ export const pass = functions.https.onRequest(
 			return;
 		}
 
+		if (request.body.passModel.endsWith(".pass")) {
+			request.body.passModel = request.body.passModel.replace(
+				".pass",
+				"",
+			);
+		}
+
 		const newPass = await PKPass.from(
 			{
 				// Get relevant pass model from model folder (see passkit-generator/examples/models/)

@@ -1,10 +1,10 @@
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-const { PKPass } = require("passkit-generator");
-const fs = require("node:fs");
-const path = require("node:path");
-const axios = require("axios");
-const os = require("node:os");
+import functions from "firebase-functions";
+import admin from "firebase-admin";
+import { PKPass } from "passkit-generator";
+import type { Barcode, TransitType } from "passkit-generator";
+import fs from "node:fs";
+import path from "node:path";
+import os from "node:os";
 
 // Firebase init
 admin
@@ -17,11 +17,51 @@ admin
 
 const storageRef = admin.storage().bucket();
 
+// Declaring our request protocol
+declare module "firebase-functions" {
+	interface HttpRequest {
+		body: {
+			passModel: string;
+			serialNumber: string;
+			logoText: string;
+			textColor: string;
+			backgroundColor: string;
+			labelColor: string;
+			relevantDate: string;
+			expiryDate: string;
+			relevantLocationLat: number | "Blank";
+			relevantLocationLong: number | "Blank";
+			header: { value: string; label: string }[];
+			primary: { value: string; label: string }[];
+			secondary: { value: string; label: string }[];
+			auxiliary: { value: string; label: string }[];
+			codeAlt: string;
+			qrText: string;
+			transitType: TransitType;
+			codeType: Barcode["format"];
+			thumbnailFile: string;
+			logoFile: string;
+		};
+	}
+}
+
+// Declaring our .env contents
+declare global {
+	namespace NodeJS {
+		interface ProcessEnv {
+			WWDR: string;
+			SIGNER_CERT: string;
+			SIGNER_KEY: string;
+			SIGNER_KEY_PASSPHRASE: string;
+		}
+	}
+}
+
 exports.pass = functions.https.onRequest(async (request, response) => {
 	const newPass = await PKPass.from(
 		{
 			// Get relevant pass model from model folder (see passkit-generator/examples/models/)
-			model: `./model/${request.body.passType}.pass`,
+			model: `./model/${request.body.passModel}.pass`,
 			certificates: {
 				// Assigning certificates from certs folder (you will need to provide these yourself)
 				wwdr: process.env.WWDR,
@@ -41,7 +81,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	);
 
 	if (newPass.type == "boardingPass") {
-		newPass.transitType = `PKTransitType${request.body.transitType}`;
+		newPass.transitType = request.body.transitType;
 	}
 
 	if (request.body.relevantDate !== "Blank") {
@@ -65,7 +105,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	for (let i = 0; i < request.body.header.length; i++) {
 		const field = request.body.header[i];
 
-		if (!(field.label && field.value)) {
+		if (!(field?.label && field.value)) {
 			continue;
 		}
 
@@ -79,7 +119,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	for (let i = 0; i < request.body.primary.length; i++) {
 		const field = request.body.primary[i];
 
-		if (!(field.label && field.value)) {
+		if (!(field?.label && field.value)) {
 			continue;
 		}
 
@@ -96,7 +136,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	for (let i = 0; i < request.body.secondary.length; i++) {
 		const field = request.body.secondary[i];
 
-		if (!(field.label && field.value)) {
+		if (!(field?.label && field.value)) {
 			continue;
 		}
 
@@ -117,7 +157,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	for (let i = 0; i < request.body.auxiliary.length; i++) {
 		const field = request.body.auxiliary[i];
 
-		if (!(field.label && field.value)) {
+		if (!(field?.label && field.value)) {
 			continue;
 		}
 
@@ -138,13 +178,13 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	if (!request.body.codeAlt || request.body.codeAlt.trim() === "") {
 		newPass.setBarcodes({
 			message: request.body.qrText,
-			format: `PKBarcodeFormat${request.body.codeType}`,
+			format: request.body.codeType,
 			messageEncoding: "iso-8859-1",
 		});
 	} else {
 		newPass.setBarcodes({
 			message: request.body.qrText,
-			format: `PKBarcodeFormat${request.body.codeType}`,
+			format: request.body.codeType,
 			messageEncoding: "iso-8859-1",
 			altText: request.body.codeAlt,
 		});
@@ -154,6 +194,7 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	if (newPass.type == "generic" || newPass.type == "eventTicket") {
 		const thumbnailFile = request.body.thumbnailFile;
 		const tempPath1 = path.join(os.tmpdir(), thumbnailFile);
+
 		try {
 			await storageRef
 				.file(`thumbnails/${thumbnailFile}`)
@@ -180,24 +221,27 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 	} catch (error) {
 		console.error(error);
 	}
+
 	let buffer = Buffer.alloc(0);
 	try {
 		buffer = fs.readFileSync(tempPath2);
 	} catch (error) {
 		console.error(error);
 	}
+
 	newPass.addBuffer("logo.png", buffer);
 	newPass.addBuffer("logo@2x.png", buffer);
 
 	const bufferData = newPass.getAsBuffer();
 	try {
 		console.log("Pass was uploaded successfully.");
+
 		response.set("Content-Type", newPass.mimeType);
 		response.status(200).send(bufferData);
 
 		// Delete thumbnail file in Firebase Storage
 		storageRef
-			.file(`thumbnails/${thumbnailFile}`)
+			.file(`thumbnails/${request.body.thumbnailFile}`)
 			.delete()
 			.then(() => {
 				console.log("Thumbnail file deleted successfully");
@@ -218,8 +262,9 @@ exports.pass = functions.https.onRequest(async (request, response) => {
 			});
 	} catch (error) {
 		console.log("Error Uploading pass " + error);
+
 		response.send({
-			explanation: error.message,
+			explanation: JSON.stringify(error),
 			result: "FAILED",
 		});
 	}

@@ -10,7 +10,8 @@
 		"service:link-pg": "cd ../.. && npm run build && npm link",
 		"preinstall": "npm run clear:deps",
 		"postinstall": "npm run service:link-pg && npm link passkit-generator",
-		"clear:deps": "rm -rf node_modules"
+		"clear:deps": "rm -rf node_modules",
+		"build": "rm -rf lib && npx tsc"
 	},
 	"engines": {
 		"node": "16"
@@ -19,7 +20,8 @@
 	"dependencies": {
 		"axios": "^1.2.6",
 		"firebase-admin": "^11.10.1",
-		"firebase-functions": "^4.4.1"
+		"firebase-functions": "^4.4.1",
+		"tslib": "^2.6.1"
 	},
 	"peerDependencies": {
 		"passkit-generator": "latest"

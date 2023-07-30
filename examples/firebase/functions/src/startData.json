@@ -1,0 +1,3 @@
+{
+	"FIREBASE_BUCKET_ADDR": "<insert your firebase storage bucket address (the part right after 'gs://...')"
+}

@@ -9,7 +9,11 @@
 				"firebase-debug.log",
 				"firebase-debug.*.log"
 			],
-			"predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
+			"predeploy": [
+				"cp -r ../models functions/models",
+				"npm --prefix \"$RESOURCE_DIR\" run build"
+			],
+			"postdeploy": ["rm -rf functions/models"]
 		}
 	],
 	"storage": {

@@ -47,6 +47,9 @@ declare global {
 			SIGNER_CERT: string;
 			SIGNER_KEY: string;
 			SIGNER_KEY_PASSPHRASE: string;
+
+			// reserved, but we use it to discriminate emulator from deploy
+			FUNCTIONS_EMULATOR: "true" | "false" | undefined;
 		}
 	}
 }
@@ -60,6 +63,21 @@ const storageRef = getStorage().bucket();
 
 export const pass = functions.https.onRequest(
 	async (request: RequestWithBody, response) => {
+		let modelBasePath: string;
+
+		if (process.env.FUNCTIONS_EMULATOR === "true") {
+			modelBasePath = "../../models/";
+		} else {
+			/**
+			 * Models are cloned on deploy through
+			 * the commands in `firebase.json` and
+			 * are uploaded along with our program.
+			 *
+			 * When deployed, root folder is the `functions` folder
+			 */
+			modelBasePath = "./models/";
+		}
+
 		try {
 			if (request.headers["content-type"] !== "application/json") {
 				response.status(400);
@@ -91,7 +109,7 @@ export const pass = functions.https.onRequest(
 					 * Get relevant pass model from model folder (see passkit-generator/examples/models/)
 					 * Path seems to get read like the function is in "firebase/" folder and not in "firebase/functions/"
 					 */
-					model: `../../models/${request.body.passModel}.pass`,
+					model: `${modelBasePath}${request.body.passModel}.pass`,
 					certificates: {
 						// Assigning certificates from certs folder (you will need to provide these yourself)
 						wwdr: process.env.WWDR,

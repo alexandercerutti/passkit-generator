@@ -1,5 +1,5 @@
 {
-  "projects": {
-    "default": "passkit-generator-cloud-fn"
-  }
+	"projects": {
+		"default": "<put here your project name>"
+	}
 }

@@ -39,7 +39,11 @@ interface RequestWithBody extends functions.Request {
 	};
 }
 
-// Declaring our .env contents
+/**
+ * Declaring our .env contents
+ * @see https://firebase.google.com/docs/functions/config-env?gen=2nd#deploying_multiple_sets_of_environment_variables
+ */
+
 declare global {
 	namespace NodeJS {
 		interface ProcessEnv {
@@ -54,7 +58,10 @@ declare global {
 	}
 }
 
-// Firebase init
+/**
+ * @see https://firebase.google.com/docs/storage/admin/start#node.js
+ */
+
 initializeApp({
 	storageBucket: startData.FIREBASE_BUCKET_ADDR,
 });

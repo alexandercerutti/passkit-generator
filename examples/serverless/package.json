@@ -19,7 +19,6 @@
 	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.93",
-		"@types/express": "4.17.13",
 		"serverless-offline": "^8.5.0",
 		"serverless-plugin-typescript": "^2.1.1",
 		"serverless-s3-local": "^0.6.22",

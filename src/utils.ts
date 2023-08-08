@@ -36,30 +36,7 @@ function dateToW3CString(date: Date) {
 		return undefined;
 	}
 
-	const paddedMonth = padMeTwo(date.getMonth() + 1);
-	const paddedDay = padMeTwo(date.getDate());
-	const paddedHour = padMeTwo(date.getHours());
-	const paddedMinutes = padMeTwo(date.getMinutes());
-	const paddedSeconds = padMeTwo(date.getSeconds());
-
-	/**
-	 * Date.prototype.getTimezoneOffset returns the timezone UTC offset in
-	 * minutes of the local machine.
-	 *
-	 * That value should then be used to calculate the effective timezone as
-	 * string, but still that would be related to the machine and not to the
-	 * specified date.
-	 *
-	 * For this reason we are completing date with "Z" TimeZoneDesignator (TZD)
-	 * to say it to use local timezone.
-	 *
-	 * In the future we might think to integrate another parameter to represent
-	 * a custom timezone.
-	 *
-	 * @see https://www.w3.org/TR/NOTE-datetime
-	 */
-
-	return `${date.getFullYear()}-${paddedMonth}-${paddedDay}T${paddedHour}:${paddedMinutes}:${paddedSeconds}Z`;
+	return date.toISOString();
 }
 
 function padMeTwo(original: string | number) {

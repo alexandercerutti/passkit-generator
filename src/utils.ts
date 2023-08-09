@@ -2,38 +2,14 @@ import * as Messages from "./messages";
 import type Bundle from "./Bundle";
 
 /**
- * Acts as a wrapper for converting date to W3C string
+ * Converts a date to W3C / UTC string
  * @param date
  * @returns
  */
 
 export function processDate(date: Date): string | undefined {
-	if (!(date instanceof Date)) {
+	if (!(date instanceof Date) || Number.isNaN(Number(date))) {
 		throw "Invalid date";
-	}
-
-	const dateParse = dateToW3CString(date);
-
-	if (!dateParse) {
-		throw "Invalid date";
-	}
-
-	return dateParse;
-}
-
-/**
- * Converts a date to W3C Standard format
- *
- * @function dateToW3Cstring
- * @params date - The date to be parsed
- * @returns - The parsed string if the parameter is valid,
- * 	 undefined otherwise
- */
-
-function dateToW3CString(date: Date) {
-	// if it is NaN, it is "Invalid Date"
-	if (isNaN(Number(date))) {
-		return undefined;
 	}
 
 	/**

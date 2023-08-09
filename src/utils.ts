@@ -39,10 +39,6 @@ function dateToW3CString(date: Date) {
 	return date.toISOString();
 }
 
-function padMeTwo(original: string | number) {
-	return String(original).padStart(2, "0");
-}
-
 /**
  * Removes hidden files from a list (those starting with dot)
  *

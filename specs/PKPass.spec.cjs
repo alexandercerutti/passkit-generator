@@ -812,7 +812,9 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.relevantDate).toBe("2023-04-10T14:15:00.000Z");
+			expect(passjsonGenerated.relevantDate).toBe(
+				"2023-04-10T14:15:00.000Z",
+			);
 		});
 
 		it("should reset relevant date", () => {

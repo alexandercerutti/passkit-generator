@@ -712,12 +712,12 @@ describe("PKPass", () => {
 
 	describe("expiration date", () => {
 		it("should set a pass expiration date", () => {
-			pkpass.setExpirationDate(new Date(2023, 3, 10));
+			pkpass.setExpirationDate(new Date("2023-04-09T17:00-07:00"));
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
 			expect(passjsonGenerated.expirationDate).toBe(
-				"2023-04-10T00:00:00Z",
+				"2023-04-10T00:00:00.000Z",
 			);
 		});
 
@@ -808,11 +808,11 @@ describe("PKPass", () => {
 
 	describe("relevant date", () => {
 		it("should set pass relevant date", () => {
-			pkpass.setRelevantDate(new Date(2023, 3, 10, 14, 15));
+			pkpass.setRelevantDate(new Date("2023-04-11T00:15+10:00"));
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.relevantDate).toBe("2023-04-10T14:15:00Z");
+			expect(passjsonGenerated.relevantDate).toBe("2023-04-10T14:15:00.000Z");
 		});
 
 		it("should reset relevant date", () => {

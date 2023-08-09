@@ -32,8 +32,8 @@ describe("Utils", () => {
 		});
 
 		it("should convert a Date object to a valid W3C date", () => {
-			expect(processDate(new Date(2020, 6, 1, 0, 0, 0, 0))).toBe(
-				"2020-07-01T00:00:00Z",
+			expect(processDate(new Date("2020-07-01T02:00+02:00"))).toBe(
+				"2020-07-01T00:00:00.000Z",
 			);
 		});
 	});

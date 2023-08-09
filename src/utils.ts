@@ -36,6 +36,10 @@ function dateToW3CString(date: Date) {
 		return undefined;
 	}
 
+	/**
+	 * @see https://www.w3.org/TR/NOTE-datetime
+	 */
+
 	return date.toISOString();
 }
 

@@ -12,11 +12,7 @@ export interface Beacon {
 }
 
 export const Beacon = Joi.object<Beacon>().keys({
-	major: Joi.number()
-		.integer()
-		.positive()
-		.max(65535)
-		.greater(Joi.ref("minor")),
+	major: Joi.number().integer().min(0).max(65535),
 	minor: Joi.number().integer().min(0).max(65535),
 	proximityUUID: Joi.string().required(),
 	relevantText: Joi.string(),

@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.11 - 15 Aug 2023
+
+    Fixed beacons `major` validation to be more relaxed (PR #158);
+
 ## 3.1.10 - 09 Aug 2023
 
     Fixed dates processing by converting them to UTC (PR #155);

@@ -1,9 +1,0 @@
-name = "pg-cw-example"
-type = "webpack"
-
-account_id = ""
-workers_dev = true
-route = ""
-zone_id = ""
-compatibility_date = "2022-01-31"
-webpack_config = "webpack.config.js"

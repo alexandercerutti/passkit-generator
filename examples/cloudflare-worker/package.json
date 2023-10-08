@@ -1,0 +1,20 @@
+{
+	"name": "cloudflare-worker",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"service:link-pg": "cd ../.. && npm run build && npm link",
+		"preinstall": "npm run clear:deps",
+		"postinstall": "npm run service:link-pg && npm link passkit-generator",
+		"clear:deps": "rm -rf node_modules",
+		"example": "npx wrangler dev"
+	},
+	"peerDependencies": {
+		"passkit-generator": "latest"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20230419.0",
+		"typescript": "^5.0.4",
+		"wrangler": "^3.0.0"
+	}
+}

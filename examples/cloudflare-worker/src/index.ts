@@ -1,18 +1,14 @@
-import { Buffer } from "buffer";
 import { PKPass } from "passkit-generator";
+import { Buffer } from "node:buffer";
 
-/** Assets are handled by Webpack url-loader */
+/** Assets are handled by Wrangler by specifying the rule inside wrangler.toml */
 import icon from "../../../models/exampleBooking.pass/icon.png";
 import icon2x from "../../../models/exampleBooking.pass/icon@2x.png";
 import footer from "../../../models/exampleBooking.pass/footer.png";
 import footer2x from "../../../models/exampleBooking.pass/footer@2x.png";
 import background2x from "../../../models/examplePass.pass/background@2x.png";
 
-// ************************** //
-// *** END ASSETS LOADING *** //
-// ************************** //
-
-declare global {
+export interface Env {
 	/**
 	 * "var" (instead of let and cost) is required here
 	 * to make typescript mark that these global variables
@@ -22,28 +18,30 @@ declare global {
 	 * @see https://developers.cloudflare.com/workers/platform/environment-variables
 	 */
 
+	WWDR: string;
 	/** Pass signerCert */
-	var SIGNER_CERT: string;
+	SIGNER_CERT: string;
 	/** Pass signerKey */
-	var SIGNER_KEY: string;
-	var SIGNER_PASSPHRASE: string;
-	var WWDR: string;
+	SIGNER_KEY: string;
+	SIGNER_PASSPHRASE: string;
 }
 
 /**
  * Request entry point
  */
 
-globalThis.addEventListener("fetch", async (event: FetchEvent) => {
-	event.respondWith(generatePass(event.request));
-});
+export default {
+	async fetch(
+		request: Request,
+		env: Env,
+		ctx: ExecutionContext,
+	): Promise<Response> {
+		return generatePass(env);
+	},
+};
 
-async function generatePass(request: Request) {
+async function generatePass(env: Env) {
 	const pass = new PKPass(
-		/**
-		 * Buffer is polyfilled by Webpack. Files must be
-		 * imported raw by webpack. See webpack.config.js
-		 */
 		{
 			"icon.png": Buffer.from(icon),
 			"icon@2x.png": Buffer.from(icon2x),
@@ -52,10 +50,10 @@ async function generatePass(request: Request) {
 			"background@2x.png": Buffer.from(background2x),
 		},
 		{
-			signerCert: SIGNER_CERT,
-			signerKey: SIGNER_KEY,
-			signerKeyPassphrase: SIGNER_PASSPHRASE,
-			wwdr: WWDR,
+			signerCert: env.SIGNER_CERT,
+			signerKey: env.SIGNER_KEY,
+			signerKeyPassphrase: env.SIGNER_PASSPHRASE,
+			wwdr: env.WWDR,
 		},
 		{
 			description: "Example Pass generated through a cloudflare worker",
@@ -214,6 +212,9 @@ async function generatePass(request: Request) {
 	);
 
 	return new Response(pass.getAsBuffer(), {
-		headers: { "content-type": pass.mimeType },
+		headers: {
+			"Content-type": pass.mimeType,
+			"Content-disposition": `attachment; filename=myPass.pkpass`,
+		},
 	});
 }

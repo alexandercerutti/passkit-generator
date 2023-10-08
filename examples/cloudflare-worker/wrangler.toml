@@ -1,0 +1,67 @@
+name = "pg-cw-example"
+main = "src/index.ts"
+compatibility_date = "2023-10-02"
+
+
+#########################################################################################
+#   This must be enabled to make passkit-generator compatible with cloudflare workers   #
+#########################################################################################
+
+node_compat = true
+
+###################################################################
+###   This is needed to import `.png` files with esm imports.   ###
+###################################################################
+
+rules = [
+  { type = "Data", globs = ["**/*.png"], fallthrough = true }
+]
+
+########################################################################################################
+#   These are some envs. These should actually be secrets, but for the sake of the                     #
+#   example, we are going to put these here.                                                           #
+#                                                                                                      #
+#   Remember to postfix every certificate line with "\", for TOML requirement for multiline strings.   #
+#      See: https://toml.io/en/                                                                        #
+#                                                                                                      #
+#      E.g.                                                                                            #
+#                                                                                                      #
+#      WWDR = """ \                                                                                    #
+#      -----BEGIN CERTIFICATE----- \                                                                   #
+#      MIIEVTCCAz2gAwIBAgIUE9x3lVJx5T3GMujM/+Uh88zFztIwDQYJKoZIhvcNAQEL \                              #
+#      ...                                                                                             #
+########################################################################################################
+
+[vars]
+WWDR = """ \
+
+
+
+"""
+
+SIGNER_CERT = """ \
+
+
+
+"""
+
+SIGNER_KEY = """ \
+
+
+
+"""
+
+SIGNER_PASSPHRASE = ""
+
+
+
+
+# DEFAULTS explanations
+
+
+
+# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
+# Note: Use secrets to store sensitive data.
+# Docs: https://developers.cloudflare.com/workers/platform/environment-variables
+# [vars]
+# MY_VARIABLE = "production_value"

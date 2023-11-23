@@ -58,6 +58,12 @@ Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-genera
 
 ---
 
+### Integrating Apple Wallet Web services?
+
+Give a look at another library I made: [Passkit Webservice Toolkit](https://github.com/alexandercerutti/passkit-webservice-toolkit) and its integrations!
+
+---
+
 ## Getting Started
 
 ##### Model

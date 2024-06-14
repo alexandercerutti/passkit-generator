@@ -32,6 +32,16 @@ declare namespace SemanticTagType {
 		longitude: number;
 	}
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+
+	interface RelevantDate {
+		startDate: string;
+		endDate: string;
+	}
+
 	interface Seat {
 		seatSection?: string;
 		seatRow?: string;
@@ -68,6 +78,15 @@ const PersonNameComponent =
 		nickname: Joi.string(),
 		phoneticRepresentation: Joi.string(),
 	});
+
+/**
+ * Minimum supported version: iOS 18
+ */
+
+const RelevantDate = Joi.object<SemanticTagType.RelevantDate>().keys({
+	startDate: Joi.string().required(),
+	endDate: Joi.string().required(),
+});
 
 const seat = Joi.object<SemanticTagType.Seat>().keys({
 	seatSection: Joi.string(),
@@ -164,6 +183,8 @@ export interface Semantics {
 	performerNames?: string[];
 	priorityStatus?: string;
 
+	relevantDates?: SemanticTagType.RelevantDate[];
+
 	seats?: SemanticTagType.Seat[];
 	securityScreening?: string;
 	silenceRequested?: boolean;
@@ -249,6 +270,8 @@ export const Semantics = Joi.object<Semantics>().keys({
 	passengerName: PersonNameComponent,
 	performerNames: Joi.array().items(Joi.string()),
 	priorityStatus: Joi.string(),
+
+	relevantDates: Joi.array().items(RelevantDate),
 
 	seats: Joi.array().items(seat),
 	securityScreening: Joi.string(),

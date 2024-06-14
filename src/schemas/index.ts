@@ -63,7 +63,20 @@ export interface PassProps {
 	locations?: Location[];
 
 	boardingPass?: PassFields & { transitType: TransitType };
-	eventTicket?: PassFields;
+	eventTicket?: PassFields & {
+		/**
+		 * New field coming in iOS 18
+		 * `"eventTicket"` is the legacy style.
+		 *
+		 * If used, passkit will try to render following the old style
+		 * first.
+		 *
+		 * Which means that `primaryFields`, `secondaryFields` and
+		 * so on, are not necessary anymore for the new style,
+		 * as semantics are preferred.
+		 */
+		preferredStyleSchemes?: ("posterEventTicket" | "eventTicket")[];
+	};
 	coupon?: PassFields;
 	generic?: PassFields;
 	storeCard?: PassFields;
@@ -132,7 +145,24 @@ export const PassKindsProps = Joi.object<PassKindsProps>({
 	coupon: PassFields.disallow("transitType"),
 	generic: PassFields.disallow("transitType"),
 	storeCard: PassFields.disallow("transitType"),
-	eventTicket: PassFields.disallow("transitType"),
+	eventTicket: PassFields.disallow("transitType").append(
+		Joi.object<PassProps["eventTicket"]>().keys({
+			/**
+			 * New field coming in iOS 18
+			 * `"eventTicket"` is the legacy style.
+			 *
+			 * If used, passkit will try to render following the old style
+			 * first.
+			 *
+			 * Which means that `primaryFields`, `secondaryFields` and
+			 * so on, are not necessary anymore for the new style,
+			 * as semantics are preferred.
+			 */
+			preferredStyleSchemes: Joi.array().items(
+				Joi.string().allow("posterEventTicket", "eventTicket"),
+			),
+		}),
+	),
 	boardingPass: PassFields,
 });
 

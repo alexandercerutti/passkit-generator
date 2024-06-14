@@ -65,6 +65,24 @@ export interface PassProps {
 	coupon?: PassFields;
 	generic?: PassFields;
 	storeCard?: PassFields;
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	bagPolicyURL?: string;
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	orderFoodURL?: string;
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	parkingInformationURL?: string;
 }
 
 /**
@@ -143,6 +161,30 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
 	// parsing url as set of words and nums followed by dots, optional port and any possible path after
 	webServiceURL: Joi.string().regex(
+		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
+	),
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	bagPolicyURL: Joi.string().regex(
+		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
+	),
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	orderFoodURL: Joi.string().regex(
+		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
+	),
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	parkingInformationURL: Joi.string().regex(
 		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
 	),
 }).with("webServiceURL", "authenticationToken");

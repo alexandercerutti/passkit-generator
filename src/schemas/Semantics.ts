@@ -206,9 +206,29 @@ export interface Semantics {
 	vehicleType?: string;
 	venueEntrance?: string;
 	venueLocation?: SemanticTagType.Location;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueGatesOpenDate?: string;
+
 	venueName?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueParkingLotsOpenDate?: string;
+
 	venuePhoneNumber?: string;
 	venueRoom?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueRegionName?: string;
 
 	wifiAccess?: SemanticTagType.WifiNetwork[];
 }
@@ -298,10 +318,32 @@ export const Semantics = Joi.object<Semantics>().keys({
 	vehicleName: Joi.string(),
 	vehicleNumber: Joi.string(),
 	vehicleType: Joi.string(),
+
 	venueEntrance: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueGatesOpenDate: Joi.string(),
+
 	venueLocation: location,
 	venueName: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueParkingLotsOpenDate: Joi.string(),
+
 	venuePhoneNumber: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueRegionName: Joi.string(),
+
 	venueRoom: Joi.string(),
 
 	wifiAccess: Joi.array().items(WifiNetwork),

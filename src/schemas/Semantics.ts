@@ -114,6 +114,12 @@ const WifiNetwork = Joi.object<SemanticTagType.WifiNetwork>().keys({
  */
 
 export interface Semantics {
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	admissionLevel?: string;
+
 	airlineCode?: string;
 	artistIDs?: string[];
 	awayTeamAbbreviation?: string;
@@ -208,6 +214,12 @@ export interface Semantics {
 }
 
 export const Semantics = Joi.object<Semantics>().keys({
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	admissionLevel: Joi.string(),
+
 	airlineCode: Joi.string(),
 	artistIDs: Joi.array().items(Joi.string()),
 	awayTeamAbbreviation: Joi.string(),

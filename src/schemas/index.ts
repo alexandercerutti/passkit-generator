@@ -24,6 +24,8 @@ import * as Messages from "../messages";
 const RGB_COLOR_REGEX =
 	/rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\)/;
 
+const URL_REGEX = /https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/;
+
 export interface FileBuffers {
 	[key: string]: Buffer;
 }
@@ -159,34 +161,25 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	foregroundColor: Joi.string().regex(RGB_COLOR_REGEX),
 	associatedStoreIdentifiers: Joi.array().items(Joi.number()),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
-	// parsing url as set of words and nums followed by dots, optional port and any possible path after
-	webServiceURL: Joi.string().regex(
-		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
-	),
+	webServiceURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * New field for iOS 18
 	 * Event Ticket
 	 */
-	bagPolicyURL: Joi.string().regex(
-		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
-	),
+	bagPolicyURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * New field for iOS 18
 	 * Event Ticket
 	 */
-	orderFoodURL: Joi.string().regex(
-		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
-	),
+	orderFoodURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * New field for iOS 18
 	 * Event Ticket
 	 */
-	parkingInformationURL: Joi.string().regex(
-		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
-	),
+	parkingInformationURL: Joi.string().regex(URL_REGEX),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

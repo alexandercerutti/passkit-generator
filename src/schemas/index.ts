@@ -15,7 +15,7 @@ import { Barcode } from "./Barcode";
 import { Location } from "./Location";
 import { Beacon } from "./Beacon";
 import { NFC } from "./NFC";
-import { PassFields, TransitType } from "./PassFields";
+import { PassFields, PreferredStyleSchemes, TransitType } from "./PassFields";
 import { Semantics } from "./Semantics";
 import { CertificatesSchema } from "./Certificates";
 
@@ -75,7 +75,7 @@ export interface PassProps {
 		 * so on, are not necessary anymore for the new style,
 		 * as semantics are preferred.
 		 */
-		preferredStyleSchemes?: ("posterEventTicket" | "eventTicket")[];
+		preferredStyleSchemes?: PreferredStyleSchemes;
 	};
 	coupon?: PassFields;
 	generic?: PassFields;
@@ -158,9 +158,7 @@ export const PassKindsProps = Joi.object<PassKindsProps>({
 			 * so on, are not necessary anymore for the new style,
 			 * as semantics are preferred.
 			 */
-			preferredStyleSchemes: Joi.array().items(
-				Joi.string().allow("posterEventTicket", "eventTicket"),
-			),
+			preferredStyleSchemes: PreferredStyleSchemes,
 		}),
 	),
 	boardingPass: PassFields,
@@ -240,7 +238,7 @@ export const Template = Joi.object<Template>({
  */
 
 export function assertValidity<T>(
-	schema: Joi.ObjectSchema<T> | Joi.StringSchema,
+	schema: Joi.ObjectSchema<T> | Joi.StringSchema | Joi.Schema<T>,
 	data: T,
 	customErrorMessage?: string,
 ): void {

@@ -15,6 +15,13 @@ export const TRANSIT_TYPE = {
 		"Cannot set transitType because not compliant with Apple specifications. Refer to https://apple.co/3DHuAG4 for more - %s",
 } as const;
 
+export const PREFERRED_STYLE_SCHEMES = {
+	UNEXPECTED_PASS_TYPE:
+		"Cannot set preferredStyleSchemes on a pass with type different from eventTicket.",
+	INVALID:
+		"Cannot set preferredStyleSchemes because not compliant with Apple specifications - %s",
+} as const;
+
 export const PASS_TYPE = {
 	INVALID:
 		"Cannot set type because not compliant with Apple specifications. Refer to https://apple.co/3aFpSfg for a list of valid props - %s",

@@ -145,7 +145,7 @@ export const PassKindsProps = Joi.object<PassKindsProps>({
 	coupon: PassFields.disallow("transitType"),
 	generic: PassFields.disallow("transitType"),
 	storeCard: PassFields.disallow("transitType"),
-	eventTicket: PassFields.disallow("transitType").append(
+	eventTicket: PassFields.disallow("transitType").concat(
 		Joi.object<PassProps["eventTicket"]>().keys({
 			/**
 			 * New field coming in iOS 18

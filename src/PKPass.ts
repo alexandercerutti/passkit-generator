@@ -415,6 +415,7 @@ export default class PKPass extends Bundle {
 				Schemas.Field,
 			),
 			transitType: undefined,
+			preferredStyleSchemes: undefined,
 		};
 	}
 
@@ -583,6 +584,7 @@ export default class PKPass extends Bundle {
 				auxiliaryFields = [],
 				backFields = [],
 				transitType,
+				preferredStyleSchemes = [],
 			} = data[type] || {};
 
 			this.headerFields.push(...headerFields);
@@ -593,6 +595,10 @@ export default class PKPass extends Bundle {
 
 			if (this.type === "boardingPass") {
 				this.transitType = transitType;
+			}
+
+			if (this.type === "eventTicket") {
+				this.preferredStyleSchemes = preferredStyleSchemes;
 			}
 		}
 	}

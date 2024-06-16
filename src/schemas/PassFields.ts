@@ -26,6 +26,7 @@ export interface PassFields {
 	primaryFields: Field[];
 	secondaryFields: Field[];
 	transitType?: TransitType;
+	preferredStyleSchemes?: PreferredStyleSchemes;
 }
 
 export const PassFields = Joi.object<PassFields>().keys({

@@ -1148,4 +1148,103 @@ describe("PKPass", () => {
 			);
 		});
 	});
+
+	describe("eventTicket new layout", () => {
+		it("should contain preferredStyleSchemes if coming from an imported pass json", () => {
+			const passjson = modelFiles["pass.json"];
+			const changedPassJson = Buffer.from(
+				JSON.stringify(
+					Object.assign({}, JSON.parse(passjson.toString("utf-8")), {
+						eventTicket: {
+							preferredStyleSchemes: [
+								"posterEventTicket",
+								"eventTicket",
+							],
+						},
+					}),
+				),
+				"utf-8",
+			);
+
+			pkpass = new PKPass(
+				Object.assign({}, modelFiles, { "pass.json": changedPassJson }),
+				{
+					signerCert: SIGNER_CERT,
+					signerKey: SIGNER_KEY,
+					wwdr: WWDR,
+					signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+				},
+			);
+
+			expect(pkpass.preferredStyleSchemes).toEqual([
+				"posterEventTicket",
+				"eventTicket",
+			]);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(
+				passjsonGenerated.eventTicket.preferredStyleSchemes,
+			).not.toBeUndefined();
+			expect(passjsonGenerated.eventTicket.preferredStyleSchemes).toEqual(
+				["posterEventTicket", "eventTicket"],
+			);
+		});
+
+		it("should contain preferredStyleSchemes if coming from the setter (legacy order)", () => {
+			pkpass.type = "eventTicket";
+
+			pkpass.preferredStyleSchemes = ["eventTicket", "posterEventTicket"];
+
+			expect(pkpass.preferredStyleSchemes).toEqual([
+				"eventTicket",
+				"posterEventTicket",
+			]);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(
+				passjsonGenerated.eventTicket.preferredStyleSchemes,
+			).not.toBeUndefined();
+			expect(passjsonGenerated.eventTicket.preferredStyleSchemes).toEqual(
+				["eventTicket", "posterEventTicket"],
+			);
+		});
+
+		it("should contain preferredStyleSchemes if coming from the setter (new order)", () => {
+			pkpass.type = "eventTicket";
+
+			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
+
+			expect(pkpass.preferredStyleSchemes).toEqual([
+				"posterEventTicket",
+				"eventTicket",
+			]);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(
+				passjsonGenerated.eventTicket.preferredStyleSchemes,
+			).not.toBeUndefined();
+			expect(passjsonGenerated.eventTicket.preferredStyleSchemes).toEqual(
+				["posterEventTicket", "eventTicket"],
+			);
+		});
+	});
+
+	it("preferredStyleSchemes setter should throw if pass is not an eventTicket", () => {
+		pkpass.type = "boardingPass";
+
+		expect(() => {
+			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
+		}).toThrowError();
+	});
+
+	it("preferredStyleSchemes getter should throw if pass is not an eventTicket", () => {
+		pkpass.type = "boardingPass";
+
+		expect(() => {
+			pkpass.preferredStyleSchemes;
+		}).toThrowError();
+	});
 });

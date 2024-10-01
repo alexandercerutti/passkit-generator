@@ -111,7 +111,8 @@ type PassMethodsProps =
 	| "barcodes"
 	| "relevantDate"
 	| "expirationDate"
-	| "locations";
+	| "locations"
+	| "preferredStyleSchemes";
 
 export type PassTypesProps =
 	| "boardingPass"
@@ -139,6 +140,7 @@ export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
 	relevantDate: Joi.string().isoDate(),
 	expirationDate: Joi.string().isoDate(),
 	locations: Joi.array().items(Location),
+	preferredStyleSchemes: PreferredStyleSchemes,
 });
 
 export const PassKindsProps = Joi.object<PassKindsProps>({

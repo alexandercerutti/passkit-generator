@@ -1,0 +1,39 @@
+{
+	"formatVersion": 1,
+	"passTypeIdentifier": "pass.com.passkitgenerator",
+	"teamIdentifier": "F53WB8AE67",
+	"groupingIdentifier": "ticket-demo",
+	"description": "Description",
+	"organizationName": "Something",
+	"backgroundColor": "rgb(255, 255, 255)",
+	"foregroundColor": "rgb(0, 0, 0)",
+	"labelColor": "rgb(0, 0, 0)",
+	"logoText": "iOS18 EventTicket Demo",
+	"preferredStyleSchemes": ["posterEventTicket", "eventTicket"],
+	"eventTicket": {
+		"headerFields": [
+			{
+				"key": "event_date",
+				"label": "event-date",
+				"value": "26.09.2024"
+			}
+		]
+	},
+	"semantics": {
+		"eventType": "PKEventTypeLivePerformance",
+		"eventName": "Secret meeting place",
+		"relevantDates": [
+			{
+				"startDate": "2024-10-02T10:00:00-06:00",
+				"endDate": "2024-10-02T17:00:00-06:00"
+			}
+		],
+		"admissionLevel": "VIP Access",
+		"venueRegionName": "Undisclosed location",
+		"performerNames": ["Jane Appleseed"]
+	},
+	"nfc": {
+		"message": "message",
+		"encryptionPublicKey": "MDkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDIgADwKMBv29ByaSLiGF0FctuyB+Hs2oZ1kDIYhTVllPexNE="
+	}
+}

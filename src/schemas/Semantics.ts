@@ -49,12 +49,6 @@ declare namespace SemanticTagType {
 		seatIdentifier?: string;
 		seatType?: string;
 		seatDescription?: string;
-
-		/**
-		 * For newly-introduced event tickets
-		 * in iOS 18
-		 */
-		venueEntranceGate?: string;
 	}
 
 	interface WifiNetwork {
@@ -95,7 +89,6 @@ const seat = Joi.object<SemanticTagType.Seat>().keys({
 	seatIdentifier: Joi.string(),
 	seatType: Joi.string(),
 	seatDescription: Joi.string(),
-	venueEntranceGate: Joi.string(),
 });
 
 const location = Joi.object<SemanticTagType.Location>().keys({
@@ -230,6 +223,12 @@ export interface Semantics {
 	 */
 	venueRegionName?: string;
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueEntranceGate?: string;
+
 	wifiAccess?: SemanticTagType.WifiNetwork[];
 }
 
@@ -347,4 +346,6 @@ export const Semantics = Joi.object<Semantics>().keys({
 	venueRoom: Joi.string(),
 
 	wifiAccess: Joi.array().items(WifiNetwork),
+
+	venueEntranceGate: Joi.string(),
 });

@@ -12,13 +12,6 @@ export const TransitType = Joi.string().regex(
 	/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/,
 );
 
-export type PreferredStyleSchemes = ("posterEventTicket" | "eventTicket")[];
-
-export const PreferredStyleSchemes = Joi.array().items(
-	"posterEventTicket",
-	"eventTicket",
-) satisfies Joi.Schema<PreferredStyleSchemes>;
-
 export interface PassFields {
 	auxiliaryFields: FieldWithRow[];
 	backFields: Field[];
@@ -26,7 +19,6 @@ export interface PassFields {
 	primaryFields: Field[];
 	secondaryFields: Field[];
 	transitType?: TransitType;
-	preferredStyleSchemes?: PreferredStyleSchemes;
 }
 
 export const PassFields = Joi.object<PassFields>().keys({

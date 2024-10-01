@@ -15,7 +15,7 @@ import { Barcode } from "./Barcode";
 import { Location } from "./Location";
 import { Beacon } from "./Beacon";
 import { NFC } from "./NFC";
-import { PassFields, PreferredStyleSchemes, TransitType } from "./PassFields";
+import { PassFields, TransitType } from "./PassFields";
 import { Semantics } from "./Semantics";
 import { CertificatesSchema } from "./Certificates";
 
@@ -25,6 +25,13 @@ const RGB_COLOR_REGEX =
 	/rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\)/;
 
 const URL_REGEX = /https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/;
+
+export type PreferredStyleSchemes = ("posterEventTicket" | "eventTicket")[];
+
+export const PreferredStyleSchemes = Joi.array().items(
+	"posterEventTicket",
+	"eventTicket",
+) satisfies Joi.Schema<PreferredStyleSchemes>;
 
 export interface FileBuffers {
 	[key: string]: Buffer;
@@ -63,20 +70,7 @@ export interface PassProps {
 	locations?: Location[];
 
 	boardingPass?: PassFields & { transitType: TransitType };
-	eventTicket?: PassFields & {
-		/**
-		 * New field coming in iOS 18
-		 * `"eventTicket"` is the legacy style.
-		 *
-		 * If used, passkit will try to render following the old style
-		 * first.
-		 *
-		 * Which means that `primaryFields`, `secondaryFields` and
-		 * so on, are not necessary anymore for the new style,
-		 * as semantics are preferred.
-		 */
-		preferredStyleSchemes?: PreferredStyleSchemes;
-	};
+	eventTicket?: PassFields;
 	coupon?: PassFields;
 	generic?: PassFields;
 	storeCard?: PassFields;
@@ -98,6 +92,12 @@ export interface PassProps {
 	 * Event Ticket
 	 */
 	parkingInformationURL?: string;
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	preferredStyleSchemes?: PreferredStyleSchemes;
 }
 
 /**
@@ -145,22 +145,7 @@ export const PassKindsProps = Joi.object<PassKindsProps>({
 	coupon: PassFields.disallow("transitType"),
 	generic: PassFields.disallow("transitType"),
 	storeCard: PassFields.disallow("transitType"),
-	eventTicket: PassFields.disallow("transitType").concat(
-		Joi.object<PassProps["eventTicket"]>().keys({
-			/**
-			 * New field coming in iOS 18
-			 * `"eventTicket"` is the legacy style.
-			 *
-			 * If used, passkit will try to render following the old style
-			 * first.
-			 *
-			 * Which means that `primaryFields`, `secondaryFields` and
-			 * so on, are not necessary anymore for the new style,
-			 * as semantics are preferred.
-			 */
-			preferredStyleSchemes: PreferredStyleSchemes,
-		}),
-	),
+	eventTicket: PassFields.disallow("transitType"),
 	boardingPass: PassFields,
 });
 
@@ -206,6 +191,10 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	/**
 	 * New field for iOS 18
 	 * Event Ticket
+	 * `"eventTicket"` is the legacy style.
+	 *
+	 * Passkit will try to render a style based on the order
+	 * of the properties
 	 */
 	parkingInformationURL: Joi.string().regex(URL_REGEX),
 }).with("webServiceURL", "authenticationToken");

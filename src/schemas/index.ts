@@ -102,35 +102,61 @@ export interface PassProps {
 	 * New field for iOS 18
 	 * Event Ticket
 	 */
+	preferredStyleSchemes?: PreferredStyleSchemes;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
+	 */
 	bagPolicyURL?: string;
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	orderFoodURL?: string;
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	parkingInformationURL?: string;
 
-	/**
-	 * New field for iOS 18
-	 * Event Ticket
-	 */
-	preferredStyleSchemes?: PreferredStyleSchemes;
 	
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	directionsInformationURL?: string;
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	contactVenueEmail?: string;
 }
@@ -216,36 +242,57 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	webServiceURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	bagPolicyURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	orderFoodURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
-	 * `"eventTicket"` is the legacy style.
+	 * New field for iOS 18 Event Ticket.
 	 *
-	 * Passkit will try to render a style based on the order
-	 * of the properties
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	parkingInformationURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	directionsInformationURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * New field for iOS 18 Event Ticket.
+	 *
+	 * To show buttons in the event guide,
+	 * at least two between `bagPolicyURL`,
+	 * `orderFoodURL`, `parkingInformationURL`,
+	 * `directionsInformationURL` and `contactVenueEmail`
+	 * must be used.
 	 */
 	contactVenueEmail: Joi.string(),
 }).with("webServiceURL", "authenticationToken");

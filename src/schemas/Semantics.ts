@@ -82,7 +82,7 @@ const RelevantDate = Joi.object<SemanticTagType.RelevantDate>().keys({
 	endDate: Joi.string().required(),
 });
 
-const seat = Joi.object<SemanticTagType.Seat>().keys({
+const SeatSemantics = Joi.object<SemanticTagType.Seat>().keys({
 	seatSection: Joi.string(),
 	seatRow: Joi.string(),
 	seatNumber: Joi.string(),
@@ -91,7 +91,7 @@ const seat = Joi.object<SemanticTagType.Seat>().keys({
 	seatDescription: Joi.string(),
 });
 
-const location = Joi.object<SemanticTagType.Location>().keys({
+const LocationSemantics = Joi.object<SemanticTagType.Location>().keys({
 	latitude: Joi.number().required(),
 	longitude: Joi.number().required(),
 });
@@ -258,7 +258,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	departureAirportCode: Joi.string(),
 	departureAirportName: Joi.string(),
 	departureGate: Joi.string(),
-	departureLocation: location,
+	departureLocation: LocationSemantics,
 	departureLocationDescription: Joi.string(),
 	departurePlatform: Joi.string(),
 	departureStationName: Joi.string(),
@@ -266,7 +266,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	destinationAirportCode: Joi.string(),
 	destinationAirportName: Joi.string(),
 	destinationGate: Joi.string(),
-	destinationLocation: location,
+	destinationLocation: LocationSemantics,
 	destinationLocationDescription: Joi.string(),
 	destinationPlatform: Joi.string(),
 	destinationStationName: Joi.string(),
@@ -304,7 +304,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 
 	relevantDates: Joi.array().items(RelevantDate),
 
-	seats: Joi.array().items(seat),
+	seats: Joi.array().items(SeatSemantics),
 	securityScreening: Joi.string(),
 	silenceRequested: Joi.boolean(),
 	sportName: Joi.string(),
@@ -326,7 +326,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 */
 	venueGatesOpenDate: Joi.string(),
 
-	venueLocation: location,
+	venueLocation: LocationSemantics,
 	venueName: Joi.string(),
 
 	/**

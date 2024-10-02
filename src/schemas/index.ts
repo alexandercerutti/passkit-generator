@@ -98,6 +98,18 @@ export interface PassProps {
 	 * Event Ticket
 	 */
 	preferredStyleSchemes?: PreferredStyleSchemes;
+	
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	directionsInformationURL?: string;
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	contactVenueEmail?: string;
 }
 
 /**
@@ -199,6 +211,18 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * of the properties
 	 */
 	parkingInformationURL: Joi.string().regex(URL_REGEX),
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	directionsInformationURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	contactVenueEmail: Joi.string(),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

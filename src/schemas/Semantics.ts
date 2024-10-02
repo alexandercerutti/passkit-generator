@@ -96,6 +96,13 @@ export interface Semantics {
 
 	airlineCode?: string;
 	artistIDs?: string[];
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	attendeeName?: string;
+
 	awayTeamAbbreviation?: string;
 	awayTeamLocation?: string;
 	awayTeamName?: string;
@@ -127,6 +134,12 @@ export interface Semantics {
 	destinationStationName?: string;
 	destinationTerminal?: string;
 	duration?: number;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	entranceDescription?: string;
 
 	eventEndDate?: string;
 	eventName?: string;
@@ -220,6 +233,13 @@ export const Semantics = Joi.object<Semantics>().keys({
 
 	airlineCode: Joi.string(),
 	artistIDs: Joi.array().items(Joi.string()),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	attendeeName: Joi.string(),
+
 	awayTeamAbbreviation: Joi.string(),
 	awayTeamLocation: Joi.string(),
 	awayTeamName: Joi.string(),
@@ -251,6 +271,12 @@ export const Semantics = Joi.object<Semantics>().keys({
 	destinationStationName: Joi.string(),
 	destinationTerminal: Joi.string(),
 	duration: Joi.number(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	entranceDescription: Joi.string(),
 
 	eventEndDate: Joi.string(),
 	eventName: Joi.string(),

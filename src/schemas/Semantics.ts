@@ -337,15 +337,19 @@ export const Semantics = Joi.object<Semantics>().keys({
 
 	venuePhoneNumber: Joi.string(),
 
+	venueRoom: Joi.string(),
+
 	/**
 	 * For newly-introduced event tickets
 	 * in iOS 18
 	 */
 	venueRegionName: Joi.string(),
 
-	venueRoom: Joi.string(),
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueEntranceGate: Joi.string(),
 
 	wifiAccess: Joi.array().items(WifiNetwork),
-
-	venueEntranceGate: Joi.string(),
 });

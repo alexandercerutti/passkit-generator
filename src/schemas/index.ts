@@ -33,6 +33,26 @@ export const PreferredStyleSchemes = Joi.array().items(
 	"eventTicket",
 ) satisfies Joi.Schema<PreferredStyleSchemes>;
 
+/**
+ * For newly-introduced event tickets
+ * in iOS 18
+ */
+
+interface RelevantDate {
+	startDate: string;
+	endDate: string;
+}
+
+/**
+ * Minimum supported version: iOS 18
+ */
+
+const RelevantDate = Joi.object<RelevantDate>().keys({
+	startDate: Joi.string().required(),
+	endDate: Joi.string().required(),
+});
+
+
 export interface FileBuffers {
 	[key: string]: Buffer;
 }
@@ -66,6 +86,9 @@ export interface PassProps {
 	beacons?: Beacon[];
 	barcodes?: Barcode[];
 	relevantDate?: string;
+
+	relevantDates?: RelevantDate[];
+
 	expirationDate?: string;
 	locations?: Location[];
 
@@ -122,6 +145,7 @@ type PassMethodsProps =
 	| "beacons"
 	| "barcodes"
 	| "relevantDate"
+	| "relevantDates"
 	| "expirationDate"
 	| "locations"
 	| "preferredStyleSchemes";
@@ -150,6 +174,7 @@ export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
 	beacons: Joi.array().items(Beacon),
 	barcodes: Joi.array().items(Barcode),
 	relevantDate: Joi.string().isoDate(),
+	relevantDates: Joi.array().items(RelevantDate),
 	expirationDate: Joi.string().isoDate(),
 	locations: Joi.array().items(Location),
 	preferredStyleSchemes: PreferredStyleSchemes,

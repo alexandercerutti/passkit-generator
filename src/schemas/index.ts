@@ -106,59 +106,124 @@ export interface PassProps {
 
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	bagPolicyURL?: string;
 
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	orderFoodURL?: string;
 
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	parkingInformationURL?: string;
 
 	
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	directionsInformationURL?: string;
 
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	contactVenueEmail?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenuePhoneNumber?: string;
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenueWebsite?: string;
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	purchaseParkingURL?: string;
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	merchandiseURL?: string;
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	transitInformationURL?: string;
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	accessibilityURL?: string;
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	addOnURL?: string;
 }
 
 /**
@@ -243,58 +308,123 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	bagPolicyURL: Joi.string().regex(URL_REGEX),
-
+	
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	orderFoodURL: Joi.string().regex(URL_REGEX),
-
+	
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	parkingInformationURL: Joi.string().regex(URL_REGEX),
-
+	
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	directionsInformationURL: Joi.string(),
-
+	
 	/**
 	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
 	 *
 	 * To show buttons in the event guide,
-	 * at least two between `bagPolicyURL`,
-	 * `orderFoodURL`, `parkingInformationURL`,
-	 * `directionsInformationURL` and `contactVenueEmail`
-	 * must be used.
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
 	 */
 	contactVenueEmail: Joi.string(),
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenuePhoneNumber: Joi.string(),
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenueWebsite: Joi.string(),
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	purchaseParkingURL: Joi.string(),
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	merchandiseURL: Joi.string(),
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	transitInformationURL: Joi.string(),
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	accessibilityURL: Joi.string(),
+	
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	addOnURL: Joi.string(),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

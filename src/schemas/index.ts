@@ -224,6 +224,18 @@ export interface PassProps {
 	 * "@domain event guide" must be used.
 	 */
 	addOnURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	transferURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	sellURL?: string;
 }
 
 /**
@@ -425,6 +437,18 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	addOnURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	transferURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	sellURL: Joi.string(),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

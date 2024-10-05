@@ -142,6 +142,16 @@ export interface Semantics {
 	entranceDescription?: string;
 
 	eventEndDate?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 *
+	 * This seem to exists but it is not
+	 * known yet what it does...
+	 */
+	eventLiveMessage?: string;
+
 	eventName?: string;
 	eventStartDate?: string;
 	eventType?:
@@ -280,6 +290,16 @@ export const Semantics = Joi.object<Semantics>().keys({
 
 	eventEndDate: Joi.string(),
 	eventName: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 *
+	 * This seem to exists but it is not
+	 * known yet what it does...
+	 */
+	eventLiveMessage: Joi.string(),
+
 	eventStartDate: Joi.string(),
 	eventType: Joi.string().regex(
 		/(PKEventTypeGeneric|PKEventTypeLivePerformance|PKEventTypeMovie|PKEventTypeSports|PKEventTypeConference|PKEventTypeConvention|PKEventTypeWorkshop|PKEventTypeSocialGathering)/,

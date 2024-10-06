@@ -264,7 +264,7 @@ export interface Semantics {
 	 * For newly-introduced event tickets
 	 * in iOS 18
 	 */
-	tailgatingAllowed?: number;
+	tailgatingAllowed?: boolean;
 
 	totalPrice?: SemanticTagType.CurrencyAmount;
 	transitProvider?: string;
@@ -468,7 +468,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	silenceRequested: Joi.boolean(),
 	sportName: Joi.string(),
 
-	tailgatingAllowed: Joi.number(),
+	tailgatingAllowed: Joi.boolean(),
 
 	totalPrice: CurrencyAmount,
 	transitProvider: Joi.string(),

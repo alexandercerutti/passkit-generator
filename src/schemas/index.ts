@@ -21,8 +21,8 @@ import { CertificatesSchema } from "./Certificates";
 
 import * as Messages from "../messages";
 
-const RGB_COLOR_REGEX =
-	/rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\)/;
+export const RGB_HEX_COLOR_REGEX =
+	/(#[a-fA-F0-9]{3,6}|rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\))/;
 
 const URL_REGEX = /https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/;
 
@@ -311,9 +311,9 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	suppressStripShine: Joi.boolean(),
 	maxDistance: Joi.number().positive(),
 	authenticationToken: Joi.string().min(16),
-	labelColor: Joi.string().regex(RGB_COLOR_REGEX),
-	backgroundColor: Joi.string().regex(RGB_COLOR_REGEX),
-	foregroundColor: Joi.string().regex(RGB_COLOR_REGEX),
+	labelColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+	backgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+	foregroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 	associatedStoreIdentifiers: Joi.array().items(Joi.number()),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
 	webServiceURL: Joi.string().regex(URL_REGEX),

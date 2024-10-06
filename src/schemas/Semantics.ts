@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { RGB_HEX_COLOR_REGEX } from ".";
 
 /**
  * For a better description of every single field,
@@ -105,7 +106,7 @@ const SeatSemantics = Joi.object<SemanticTagType.Seat>().keys({
 	 * For newly-introduced event tickets
 	 * in iOS 18
 	 */
-	seatSectionColor: Joi.string(),
+	seatSectionColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 });
 
 const LocationSemantics = Joi.object<SemanticTagType.Location>().keys({

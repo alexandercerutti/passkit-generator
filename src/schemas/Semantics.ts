@@ -39,6 +39,24 @@ declare namespace SemanticTagType {
 		seatIdentifier?: string;
 		seatType?: string;
 		seatDescription?: string;
+
+		/**
+		 * For newly-introduced event tickets
+		 * in iOS 18
+		 */
+		seatAisle?: string;
+
+		/**
+		 * For newly-introduced event tickets
+		 * in iOS 18
+		 */
+		seatLevel?: string;
+
+		/**
+		 * For newly-introduced event tickets
+		 * in iOS 18
+		 */
+		seatSectionColor?: string;
 	}
 
 	interface WifiNetwork {
@@ -70,6 +88,24 @@ const SeatSemantics = Joi.object<SemanticTagType.Seat>().keys({
 	seatIdentifier: Joi.string(),
 	seatType: Joi.string(),
 	seatDescription: Joi.string(),
+
+	/**
+	 * Newly-introduced in iOS 18
+	 * Used in poster event tickets
+	 */
+	seatAisle: Joi.string(),
+
+	/**
+	 * Newly-introduced in iOS 18
+	 * Used in poster event tickets
+	 */
+	seatLevel: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	seatSectionColor: Joi.string(),
 });
 
 const LocationSemantics = Joi.object<SemanticTagType.Location>().keys({
@@ -94,8 +130,28 @@ export interface Semantics {
 	 */
 	admissionLevel?: string;
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	admissionLevelAbbreviation?: string;
+
 	airlineCode?: string;
 	artistIDs?: string[];
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	albumIDs?: string[];
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	airplay?: {
+		airPlayDeviceGroupToken: string;
+	}[];
 
 	/**
 	 * For newly-introduced event tickets
@@ -106,6 +162,12 @@ export interface Semantics {
 	awayTeamAbbreviation?: string;
 	awayTeamLocation?: string;
 	awayTeamName?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	additionalTicketAttributes?: string;
 
 	balance?: SemanticTagType.CurrencyAmount;
 	boardingGroup?: string;
@@ -186,10 +248,22 @@ export interface Semantics {
 	performerNames?: string[];
 	priorityStatus?: string;
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	playlistIDs?: string[];
+
 	seats?: SemanticTagType.Seat[];
 	securityScreening?: string;
 	silenceRequested?: boolean;
 	sportName?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	tailgatingAllowed?: number;
 
 	totalPrice?: SemanticTagType.CurrencyAmount;
 	transitProvider?: string;
@@ -199,6 +273,7 @@ export interface Semantics {
 	vehicleName?: string;
 	vehicleNumber?: string;
 	vehicleType?: string;
+
 	venueEntrance?: string;
 	venueLocation?: SemanticTagType.Location;
 
@@ -216,6 +291,30 @@ export interface Semantics {
 	 */
 	venueParkingLotsOpenDate?: string;
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueBoxOfficeOpenDate?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueDoorsOpenDate?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueFanZoneOpenDate?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueCloseDate?: string;
+
 	venuePhoneNumber?: string;
 	venueRoom?: string;
 
@@ -231,6 +330,18 @@ export interface Semantics {
 	 */
 	venueEntranceGate?: string;
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueEntranceDoor?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueEntrancePortal?: string;
+
 	wifiAccess?: SemanticTagType.WifiNetwork[];
 }
 
@@ -241,8 +352,28 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 */
 	admissionLevel: Joi.string(),
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	admissionLevelAbbreviation: Joi.string(),
+
 	airlineCode: Joi.string(),
 	artistIDs: Joi.array().items(Joi.string()),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	albumIDs: Joi.array().items(Joi.string()),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	airplay: Joi.array().items({
+		airplayDeviceGroupToken: Joi.string(),
+	}),
 
 	/**
 	 * For newly-introduced event tickets
@@ -253,6 +384,8 @@ export const Semantics = Joi.object<Semantics>().keys({
 	awayTeamAbbreviation: Joi.string(),
 	awayTeamLocation: Joi.string(),
 	awayTeamName: Joi.string(),
+
+	additionalTicketAttributes: Joi.string(),
 
 	balance: CurrencyAmount,
 	boardingGroup: Joi.string(),
@@ -327,10 +460,14 @@ export const Semantics = Joi.object<Semantics>().keys({
 	performerNames: Joi.array().items(Joi.string()),
 	priorityStatus: Joi.string(),
 
+	playlistIDs: Joi.array().items(Joi.string()),
+
 	seats: Joi.array().items(SeatSemantics),
 	securityScreening: Joi.string(),
 	silenceRequested: Joi.boolean(),
 	sportName: Joi.string(),
+
+	tailgatingAllowed: Joi.number(),
 
 	totalPrice: CurrencyAmount,
 	transitProvider: Joi.string(),
@@ -358,8 +495,31 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 */
 	venueParkingLotsOpenDate: Joi.string(),
 
-	venuePhoneNumber: Joi.string(),
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueBoxOfficeOpenDate: Joi.string(),
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueDoorsOpenDate: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueFanZoneOpenDate: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueCloseDate: Joi.string(),
+
+	venuePhoneNumber: Joi.string(),
 	venueRoom: Joi.string(),
 
 	/**
@@ -373,6 +533,18 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 * in iOS 18
 	 */
 	venueEntranceGate: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueEntranceDoor: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18
+	 */
+	venueEntrancePortal: Joi.string(),
 
 	wifiAccess: Joi.array().items(WifiNetwork),
 });

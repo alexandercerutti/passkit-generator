@@ -5,8 +5,8 @@
 
 import { app } from "./webserver";
 import { getCertificates } from "./shared";
-import path from "path";
-import { promises as fs } from "fs";
+import path from "node:path";
+import { promises as fs } from "node:fs";
 import { PKPass } from "passkit-generator";
 
 function getRandomColorPart() {

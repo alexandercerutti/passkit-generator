@@ -1,4 +1,4 @@
-import { Readable, Stream } from "stream";
+import { Readable, Stream } from "node:stream";
 import * as Messages from "./messages";
 import * as zip from "do-not-zip";
 

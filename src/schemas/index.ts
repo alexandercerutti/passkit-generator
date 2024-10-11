@@ -9,7 +9,7 @@ export * from "./Personalize";
 export * from "./Certificates";
 
 import Joi from "joi";
-import { Buffer } from "buffer";
+import type { Buffer } from "node:buffer";
 
 import { Barcode } from "./Barcode";
 import { Location } from "./Location";

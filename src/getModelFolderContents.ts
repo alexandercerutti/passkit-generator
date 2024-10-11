@@ -1,8 +1,8 @@
-import * as path from "path";
+import * as path from "node:path";
 import * as Utils from "./utils";
 import * as Messages from "./messages";
-import { promises as fs } from "fs";
-import type { Buffer } from "buffer";
+import { promises as fs } from "node:fs";
+import type { Buffer } from "node:buffer";
 
 /**
  * Reads the model folder contents

@@ -11,7 +11,7 @@
 import { app } from "./webserver";
 import { getCertificates } from "./shared";
 import { PKPass } from "passkit-generator";
-import path from "path";
+import path from "node:path";
 
 app.route("/barcodes/:modelName").get(async (request, response) => {
 	const passName =

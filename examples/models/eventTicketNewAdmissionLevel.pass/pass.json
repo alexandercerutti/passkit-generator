@@ -20,18 +20,43 @@
 		]
 	},
 	"semantics": {
+		"venueParkingLotsOpenDate": "2024-10-04T09:00:00+00:00",
+		"venueGatesOpenDate": "2024-10-06T20:00:00+00:00",
 		"eventType": "PKEventTypeLivePerformance",
 		"eventName": "Secret meeting place",
-		"relevantDates": [
-			{
-				"startDate": "2024-10-02T10:00:00-06:00",
-				"endDate": "2024-10-02T17:00:00-06:00"
-			}
-		],
 		"admissionLevel": "VIP Access",
 		"venueRegionName": "Undisclosed location",
-		"performerNames": ["Jane Appleseed"]
+		"performerNames": ["Lady Gaga"],
+		"venueBoxOfficeOpenDate": "2024-10-06T20:15:00+00:00",
+		"venueCloseDate": "2024-10-06T23:59:59+00:00",
+		"venueDoorsOpenDate": "2024-10-06T20:00:00+00:00",
+		"venueFanZoneOpenDate": "2024-10-06T19:30:00+00:00",
+		"updatedEventStartDate": "2024-10-06T21:30:00+00:00",
+		"updatedEventEndDate": "2024-10-07T01:30:00+00:00",
+		"admissionLevelAbbreviation": "VIP A.",
+		"venueEntranceDoor": "15A",
+		"venueEntrancePortal": "7B",
+		"albumIDs": ["1440818588"],
+		"additionalTicketAttributes": "3,4,5",
+		"entranceDescription": "Event at The Stadium",
+		"venueLocation": {
+			"latitude": 51.555557,
+			"longitude": 0.238041
+		}
 	},
+	"parkingInformationURL": "https://www.southbayjazzfestival.com/parking",
+	"directionsInformationURL": "https://apple.co/mapsapvc",
+	"contactVenueEmail": "rsvp_events@apple.com",
+	"relevantDates": [
+		{
+			"startDate": "2024-10-03T17:00:00+01:00",
+			"endDate": "2024-10-03T23:00:00+01:00"
+		},
+		{
+			"startDate": "2024-10-06T00:00:00+00:00",
+			"endDate": "2024-10-06T19:00:00+01:00"
+		}
+	],
 	"nfc": {
 		"message": "message",
 		"encryptionPublicKey": "MDkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDIgADwKMBv29ByaSLiGF0FctuyB+Hs2oZ1kDIYhTVllPexNE="

@@ -1,0 +1,83 @@
+{
+	"formatVersion": 1,
+	"serialNumber": "<serial number>",
+	"passTypeIdentifier": "pass.com.passkitgenerator",
+	"teamIdentifier": "F53WB8AE67",
+	"description": "Apple Event",
+	"organizationName": "Apple Inc.",
+	"foregroundColor": "#ffffff",
+	"backgroundColor": "#1595d7",
+	"labelColor": "#ffffff",
+	"voided": false,
+	"sharingProhibited": false,
+	"beacons": [
+		{
+			"proximityUUID": "B7FA1C44-B5B2-436D-AD33-C26651C498BB",
+			"relevantText": "Prepare to check in."
+		}
+	],
+	"locations": [{ "latitude": 37.3349, "longitude": -122.00902 }],
+	"barcode": {
+		"message": "<nfc message>",
+		"format": "PKBarcodeFormatQR",
+		"messageEncoding": "iso-8859-1",
+		"altText": "Special Apple Event"
+	},
+	"nfc": {
+		"message": "<nfc message>",
+		"encryptionPublicKey": "MDkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDIgADrCFAKUbtUh7oAnm5drhZKj5+CHO+B5Q0VdF4QTkd17I="
+	},
+	"eventTicket": {
+		"headerFields": [
+			{ "key": "eventDateTime", "label": "DATE", "value": "Sep 09, 2024" }
+		],
+		"primaryFields": [
+			{ "key": "eventGuest", "label": "Guest", "value": "<guest name>" }
+		],
+		"secondaryFields": [
+			{
+				"key": "eventVenue",
+				"label": "Venue",
+				"value": "Steve Jobs Theater"
+			}
+		],
+		"backFields": [
+			{
+				"key": "eventBackInformation",
+				"label": "Event Information",
+				"value": "A government-issued photo ID will be required at check-in.\n\nPasses are unique, non-transferable, and can only be used once.\n\nYour confirmation email contains details regarding arrival and event location.\n\nPhoto & Video Release:\nPhotographs, audio and/or video taken at the event by Apple, or others on behalf of Apple, may include your voice, image or likeness. You agree that Apple may use such photographs, audio and/or video, including those that may contain your voice, image or likeness, for any purpose on a worldwide basis in perpetuity, without any compensation to you, and you release Apple from all liability related thereto."
+			},
+			{
+				"key": "eventBackLocation",
+				"label": "EVENT LOCATION",
+				"value": "Steve Jobs Theater\n10600 N. Tantau Avenue\nCupertino, CA 95014"
+			}
+		]
+	},
+	"suppressStripShine": false,
+	"passLastModDate": "2024-08-21T00:00:00.000Z",
+	"semantics": {
+		"eventType": "PKEventTypeGeneric",
+		"eventName": "Special Apple Event",
+		"venueName": "Steve Jobs Theater",
+		"entranceDescription": "Apple Park Visitor Center",
+		"attendeeName": "<attendee name>",
+		"eventStartDate": "2024-10-04T17:00:00+00:00",
+		"eventEndDate": "2024-10-05T19:00:00+00:00",
+		"venueLocation": { "latitude": 37.3349, "longitude": -122.00902 },
+		"playlistIDs": []
+	},
+	"relevantDates": [
+		{
+			"startDate": "2024-10-03T17:00:00+00:00",
+			"endDate": "2024-10-03T23:00:00+00:00"
+		},
+		{
+			"startDate": "2024-10-04T17:00:00+00:00",
+			"endDate": "2024-10-04T19:00:00+00:00"
+		}
+	],
+	"directionsInformationURL": "https://apple.co/mapsapvc",
+	"contactVenueEmail": "rsvp_events@apple.com",
+	"preferredStyleSchemes": ["posterEventTicket", "eventTicket"]
+}

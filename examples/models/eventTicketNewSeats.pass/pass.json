@@ -4,12 +4,11 @@
 	"teamIdentifier": "F53WB8AE67",
 	"groupingIdentifier": "ticket-demo",
 	"description": "Description",
-	"organizationName": "Something",
-	"suppressStripShine": true,
-	"backgroundColor": "rgb(255, 255, 255)",
-	"foregroundColor": "rgb(0, 0, 0)",
-	"labelColor": "rgb(0, 0, 0)",
-	"logoText": "Demo Ticket",
+	"organizationName": "A some kind of event happening tomorrow",
+	"backgroundColor": "#ffffff",
+	"foregroundColor": "#000000",
+	"labelColor": "#FF0000",
+	"logoText": "Demo",
 	"preferredStyleSchemes": ["posterEventTicket", "eventTicket"],
 	"eventTicket": {
 		"headerFields": [
@@ -24,24 +23,47 @@
 		]
 	},
 	"semantics": {
+		"venueParkingLotsOpenDate": "2024-10-09T04:00:00+00:00",
+		"venueGatesOpenDate": "2024-10-09T06:00:00+00:00",
+		"eventLiveMessage": "This event is going to start soon! Try to relax your anus (cit.)",
 		"eventType": "PKEventTypeLivePerformance",
 		"eventName": "South Bay Jazz Festival",
-		"eventStartDate": "2024-10-15T10:00:00-06:00",
-		"performerNames": ["Big Zuu"],
-		"venueName": "Apple Park, Cupertino, CA",
+		"entranceDescription": "Event at The Stadium",
 		"venueLocation": {
-			"latitude": 37.332279,
-			"longitude": -122.010979
+			"latitude": 51.555557,
+			"longitude": 0.238041
 		},
-		"venueEntranceGate": "3",
+		"venueName": "The Stadium",
+		"performerNames": ["Lady Gaga"],
+		"eventStartDate": "2024-10-08T22:00:00+00:00",
+		"eventEndDate": "2024-10-09T23:59:59+00:00",
+		"tailgatingAllowed": true,
 		"seats": [
 			{
 				"seatNumber": "5",
 				"seatRow": "3",
-				"seatSection": "100"
+				"seatSection": "100",
+				"seatSectionColor": "#FFD700"
 			}
-		]
+		],
+		"artistIDs": ["984117861"]
 	},
+	"directionsInformationURL": "https://www.displaysomeinfoexample.com",
+	"contactVenueWebsite": "https://www.venueexample.com",
+	"relevantDates": [
+		{
+			"startDate": "2024-10-09T17:00:00+01:00",
+			"endDate": "2024-10-09T23:59:59+01:00"
+		},
+		{
+			"startDate": "2024-10-10T17:00:00+00:00",
+			"endDate": "2024-10-10T19:00:00+00:00"
+		},
+		{
+			"startDate": "2024-10-11T17:00:00+00:00",
+			"endDate": "2024-10-11T19:00:00+00:00"
+		}
+	],
 	"nfc": {
 		"message": "message",
 		"encryptionPublicKey": "MDkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDIgADwKMBv29ByaSLiGF0FctuyB+Hs2oZ1kDIYhTVllPexNE="

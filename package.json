@@ -40,6 +40,6 @@
 		"typescript": "^5.0.4"
 	},
 	"files": [
-		"lib/**/*.+(js|d.ts)!(*.map)"
+		"lib/**/*.+(js|d.ts)"
 	]
 }

@@ -10,7 +10,7 @@ import os from "node:os";
 // Please note this is experimental in NodeJS as
 // it is marked as Stage 3 in TC39
 // Should probably not be used in production
-import startData from "./startData.json" assert { "type": "json" };
+import startData from "./startData.json" assert { type: "json" };
 
 const PKPass = passkit.PKPass;
 

@@ -48,7 +48,6 @@ const RelevantDate = Joi.object<RelevantDate>().keys({
 	endDate: Joi.string().required(),
 });
 
-
 export interface FileBuffers {
 	[key: string]: Buffer;
 }
@@ -130,7 +129,6 @@ export interface PassProps {
 	 */
 	parkingInformationURL?: string;
 
-	
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -160,7 +158,7 @@ export interface PassProps {
 	 * "@domain event guide" must be used.
 	 */
 	contactVenuePhoneNumber?: string;
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -170,7 +168,7 @@ export interface PassProps {
 	 * "@domain event guide" must be used.
 	 */
 	contactVenueWebsite?: string;
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -180,7 +178,7 @@ export interface PassProps {
 	 * "@domain event guide" must be used.
 	 */
 	purchaseParkingURL?: string;
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -190,7 +188,7 @@ export interface PassProps {
 	 * "@domain event guide" must be used.
 	 */
 	merchandiseURL?: string;
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -200,7 +198,7 @@ export interface PassProps {
 	 * "@domain event guide" must be used.
 	 */
 	transitInformationURL?: string;
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -210,7 +208,7 @@ export interface PassProps {
 	 * "@domain event guide" must be used.
 	 */
 	accessibilityURL?: string;
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -323,7 +321,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	bagPolicyURL: Joi.string().regex(URL_REGEX),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -333,7 +331,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	orderFoodURL: Joi.string().regex(URL_REGEX),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -343,7 +341,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	parkingInformationURL: Joi.string().regex(URL_REGEX),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -353,7 +351,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	directionsInformationURL: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -363,7 +361,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	contactVenueEmail: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -373,7 +371,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	contactVenuePhoneNumber: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -383,7 +381,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	contactVenueWebsite: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -393,7 +391,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	purchaseParkingURL: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -403,7 +401,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	merchandiseURL: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -413,7 +411,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	transitInformationURL: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide
@@ -423,7 +421,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * "@domain event guide" must be used.
 	 */
 	accessibilityURL: Joi.string(),
-	
+
 	/**
 	 * New field for iOS 18 Event Ticket.
 	 * @domain event guide

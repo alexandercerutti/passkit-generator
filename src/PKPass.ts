@@ -220,11 +220,16 @@ export default class PKPass extends Bundle {
 	 * Allows accessing to iOS 18 new Event Ticket
 	 * property `preferredStyleSchemes`.
 	 *
-	 * @throws (automatically) if current type is not
-	 * "eventTicket".
+	 * @throws if current type is not "eventTicket".
 	 */
 
 	public get preferredStyleSchemes(): Schemas.PreferredStyleSchemes {
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_GET,
+			);
+		}
+
 		return this[propsSymbol].preferredStyleSchemes;
 	}
 
@@ -241,7 +246,7 @@ export default class PKPass extends Bundle {
 
 		if (this.type !== "eventTicket") {
 			throw new TypeError(
-				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE,
+				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_SET,
 			);
 		}
 

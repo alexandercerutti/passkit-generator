@@ -16,8 +16,10 @@ export const TRANSIT_TYPE = {
 } as const;
 
 export const PREFERRED_STYLE_SCHEMES = {
-	UNEXPECTED_PASS_TYPE:
+	UNEXPECTED_PASS_TYPE_SET:
 		"Cannot set preferredStyleSchemes on a pass with type different from eventTicket.",
+	UNEXPECTED_PASS_TYPE_GET:
+		"Cannot get preferredStyleSchemes on a pass with type different from eventTicket.",
 	INVALID:
 		"Cannot set preferredStyleSchemes because not compliant with Apple specifications - %s",
 } as const;

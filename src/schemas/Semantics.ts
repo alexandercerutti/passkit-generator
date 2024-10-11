@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { RGB_HEX_COLOR_REGEX } from ".";
+import { RGB_HEX_COLOR_REGEX } from "./regexps";
 
 /**
  * For a better description of every single field,

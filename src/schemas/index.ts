@@ -20,11 +20,7 @@ import { Semantics } from "./Semantics";
 import { CertificatesSchema } from "./Certificates";
 
 import * as Messages from "../messages";
-
-export const RGB_HEX_COLOR_REGEX =
-	/(#[a-fA-F0-9]{3,6}|rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\))/;
-
-const URL_REGEX = /https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/;
+import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps";
 
 export type PreferredStyleSchemes = ("posterEventTicket" | "eventTicket")[];
 

@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"outDir": "lib",
 		"declaration": true,
-		"sourceMap": true,
+		"inlineSourceMap": true,
 		"skipLibCheck": true
 	},
 	"include": ["src/**/*"]

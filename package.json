@@ -4,11 +4,11 @@
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
 	"main": "lib/index.js",
 	"scripts": {
-		"build": "npm run build:src",
-		"build:all": "npm run build:src && npm run build:examples",
-		"build:src": "rimraf lib && npx tsc -p tsconfig.dist.json",
-		"prepublishOnly": "npm run build && npm run test",
-		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" jest -c jest.config.cjs --silent"
+		"build": "pnpm build:src",
+		"build:all": "pnpm build:src && pnpm build:examples",
+		"build:src": "pnpm rimraf lib && pnpm tsc -p tsconfig.dist.json",
+		"prepublishOnly": "pnpm build && pnpm test",
+		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" pnpm jest -c jest.config.cjs --silent"
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",

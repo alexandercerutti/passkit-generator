@@ -42,7 +42,7 @@ export interface Field {
 	dateStyle?: PKDateStyleType;
 	ignoresTimeZone?: boolean;
 	isRelative?: boolean;
-	timeStyle?: string;
+	timeStyle?: PKDateStyleType;
 	currencyCode?: string;
 	numberStyle?: PKNumberStyleType;
 }

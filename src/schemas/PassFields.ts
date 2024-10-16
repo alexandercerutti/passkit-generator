@@ -19,6 +19,7 @@ export interface PassFields {
 	primaryFields: Field[];
 	secondaryFields: Field[];
 	transitType?: TransitType;
+	additionalInfoFields?: Field[];
 }
 
 export const PassFields = Joi.object<PassFields>().keys({
@@ -28,4 +29,5 @@ export const PassFields = Joi.object<PassFields>().keys({
 	primaryFields: Joi.array().items(Field),
 	secondaryFields: Joi.array().items(Field),
 	transitType: TransitType,
+	additionalInfoFields: Joi.array().items(Field),
 });

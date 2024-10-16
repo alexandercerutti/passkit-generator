@@ -20,6 +20,38 @@
 		],
 		"primaryFields": [
 			{ "key": "event_name", "label": "event-name", "value": "Dune" }
+		],
+		"additionalInfoFields": [
+			{
+				"key": "additionalInfo-1",
+				"label": "Additional Info 1",
+				"value": "The text to show"
+			},
+			{
+				"key": "additionalInfo-1",
+				"label": "Additional Info 2",
+				"value": "The text to show 2"
+			},
+			{
+				"key": "lineItem3",
+				"label": "Emergency Contact",
+				"value": "+1 8716 12736131",
+				"dataDetectorTypes": [
+					"PKDataDetectorTypePhoneNumber",
+					"used only on Watch"
+				]
+			},
+			{
+				"key": "lineItem4",
+				"label": "Test link",
+				"value": "https://apple.com",
+				"dataDetectorTypes": [
+					"PKDataDetectorTypeLink",
+					"used only on Watch"
+				],
+				"textAlignment": "<unused in these fields>",
+				"attributedValue": "<a href=\"https://apple.com\">Used literally on iPhone, used correctly on Watch</a>"
+			}
 		]
 	},
 	"semantics": {

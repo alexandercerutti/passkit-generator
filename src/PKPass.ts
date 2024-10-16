@@ -360,6 +360,18 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
+	 * Allows accessing to backFields object
+	 *
+	 * @throws (automatically) if no valid pass.json
+	 * 		has been parsed yet or, anyway, if current
+	 *		type is not "eventTicket".
+	 */
+
+	public get additionalInfoFields(): Schemas.Field[] {
+		return this[propsSymbol]["eventTicket"].additionalInfoFields;
+	}
+
+	/**
 	 * Allows setting a pass type.
 	 *
 	 * **Warning**: setting a type with this setter,
@@ -416,6 +428,11 @@ export default class PKPass extends Bundle {
 				type === "eventTicket" ? Schemas.FieldWithRow : Schemas.Field,
 			),
 			backFields /********/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			additionalInfoFields: new FieldsArray(
 				this,
 				sharedKeysPool,
 				Schemas.Field,
@@ -589,6 +606,7 @@ export default class PKPass extends Bundle {
 				auxiliaryFields = [],
 				backFields = [],
 				transitType,
+				additionalInfoFields = [],
 			} = data[type] || {};
 
 			this.headerFields.push(...headerFields);
@@ -596,6 +614,7 @@ export default class PKPass extends Bundle {
 			this.secondaryFields.push(...secondaryFields);
 			this.auxiliaryFields.push(...auxiliaryFields);
 			this.backFields.push(...backFields);
+			this.additionalInfoFields.push(...additionalInfoFields);
 
 			if (this.type === "boardingPass") {
 				this.transitType = transitType;

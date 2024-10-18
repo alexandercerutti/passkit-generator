@@ -360,7 +360,8 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
-	 * Allows accessing to backFields object
+	 * Allows accessing to new iOS 18
+	 * event ticket additional fields
 	 *
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
@@ -614,10 +615,13 @@ export default class PKPass extends Bundle {
 			this.secondaryFields.push(...secondaryFields);
 			this.auxiliaryFields.push(...auxiliaryFields);
 			this.backFields.push(...backFields);
-			this.additionalInfoFields.push(...additionalInfoFields);
 
 			if (this.type === "boardingPass") {
 				this.transitType = transitType;
+			}
+
+			if (this.type === "eventTicket") {
+				this.additionalInfoFields.push(...additionalInfoFields);
 			}
 		}
 	}

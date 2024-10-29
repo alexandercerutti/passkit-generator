@@ -20,12 +20,15 @@ jobs:
             WWDR: ${{ secrets.WWDR }}
             SIGNER_KEY_PASSPHRASE: ${{ secrets.SIGNER_KEY_PASSPHRASE }}
         steps:
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9
             - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
               with:
                   node-version: "14.x"
                   check-latest: true
             - run: |
-                  npm install
-                  npm run build
-                  npm run test
+                  pnpm install
+                  pnpm build
+                  pnpm test

@@ -8,19 +8,72 @@ const {
 } = require("@jest/globals");
 const fs = require("node:fs");
 const path = require("node:path");
+const forge = require("node-forge");
 const { default: PKPass } = require("../lib/PKPass");
+
+/**
+ * @returns {[cert: Buffer, key: Buffer]}
+ */
+
+function generateCertificateAndPrivateKey() {
+	const keys = forge.pki.rsa.generateKeyPair(2048);
+	const cert = forge.pki.createCertificate();
+
+	cert.publicKey = keys.publicKey;
+
+	cert.serialNumber = "01";
+	cert.validity.notBefore = new Date();
+	cert.validity.notAfter = new Date();
+	cert.validity.notAfter.setFullYear(
+		cert.validity.notBefore.getFullYear() + 1,
+	);
+
+	const attrs = [
+		{
+			name: "commonName",
+			value: "example.org",
+		},
+		{
+			name: "countryName",
+			value: "TS",
+		},
+		{
+			shortName: "ST",
+			value: "Test",
+		},
+		{
+			name: "localityName",
+			value: "Test",
+		},
+		{
+			name: "organizationName",
+			value: "Test",
+		},
+		{
+			shortName: "OU",
+			value: "Test",
+		},
+	];
+
+	cert.setIssuer(attrs);
+	cert.setSubject(attrs);
+	cert.sign(keys.privateKey);
+
+	return [
+		Buffer.from(forge.pki.certificateToPem(cert)),
+		Buffer.from(forge.pki.privateKeyToPem(keys.privateKey)),
+	];
+}
+
+const [signerCertBuffer, privateKeyBuffer] = generateCertificateAndPrivateKey();
 
 /**
  * SIGNER_CERT, SIGNER_KEY, WWDR and SIGNER_KEY_PASSPHRASE are also set
  * as secrets in Github for run tests on Github Actions
  */
 
-const SIGNER_CERT =
-	process.env.SIGNER_CERT ||
-	fs.readFileSync(path.resolve(__dirname, "../certificates/signerCert.pem"));
-const SIGNER_KEY =
-	process.env.SIGNER_KEY ||
-	fs.readFileSync(path.resolve(__dirname, "../certificates/signerKey.pem"));
+const SIGNER_CERT = process.env.SIGNER_CERT || signerCertBuffer;
+const SIGNER_KEY = process.env.SIGNER_KEY || privateKeyBuffer;
 const WWDR =
 	process.env.WWDR ||
 	fs.readFileSync(path.resolve(__dirname, "../certificates/WWDR.pem"));
@@ -1147,5 +1200,100 @@ describe("PKPass", () => {
 				"application/vnd.apple.pkpasses",
 			);
 		});
+	});
+
+	describe("eventTicket new layout", () => {
+		it("should contain preferredStyleSchemes if coming from an imported pass json", () => {
+			const passjson = modelFiles["pass.json"];
+			const changedPassJson = Buffer.from(
+				JSON.stringify(
+					Object.assign({}, JSON.parse(passjson.toString("utf-8")), {
+						preferredStyleSchemes: [
+							"posterEventTicket",
+							"eventTicket",
+						],
+						eventTicket: {},
+					}),
+				),
+				"utf-8",
+			);
+
+			pkpass = new PKPass(
+				Object.assign({}, modelFiles, { "pass.json": changedPassJson }),
+				{
+					signerCert: SIGNER_CERT,
+					signerKey: SIGNER_KEY,
+					wwdr: WWDR,
+					signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+				},
+			);
+
+			expect(pkpass.preferredStyleSchemes).toEqual([
+				"posterEventTicket",
+				"eventTicket",
+			]);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.preferredStyleSchemes).not.toBeUndefined();
+			expect(passjsonGenerated.preferredStyleSchemes).toEqual([
+				"posterEventTicket",
+				"eventTicket",
+			]);
+		});
+
+		it("should contain preferredStyleSchemes if coming from the setter (legacy order)", () => {
+			pkpass.type = "eventTicket";
+
+			pkpass.preferredStyleSchemes = ["eventTicket", "posterEventTicket"];
+
+			expect(pkpass.preferredStyleSchemes).toEqual([
+				"eventTicket",
+				"posterEventTicket",
+			]);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.preferredStyleSchemes).not.toBeUndefined();
+			expect(passjsonGenerated.preferredStyleSchemes).toEqual([
+				"eventTicket",
+				"posterEventTicket",
+			]);
+		});
+
+		it("should contain preferredStyleSchemes if coming from the setter (new order)", () => {
+			pkpass.type = "eventTicket";
+
+			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
+
+			expect(pkpass.preferredStyleSchemes).toEqual([
+				"posterEventTicket",
+				"eventTicket",
+			]);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.preferredStyleSchemes).not.toBeUndefined();
+			expect(passjsonGenerated.preferredStyleSchemes).toEqual([
+				"posterEventTicket",
+				"eventTicket",
+			]);
+		});
+	});
+
+	it("preferredStyleSchemes setter should throw if pass is not an eventTicket", () => {
+		pkpass.type = "boardingPass";
+
+		expect(() => {
+			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
+		}).toThrowError();
+	});
+
+	it("preferredStyleSchemes getter should throw if pass is not an eventTicket", () => {
+		pkpass.type = "boardingPass";
+
+		expect(() => {
+			pkpass.preferredStyleSchemes;
+		}).toThrowError();
 	});
 });

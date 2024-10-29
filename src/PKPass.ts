@@ -1,6 +1,6 @@
-import { Stream } from "stream";
-import { Buffer } from "buffer";
-import path from "path";
+import { Stream } from "node:stream";
+import { Buffer } from "node:buffer";
+import path from "node:path";
 import FieldsArray from "./FieldsArray";
 import Bundle, { filesSymbol } from "./Bundle";
 import getModelFolderContents from "./getModelFolderContents";
@@ -217,6 +217,49 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
+	 * Allows accessing to iOS 18 new Event Ticket
+	 * property `preferredStyleSchemes`.
+	 *
+	 * @throws if current type is not "eventTicket".
+	 */
+
+	public get preferredStyleSchemes(): Schemas.PreferredStyleSchemes {
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_GET,
+			);
+		}
+
+		return this[propsSymbol].preferredStyleSchemes;
+	}
+
+	/**
+	 * Allows setting a preferredStyleSchemes property
+	 * for a eventTicket.
+	 *
+	 * @throws if current type is not "eventTicket".
+	 * @param value
+	 */
+
+	public set preferredStyleSchemes(value: Schemas.PreferredStyleSchemes) {
+		Utils.assertUnfrozen(this);
+
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_SET,
+			);
+		}
+
+		Schemas.assertValidity(
+			Schemas.PreferredStyleSchemes,
+			value,
+			Messages.PREFERRED_STYLE_SCHEMES.INVALID,
+		);
+
+		this[propsSymbol].preferredStyleSchemes = value;
+	}
+
+	/**
 	 * Allows setting a transitType property
 	 * for a boardingPass.
 	 *
@@ -317,6 +360,19 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
+	 * Allows accessing to new iOS 18
+	 * event ticket additional fields
+	 *
+	 * @throws (automatically) if no valid pass.json
+	 * 		has been parsed yet or, anyway, if current
+	 *		type is not "eventTicket".
+	 */
+
+	public get additionalInfoFields(): Schemas.Field[] {
+		return this[propsSymbol]["eventTicket"].additionalInfoFields;
+	}
+
+	/**
 	 * Allows setting a pass type.
 	 *
 	 * **Warning**: setting a type with this setter,
@@ -345,6 +401,7 @@ export default class PKPass extends Bundle {
 			 */
 
 			this[propsSymbol][this.type] = undefined;
+			this[propsSymbol].preferredStyleSchemes = undefined;
 		}
 
 		const sharedKeysPool = new Set<string>();
@@ -372,6 +429,11 @@ export default class PKPass extends Bundle {
 				type === "eventTicket" ? Schemas.FieldWithRow : Schemas.Field,
 			),
 			backFields /********/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.Field,
+			),
+			additionalInfoFields: new FieldsArray(
 				this,
 				sharedKeysPool,
 				Schemas.Field,
@@ -545,6 +607,7 @@ export default class PKPass extends Bundle {
 				auxiliaryFields = [],
 				backFields = [],
 				transitType,
+				additionalInfoFields = [],
 			} = data[type] || {};
 
 			this.headerFields.push(...headerFields);
@@ -555,6 +618,10 @@ export default class PKPass extends Bundle {
 
 			if (this.type === "boardingPass") {
 				this.transitType = transitType;
+			}
+
+			if (this.type === "eventTicket") {
+				this.additionalInfoFields.push(...additionalInfoFields);
 			}
 		}
 	}

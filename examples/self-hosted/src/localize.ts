@@ -6,7 +6,7 @@
 
 import { app } from "./webserver";
 import { getCertificates } from "./shared";
-import path from "path";
+import path from "node:path";
 import { PKPass } from "passkit-generator";
 
 app.route("/localize/:modelName").get(async (request, response) => {

@@ -6,24 +6,24 @@
 	"author": "Alexander P. Cerutti <cerutti.alexander@gmail.com>",
 	"license": "ISC",
 	"scripts": {
-		"service:link-pg": "cd ../.. && npm run build && npm link",
-		"preinstall": "npm run clear:deps",
-		"postinstall": "npm run service:link-pg && npm link passkit-generator",
+		"service:link-pg": "cd ../.. && pnpm build && pnpm link",
+		"preinstall": "pnpm clear:deps",
+		"postinstall": "pnpm service:link-pg && pnpm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
-		"example": "npx ts-node src/index.ts",
+		"example": "pnpm ts-node src/index.ts",
 		"example:debug": "node -r ts-node/register --inspect-brk src/index.ts"
 	},
 	"peerDependencies": {
 		"passkit-generator": "latest"
 	},
 	"dependencies": {
-		"express": "^4.17.3",
+		"express": "^4.21.1",
 		"node-fetch": "^3.2.3",
-		"tslib": "^2.3.1"
+		"tslib": "^2.7.0"
 	},
 	"devDependencies": {
 		"@types/express": "4.17.13",
-		"ts-node": "^10.7.0",
-		"typescript": "^4.6.3"
+		"ts-node": "^10.9.2",
+		"typescript": "^5.6.3"
 	}
 }

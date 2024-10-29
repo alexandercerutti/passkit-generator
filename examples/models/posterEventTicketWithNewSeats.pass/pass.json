@@ -1,0 +1,96 @@
+{
+	"formatVersion": 1,
+	"passTypeIdentifier": "pass.com.passkitgenerator",
+	"teamIdentifier": "F53WB8AE67",
+	"groupingIdentifier": "ticket-demo",
+	"description": "Description",
+	"organizationName": "A some kind of event happening tomorrow",
+	"backgroundColor": "#ffffff",
+	"foregroundColor": "#000000",
+	"labelColor": "#FF0000",
+	"logoText": "Demo",
+	"preferredStyleSchemes": ["posterEventTicket", "eventTicket"],
+	"eventTicket": {
+		"headerFields": [
+			{
+				"key": "event_date",
+				"label": "event-date",
+				"value": "26.09.2024"
+			}
+		],
+		"primaryFields": [
+			{ "key": "event_name", "label": "event-name", "value": "Dune" }
+		],
+		"additionalInfoFields": [
+			{
+				"key": "additionalInfo-1",
+				"label": "Additional Info 1",
+				"value": "The text to show"
+			},
+			{
+				"key": "additionalInfo-2",
+				"label": "Additional Info 2",
+				"value": "The text to show 2"
+			},
+			{
+				"key": "lineItem3",
+				"label": "Emergency Contact",
+				"value": "+1 8716 12736131",
+				"dataDetectorTypes": ["PKDataDetectorTypePhoneNumber"]
+			},
+			{
+				"key": "lineItem4",
+				"label": "Test link",
+				"value": "https://apple.com",
+				"dataDetectorTypes": ["PKDataDetectorTypeLink"],
+				"attributedValue": "<a href=\"https://apple.com\">Used literally on iPhone, used correctly on Watch</a>"
+			}
+		]
+	},
+	"semantics": {
+		"venueParkingLotsOpenDate": "2024-10-09T04:00:00+00:00",
+		"venueGatesOpenDate": "2024-10-09T06:00:00+00:00",
+		"eventLiveMessage": "This event is going to start soon! Try to relax your anus (cit.)",
+		"eventType": "PKEventTypeLivePerformance",
+		"eventName": "South Bay Jazz Festival",
+		"entranceDescription": "Event at The Stadium",
+		"venueLocation": {
+			"latitude": 51.555557,
+			"longitude": 0.238041
+		},
+		"venueName": "The Stadium",
+		"performerNames": ["Lady Gaga"],
+		"eventStartDate": "2024-10-08T22:00:00+00:00",
+		"eventEndDate": "2024-10-09T23:59:59+00:00",
+		"tailgatingAllowed": true,
+		"seats": [
+			{
+				"seatNumber": "5",
+				"seatRow": "3",
+				"seatSection": "100",
+				"seatSectionColor": "#FFD700"
+			}
+		],
+		"artistIDs": ["984117861"]
+	},
+	"directionsInformationURL": "https://www.displaysomeinfoexample.com",
+	"contactVenueWebsite": "https://www.venueexample.com",
+	"relevantDates": [
+		{
+			"startDate": "2024-10-09T17:00:00+01:00",
+			"endDate": "2024-10-09T23:59:59+01:00"
+		},
+		{
+			"startDate": "2024-10-10T17:00:00+00:00",
+			"endDate": "2024-10-10T19:00:00+00:00"
+		},
+		{
+			"startDate": "2024-10-11T17:00:00+00:00",
+			"endDate": "2024-10-11T19:00:00+00:00"
+		}
+	],
+	"nfc": {
+		"message": "message",
+		"encryptionPublicKey": "MDkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDIgADwKMBv29ByaSLiGF0FctuyB+Hs2oZ1kDIYhTVllPexNE="
+	}
+}

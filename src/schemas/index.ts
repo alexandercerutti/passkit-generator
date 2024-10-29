@@ -9,7 +9,7 @@ export * from "./Personalize";
 export * from "./Certificates";
 
 import Joi from "joi";
-import { Buffer } from "buffer";
+import type { Buffer } from "node:buffer";
 
 import { Barcode } from "./Barcode";
 import { Location } from "./Location";
@@ -20,9 +20,33 @@ import { Semantics } from "./Semantics";
 import { CertificatesSchema } from "./Certificates";
 
 import * as Messages from "../messages";
+import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps";
 
-const RGB_COLOR_REGEX =
-	/rgb\(\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*,\s*(?:[01]?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\s*\)/;
+export type PreferredStyleSchemes = ("posterEventTicket" | "eventTicket")[];
+
+export const PreferredStyleSchemes = Joi.array().items(
+	"posterEventTicket",
+	"eventTicket",
+) satisfies Joi.Schema<PreferredStyleSchemes>;
+
+/**
+ * For newly-introduced event tickets
+ * in iOS 18
+ */
+
+interface RelevantDate {
+	startDate: string;
+	endDate: string;
+}
+
+/**
+ * Minimum supported version: iOS 18
+ */
+
+const RelevantDate = Joi.object<RelevantDate>().keys({
+	startDate: Joi.string().required(),
+	endDate: Joi.string().required(),
+});
 
 export interface FileBuffers {
 	[key: string]: Buffer;
@@ -57,6 +81,9 @@ export interface PassProps {
 	beacons?: Beacon[];
 	barcodes?: Barcode[];
 	relevantDate?: string;
+
+	relevantDates?: RelevantDate[];
+
 	expirationDate?: string;
 	locations?: Location[];
 
@@ -65,6 +92,144 @@ export interface PassProps {
 	coupon?: PassFields;
 	generic?: PassFields;
 	storeCard?: PassFields;
+
+	/**
+	 * New field for iOS 18
+	 * Event Ticket
+	 */
+	preferredStyleSchemes?: PreferredStyleSchemes;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	bagPolicyURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	orderFoodURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	parkingInformationURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	directionsInformationURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenueEmail?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenuePhoneNumber?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenueWebsite?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	purchaseParkingURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	merchandiseURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	transitInformationURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	accessibilityURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	addOnURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	transferURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	sellURL?: string;
 }
 
 /**
@@ -77,8 +242,10 @@ type PassMethodsProps =
 	| "beacons"
 	| "barcodes"
 	| "relevantDate"
+	| "relevantDates"
 	| "expirationDate"
-	| "locations";
+	| "locations"
+	| "preferredStyleSchemes";
 
 export type PassTypesProps =
 	| "boardingPass"
@@ -104,8 +271,10 @@ export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
 	beacons: Joi.array().items(Beacon),
 	barcodes: Joi.array().items(Barcode),
 	relevantDate: Joi.string().isoDate(),
+	relevantDates: Joi.array().items(RelevantDate),
 	expirationDate: Joi.string().isoDate(),
 	locations: Joi.array().items(Location),
+	preferredStyleSchemes: PreferredStyleSchemes,
 });
 
 export const PassKindsProps = Joi.object<PassKindsProps>({
@@ -136,15 +305,144 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	suppressStripShine: Joi.boolean(),
 	maxDistance: Joi.number().positive(),
 	authenticationToken: Joi.string().min(16),
-	labelColor: Joi.string().regex(RGB_COLOR_REGEX),
-	backgroundColor: Joi.string().regex(RGB_COLOR_REGEX),
-	foregroundColor: Joi.string().regex(RGB_COLOR_REGEX),
+	labelColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+	backgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+	foregroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 	associatedStoreIdentifiers: Joi.array().items(Joi.number()),
 	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
-	// parsing url as set of words and nums followed by dots, optional port and any possible path after
-	webServiceURL: Joi.string().regex(
-		/https?:\/\/(?:[a-z0-9]+\.?)+(?::\d{2,})?(?:\/[\S]+)*/,
-	),
+	webServiceURL: Joi.string().regex(URL_REGEX),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	bagPolicyURL: Joi.string().regex(URL_REGEX),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	orderFoodURL: Joi.string().regex(URL_REGEX),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	parkingInformationURL: Joi.string().regex(URL_REGEX),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	directionsInformationURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenueEmail: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenuePhoneNumber: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	contactVenueWebsite: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	purchaseParkingURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	merchandiseURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	transitInformationURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	accessibilityURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * @domain event guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@domain event guide" must be used.
+	 */
+	addOnURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	transferURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will add a button among options near "share"
+	 */
+	sellURL: Joi.string(),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<
@@ -175,7 +473,7 @@ export const Template = Joi.object<Template>({
  */
 
 export function assertValidity<T>(
-	schema: Joi.ObjectSchema<T> | Joi.StringSchema,
+	schema: Joi.ObjectSchema<T> | Joi.StringSchema | Joi.Schema<T>,
 	data: T,
 	customErrorMessage?: string,
 ): void {

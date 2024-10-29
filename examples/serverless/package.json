@@ -7,21 +7,21 @@
 	"license": "ISC",
 	"main": "src/index.js",
 	"scripts": {
-		"service:link-pg": "cd ../.. && npm run build && npm link",
-		"preinstall": "npm run clear:deps",
-		"postinstall": "npm run service:link-pg && npm link passkit-generator",
+		"service:link-pg": "cd ../.. && pnpm build && pnpm link",
+		"preinstall": "pnpm clear:deps",
+		"postinstall": "pnpm service:link-pg && pnpm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
-		"example": "npx serverless@3 offline --host 0.0.0.0; :'specifying host due to WSL limits'"
+		"example": "pnpm serverless@3 offline --host 0.0.0.0; :'specifying host due to WSL limits'"
 	},
 	"dependencies": {
-		"aws-sdk": "^2.1092.0",
-		"tslib": "^2.3.1"
+		"aws-sdk": "^2.1691.0",
+		"tslib": "^2.7.0"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.93",
-		"serverless-offline": "^8.5.0",
-		"serverless-plugin-typescript": "^2.1.1",
-		"serverless-s3-local": "^0.6.22",
-		"typescript": "^4.6.3"
+		"@types/aws-lambda": "^8.10.145",
+		"serverless-offline": "^8.8.1",
+		"serverless-plugin-typescript": "^2.1.5",
+		"serverless-s3-local": "^0.8.5",
+		"typescript": "^5.6.3"
 	}
 }

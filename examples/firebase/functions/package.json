@@ -2,15 +2,15 @@
 	"name": "functions",
 	"description": "Cloud Functions for Firebase",
 	"scripts": {
-		"serve": "npm run build && npx firebase emulators:start --only functions",
-		"shell": "npm run build && npx firebase functions:shell",
-		"deploy": "npx firebase deploy --only functions",
-		"logs": "npx firebase functions:log",
-		"service:link-pg": "cd ../../.. && npm run build && npm link",
-		"predev:install": "npm run clear:deps",
-		"dev:install": "npm run service:link-pg && npm link passkit-generator",
+		"serve": "pnpm build && pnpm firebase emulators:start --only functions",
+		"shell": "pnpm build && pnpm firebase functions:shell",
+		"deploy": "pnpm firebase deploy --only functions",
+		"logs": "pnpm firebase functions:log",
+		"service:link-pg": "cd ../../.. && pnpm build && pnpm link",
+		"predev:install": "pnpm clear:deps",
+		"dev:install": "pnpm service:link-pg && pnpm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
-		"build": "rm -rf lib && npx tsc"
+		"build": "rm -rf lib && pnpm tsc"
 	},
 	"engines": {
 		"node": "16"
@@ -18,16 +18,16 @@
 	"type": "module",
 	"main": "lib/index.js",
 	"dependencies": {
-		"firebase-admin": "^11.10.1",
-		"firebase-functions": "^4.4.1",
-		"tslib": "^2.6.1"
+		"firebase-admin": "^11.11.1",
+		"firebase-functions": "^4.9.0",
+		"tslib": "^2.7.0"
 	},
 	"peerDependencies": {
 		"passkit-generator": "latest"
 	},
 	"devDependencies": {
 		"firebase-functions-test": "^0.2.3",
-		"firebase-tools": "^12.4.6"
+		"firebase-tools": "^12.9.1"
 	},
 	"private": true
 }

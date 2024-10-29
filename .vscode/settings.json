@@ -5,5 +5,5 @@
 	"editor.smoothScrolling": true,
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 
-	"jest.jestCommandLine": "node --no-warnings ./node_modules/.bin/jest -c jest.config.cjs --runInBand --silent"
+	"jest.jestCommandLine": "NODE_OPTIONS=\"--warnings\" pnpm jest -c jest.config.cjs --runInBand --silent"
 }

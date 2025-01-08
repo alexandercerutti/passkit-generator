@@ -209,9 +209,9 @@ export interface Semantics {
 	/**
 	 * For newly-introduced event tickets
 	 * in iOS 18
-	 *
-	 * This seem to exists but it is not
-	 * known yet what it does...
+	 * 
+	 * Shows a message in the live activity
+	 * when the activity starts.
 	 */
 	eventLiveMessage?: string;
 
@@ -428,9 +428,9 @@ export const Semantics = Joi.object<Semantics>().keys({
 	/**
 	 * For newly-introduced event tickets
 	 * in iOS 18
-	 *
-	 * This seem to exists but it is not
-	 * known yet what it does...
+	 * 
+	 * Shows a message in the live activity
+	 * when the activity starts.
 	 */
 	eventLiveMessage: Joi.string(),
 

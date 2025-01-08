@@ -60,6 +60,17 @@ declare namespace SemanticTagType {
 		seatSectionColor?: string;
 	}
 
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18.
+	 */
+
+	interface EventDateInfo {
+		date: string;
+		ignoreTimeComponents?: boolean;
+		timeZone?: string;
+	}
+
 	interface WifiNetwork {
 		password: string;
 		ssid: string;
@@ -81,6 +92,12 @@ const PersonNameComponent =
 		nickname: Joi.string(),
 		phoneticRepresentation: Joi.string(),
 	});
+
+const EventDateInfo = Joi.object<SemanticTagType.EventDateInfo>().keys({
+	date: Joi.string().isoDate().required(),
+	ignoreTimeComponents: Joi.boolean(),
+	timeZone: Joi.string(),
+});
 
 const SeatSemantics = Joi.object<SemanticTagType.Seat>().keys({
 	seatSection: Joi.string(),
@@ -217,6 +234,19 @@ export interface Semantics {
 
 	eventName?: string;
 	eventStartDate?: string;
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18.
+	 *
+	 * Can be used as an alternative way to
+	 * show show start date, with more control
+	 * on time and timeZone details and as
+	 * a way to show the event guide, both
+	 * instead of `eventStartDate`.
+	 */
+	eventStartDateInfo?: SemanticTagType.EventDateInfo;
+
 	eventType?:
 		| "PKEventTypeGeneric"
 		| "PKEventTypeLivePerformance"
@@ -433,6 +463,18 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 * when the activity starts.
 	 */
 	eventLiveMessage: Joi.string(),
+
+	/**
+	 * For newly-introduced event tickets
+	 * in iOS 18.
+	 *
+	 * Can be used as an alternative way to
+	 * show show start date, with more control
+	 * on time and timeZone details and as
+	 * a way to show the event guide, both
+	 * instead of `eventStartDate`.
+	 */
+	eventStartDateInfo: EventDateInfo,
 
 	eventStartDate: Joi.string(),
 	eventType: Joi.string().regex(

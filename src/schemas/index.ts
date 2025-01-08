@@ -258,6 +258,13 @@ export interface PassProps {
 	 * Will add a button among options near "share"
 	 */
 	sellURL?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will remove an automatic shadow in the new
+	 * event ticket layouts.
+	 */
+	suppressHeaderDarkening?: boolean;
 }
 
 /**
@@ -471,6 +478,13 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * Will add a button among options near "share"
 	 */
 	sellURL: Joi.string(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Will remove an automatic shadow in the new
+	 * event ticket layouts.
+	 */
+	suppressHeaderDarkening: Joi.boolean(),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

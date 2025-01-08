@@ -30,23 +30,37 @@ export const PreferredStyleSchemes = Joi.array().items(
 ) satisfies Joi.Schema<PreferredStyleSchemes>;
 
 /**
- * For newly-introduced event tickets
- * in iOS 18
+ * A single interval can span at most 24 hours
  */
-
-interface RelevantDate {
+interface RelevancyInterval {
 	startDate: string;
 	endDate: string;
 }
 
+interface RelevancyEntry {
+	relevantDate: string;
+}
+
 /**
- * Minimum supported version: iOS 18
+ * Newly introduced in iOS 18.
+ * Using a RelevancyInterval, will trigger a live activity on
+ * new event ticket passes.
+ *
+ * Using a RelevancyEntry, will match the behavior of the
+ * currently deprecated property `relevantDate`.
  */
 
-const RelevantDate = Joi.object<RelevantDate>().keys({
-	startDate: Joi.string().required(),
-	endDate: Joi.string().required(),
-});
+export type RelevantDate = RelevancyInterval | RelevancyEntry;
+
+const RelevantDate = Joi.alternatives(
+	Joi.object<RelevancyInterval>().keys({
+		startDate: Joi.string().required(),
+		endDate: Joi.string().required(),
+	}),
+	Joi.object<RelevancyEntry>().keys({
+		relevantDate: Joi.string().required(),
+	}),
+);
 
 export interface FileBuffers {
 	[key: string]: Buffer;
@@ -80,6 +94,11 @@ export interface PassProps {
 	nfc?: NFC;
 	beacons?: Beacon[];
 	barcodes?: Barcode[];
+
+	/**
+	 * @deprecated starting from iOS 18
+	 * Use `relevantDates`
+	 */
 	relevantDate?: string;
 
 	relevantDates?: RelevantDate[];

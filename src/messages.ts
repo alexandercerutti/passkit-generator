@@ -43,6 +43,10 @@ export const FIELDS = {
 		"Cannot add field with key '%s': another field already owns this key. Ignored.",
 } as const;
 
+export const RELEVANT_DATE = {
+	INVALID: "Cannot set relevant date. Date format is invalid",
+} as const;
+
 export const DATE = {
 	INVALID: "Cannot set %s. Invalid date %s",
 } as const;

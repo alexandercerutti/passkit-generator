@@ -87,6 +87,11 @@ const modelFiles = {};
 
 const EXAMPLE_PATH_RELATIVE = "../examples/models/examplePass.pass";
 
+/**
+ * @param {string} folder
+ * @returns
+ */
+
 function unpackFolder(folder) {
 	const entryList = fs.readdirSync(path.resolve(__dirname, folder));
 
@@ -859,35 +864,107 @@ describe("PKPass", () => {
 		});
 	});
 
-	describe("relevant date", () => {
-		it("should set pass relevant date", () => {
-			pkpass.setRelevantDate(new Date("2023-04-11T00:15+10:00"));
+	describe("Date relevancy", () => {
+		describe("(deprecated iOS 18) (root).relevantDate", () => {
+			it("should set pass relevant date", () => {
+				pkpass.setRelevantDate(new Date("2023-04-11T00:15+10:00"));
 
-			const passjsonGenerated = getGeneratedPassJson(pkpass);
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.relevantDate).toBe(
-				"2023-04-10T14:15:00.000Z",
-			);
+				expect(passjsonGenerated.relevantDate).toBe(
+					"2023-04-10T14:15:00.000Z",
+				);
+			});
+
+			it("should reset relevant date", () => {
+				pkpass.setRelevantDate(new Date(2023, 3, 10, 14, 15));
+				pkpass.setRelevantDate(null);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDate).toBeUndefined();
+			});
+
+			it("should throw if an invalid date is received", () => {
+				expect(() =>
+					// @ts-expect-error
+					pkpass.setRelevantDate("32/18/228317"),
+				).toThrowError();
+				// @ts-expect-error
+				expect(() => pkpass.setRelevantDate(undefined)).toThrowError();
+				// @ts-expect-error
+				expect(() => pkpass.setRelevantDate(5)).toThrowError();
+				// @ts-expect-error
+				expect(() => pkpass.setRelevantDate({})).toThrowError();
+			});
 		});
 
-		it("should reset relevant date", () => {
-			pkpass.setRelevantDate(new Date(2023, 3, 10, 14, 15));
-			pkpass.setRelevantDate(null);
+		describe("setRelevantDates", () => {
+			it("should accept strings", () => {
+				pkpass.setRelevantDates([
+					{
+						startDate: "2025-01-08T22:17:30.000Z",
+						endDate: "2025-01-08T23:58:25.000Z",
+					},
+					{
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
 
-			const passjsonGenerated = getGeneratedPassJson(pkpass);
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.relevantDate).toBeUndefined();
-		});
+				expect(passjsonGenerated.relevantDates).toMatchObject([
+					{
+						startDate: "2025-01-08T22:17:30.000Z",
+						endDate: "2025-01-08T23:58:25.000Z",
+					},
+					{
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+			});
 
-		it("should throw if an invalid date is received", () => {
-			// @ts-expect-error
-			expect(() => pkpass.setRelevantDate("32/18/228317")).toThrowError();
-			// @ts-expect-error
-			expect(() => pkpass.setRelevantDate(undefined)).toThrowError();
-			// @ts-expect-error
-			expect(() => pkpass.setRelevantDate(5)).toThrowError();
-			// @ts-expect-error
-			expect(() => pkpass.setRelevantDate({})).toThrowError();
+			it("should accept dates", () => {
+				pkpass.setRelevantDates([
+					{
+						startDate: new Date(2025, 1, 8, 23, 58, 25),
+						endDate: new Date(2025, 1, 8, 23, 58, 25),
+					},
+					{
+						relevantDate: new Date(2025, 1, 8, 23, 58, 25),
+					},
+				]);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDates).toMatchObject([
+					{
+						startDate: "2025-02-08T22:58:25.000Z",
+						endDate: "2025-02-08T22:58:25.000Z",
+					},
+					{
+						relevantDate: "2025-02-08T22:58:25.000Z",
+					},
+				]);
+			});
+
+			it("should allow resetting", () => {
+				pkpass.setRelevantDates([
+					{
+						startDate: "2025-01-08T22:17:30.000Z",
+						endDate: "2025-01-08T23:58:25.000Z",
+					},
+					{
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+
+				pkpass.setRelevantDates(null);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDates).toBeUndefined();
+			});
 		});
 	});
 

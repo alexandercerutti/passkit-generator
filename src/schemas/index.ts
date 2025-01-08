@@ -32,13 +32,13 @@ export const PreferredStyleSchemes = Joi.array().items(
 /**
  * A single interval can span at most 24 hours
  */
-interface RelevancyInterval {
-	startDate: string;
-	endDate: string;
+export interface RelevancyInterval {
+	startDate: string | Date;
+	endDate: string | Date;
 }
 
-interface RelevancyEntry {
-	relevantDate: string;
+export interface RelevancyEntry {
+	relevantDate: string | Date;
 }
 
 /**
@@ -52,13 +52,22 @@ interface RelevancyEntry {
 
 export type RelevantDate = RelevancyInterval | RelevancyEntry;
 
-const RelevantDate = Joi.alternatives(
+export const RelevantDate = Joi.alternatives(
 	Joi.object<RelevancyInterval>().keys({
-		startDate: Joi.string().required(),
-		endDate: Joi.string().required(),
+		startDate: Joi.alternatives(
+			Joi.string().isoDate(),
+			Joi.date().iso(),
+		).required(),
+		endDate: Joi.alternatives(
+			Joi.string().isoDate(),
+			Joi.date().iso(),
+		).required(),
 	}),
 	Joi.object<RelevancyEntry>().keys({
-		relevantDate: Joi.string().required(),
+		relevantDate: Joi.alternatives(
+			Joi.string().isoDate(),
+			Joi.date().iso(),
+		).required(),
 	}),
 );
 
@@ -492,7 +501,7 @@ export const Template = Joi.object<Template>({
  */
 
 export function assertValidity<T>(
-	schema: Joi.ObjectSchema<T> | Joi.StringSchema | Joi.Schema<T>,
+	schema: Joi.Schema<T>,
 	data: T,
 	customErrorMessage?: string,
 ): void {
@@ -524,7 +533,7 @@ export function assertValidity<T>(
  */
 
 export function validate<T extends Object>(
-	schema: Joi.ObjectSchema<T> | Joi.StringSchema,
+	schema: Joi.Schema<T>,
 	options: T,
 ): T {
 	const validationResult = schema.validate(options, {

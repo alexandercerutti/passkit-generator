@@ -957,6 +957,54 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
+	 * Allows setting a series of relevancy intervals or
+	 * relevancy entries for the pass.
+	 *
+	 * @param {Schemas.RelevantDate[] | null} relevancyEntries
+	 * @returns {void}
+	 */
+
+	public setRelevantDates(
+		relevancyEntries: Schemas.RelevantDate[] | null,
+	): void {
+		Utils.assertUnfrozen(this);
+
+		if (relevancyEntries === null) {
+			this[propsSymbol]["relevantDates"] = undefined;
+			return;
+		}
+
+		const processedDateEntries = relevancyEntries.reduce<
+			Schemas.RelevantDate[]
+		>((acc, entry) => {
+			try {
+				Schemas.validate(Schemas.RelevantDate, entry);
+
+				if (isRelevantEntry(entry)) {
+					acc.push({
+						relevantDate: Utils.processDate(
+							new Date(entry.relevantDate),
+						),
+					});
+
+					return acc;
+				}
+
+				acc.push({
+					startDate: Utils.processDate(new Date(entry.startDate)),
+					endDate: Utils.processDate(new Date(entry.endDate)),
+				});
+			} catch (err) {
+				console.warn(new TypeError(Messages.RELEVANT_DATE.INVALID));
+			}
+
+			return acc;
+		}, []);
+
+		this[propsSymbol]["relevantDates"] = processedDateEntries;
+	}
+
+	/**
 	 * Allows setting a relevant date in which the OS
 	 * should show this pass.
 	 *
@@ -964,6 +1012,13 @@ export default class PKPass extends Bundle {
 	 *
 	 * @param {Date | null} date
 	 * @throws if pass is frozen due to previous export
+	 *
+	 * @warning `relevantDate` property has been deprecated in iOS 18
+	 * in order to get replaced by `relevantDates` array of intervals
+	 * (`relevantDates[].startDate` + `relevantDates[].endDate`)
+	 * or single date (`relevantDates[].relevantDate`). This method will
+	 * set both the original, as the new one will get ignored in older
+	 * iOS versions.
 	 */
 
 	public setRelevantDate(date: Date | null): void {
@@ -1085,4 +1140,10 @@ function validateJSONBuffer(
 	}
 
 	return Schemas.validate(schema, contentAsJSON);
+}
+
+function isRelevantEntry(
+	entry: Schemas.RelevantDate,
+): entry is Schemas.RelevancyEntry {
+	return Object.prototype.hasOwnProperty.call(entry, "relevantDate");
 }

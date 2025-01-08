@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { RGB_HEX_COLOR_REGEX } from "./regexps";
+import * as SemanticTagType from "./SemanticTagType";
 
 /**
  * For a better description of every single field,
@@ -7,134 +7,6 @@ import { RGB_HEX_COLOR_REGEX } from "./regexps";
  *
  * @see https://developer.apple.com/documentation/walletpasses/semantictags
  */
-
-/**
- * @see https://developer.apple.com/documentation/walletpasses/semantictagtype
- */
-
-declare namespace SemanticTagType {
-	interface PersonNameComponents {
-		familyName?: string;
-		givenName?: string;
-		middleName?: string;
-		namePrefix?: string;
-		nameSuffix?: string;
-		nickname?: string;
-		phoneticRepresentation?: string;
-	}
-
-	interface CurrencyAmount {
-		currencyCode?: string; // ISO 4217 currency code
-		amount?: string;
-	}
-
-	interface Location {
-		latitude: number;
-		longitude: number;
-	}
-
-	interface Seat {
-		seatSection?: string;
-		seatRow?: string;
-		seatNumber?: string;
-		seatIdentifier?: string;
-		seatType?: string;
-		seatDescription?: string;
-
-		/**
-		 * For newly-introduced event tickets
-		 * in iOS 18
-		 */
-		seatAisle?: string;
-
-		/**
-		 * For newly-introduced event tickets
-		 * in iOS 18
-		 */
-		seatLevel?: string;
-
-		/**
-		 * For newly-introduced event tickets
-		 * in iOS 18
-		 */
-		seatSectionColor?: string;
-	}
-
-	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18.
-	 */
-
-	interface EventDateInfo {
-		date: string;
-		ignoreTimeComponents?: boolean;
-		timeZone?: string;
-	}
-
-	interface WifiNetwork {
-		password: string;
-		ssid: string;
-	}
-}
-
-const CurrencyAmount = Joi.object<SemanticTagType.CurrencyAmount>().keys({
-	currencyCode: Joi.string(),
-	amount: Joi.string(),
-});
-
-const PersonNameComponent =
-	Joi.object<SemanticTagType.PersonNameComponents>().keys({
-		givenName: Joi.string(),
-		familyName: Joi.string(),
-		middleName: Joi.string(),
-		namePrefix: Joi.string(),
-		nameSuffix: Joi.string(),
-		nickname: Joi.string(),
-		phoneticRepresentation: Joi.string(),
-	});
-
-const EventDateInfo = Joi.object<SemanticTagType.EventDateInfo>().keys({
-	date: Joi.string().isoDate().required(),
-	ignoreTimeComponents: Joi.boolean(),
-	timeZone: Joi.string(),
-});
-
-const SeatSemantics = Joi.object<SemanticTagType.Seat>().keys({
-	seatSection: Joi.string(),
-	seatRow: Joi.string(),
-	seatNumber: Joi.string(),
-	seatIdentifier: Joi.string(),
-	seatType: Joi.string(),
-	seatDescription: Joi.string(),
-
-	/**
-	 * Newly-introduced in iOS 18
-	 * Used in poster event tickets
-	 */
-	seatAisle: Joi.string(),
-
-	/**
-	 * Newly-introduced in iOS 18
-	 * Used in poster event tickets
-	 */
-	seatLevel: Joi.string(),
-
-	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
-	 */
-	seatSectionColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
-});
-
-const LocationSemantics = Joi.object<SemanticTagType.Location>().keys({
-	latitude: Joi.number().required(),
-	longitude: Joi.number().required(),
-});
-
-const WifiNetwork = Joi.object<SemanticTagType.WifiNetwork>().keys({
-	password: Joi.string().required(),
-	ssid: Joi.string().required(),
-});
 
 /**
  * Alphabetical order
@@ -226,7 +98,7 @@ export interface Semantics {
 	/**
 	 * For newly-introduced event tickets
 	 * in iOS 18
-	 * 
+	 *
 	 * Shows a message in the live activity
 	 * when the activity starts.
 	 */
@@ -418,7 +290,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 
 	additionalTicketAttributes: Joi.string(),
 
-	balance: CurrencyAmount,
+	balance: SemanticTagType.CurrencyAmount,
 	boardingGroup: Joi.string(),
 	boardingSequenceNumber: Joi.string(),
 
@@ -431,7 +303,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	departureAirportCode: Joi.string(),
 	departureAirportName: Joi.string(),
 	departureGate: Joi.string(),
-	departureLocation: LocationSemantics,
+	departureLocation: SemanticTagType.Location,
 	departureLocationDescription: Joi.string(),
 	departurePlatform: Joi.string(),
 	departureStationName: Joi.string(),
@@ -439,7 +311,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	destinationAirportCode: Joi.string(),
 	destinationAirportName: Joi.string(),
 	destinationGate: Joi.string(),
-	destinationLocation: LocationSemantics,
+	destinationLocation: SemanticTagType.Location,
 	destinationLocationDescription: Joi.string(),
 	destinationPlatform: Joi.string(),
 	destinationStationName: Joi.string(),
@@ -458,7 +330,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	/**
 	 * For newly-introduced event tickets
 	 * in iOS 18
-	 * 
+	 *
 	 * Shows a message in the live activity
 	 * when the activity starts.
 	 */
@@ -474,7 +346,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 * a way to show the event guide, both
 	 * instead of `eventStartDate`.
 	 */
-	eventStartDateInfo: EventDateInfo,
+	eventStartDateInfo: SemanticTagType.EventDateInfo,
 
 	eventStartDate: Joi.string(),
 	eventType: Joi.string().regex(
@@ -499,20 +371,20 @@ export const Semantics = Joi.object<Semantics>().keys({
 	originalBoardingDate: Joi.string(),
 	originalDepartureDate: Joi.string(),
 
-	passengerName: PersonNameComponent,
+	passengerName: SemanticTagType.PersonNameComponents,
 	performerNames: Joi.array().items(Joi.string()),
 	priorityStatus: Joi.string(),
 
 	playlistIDs: Joi.array().items(Joi.string()),
 
-	seats: Joi.array().items(SeatSemantics),
+	seats: Joi.array().items(SemanticTagType.Seat),
 	securityScreening: Joi.string(),
 	silenceRequested: Joi.boolean(),
 	sportName: Joi.string(),
 
 	tailgatingAllowed: Joi.boolean(),
 
-	totalPrice: CurrencyAmount,
+	totalPrice: SemanticTagType.CurrencyAmount,
 	transitProvider: Joi.string(),
 	transitStatus: Joi.string(),
 	transitStatusReason: Joi.string(),
@@ -529,7 +401,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 */
 	venueGatesOpenDate: Joi.string(),
 
-	venueLocation: LocationSemantics,
+	venueLocation: SemanticTagType.Location,
 	venueName: Joi.string(),
 
 	/**
@@ -589,5 +461,5 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 */
 	venueEntrancePortal: Joi.string(),
 
-	wifiAccess: Joi.array().items(WifiNetwork),
+	wifiAccess: Joi.array().items(SemanticTagType.WifiNetwork),
 });

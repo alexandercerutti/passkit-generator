@@ -265,6 +265,15 @@ export interface PassProps {
 	 * event ticket layouts.
 	 */
 	suppressHeaderDarkening?: boolean;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * By default, the chin is colored with a
+	 * blur. Through this option, it is possible
+	 * to specify a different and specific color
+	 * for it.
+	 */
+	footerBackgroundColor?: string;
 }
 
 /**
@@ -485,6 +494,15 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * event ticket layouts.
 	 */
 	suppressHeaderDarkening: Joi.boolean(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * By default, the chin is colored with a
+	 * blur. Through this option, it is possible
+	 * to specify a different and specific color
+	 * for it.
+	 */
+	footerBackgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

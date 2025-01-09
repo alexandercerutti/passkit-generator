@@ -19,6 +19,14 @@ export interface PassFields {
 	primaryFields: Field[];
 	secondaryFields: Field[];
 	transitType?: TransitType;
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain dashboard
+	 *
+	 * @see \<undiclosed>
+	 */
 	additionalInfoFields?: Field[];
 }
 
@@ -29,5 +37,13 @@ export const PassFields = Joi.object<PassFields>().keys({
 	primaryFields: Joi.array().items(Field),
 	secondaryFields: Joi.array().items(Field),
 	transitType: TransitType,
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain dashboard
+	 *
+	 * @see \<undiclosed>
+	 */
 	additionalInfoFields: Joi.array().items(Field),
 });

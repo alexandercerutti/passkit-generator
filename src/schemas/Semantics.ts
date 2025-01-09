@@ -15,14 +15,14 @@ import * as SemanticTagType from "./SemanticTagType";
 
 export interface Semantics {
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	admissionLevel?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	admissionLevelAbbreviation?: string;
 
@@ -30,22 +30,22 @@ export interface Semantics {
 	artistIDs?: string[];
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	albumIDs?: string[];
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	airplay?: {
 		airPlayDeviceGroupToken: string;
 	}[];
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	attendeeName?: string;
 
@@ -54,8 +54,8 @@ export interface Semantics {
 	awayTeamName?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	additionalTicketAttributes?: string;
 
@@ -88,16 +88,16 @@ export interface Semantics {
 	duration?: number;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	entranceDescription?: string;
 
 	eventEndDate?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 *
 	 * Shows a message in the live activity
 	 * when the activity starts.
@@ -108,8 +108,8 @@ export interface Semantics {
 	eventStartDate?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout).
 	 *
 	 * Can be used as an alternative way to
 	 * show show start date, with more control
@@ -119,15 +119,33 @@ export interface Semantics {
 	 */
 	eventStartDateInfo?: SemanticTagType.EventDateInfo;
 
+	/**
+	 * @iOSVersion < 18
+	 * Since iOS 18, for the event tickets these determine
+	 * the template to be used when rendering the pass.
+	 *
+	 * - Generic Template
+	 * 		- "PKEventTypeGeneric"
+	 * 		- "PKEventTypeMovie"
+	 * 		- "PKEventTypeConference"
+	 * 		- "PKEventTypeConvention"
+	 * 		- "PKEventTypeWorkshop"
+	 * 		- "PKEventTypeSocialGathering"
+	 * - Sport Template
+	 * 		- "PKEventTypeSports"
+	 * - Live Performance Template
+	 * 		- "PKEventTypeLivePerformance";
+	 */
+
 	eventType?:
 		| "PKEventTypeGeneric"
-		| "PKEventTypeLivePerformance"
 		| "PKEventTypeMovie"
-		| "PKEventTypeSports"
 		| "PKEventTypeConference"
 		| "PKEventTypeConvention"
 		| "PKEventTypeWorkshop"
-		| "PKEventTypeSocialGathering";
+		| "PKEventTypeSocialGathering"
+		| "PKEventTypeSports"
+		| "PKEventTypeLivePerformance";
 
 	flightCode?: string;
 	flightNumber?: number;
@@ -152,8 +170,8 @@ export interface Semantics {
 	priorityStatus?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	playlistIDs?: string[];
 
@@ -163,8 +181,8 @@ export interface Semantics {
 	sportName?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	tailgatingAllowed?: boolean;
 
@@ -181,40 +199,46 @@ export interface Semantics {
 	venueLocation?: SemanticTagType.Location;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueGatesOpenDate?: string;
 
 	venueName?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueParkingLotsOpenDate?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueBoxOfficeOpenDate?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueDoorsOpenDate?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueFanZoneOpenDate?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 */
+	venueOpenDate?: string;
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueCloseDate?: string;
 
@@ -222,26 +246,26 @@ export interface Semantics {
 	venueRoom?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueRegionName?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueEntranceGate?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueEntranceDoor?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueEntrancePortal?: string;
 
@@ -250,14 +274,14 @@ export interface Semantics {
 
 export const Semantics = Joi.object<Semantics>().keys({
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	admissionLevel: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	admissionLevelAbbreviation: Joi.string(),
 
@@ -265,22 +289,22 @@ export const Semantics = Joi.object<Semantics>().keys({
 	artistIDs: Joi.array().items(Joi.string()),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	albumIDs: Joi.array().items(Joi.string()),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	airplay: Joi.array().items({
 		airplayDeviceGroupToken: Joi.string(),
 	}),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	attendeeName: Joi.string(),
 
@@ -319,8 +343,8 @@ export const Semantics = Joi.object<Semantics>().keys({
 	duration: Joi.number(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	entranceDescription: Joi.string(),
 
@@ -328,8 +352,8 @@ export const Semantics = Joi.object<Semantics>().keys({
 	eventName: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 *
 	 * Shows a message in the live activity
 	 * when the activity starts.
@@ -337,8 +361,8 @@ export const Semantics = Joi.object<Semantics>().keys({
 	eventLiveMessage: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout).
 	 *
 	 * Can be used as an alternative way to
 	 * show show start date, with more control
@@ -396,8 +420,8 @@ export const Semantics = Joi.object<Semantics>().keys({
 	venueEntrance: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueGatesOpenDate: Joi.string(),
 
@@ -405,32 +429,38 @@ export const Semantics = Joi.object<Semantics>().keys({
 	venueName: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueParkingLotsOpenDate: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueBoxOfficeOpenDate: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueDoorsOpenDate: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueFanZoneOpenDate: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 */
+	venueOpenDate: Joi.string(),
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueCloseDate: Joi.string(),
 
@@ -438,26 +468,26 @@ export const Semantics = Joi.object<Semantics>().keys({
 	venueRoom: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueRegionName: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueEntranceGate: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueEntranceDoor: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	venueEntrancePortal: Joi.string(),
 

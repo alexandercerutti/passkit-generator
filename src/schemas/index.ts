@@ -42,7 +42,8 @@ export interface RelevancyEntry {
 }
 
 /**
- * Newly introduced in iOS 18.
+ * @iOSVersion 18
+ *
  * Using a RelevancyInterval, will trigger a live activity on
  * new event ticket passes.
  *
@@ -122,152 +123,208 @@ export interface PassProps {
 	storeCard?: PassFields;
 
 	/**
-	 * New field for iOS 18
-	 * Event Ticket
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	preferredStyleSchemes?: PreferredStyleSchemes;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain event guide" must be used.
 	 */
 	bagPolicyURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	orderFoodURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	parkingInformationURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	directionsInformationURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource to buy or access
+	 * the parking spot.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
-	 */
-	contactVenueEmail?: string;
-
-	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@domain event guide" must be used.
-	 */
-	contactVenuePhoneNumber?: string;
-
-	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@domain event guide" must be used.
-	 */
-	contactVenueWebsite?: string;
-
-	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	purchaseParkingURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource to buy the
+	 * merchandise.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	merchandiseURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource about public or
+	 * private transportation to reach the
+	 * venue.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	transitInformationURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource about accessibility
+	 * in the events venue.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	accessibilityURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * An URL to link experiences to the
+	 * pass (upgrades and more).
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	addOnURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@passDomain Event Guide" must be used.
+	 */
+	contactVenueEmail?: string;
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@passDomain Event Guide" must be used.
+	 */
+	contactVenuePhoneNumber?: string;
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@passDomain Event Guide" must be used.
+	 */
+	contactVenueWebsite?: string;
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Menu dropdown
+	 *
+	 * @description
+	 *
 	 * Will add a button among options near "share"
 	 */
 	transferURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Menu dropdown
+	 *
+	 * @description
+	 *
 	 * Will add a button among options near "share"
 	 */
 	sellURL?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Will remove an automatic shadow in the new
 	 * event ticket layouts.
 	 */
 	suppressHeaderDarkening?: boolean;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * By default, the chin is colored with a
 	 * blur. Through this option, it is possible
 	 * to specify a different and specific color
@@ -276,7 +333,11 @@ export interface PassProps {
 	footerBackgroundColor?: string;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Enables the automatic calculation of the
 	 * `foregroundColor` and `labelColor` based
 	 * on the background image in the new event
@@ -288,7 +349,11 @@ export interface PassProps {
 	useAutomaticColor?: boolean;
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Applications AppStore Identifiers
 	 * related to the event ticket.
 	 *
@@ -299,7 +364,7 @@ export interface PassProps {
 	 * the passes users has (probably differently
 	 * by `associatedStoreIdentifiers`).
 	 */
-	auxiliaryStoreIdentifiers: number[];
+	auxiliaryStoreIdentifiers?: number[];
 }
 
 /**
@@ -383,146 +448,206 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	webServiceURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	bagPolicyURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	orderFoodURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	parkingInformationURL: Joi.string().regex(URL_REGEX),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	directionsInformationURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource to buy or access
+	 * the parking spot.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
-	 */
-	contactVenueEmail: Joi.string(),
-
-	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@domain event guide" must be used.
-	 */
-	contactVenuePhoneNumber: Joi.string(),
-
-	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@domain event guide" must be used.
-	 */
-	contactVenueWebsite: Joi.string(),
-
-	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	purchaseParkingURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource to buy the
+	 * merchandise.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	merchandiseURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource about public or
+	 * private transportation to reach the
+	 * venue.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	transitInformationURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * URL to a resource about accessibility
+	 * in the events venue.
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	accessibilityURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
-	 * @domain event guide
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * An URL to link experiences to the
+	 * pass (upgrades and more).
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
-	 * "@domain event guide" must be used.
+	 * "@passDomain Event Guide" must be used.
 	 */
 	addOnURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@passDomain Event Guide" must be used.
+	 */
+	contactVenueEmail: Joi.string(),
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@passDomain Event Guide" must be used.
+	 */
+	contactVenuePhoneNumber: Joi.string(),
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 * @passDomain Event Guide
+	 *
+	 * @description
+	 *
+	 * To show buttons in the event guide,
+	 * at least two among those marked with
+	 * "@passDomain Event Guide" must be used.
+	 */
+	contactVenueWebsite: Joi.string(),
+
+	/**
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Will add a button among options near "share"
 	 */
 	transferURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Will add a button among options near "share"
 	 */
 	sellURL: Joi.string(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Will remove an automatic shadow in the new
 	 * event ticket layouts.
 	 */
 	suppressHeaderDarkening: Joi.boolean(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * By default, the chin is colored with a
 	 * blur. Through this option, it is possible
 	 * to specify a different and specific color
@@ -531,7 +656,11 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	footerBackgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Enables the automatic calculation of the
 	 * `foregroundColor` and `labelColor` based
 	 * on the background image in the new event
@@ -543,7 +672,11 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	useAutomaticColor: Joi.boolean(),
 
 	/**
-	 * New field for iOS 18 Event Ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
+	 *
+	 * @description
+	 *
 	 * Applications AppStore Identifiers
 	 * related to the event ticket.
 	 *

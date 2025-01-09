@@ -22,8 +22,8 @@ export const CurrencyAmount = Joi.object<CurrencyAmount>().keys({
 });
 
 /**
- * For newly-introduced event tickets
- * in iOS 18.
+ * @iOSVersion 18
+ * @passStyle eventTicket (new layout)
  *
  * @see \<undiclosed>
  */
@@ -88,20 +88,20 @@ export interface Seat {
 	seatDescription?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	seatAisle?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	seatLevel?: string;
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	seatSectionColor?: string;
 }
@@ -115,20 +115,20 @@ export const Seat = Joi.object<Seat>().keys({
 	seatDescription: Joi.string(),
 
 	/**
-	 * Newly-introduced in iOS 18
-	 * Used in poster event tickets
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	seatAisle: Joi.string(),
 
 	/**
-	 * Newly-introduced in iOS 18
-	 * Used in poster event tickets
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	seatLevel: Joi.string(),
 
 	/**
-	 * For newly-introduced event tickets
-	 * in iOS 18
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (new layout)
 	 */
 	seatSectionColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 });

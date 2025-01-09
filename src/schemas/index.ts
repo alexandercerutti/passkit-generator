@@ -274,6 +274,18 @@ export interface PassProps {
 	 * for it.
 	 */
 	footerBackgroundColor?: string;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Enables the automatic calculation of the
+	 * `foregroundColor` and `labelColor` based
+	 * on the background image in the new event
+	 * ticket passes.
+	 *
+	 * If enabled, `foregroundColor` and `labelColor`
+	 * are ignored.
+	 */
+	useAutomaticColor?: boolean;
 }
 
 /**
@@ -503,6 +515,18 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * for it.
 	 */
 	footerBackgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Enables the automatic calculation of the
+	 * `foregroundColor` and `labelColor` based
+	 * on the background image in the new event
+	 * ticket passes.
+	 *
+	 * If enabled, `foregroundColor` and `labelColor`
+	 * are ignored.
+	 */
+	useAutomaticColor: Joi.boolean(),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

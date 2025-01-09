@@ -286,6 +286,20 @@ export interface PassProps {
 	 * are ignored.
 	 */
 	useAutomaticColor?: boolean;
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Applications AppStore Identifiers
+	 * related to the event ticket.
+	 *
+	 * It is not mandatory for the app to
+	 * be related to the pass issuer.
+	 *
+	 * Such applications won't be able to read
+	 * the passes users has (probably differently
+	 * by `associatedStoreIdentifiers`).
+	 */
+	auxiliaryStoreIdentifiers: number[];
 }
 
 /**
@@ -527,6 +541,20 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * are ignored.
 	 */
 	useAutomaticColor: Joi.boolean(),
+
+	/**
+	 * New field for iOS 18 Event Ticket.
+	 * Applications AppStore Identifiers
+	 * related to the event ticket.
+	 *
+	 * It is not mandatory for the app to
+	 * be related to the pass issuer.
+	 *
+	 * Such applications won't be able to read
+	 * the passes users has (probably differently
+	 * by `associatedStoreIdentifiers`).
+	 */
+	auxiliaryStoreIdentifiers: Joi.array().items(Joi.number()),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

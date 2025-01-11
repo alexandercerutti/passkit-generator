@@ -2,16 +2,18 @@
 	"name": "cloudflare-worker",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"clear:deps": "rm -rf node_modules",
-		"example": "npx wrangler dev"
+		"example": "pnpm wrangler dev"
 	},
 	"dependencies": {
 		"passkit-generator": "workspace:*"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20230419.0",
+		"@cloudflare/workers-types": "^4.20250109.0",
 		"typescript": "^5.7.3",
-		"wrangler": "^3.0.0"
+		"wrangler": "^3.101.0",
+		"@types/node": "^20"
 	}
 }

@@ -1,13 +1,12 @@
 name = "pg-cw-example"
 main = "src/index.ts"
-compatibility_date = "2023-10-02"
-
 
 #########################################################################################
 #   This must be enabled to make passkit-generator compatible with cloudflare workers   #
 #########################################################################################
 
-node_compat = true
+compatibility_flags = [ "nodejs_compat" ]
+compatibility_date = "2024-09-23"
 
 ###################################################################
 ###   This is needed to import `.png` files with esm imports.   ###

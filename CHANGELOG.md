@@ -1,5 +1,18 @@
 # Changelog
 
+### 3.3.0 (11 Jan 2025)
+
+-   Added support to the missing iOS 18 changes (`useAutomaticColor`, `footerBackgroundColor`, `suppressHeaderDarkening`, `auxiliaryStoreIdentifiers`, `eventStartDateInfo`, `venueOpenDate`);
+-   Added support to `relevantDate` property in `relevantDates`, along with `startDate` and `endDate`, in `pass.json`;
+-   Added new method `setRelevantDates`;
+-   Improved details on `(root).relevantDate` deprecation since iOS 18;
+-   Improved comments and markers on SemanticTags with iOS version;
+-   Added support to double compilation ESM + CJS: both are now shipped;
+-   Updated examples. This update brings also them to run on ESM;
+-   Made easier to run examples and install their dependency by converting repo to be a pnpm workspace;
+
+---
+
 ### 3.2.0 (29 Oct 2024)
 
 -   Added support to iOS 18 changes (refer to [issue #205](https://github.com/alexandercerutti/passkit-generator/issues/205) for all the changes);

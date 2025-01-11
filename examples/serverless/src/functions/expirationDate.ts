@@ -3,7 +3,7 @@ import { PKPass } from "passkit-generator";
 import {
 	throwClientErrorWithoutModelName,
 	createPassGenerator,
-} from "../shared";
+} from "../shared.js";
 
 /**
  * Lambda for expirationDate example

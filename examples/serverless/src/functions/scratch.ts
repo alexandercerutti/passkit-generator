@@ -4,7 +4,7 @@ import {
 	createPassGenerator,
 	getRandomColorPart,
 	getSpecificFileInModel,
-} from "../shared";
+} from "../shared.js";
 
 /**
  * Lambda for scratch example

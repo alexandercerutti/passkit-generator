@@ -37,7 +37,7 @@ import {
 	getS3Instance,
 	getRandomColorPart,
 	throwClientErrorWithoutModelName,
-} from "../shared";
+} from "../shared.js";
 import config from "../../config.json";
 
 /**

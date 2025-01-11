@@ -1,7 +1,7 @@
 import {
 	throwClientErrorWithoutModelName,
 	createPassGenerator,
-} from "../shared";
+} from "../shared.js";
 import type { ALBEvent, ALBResult } from "aws-lambda";
 import type { PKPass } from "passkit-generator";
 

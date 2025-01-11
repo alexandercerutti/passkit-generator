@@ -1,9 +1,9 @@
 import { ALBEvent, ALBResult } from "aws-lambda";
-import { PKPass } from "../../../../lib";
+import { PKPass } from "passkit-generator";
 import {
 	throwClientErrorWithoutModelName,
 	createPassGenerator,
-} from "../shared";
+} from "../shared.js";
 
 /**
  * Lambda for barcodes example

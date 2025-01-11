@@ -1,6 +1,6 @@
 import { ALBEvent, ALBResult } from "aws-lambda";
 import { PKPass } from "passkit-generator";
-import { createPassGenerator } from "../shared";
+import { createPassGenerator } from "../shared.js";
 
 /**
  * Lambda for fields example

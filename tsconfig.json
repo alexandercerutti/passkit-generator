@@ -1,7 +1,5 @@
 {
 	"compilerOptions": {
-		"declaration": true,
-		"declarationDir": "lib/types",
 		"target": "es2018",
 		"esModuleInterop": true,
 		"newLine": "LF",

@@ -1,6 +1,8 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
+		"declaration": true,
+		"declarationDir": "lib/types",
 		"outDir": "lib/esm",
 		"inlineSourceMap": true,
 		"skipLibCheck": true,

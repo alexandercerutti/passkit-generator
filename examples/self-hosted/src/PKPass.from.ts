@@ -5,17 +5,29 @@
  * examples, creation through templates is already shown
  */
 
-import { app } from "./webserver";
-import { getCertificates } from "./shared";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { promises as fs } from "node:fs";
 import { PKPass } from "passkit-generator";
+import { app } from "./webserver.js";
+import { getCertificates } from "./shared.js";
 
-import * as Utils from "passkit-generator/lib/utils";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ******************************************** //
 // *** CODE FROM GET MODEL FOLDER INTERNALS *** //
 // ******************************************** //
+
+/**
+ * Removes hidden files from a list (those starting with dot)
+ *
+ * @params from - list of file names
+ * @return
+ */
+
+export function removeHidden(from: Array<string>): Array<string> {
+	return from.filter((e) => e.charAt(0) !== ".");
+}
 
 async function readFileOrDirectory(filePath: string) {
 	if ((await fs.lstat(filePath)).isDirectory()) {
@@ -59,7 +71,7 @@ function getObjectFromModelFile(
  */
 
 async function readDirectory(filePath: string) {
-	const dirContent = await fs.readdir(filePath).then(Utils.removeHidden);
+	const dirContent = await fs.readdir(filePath).then(removeHidden);
 
 	return dirContent.map(async (fileName) => {
 		const content = await fs.readFile(path.resolve(filePath, fileName));

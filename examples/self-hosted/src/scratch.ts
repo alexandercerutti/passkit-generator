@@ -3,11 +3,11 @@
  * by adding files later and not adding pass.json
  */
 
-import { app } from "./webserver";
-import { getCertificates } from "./shared";
 import path from "node:path";
 import { promises as fs } from "node:fs";
 import { PKPass } from "passkit-generator";
+import { app } from "./webserver.js";
+import { getCertificates } from "./shared.js";
 
 function getRandomColorPart() {
 	return Math.floor(Math.random() * 255);

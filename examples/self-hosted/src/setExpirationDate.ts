@@ -7,10 +7,10 @@
  * have to wait two minutes.
  */
 
-import { app } from "./webserver";
-import { getCertificates } from "./shared";
 import path from "node:path";
 import { PKPass } from "passkit-generator";
+import { app } from "./webserver.js";
+import { getCertificates } from "./shared.js";
 
 app.route("/expirationDate/:modelName").get(async (request, response) => {
 	if (!request.query.fn) {

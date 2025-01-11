@@ -9,10 +9,10 @@
  * @Author: Alexander P. Cerutti
  */
 
-import { app } from "./webserver";
-import { getCertificates } from "./shared";
 import path from "node:path";
 import { PKPass } from "passkit-generator";
+import { app } from "./webserver.js";
+import { getCertificates } from "./shared.js";
 
 app.route("/fields/:modelName").get(async (request, response) => {
 	const passName =

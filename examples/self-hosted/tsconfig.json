@@ -2,9 +2,7 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"target": "ESNext",
-		"module": "CommonJS",
 		"outDir": "build",
-		"moduleResolution": "node",
 		"sourceMap": true,
 		"useUnknownInCatchVariables": false
 	},

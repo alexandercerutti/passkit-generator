@@ -29,8 +29,8 @@
  * A feedback to Apple have been sent for this.
  */
 
-import { app } from "./webserver";
-import { getCertificates } from "./shared";
+import { app } from "./webserver.js";
+import { getCertificates } from "./shared.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { PKPass } from "passkit-generator";

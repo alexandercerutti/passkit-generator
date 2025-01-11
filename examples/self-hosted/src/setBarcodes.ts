@@ -8,10 +8,10 @@
  * by a string
  */
 
-import { app } from "./webserver";
-import { getCertificates } from "./shared";
 import { PKPass } from "passkit-generator";
 import path from "node:path";
+import { app } from "./webserver.js";
+import { getCertificates } from "./shared.js";
 
 app.route("/barcodes/:modelName").get(async (request, response) => {
 	const passName =

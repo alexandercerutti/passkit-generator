@@ -45,6 +45,9 @@ importers:
       rimraf:
         specifier: ^4.4.1
         version: 4.4.1
+      tsconfig-to-dual-package:
+        specifier: ^1.2.0
+        version: 1.2.0(typescript@5.6.3)
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -1068,6 +1071,12 @@ packages:
     resolution: {integrity: sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw==}
     engines: {node: '>=8'}
 
+  resolve-tsconfig@1.3.0:
+    resolution: {integrity: sha512-Ba5mo3soshb2CnIcNFz75F/80H/2eMVxrlmdgoSDNH7Lr6UAoT3BvxNtc7+VXqKSBlC0SJk2qSXOTcy0/p7cFw==}
+    engines: {node: '>=16', pnpm: '>=7'}
+    peerDependencies:
+      typescript: '*'
+
   resolve.exports@2.0.2:
     resolution: {integrity: sha512-X2UW6Nw3n/aMgDVy+0rSqgHlv39WZAlZrXCdnbyEiKm17DSqHX4MmQMaST3FbeWR5FTuRcUwYAziZajji0Y7mg==}
     engines: {node: '>=10'}
@@ -1176,6 +1185,13 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
+
+  tsconfig-to-dual-package@1.2.0:
+    resolution: {integrity: sha512-UtMinqTLfWr9fX6KidLsEcCJoA/jSLPIS00ohpQybMSxA3LlJCRf2DsGPw4AJJ8AP4FOHfbQJFJ5XgLoL7RoLw==}
+    engines: {node: '>=18.3.0 || >=16.17.0'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=4.0.0'
 
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
@@ -2549,6 +2565,10 @@ snapshots:
 
   resolve-from@5.0.0: {}
 
+  resolve-tsconfig@1.3.0(typescript@5.6.3):
+    dependencies:
+      typescript: 5.6.3
+
   resolve.exports@2.0.2: {}
 
   resolve@1.22.8:
@@ -2638,6 +2658,11 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
+
+  tsconfig-to-dual-package@1.2.0(typescript@5.6.3):
+    dependencies:
+      resolve-tsconfig: 1.3.0(typescript@5.6.3)
+      typescript: 5.6.3
 
   tslib@2.7.0: {}
 

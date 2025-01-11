@@ -1,11 +1,14 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"declaration": true,
+		"declarationDir": "lib/types",
 		"target": "es2018",
 		"esModuleInterop": true,
 		"newLine": "LF",
 		"importHelpers": true,
-		"useUnknownInCatchVariables": true
+		"useUnknownInCatchVariables": true,
+		"moduleResolution": "Node16",
+		"module": "Node16"
 	},
 	"exclude": ["node_modules/"]
 }

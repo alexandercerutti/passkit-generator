@@ -2,11 +2,13 @@
 	"name": "passkit-generator",
 	"version": "3.2.0",
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
-	"main": "lib/index.js",
+	"main": "lib/cjs/index.js",
+	"types": "lib/types/index.d.ts",
+	"type": "module",
 	"scripts": {
-		"build": "pnpm build:src",
-		"build:all": "pnpm build:src && pnpm build:examples",
-		"build:src": "pnpm rimraf lib && pnpm tsc -p tsconfig.dist.json",
+		"build": "rm -rf lib && pnpm tsc -b tsconfig.esm.json tsconfig.cjs.json && pnpm build:dual",
+		"build:dual": "pnpm tsconfig-to-dual-package tsconfig.esm.json tsconfig.cjs.json",
+		"build:all": "pnpm build && pnpm build:examples",
 		"prepublishOnly": "pnpm build && pnpm test",
 		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" pnpm jest -c jest.config.cjs --silent"
 	},
@@ -38,9 +40,17 @@
 		"jest-environment-node": "^29.7.0",
 		"prettier": "^3.3.3",
 		"rimraf": "^4.4.1",
+		"tsconfig-to-dual-package": "^1.2.0",
 		"typescript": "^5.6.3"
 	},
 	"files": [
 		"lib/**/*.+(js|d.ts)"
-	]
+	],
+	"exports": {
+		".": {
+			"types": "./lib/types/index.d.ts",
+			"require": "./lib/cjs/index.js",
+			"import": "./lib/esm/index.js"
+		}
+	}
 }

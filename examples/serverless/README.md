@@ -34,11 +34,11 @@ These examples are basically made for being executed locally. In the file `confi
 
 ## Run examples
 
-Install the dependencies and run serverless. Installing the dependencies will link the latest version of passkit-generator in the parent workspace.
+Install the dependencies from wherever path you are and run serverless. Installing the dependencies will link passkit-generator in the parent workspace, so to reflect any change, it will be enough to build passkit-generator and restart the example.
 
 ```sh
-$ npm install;
-$ npm run example;
+$ pnpm install;
+$ pnpm example;
 ```
 
 This will start `serverless offline` with an additional host option (mainly for WSL environment).

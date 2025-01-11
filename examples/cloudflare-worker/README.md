@@ -11,7 +11,8 @@ This example offers just the generation of a single static `boardingPass`.
 
 ## Setting up
 
-Install all the dependencies through `npm install`.
+Install the dependencies from wherever path you are with `pnpm install`. Installing the dependencies will link passkit-generator in the parent workspace, so to reflect any change, it will be enough to build passkit-generator and restart the example.
+
 Configure wrangler and your account [according to the guide](https://developers.cloudflare.com/workers/get-started/guide).
 You are always suggested to start with a brand new project and to not clone this one, so that you won't miss any configuration you might need.
 
@@ -27,7 +28,7 @@ This example uses some environmental variables (secrets), which can be set throu
 So, assuming you have `certificates` folder in the root of passkit-generator and all the dependencies installed, you'll be able to directly inject your secrets into wrangler by doing this.
 
 ```sh
-$ cat ../../../certificates/signerKey.pem | npx wrangler secret put SIGNER_KEY
+$ cat ../../../certificates/signerKey.pem | pnpm wrangler secret put SIGNER_KEY
 ```
 
 These variables are exposed on `env` when performing the request.

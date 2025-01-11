@@ -134,12 +134,8 @@ Importing:
 /** CommonJS **/
 const { PKPass } = require("passkit-generator");
 
-/** Typescript **/
-import { PKPass } from "passkit-generator";
-
 /** ESM **/
-import passkit from "passkit-generator";
-const PKPass = passkit.PKPass;
+import { PKPass } from "passkit-generator";
 ```
 
 ### Folder Model

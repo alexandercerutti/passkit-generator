@@ -1,7 +1,7 @@
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/https";
 import { initializeApp } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
-import passkit from "passkit-generator";
+import { PKPass } from "passkit-generator";
 import type { Barcode, TransitType } from "passkit-generator";
 import fs from "node:fs";
 import path from "node:path";
@@ -11,8 +11,6 @@ import os from "node:os";
 // it is marked as Stage 3 in TC39
 // Should probably not be used in production
 import startData from "./startData.json" assert { type: "json" };
-
-const PKPass = passkit.PKPass;
 
 interface RequestWithBody extends functions.Request {
 	body: {
@@ -68,7 +66,7 @@ initializeApp({
 
 const storageRef = getStorage().bucket();
 
-export const pass = functions.https.onRequest(
+export const pass = functions.onRequest(
 	async (request: RequestWithBody, response) => {
 		let modelBasePath: string;
 

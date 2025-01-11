@@ -10,23 +10,24 @@
 		"build": "rm -rf lib && pnpm tsc"
 	},
 	"engines": {
-		"node": "16"
+		"node": "20"
 	},
 	"type": "module",
 	"main": "lib/index.js",
 	"dependencies": {
-		"firebase-admin": "^11.11.1",
-		"firebase-functions": "^4.9.0",
-		"tslib": "^2.7.0",
+		"firebase-admin": "^13.0.2",
+		"firebase-functions": "^6.2.0",
+		"tslib": "^2.8.1",
 		"passkit-generator": "workspace:*"
 	},
 	"peerDependencies": {
 		"passkit-generator": "workspace:*"
 	},
 	"devDependencies": {
-		"firebase-functions-test": "^0.2.3",
-		"firebase-tools": "^12.9.1",
-		"typescript": "^5.7.3"
+		"firebase-functions-test": "^3.4.0",
+		"firebase-tools": "^13.29.1",
+		"typescript": "^5.7.3",
+		"@types/node": "^20"
 	},
 	"private": true
 }

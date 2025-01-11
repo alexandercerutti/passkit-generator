@@ -1,5 +1,5 @@
 import forge from "node-forge";
-import type * as Schemas from "./schemas";
+import type * as Schemas from "./schemas/index.js";
 import { Buffer } from "node:buffer";
 
 /**

@@ -1,26 +1,26 @@
-export * from "./Barcode";
-export * from "./Beacon";
-export * from "./Location";
-export * from "./Field";
-export * from "./NFC";
-export * from "./Semantics";
-export * from "./PassFields";
-export * from "./Personalize";
-export * from "./Certificates";
+export * from "./Barcode.js";
+export * from "./Beacon.js";
+export * from "./Location.js";
+export * from "./Field.js";
+export * from "./NFC.js";
+export * from "./Semantics.js";
+export * from "./PassFields.js";
+export * from "./Personalize.js";
+export * from "./Certificates.js";
 
 import Joi from "joi";
 import type { Buffer } from "node:buffer";
 
-import { Barcode } from "./Barcode";
-import { Location } from "./Location";
-import { Beacon } from "./Beacon";
-import { NFC } from "./NFC";
-import { PassFields, TransitType } from "./PassFields";
-import { Semantics } from "./Semantics";
-import { CertificatesSchema } from "./Certificates";
+import { Barcode } from "./Barcode.js";
+import { Location } from "./Location.js";
+import { Beacon } from "./Beacon.js";
+import { NFC } from "./NFC.js";
+import { PassFields, TransitType } from "./PassFields.js";
+import { Semantics } from "./Semantics.js";
+import { CertificatesSchema } from "./Certificates.js";
 
-import * as Messages from "../messages";
-import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps";
+import * as Messages from "../messages.js";
+import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
 
 export type PreferredStyleSchemes = ("posterEventTicket" | "eventTicket")[];
 

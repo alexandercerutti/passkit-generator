@@ -1,5 +1,5 @@
 import Joi from "joi";
-import * as SemanticTagType from "./SemanticTagType";
+import * as SemanticTagType from "./SemanticTagType.js";
 
 /**
  * For a better description of every single field,

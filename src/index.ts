@@ -1,4 +1,4 @@
-export { default as PKPass } from "./PKPass";
+export { default as PKPass } from "./PKPass.js";
 
 // ***************************************** //
 // *** Exporting only schemas interfaces *** //
@@ -15,4 +15,4 @@ export type {
 	TransitType,
 	Personalize,
 	OverridablePassProps,
-} from "./schemas";
+} from "./schemas/index.js";

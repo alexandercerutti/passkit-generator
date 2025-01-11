@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { Semantics } from "./Semantics";
+import { Semantics } from "./Semantics.js";
 
 export type PKDataDetectorType =
 	| "PKDataDetectorTypePhoneNumber"

@@ -1,5 +1,5 @@
-import * as Messages from "./messages";
-import type Bundle from "./Bundle";
+import * as Messages from "./messages.js";
+import type Bundle from "./Bundle.js";
 
 /**
  * Converts a date to W3C / UTC string

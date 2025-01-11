@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { RGB_HEX_COLOR_REGEX } from "./regexps";
+import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 
 /**
  * These couple of structures are organized alphabetically,

@@ -1,7 +1,7 @@
-import type PKPass from "./PKPass";
-import * as Schemas from "./schemas";
-import * as Utils from "./utils";
-import * as Messages from "./messages";
+import type PKPass from "./PKPass.js";
+import * as Schemas from "./schemas/index.js";
+import * as Utils from "./utils.js";
+import * as Messages from "./messages.js";
 
 /**
  * Class to represent lower-level keys pass fields

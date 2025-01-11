@@ -1,7 +1,7 @@
 import { Readable, Stream } from "node:stream";
-import * as Messages from "./messages";
-import { toArray as zipToArray } from "do-not-zip";
 import { Buffer } from "node:buffer";
+import { toArray as zipToArray } from "do-not-zip";
+import * as Messages from "./messages.js";
 
 export const filesSymbol = Symbol("bundleFiles");
 export const freezeSymbol = Symbol("bundleFreeze");

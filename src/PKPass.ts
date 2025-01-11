@@ -1,14 +1,14 @@
 import { Stream } from "node:stream";
 import { Buffer } from "node:buffer";
 import path from "node:path";
-import FieldsArray from "./FieldsArray";
-import Bundle, { filesSymbol } from "./Bundle";
-import getModelFolderContents from "./getModelFolderContents";
-import * as Schemas from "./schemas";
-import * as Signature from "./Signature";
-import * as Strings from "./StringsUtils";
-import * as Utils from "./utils";
-import * as Messages from "./messages";
+import FieldsArray from "./FieldsArray.js";
+import Bundle, { filesSymbol } from "./Bundle.js";
+import getModelFolderContents from "./getModelFolderContents.js";
+import * as Schemas from "./schemas/index.js";
+import * as Signature from "./Signature.js";
+import * as Strings from "./StringsUtils.js";
+import * as Utils from "./utils.js";
+import * as Messages from "./messages.js";
 
 const propsSymbol = Symbol("props");
 const localizationSymbol = Symbol("pass.l10n");

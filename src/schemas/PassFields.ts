@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { Field, FieldWithRow } from "./Field";
+import { Field, FieldWithRow } from "./Field.js";
 
 export type TransitType =
 	| "PKTransitTypeAir"

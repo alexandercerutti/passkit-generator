@@ -23,6 +23,6 @@
 		"@types/express": "5.0.0",
 		"@types/express-serve-static-core": "^5.0.4",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.6.3"
+		"typescript": "^5.7.3"
 	}
 }

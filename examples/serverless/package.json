@@ -20,6 +20,6 @@
 		"serverless-offline": "^8.8.1",
 		"serverless-plugin-typescript": "^2.1.5",
 		"serverless-s3-local": "^0.8.5",
-		"typescript": "^5.6.3"
+		"typescript": "^5.7.3"
 	}
 }

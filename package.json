@@ -41,7 +41,7 @@
 		"prettier": "^3.3.3",
 		"rimraf": "^4.4.1",
 		"tsconfig-to-dual-package": "^1.2.0",
-		"typescript": "^5.6.3"
+		"typescript": "^5.7.3"
 	},
 	"files": [
 		"lib/**/*.+(js|d.ts)"

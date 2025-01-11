@@ -27,7 +27,7 @@
 		"tslib": "^2.7.0"
 	},
 	"engines": {
-		"node": ">=14.18.1"
+		"node": ">=14.21.3"
 	},
 	"devDependencies": {
 		"@jest/globals": "^29.7.0",

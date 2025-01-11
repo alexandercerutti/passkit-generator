@@ -7,15 +7,13 @@
 	"license": "ISC",
 	"main": "src/index.js",
 	"scripts": {
-		"service:link-pg": "cd ../.. && pnpm build && pnpm link",
-		"preinstall": "pnpm clear:deps",
-		"postinstall": "pnpm service:link-pg && pnpm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
 		"example": "pnpm serverless@3 offline --host 0.0.0.0; :'specifying host due to WSL limits'"
 	},
 	"dependencies": {
 		"aws-sdk": "^2.1691.0",
-		"tslib": "^2.7.0"
+		"tslib": "^2.7.0",
+		"passkit-generator": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.145",

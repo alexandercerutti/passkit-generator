@@ -6,20 +6,18 @@
 	"author": "Alexander P. Cerutti <cerutti.alexander@gmail.com>",
 	"license": "ISC",
 	"scripts": {
-		"service:link-pg": "cd ../.. && pnpm build && pnpm link",
-		"preinstall": "pnpm clear:deps",
-		"postinstall": "pnpm service:link-pg && pnpm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
 		"example": "pnpm ts-node src/index.ts",
 		"example:debug": "node -r ts-node/register --inspect-brk src/index.ts"
 	},
 	"peerDependencies": {
-		"passkit-generator": "latest"
+		"passkit-generator": "workspace:*"
 	},
 	"dependencies": {
 		"express": "^4.21.1",
 		"node-fetch": "^3.2.3",
-		"tslib": "^2.7.0"
+		"tslib": "^2.7.0",
+		"passkit-generator": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/express": "4.17.13",

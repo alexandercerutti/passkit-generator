@@ -6,9 +6,6 @@
 		"shell": "pnpm build && pnpm firebase functions:shell",
 		"deploy": "pnpm firebase deploy --only functions",
 		"logs": "pnpm firebase functions:log",
-		"service:link-pg": "cd ../../.. && pnpm build && pnpm link",
-		"predev:install": "pnpm clear:deps",
-		"dev:install": "pnpm service:link-pg && pnpm link passkit-generator",
 		"clear:deps": "rm -rf node_modules",
 		"build": "rm -rf lib && pnpm tsc"
 	},
@@ -20,10 +17,11 @@
 	"dependencies": {
 		"firebase-admin": "^11.11.1",
 		"firebase-functions": "^4.9.0",
-		"tslib": "^2.7.0"
+		"tslib": "^2.7.0",
+		"passkit-generator": "workspace:*"
 	},
 	"peerDependencies": {
-		"passkit-generator": "latest"
+		"passkit-generator": "workspace:*"
 	},
 	"devDependencies": {
 		"firebase-functions-test": "^0.2.3",

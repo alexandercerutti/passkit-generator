@@ -1016,9 +1016,7 @@ export default class PKPass extends Bundle {
 	 * @warning `relevantDate` property has been deprecated in iOS 18
 	 * in order to get replaced by `relevantDates` array of intervals
 	 * (`relevantDates[].startDate` + `relevantDates[].endDate`)
-	 * or single date (`relevantDates[].relevantDate`). This method will
-	 * set both the original, as the new one will get ignored in older
-	 * iOS versions.
+	 * or single date (`relevantDates[].relevantDate`).
 	 */
 
 	public setRelevantDate(date: Date | null): void {

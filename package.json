@@ -10,7 +10,7 @@
 		"build:dual": "pnpm tsconfig-to-dual-package tsconfig.esm.json tsconfig.cjs.json",
 		"build:all": "pnpm build && pnpm build:examples",
 		"prepublishOnly": "pnpm build && pnpm test",
-		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" pnpm jest -c jest.config.cjs --silent"
+		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" pnpm jest -c jest.config.mjs --silent"
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",

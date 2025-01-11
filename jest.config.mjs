@@ -4,9 +4,9 @@
  * @type {import("jest").Config}
  */
 
-module.exports = {
+export default {
 	moduleFileExtensions: ["js", "mjs", "cjs"],
 	testEnvironment: "node",
-	testMatch: ["**/specs/**/*.spec.cjs"],
+	testMatch: ["**/specs/**/*.spec.mjs"],
 	injectGlobals: false,
 };

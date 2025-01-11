@@ -1,15 +1,12 @@
 // @ts-check
-const {
-	beforeEach,
-	beforeAll,
-	expect,
-	it,
-	describe,
-} = require("@jest/globals");
-const fs = require("node:fs");
-const path = require("node:path");
-const forge = require("node-forge");
-const { default: PKPass } = require("../lib/PKPass");
+import { beforeEach, beforeAll, expect, it, describe } from "@jest/globals";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import forge from "node-forge";
+import { PKPass } from "passkit-generator";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * @returns {[cert: Buffer, key: Buffer]}

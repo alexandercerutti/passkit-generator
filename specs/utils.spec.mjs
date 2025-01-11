@@ -1,5 +1,5 @@
-const { describe, expect, it } = require("@jest/globals");
-const { processDate, removeHidden } = require("../lib/utils");
+import { describe, expect, it } from "@jest/globals";
+import { processDate, removeHidden } from "../lib/esm/utils.js";
 
 describe("Utils", () => {
 	describe("removeHidden", () => {

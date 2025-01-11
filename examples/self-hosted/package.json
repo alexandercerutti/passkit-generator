@@ -14,13 +14,14 @@
 		"passkit-generator": "workspace:*"
 	},
 	"dependencies": {
-		"express": "^4.21.1",
+		"express": "^5.0.1",
 		"node-fetch": "^3.2.3",
-		"tslib": "^2.7.0",
-		"passkit-generator": "workspace:*"
+		"passkit-generator": "workspace:*",
+		"tslib": "^2.7.0"
 	},
 	"devDependencies": {
-		"@types/express": "4.17.13",
+		"@types/express": "5.0.0",
+		"@types/express-serve-static-core": "^5.0.4",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.6.3"
 	}

@@ -26,5 +26,6 @@
 		"allowUnusedLabels": false,
 		"allowUnreachableCode": false,
 		"resolveJsonModule": true
-	}
+	},
+	"include": ["src/**/*"]
 }

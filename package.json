@@ -44,7 +44,9 @@
 		"typescript": "^5.7.3"
 	},
 	"files": [
-		"lib/**/*.+(js|d.ts)"
+		"lib/cjs/**/*.+(js*)",
+		"lib/esm/**/*.+(js*)",
+		"lib/types/**/*.+(d.ts*)"
 	],
 	"exports": {
 		".": {

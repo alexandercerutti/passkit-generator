@@ -32,11 +32,11 @@ export function removeHidden(from: Array<string>): Array<string> {
 async function readFileOrDirectory(filePath: string) {
 	if ((await fs.lstat(filePath)).isDirectory()) {
 		return Promise.all(await readDirectory(filePath));
-	} else {
-		return fs
-			.readFile(filePath)
-			.then((content) => getObjectFromModelFile(filePath, content, 1));
 	}
+
+	const fileBuffer = await fs.readFile(filePath);
+
+	return getObjectFromModelFile(filePath, fileBuffer, 1);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { Readable, Stream } from "node:stream";
+import { ReadableStream } from "node:stream/web";
 import { toArray as zipToArray } from "do-not-zip";
 import * as Messages from "./messages.js";
 
@@ -128,7 +128,7 @@ export default class Bundle {
 
 	public getAsBuffer(): Uint8Array {
 		this[freezeSymbol]();
-		return Buffer.from(zipToArray(createZipFilesMap(this[filesSymbol])));
+		return new Uint8Array(zipToArray(createZipFilesMap(this[filesSymbol])));
 	}
 
 	/**
@@ -139,11 +139,12 @@ export default class Bundle {
 	 * @returns
 	 */
 
-	public getAsStream(): Stream {
+	public getAsStream(): ReadableStream {
 		this[freezeSymbol]();
-		return Readable.from(
-			Buffer.from(zipToArray(createZipFilesMap(this[filesSymbol]))),
-		);
+
+		return ReadableStream.from([
+			Uint8Array.from(zipToArray(createZipFilesMap(this[filesSymbol]))),
+		]);
 	}
 
 	/**

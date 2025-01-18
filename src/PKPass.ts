@@ -1,4 +1,4 @@
-import { Stream } from "node:stream";
+import type { ReadableStream } from "node:stream/web";
 import { Buffer } from "node:buffer";
 import path from "node:path";
 import FieldsArray from "./FieldsArray.js";
@@ -764,7 +764,7 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	public getAsStream(): Stream {
+	public getAsStream(): ReadableStream {
 		if (!this.isFrozen) {
 			this[closePassSymbol]();
 		}

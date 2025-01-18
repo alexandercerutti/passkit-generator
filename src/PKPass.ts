@@ -642,7 +642,7 @@ export default class PKPass extends Bundle {
 			{},
 		);
 
-		return Buffer.from(JSON.stringify(manifest));
+		return new TextEncoder().encode(JSON.stringify(manifest));
 	}
 
 	/**

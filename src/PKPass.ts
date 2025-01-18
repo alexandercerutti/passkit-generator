@@ -1,5 +1,4 @@
 import type { ReadableStream } from "node:stream/web";
-import { Buffer } from "node:buffer";
 import path from "node:path";
 import FieldsArray from "./FieldsArray.js";
 import Bundle, { filesSymbol } from "./Bundle.js";
@@ -70,9 +69,7 @@ export default class PKPass extends Bundle {
 			/** Cloning all the buffers to prevent unwanted edits */
 			for (let i = 0; i < buffersEntries.length; i++) {
 				const [fileName, contentBuffer] = buffersEntries[i];
-
-				buffers[fileName] = Buffer.alloc(contentBuffer.length);
-				contentBuffer.copy(buffers[fileName]);
+				buffers[fileName] = contentBuffer.subarray(0);
 			}
 
 			/**
@@ -81,7 +78,7 @@ export default class PKPass extends Bundle {
 			 * through validation
 			 */
 
-			buffers["pass.json"] = Buffer.from(
+			buffers["pass.json"] = new TextEncoder().encode(
 				JSON.stringify(source[propsSymbol]),
 			);
 		} else {
@@ -506,7 +503,7 @@ export default class PKPass extends Bundle {
 			 * It will be reconciliated in export phase.
 			 */
 
-			return super.addBuffer(pathName, Buffer.alloc(0));
+			return super.addBuffer(pathName, new Uint8Array());
 		}
 
 		if (RegExps.PERSONALIZATION.JSON.test(pathName)) {
@@ -658,8 +655,9 @@ export default class PKPass extends Bundle {
 		}
 
 		const fileNames = Object.keys(this[filesSymbol]);
-
-		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
+		const passJson = new TextEncoder().encode(
+			JSON.stringify(this[propsSymbol]),
+		);
 		super.addBuffer("pass.json", passJson);
 
 		if (!fileNames.some((fileName) => RegExps.PASS_ICON.test(fileName))) {
@@ -1132,7 +1130,8 @@ function validateJSONBuffer(
 	let contentAsJSON: Schemas.PassProps;
 
 	try {
-		contentAsJSON = JSON.parse(buffer.toString("utf8"));
+		const bufferAsString = new TextDecoder().decode(buffer);
+		contentAsJSON = JSON.parse(bufferAsString);
 	} catch (err) {
 		throw new TypeError(Messages.JSON.INVALID);
 	}

@@ -13,8 +13,8 @@ import { Buffer } from "node:buffer";
  * @returns
  */
 
-export function parse(buffer: Buffer) {
-	const fileAsString = buffer.toString("utf8");
+export function parse(buffer: Uint8Array) {
+	const fileAsString = Buffer.from(buffer).toString("utf8");
 	const translationRowRegex = /"(?<key>.+)"\s+=\s+"(?<value>.+)";\n?/;
 	const commentRowRegex = /\/\*\s*(.+)\s*\*\//;
 
@@ -71,7 +71,7 @@ export function parse(buffer: Buffer) {
  * @returns
  */
 
-export function create(translations: { [key: string]: string }): Buffer {
+export function create(translations: { [key: string]: string }): Uint8Array {
 	const stringContents = [];
 
 	const translationsEntries = Object.entries(translations);

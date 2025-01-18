@@ -2,9 +2,9 @@ import { Buffer } from "node:buffer";
 import Joi from "joi";
 
 export interface CertificatesSchema {
-	wwdr: string | Buffer;
-	signerCert: string | Buffer;
-	signerKey: string | Buffer;
+	wwdr: string | Uint8Array;
+	signerCert: string | Uint8Array;
+	signerKey: string | Uint8Array;
 	signerKeyPassphrase?: string;
 }
 
@@ -13,15 +13,11 @@ export interface CertificatesSchema {
  * so we fallback to manual checking. Buffer must be polyfilled.
  */
 
-const binary = Joi.binary
-	? Joi.binary()
-	: Joi.custom((obj) => Buffer.isBuffer(obj));
-
 export const CertificatesSchema = Joi.object<CertificatesSchema>()
 	.keys({
-		wwdr: Joi.alternatives(binary, Joi.string()).required(),
-		signerCert: Joi.alternatives(binary, Joi.string()).required(),
-		signerKey: Joi.alternatives(binary, Joi.string()).required(),
+		wwdr: Joi.alternatives(Joi.binary(), Joi.string()).required(),
+		signerCert: Joi.alternatives(Joi.binary(), Joi.string()).required(),
+		signerKey: Joi.alternatives(Joi.binary(), Joi.string()).required(),
 		signerKeyPassphrase: Joi.string(),
 	})
 	.required();

@@ -73,7 +73,7 @@ export const RelevantDate = Joi.alternatives(
 );
 
 export interface FileBuffers {
-	[key: string]: Buffer;
+	[key: string]: Uint8Array;
 }
 
 export interface PassProps {

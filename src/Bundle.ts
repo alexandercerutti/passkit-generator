@@ -1,5 +1,4 @@
 import { Readable, Stream } from "node:stream";
-import { Buffer } from "node:buffer";
 import { toArray as zipToArray } from "do-not-zip";
 import * as Messages from "./messages.js";
 
@@ -19,7 +18,7 @@ namespace Mime {
  */
 
 export default class Bundle {
-	private [filesSymbol]: { [key: string]: Buffer } = {};
+	private [filesSymbol]: { [key: string]: Uint8Array } = {};
 	private [mimeTypeSymbol]: string;
 
 	public constructor(mimeType: `${Mime.type}/${Mime.subtype}`) {
@@ -111,7 +110,7 @@ export default class Bundle {
 	 * @param buffer
 	 */
 
-	public addBuffer(fileName: string, buffer: Buffer) {
+	public addBuffer(fileName: string, buffer: Uint8Array) {
 		if (this.isFrozen) {
 			throw new Error(Messages.BUNDLE.CLOSED);
 		}
@@ -120,14 +119,14 @@ export default class Bundle {
 	}
 
 	/**
-	 * Closes the bundle and returns it as a Buffer.
+	 * Closes the bundle and returns it as a Uint8Array.
 	 * Once closed, the bundle does not allow files
 	 * to be added any further.
 	 *
-	 * @returns Buffer
+	 * @returns Uint8Array
 	 */
 
-	public getAsBuffer(): Buffer {
+	public getAsBuffer(): Uint8Array {
 		this[freezeSymbol]();
 		return Buffer.from(zipToArray(createZipFilesMap(this[filesSymbol])));
 	}
@@ -157,7 +156,7 @@ export default class Bundle {
 	 * 		and Buffers as content.
 	 */
 
-	public getAsRaw(): { [filePath: string]: Buffer } {
+	public getAsRaw(): { [filePath: string]: Uint8Array } {
 		this[freezeSymbol]();
 		return Object.freeze({ ...this[filesSymbol] });
 	}
@@ -170,7 +169,7 @@ export default class Bundle {
  * @returns
  */
 
-function createZipFilesMap(files: { [key: string]: Buffer }) {
+function createZipFilesMap(files: { [key: string]: Uint8Array }) {
 	return Object.entries(files).map(([path, data]) => ({
 		path,
 		data,

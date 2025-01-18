@@ -146,7 +146,7 @@ export default class PKPass extends Bundle {
 			const buffersEntries = Object.entries(buffers);
 
 			for (
-				let i = buffersEntries.length, buffer: [string, Buffer];
+				let i = buffersEntries.length, buffer: [string, Uint8Array];
 				(buffer = buffersEntries[--i]);
 
 			) {
@@ -471,7 +471,7 @@ export default class PKPass extends Bundle {
 	 * @param buffer
 	 */
 
-	public addBuffer(pathName: string, buffer: Buffer): void {
+	public addBuffer(pathName: string, buffer: Uint8Array): void {
 		if (!buffer?.length) {
 			return;
 		}
@@ -631,7 +631,7 @@ export default class PKPass extends Bundle {
 	 * added to the bundle
 	 */
 
-	private [createManifestSymbol](): Buffer {
+	private [createManifestSymbol](): Uint8Array {
 		const manifest = Object.entries(this[filesSymbol]).reduce<{
 			[key: string]: string;
 		}>(
@@ -748,7 +748,7 @@ export default class PKPass extends Bundle {
 	 * @returns
 	 */
 
-	public getAsBuffer(): Buffer {
+	public getAsBuffer(): Uint8Array {
 		if (!this.isFrozen) {
 			this[closePassSymbol]();
 		}
@@ -786,7 +786,7 @@ export default class PKPass extends Bundle {
 	 * 		and Buffers as content.
 	 */
 
-	public getAsRaw(): { [filePath: string]: Buffer } {
+	public getAsRaw(): { [filePath: string]: Uint8Array } {
 		if (!this.isFrozen) {
 			this[closePassSymbol]();
 		}
@@ -1126,7 +1126,7 @@ export default class PKPass extends Bundle {
 }
 
 function validateJSONBuffer(
-	buffer: Buffer,
+	buffer: Uint8Array,
 	schema: Parameters<typeof Schemas.validate>[0],
 ): Schemas.PassProps {
 	let contentAsJSON: Schemas.PassProps;

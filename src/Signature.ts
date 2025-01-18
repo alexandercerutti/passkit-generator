@@ -1,6 +1,5 @@
 import forge from "node-forge";
 import type * as Schemas from "./schemas/index.js";
-import { Buffer } from "node:buffer";
 
 /**
  * Creates an hash for a buffer. Used by manifest
@@ -9,7 +8,7 @@ import { Buffer } from "node:buffer";
  * @returns
  */
 
-export function createHash(buffer: Buffer) {
+export function createHash(buffer: Uint8Array) {
 	const hashFlow = forge.md.sha1.create();
 	hashFlow.update(buffer.toString("binary"));
 
@@ -26,9 +25,9 @@ export function createHash(buffer: Buffer) {
  */
 
 export function create(
-	manifestBuffer: Buffer,
+	manifestBuffer: Uint8Array,
 	certificates: Schemas.CertificatesSchema,
-): Buffer {
+): Uint8Array {
 	const signature = forge.pkcs7.createSignedData();
 
 	signature.content = new forge.util.ByteStringBuffer(manifestBuffer);

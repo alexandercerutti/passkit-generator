@@ -197,7 +197,7 @@ export async function* createPassGenerator(
 		 * @see https://aws.amazon.com/it/blogs/compute/handling-binary-data-using-amazon-api-gateway-http-apis/
 		 * "For the response path, API Gateway inspects the isBase64Encoding flag returned from Lambda."
 		 */
-		body: buffer.toString("base64"),
+		body: Buffer.from(buffer).toString("base64"),
 		isBase64Encoded: true,
 	};
 }

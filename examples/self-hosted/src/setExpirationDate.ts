@@ -8,9 +8,13 @@
  */
 
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
+import { Readable } from "node:stream";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.route("/expirationDate/:modelName").get(async (request, response) => {
 	if (!request.query.fn) {
@@ -74,7 +78,7 @@ app.route("/expirationDate/:modelName").get(async (request, response) => {
 			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 
-		stream.pipe(response);
+		Readable.fromWeb(stream).pipe(response);
 	} catch (err) {
 		console.log(err);
 

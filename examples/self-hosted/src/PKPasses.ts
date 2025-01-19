@@ -34,6 +34,10 @@ import { getCertificates } from "./shared.js";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { PKPass } from "passkit-generator";
+import { Readable } from "node:stream";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // *************************** //
 // *** EXAMPLE FROM NOW ON *** //
@@ -142,7 +146,7 @@ app.route("/pkpasses/:modelName").get(async (request, response) => {
 
 		const stream = pkpasses.getAsStream();
 
-		stream.pipe(response);
+		Readable.fromWeb(stream).pipe(response);
 	} catch (err) {
 		console.log(err);
 

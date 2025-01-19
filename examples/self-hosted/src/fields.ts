@@ -13,6 +13,10 @@ import path from "node:path";
 import { PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
+import { fileURLToPath } from "node:url";
+import { Readable } from "node:stream";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.route("/fields/:modelName").get(async (request, response) => {
 	const passName =
@@ -186,7 +190,7 @@ app.route("/fields/:modelName").get(async (request, response) => {
 			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 
-		stream.pipe(response);
+		Readable.fromWeb(stream).pipe(response);
 	} catch (err) {
 		console.log(err);
 

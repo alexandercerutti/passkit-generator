@@ -5,9 +5,13 @@
 
 import path from "node:path";
 import { promises as fs } from "node:fs";
+import { Readable } from "node:stream";
+import { fileURLToPath } from "node:url";
 import { PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function getRandomColorPart() {
 	return Math.floor(Math.random() * 255);
@@ -93,7 +97,7 @@ app.route("/scratch/:modelName").get(async (request, response) => {
 			"Content-disposition": `attachment; filename=${passName}.pkpass`,
 		});
 
-		stream.pipe(response);
+		Readable.fromWeb(stream).pipe(response);
 	} catch (err) {
 		console.log(err);
 

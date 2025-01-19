@@ -1,4 +1,5 @@
 import forge from "node-forge";
+import crypto from "node:crypto";
 import type * as Schemas from "./schemas/index.js";
 
 /**
@@ -9,10 +10,7 @@ import type * as Schemas from "./schemas/index.js";
  */
 
 export function createHash(buffer: Uint8Array) {
-	const hashFlow = forge.md.sha1.create();
-	hashFlow.update(buffer.toString("binary"));
-
-	return hashFlow.digest().toHex();
+	return crypto.createHash("sha1").update(buffer).digest("hex");
 }
 
 /**

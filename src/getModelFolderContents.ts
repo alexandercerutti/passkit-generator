@@ -1,6 +1,5 @@
 import * as path from "node:path";
 import { promises as fs } from "node:fs";
-import type { Buffer } from "node:buffer";
 import * as Utils from "./utils.js";
 import * as Messages from "./messages.js";
 
@@ -14,7 +13,7 @@ import * as Messages from "./messages.js";
 
 export default async function getModelFolderContents(
 	model: string,
-): Promise<{ [filePath: string]: Buffer }> {
+): Promise<{ [filePath: string]: Uint8Array }> {
 	try {
 		const modelPath = `${model}${(!path.extname(model) && ".pass") || ""}`;
 		const modelFilesList = await fs.readdir(modelPath);
@@ -93,14 +92,14 @@ function isFileReadingFailure(
 
 async function readFileOrDirectory(
 	filePath: string,
-): Promise<[key: string, content: Buffer][]> {
+): Promise<[key: string, content: Uint8Array][]> {
 	const stats = await fs.lstat(filePath);
 
 	if (stats.isDirectory()) {
 		return readFilesInDirectory(filePath);
-	} else {
-		return getFileContents(filePath).then((result) => [result]);
 	}
+
+	return getFileContents(filePath).then((result) => [result]);
 }
 
 /**
@@ -132,7 +131,7 @@ async function readFilesInDirectory(
 async function getFileContents(
 	filePath: string,
 	pathSlicesDepthFromEnd: number = 1,
-): Promise<[key: string, content: Buffer]> {
+): Promise<[key: string, content: Uint8Array]> {
 	const fileComponents = filePath.split(path.sep);
 	const fileName = fileComponents
 		.slice(fileComponents.length - pathSlicesDepthFromEnd)
@@ -140,5 +139,5 @@ async function getFileContents(
 
 	const content = await fs.readFile(filePath);
 
-	return [fileName, content];
+	return [fileName, Uint8Array.from(content)];
 }

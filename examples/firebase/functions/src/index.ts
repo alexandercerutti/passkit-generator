@@ -296,7 +296,11 @@ export const pass = functions.onRequest(
 			const bufferData = newPass.getAsBuffer();
 
 			response.set("Content-Type", newPass.mimeType);
-			response.status(200).send(bufferData);
+			/**
+			 * Needs to convert to Buffer because Firebase is based
+			 * on Express, and express doesn't handle Uint8Array yet
+			 */
+			response.status(200).send(Buffer.from(bufferData));
 		} catch (error) {
 			console.log("Error Uploading pass " + error);
 

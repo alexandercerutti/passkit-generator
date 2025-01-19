@@ -3,6 +3,7 @@
 	"description": "Cloud Functions for Firebase",
 	"scripts": {
 		"serve": "pnpm build && pnpm firebase emulators:start --only functions",
+		"serve:debug": "pnpm build && pnpm firebase emulators:start --only functions --inspect-functions",
 		"shell": "pnpm build && pnpm firebase functions:shell",
 		"deploy": "pnpm firebase deploy --only functions",
 		"logs": "pnpm firebase functions:log",

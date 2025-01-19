@@ -10,6 +10,9 @@ interface StringsFileParseResult {
 	comments: string[];
 }
 
+const TRANSLATION_ROW_REGEX = /"(?<key>.+)"\s+=\s+"(?<value>.+)";\n?/;
+const COMMENT_ROW_REGEX = /\/\*\s*(.+)\s*\*\//;
+
 /**
  * Parses a string file to convert it to
  * an object
@@ -21,8 +24,6 @@ interface StringsFileParseResult {
 export function parse(buffer: Uint8Array): StringsFileParseResult {
 	const decoder = new TextDecoder("utf-8");
 	const fileAsString = decoder.decode(buffer);
-	const translationRowRegex = /"(?<key>.+)"\s+=\s+"(?<value>.+)";\n?/;
-	const commentRowRegex = /\/\*\s*(.+)\s*\*\//;
 
 	let translations: [placeholder: string, value: string][] = [];
 	let comments: string[] = [];
@@ -44,13 +45,16 @@ export function parse(buffer: Uint8Array): StringsFileParseResult {
 				blockEndPoint + 1,
 			);
 
-			if ((match = section.match(translationRowRegex)) && match.groups) {
+			if (
+				(match = section.match(TRANSLATION_ROW_REGEX)) &&
+				match.groups
+			) {
 				const {
 					groups: { key, value },
 				} = match;
 
 				translations.push([key, value]);
-			} else if ((match = section.match(commentRowRegex))) {
+			} else if ((match = section.match(COMMENT_ROW_REGEX))) {
 				const [, content] = match;
 
 				comments.push(content.trimEnd());

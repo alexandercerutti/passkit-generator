@@ -629,17 +629,15 @@ export default class PKPass extends Bundle {
 	 */
 
 	private [createManifestSymbol](): Uint8Array {
-		const manifest = Object.entries(this[filesSymbol]).reduce<{
-			[key: string]: string;
-		}>(
-			(acc, [fileName, buffer]) => ({
-				...acc,
-				[fileName]: Signature.createHash(buffer),
-			}),
-			{},
-		);
+		const fileEntries = Object.entries(this[filesSymbol]);
+		const manifestEntries = fileEntries.map(([name, buffer]) => [
+			name,
+			Signature.createHash(buffer),
+		]);
 
-		return new TextEncoder().encode(JSON.stringify(manifest));
+		const manifestObject = Object.fromEntries(manifestEntries);
+
+		return new TextEncoder().encode(JSON.stringify(manifestObject));
 	}
 
 	/**

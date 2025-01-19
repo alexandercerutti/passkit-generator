@@ -101,14 +101,16 @@ export function create(
  * @returns The parsed certificate or key in node forge format
  */
 
-function parseCertificates(certificates: Schemas.CertificatesSchema) {
+function parseCertificates(
+	certificates: Record<keyof Schemas.CertificatesSchema, string>,
+) {
 	const { signerCert, signerKey, wwdr, signerKeyPassphrase } = certificates;
 
 	return {
-		signerCert: forge.pki.certificateFromPem(signerCert.toString("utf-8")),
-		wwdr: forge.pki.certificateFromPem(wwdr.toString("utf-8")),
+		signerCert: forge.pki.certificateFromPem(signerCert),
+		wwdr: forge.pki.certificateFromPem(wwdr),
 		signerKey: forge.pki.decryptRsaPrivateKey(
-			signerKey.toString("utf-8"),
+			signerKey,
 			signerKeyPassphrase,
 		),
 	};
@@ -116,14 +118,26 @@ function parseCertificates(certificates: Schemas.CertificatesSchema) {
 
 function getStringCertificates(
 	certificates: Schemas.CertificatesSchema,
-): Record<
-	keyof Omit<Schemas.CertificatesSchema, "signerKeyPassphrase">,
-	string
-> & { signerKeyPassphrase?: string } {
+): Record<keyof Schemas.CertificatesSchema, string> {
+	const { wwdr, signerCert, signerKey, signerKeyPassphrase } = certificates;
+
+	const decoder = new TextDecoder();
+
 	return {
-		signerKeyPassphrase: certificates.signerKeyPassphrase,
-		wwdr: Buffer.from(certificates.wwdr).toString("utf-8"),
-		signerCert: Buffer.from(certificates.signerCert).toString("utf-8"),
-		signerKey: Buffer.from(certificates.signerKey).toString("utf-8"),
+		signerKeyPassphrase,
+		wwdr: extractStringFromUint8Array(wwdr, decoder),
+		signerCert: extractStringFromUint8Array(signerCert, decoder),
+		signerKey: extractStringFromUint8Array(signerKey, decoder),
 	};
+}
+
+function extractStringFromUint8Array(
+	content: string | Uint8Array,
+	decoder: TextDecoder,
+): string {
+	if (typeof content === "string") {
+		return content;
+	}
+
+	return decoder.decode(content);
 }

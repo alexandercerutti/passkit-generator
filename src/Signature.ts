@@ -87,9 +87,8 @@ export function create(
 	 * of beautiful things. ¯\_(ツ)_/¯
 	 */
 
-	return Buffer.from(
+	return forge.util.binary.raw.decode(
 		forge.asn1.toDer(signature.toAsn1()).getBytes(),
-		"binary",
 	);
 }
 

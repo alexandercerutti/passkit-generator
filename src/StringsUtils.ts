@@ -25,8 +25,8 @@ export function parse(buffer: Uint8Array): StringsFileParseResult {
 	const decoder = new TextDecoder("utf-8");
 	const fileAsString = decoder.decode(buffer);
 
-	let translations: [placeholder: string, value: string][] = [];
-	let comments: string[] = [];
+	const translations: [placeholder: string, value: string][] = [];
+	const comments: string[] = [];
 
 	let blockStartPoint = 0;
 	let blockEndPoint = 0;

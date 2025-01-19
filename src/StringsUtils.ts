@@ -5,6 +5,11 @@ import { Buffer } from "node:buffer";
 // *** UTILS FOR PASS.STRINGS FILES *** //
 // ************************************ //
 
+interface StringsFileParseResult {
+	translations: [key: string, translation: string][];
+	comments: string[];
+}
+
 /**
  * Parses a string file to convert it to
  * an object
@@ -13,8 +18,9 @@ import { Buffer } from "node:buffer";
  * @returns
  */
 
-export function parse(buffer: Uint8Array) {
-	const fileAsString = Buffer.from(buffer).toString("utf8");
+export function parse(buffer: Uint8Array): StringsFileParseResult {
+	const decoder = new TextDecoder("utf-8");
+	const fileAsString = decoder.decode(buffer);
 	const translationRowRegex = /"(?<key>.+)"\s+=\s+"(?<value>.+)";\n?/;
 	const commentRowRegex = /\/\*\s*(.+)\s*\*\//;
 
@@ -82,5 +88,5 @@ export function create(translations: { [key: string]: string }): Uint8Array {
 		stringContents.push(`"${key}" = "${value}";`);
 	}
 
-	return Buffer.from(stringContents.join(EOL));
+	return new TextEncoder().encode(stringContents.join(EOL));
 }

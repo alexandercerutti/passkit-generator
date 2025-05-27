@@ -101,6 +101,13 @@ export interface PassProps {
 	foregroundColor?: string;
 	labelColor?: string;
 
+	/**
+	 * Undocumented feature:
+	 * Color of primary fields value when
+	 * rendered on top of a strip.
+	 */
+	stripColor?: string;
+
 	nfc?: NFC;
 	beacons?: Beacon[];
 	barcodes?: Barcode[];
@@ -441,6 +448,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	maxDistance: Joi.number().positive(),
 	authenticationToken: Joi.string().min(16),
 	labelColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+	stripColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 	backgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 	foregroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 	associatedStoreIdentifiers: Joi.array().items(Joi.number()),

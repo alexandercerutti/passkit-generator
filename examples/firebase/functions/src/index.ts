@@ -20,6 +20,7 @@ interface RequestWithBody extends functions.Request {
 		textColor: string;
 		backgroundColor: string;
 		labelColor: string;
+		stripColor: string;
 		relevantDate?: string;
 		expiryDate?: string;
 		relevantLocationLat?: number;

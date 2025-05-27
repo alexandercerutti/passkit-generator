@@ -405,7 +405,7 @@ export type PassKindsProps = { [K in PassTypesProps]: PassProps[K] };
 
 export type PassColors = Pick<
 	OverridablePassProps,
-	"backgroundColor" | "foregroundColor" | "labelColor"
+	"backgroundColor" | "foregroundColor" | "labelColor" | "stripColor"
 >;
 
 export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({

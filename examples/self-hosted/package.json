@@ -24,6 +24,7 @@
 		"@types/express": "5.0.0",
 		"@types/express-serve-static-core": "^5.0.4",
 		"tsx": "^4.19.2",
-		"typescript": "^5.7.3"
+		"typescript": "^5.7.3",
+		"@types/node": "^20.0.0"
 	}
 }

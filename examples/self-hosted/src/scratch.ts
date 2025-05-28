@@ -26,7 +26,7 @@ app.route("/scratch/:modelName").get(async (request, response) => {
 				"../../models/exampleBooking.pass/icon.png",
 			),
 		),
-		await getCertificates(),
+		getCertificates(),
 	]);
 
 	try {

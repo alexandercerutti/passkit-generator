@@ -1,5 +1,11 @@
 # Changelog
 
+### 3.4.0 (28 May 2025)
+
+-   Added support to undocumented feature `stripColor` (PR #245)
+
+---
+
 ### 3.3.0 (11 Jan 2025)
 
 -   Added support to the missing iOS 18 changes (`useAutomaticColor`, `footerBackgroundColor`, `suppressHeaderDarkening`, `auxiliaryStoreIdentifiers`, `eventStartDateInfo`, `venueOpenDate`);

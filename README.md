@@ -60,7 +60,10 @@ Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-genera
 
 ### Integrating Apple Wallet Web services?
 
-Give a look at another library I made: [Passkit Webservice Toolkit](https://github.com/alexandercerutti/passkit-webservice-toolkit) and its integrations!
+Give a look at other libreries I made:
+
+-   [Passkit Webservice Toolkit](https://github.com/alexandercerutti/passkit-webservice-toolkit) and its integrations
+-   🚧 [hapns](https://github.com/alexandercerutti/hapns) to support updates through APNs notifications, with examples (early stage of development, feedbacks are welcome)
 
 ---
 

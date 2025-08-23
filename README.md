@@ -63,7 +63,7 @@ Look at the [Migration Guide](https://github.com/alexandercerutti/passkit-genera
 Give a look at other libreries I made:
 
 -   [Passkit Webservice Toolkit](https://github.com/alexandercerutti/passkit-webservice-toolkit) and its integrations
--   🚧 [hapns](https://github.com/alexandercerutti/hapns) to support updates through APNs notifications, with examples (early stage of development, feedbacks are welcome)
+-   [hapns](https://github.com/alexandercerutti/hapns) to support updates through APNs notifications, with examples
 
 ---
 

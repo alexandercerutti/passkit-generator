@@ -353,7 +353,7 @@ export interface PassProps {
 	 * If enabled, `foregroundColor` and `labelColor`
 	 * are ignored.
 	 */
-	useAutomaticColor?: boolean;
+	useAutomaticColors?: boolean;
 
 	/**
 	 * @iOSVersion 18
@@ -677,7 +677,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * If enabled, `foregroundColor` and `labelColor`
 	 * are ignored.
 	 */
-	useAutomaticColor: Joi.boolean(),
+	useAutomaticColors: Joi.boolean(),
 
 	/**
 	 * @iOSVersion 18

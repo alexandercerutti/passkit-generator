@@ -7,6 +7,7 @@ export * from "./Semantics.js";
 export * from "./PassFields.js";
 export * from "./Personalize.js";
 export * from "./Certificates.js";
+export * from "./UpcomingPassInformation.js";
 
 import Joi from "joi";
 import type { Buffer } from "node:buffer";
@@ -18,6 +19,7 @@ import { NFC } from "./NFC.js";
 import { PassFields, TransitType } from "./PassFields.js";
 import { Semantics } from "./Semantics.js";
 import { CertificatesSchema } from "./Certificates.js";
+import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
 
 import * as Messages from "../messages.js";
 import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
@@ -372,6 +374,16 @@ export interface PassProps {
 	 * by `associatedStoreIdentifiers`).
 	 */
 	auxiliaryStoreIdentifiers?: number[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * Information about upcoming passes related
+	 * to this pass.
+	 */
+	upcomingPassInformation?: UpcomingPassInformationEntry[];
 }
 
 /**
@@ -387,7 +399,8 @@ type PassMethodsProps =
 	| "relevantDates"
 	| "expirationDate"
 	| "locations"
-	| "preferredStyleSchemes";
+	| "preferredStyleSchemes"
+	| "upcomingPassInformation";
 
 export type PassTypesProps =
 	| "boardingPass"
@@ -417,6 +430,7 @@ export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
 	expirationDate: Joi.string().isoDate(),
 	locations: Joi.array().items(Location),
 	preferredStyleSchemes: PreferredStyleSchemes,
+	upcomingPassInformation: Joi.array().items(UpcomingPassInformationEntry),
 });
 
 export const PassKindsProps = Joi.object<PassKindsProps>({

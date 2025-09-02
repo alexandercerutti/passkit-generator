@@ -1,5 +1,8 @@
 import Joi from "joi";
-import { Field, FieldWithRow } from "./Field.js";
+import {
+	PassFieldContent,
+	PassFieldContentWithRow,
+} from "./PassFieldContent.js";
 
 export type TransitType =
 	| "PKTransitTypeAir"
@@ -13,11 +16,11 @@ export const TransitType = Joi.string().regex(
 );
 
 export interface PassFields {
-	auxiliaryFields: FieldWithRow[];
-	backFields: Field[];
-	headerFields: Field[];
-	primaryFields: Field[];
-	secondaryFields: Field[];
+	auxiliaryFields: PassFieldContentWithRow[];
+	backFields: PassFieldContent[];
+	headerFields: PassFieldContent[];
+	primaryFields: PassFieldContent[];
+	secondaryFields: PassFieldContent[];
 	transitType?: TransitType;
 
 	/**
@@ -27,15 +30,15 @@ export interface PassFields {
 	 *
 	 * @see \<undiclosed>
 	 */
-	additionalInfoFields?: Field[];
+	additionalInfoFields?: PassFieldContent[];
 }
 
 export const PassFields = Joi.object<PassFields>().keys({
-	auxiliaryFields: Joi.array().items(FieldWithRow),
-	backFields: Joi.array().items(Field),
-	headerFields: Joi.array().items(Field),
-	primaryFields: Joi.array().items(Field),
-	secondaryFields: Joi.array().items(Field),
+	auxiliaryFields: Joi.array().items(PassFieldContentWithRow),
+	backFields: Joi.array().items(PassFieldContent),
+	headerFields: Joi.array().items(PassFieldContent),
+	primaryFields: Joi.array().items(PassFieldContent),
+	secondaryFields: Joi.array().items(PassFieldContent),
 	transitType: TransitType,
 
 	/**
@@ -45,5 +48,5 @@ export const PassFields = Joi.object<PassFields>().keys({
 	 *
 	 * @see \<undiclosed>
 	 */
-	additionalInfoFields: Joi.array().items(Field),
+	additionalInfoFields: Joi.array().items(PassFieldContent),
 });

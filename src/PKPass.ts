@@ -302,7 +302,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get primaryFields(): Schemas.Field[] {
+	public get primaryFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].primaryFields;
 	}
 
@@ -314,7 +314,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get secondaryFields(): Schemas.Field[] {
+	public get secondaryFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].secondaryFields;
 	}
 
@@ -331,7 +331,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get auxiliaryFields(): Schemas.FieldWithRow[] {
+	public get auxiliaryFields(): Schemas.PassFieldContentWithRow[] {
 		return this[propsSymbol][this.type].auxiliaryFields;
 	}
 
@@ -343,7 +343,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get headerFields(): Schemas.Field[] {
+	public get headerFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].headerFields;
 	}
 
@@ -355,7 +355,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get backFields(): Schemas.Field[] {
+	public get backFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].backFields;
 	}
 
@@ -368,7 +368,7 @@ export default class PKPass extends Bundle {
 	 *		type is not "eventTicket".
 	 */
 
-	public get additionalInfoFields(): Schemas.Field[] {
+	public get additionalInfoFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol]["eventTicket"].additionalInfoFields;
 	}
 
@@ -411,32 +411,34 @@ export default class PKPass extends Bundle {
 			headerFields /******/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			primaryFields /*****/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			secondaryFields /***/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			auxiliaryFields /***/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				type === "eventTicket" ? Schemas.FieldWithRow : Schemas.Field,
+				type === "eventTicket"
+					? Schemas.PassFieldContentWithRow
+					: Schemas.PassFieldContent,
 			),
 			backFields /********/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			additionalInfoFields: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			transitType: undefined,
 		};

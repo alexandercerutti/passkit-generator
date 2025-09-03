@@ -12,15 +12,17 @@ const passInstanceSymbol = Symbol("passInstance");
 const sharedKeysPoolSymbol = Symbol("keysPool");
 const fieldSchemaSymbol = Symbol("fieldSchema");
 
-export default class FieldsArray extends Array<Schemas.Field> {
+export default class FieldsArray extends Array<Schemas.PassFieldContent> {
 	private [passInstanceSymbol]: InstanceType<typeof PKPass>;
 	private [sharedKeysPoolSymbol]: Set<string>;
 
 	constructor(
 		passInstance: InstanceType<typeof PKPass>,
 		keysPool: Set<string>,
-		fieldSchema: typeof Schemas.Field | typeof Schemas.FieldWithRow,
-		...args: Schemas.Field[]
+		fieldSchema:
+			| typeof Schemas.PassFieldContent
+			| typeof Schemas.PassFieldContentWithRow,
+		...args: Schemas.PassFieldContent[]
 	) {
 		super(...args);
 		this[fieldSchemaSymbol] = fieldSchema;
@@ -28,20 +30,20 @@ export default class FieldsArray extends Array<Schemas.Field> {
 		this[sharedKeysPoolSymbol] = keysPool;
 	}
 
-	push(...items: Schemas.Field[]): number {
+	push(...items: Schemas.PassFieldContent[]): number {
 		const validItems = registerWithValidation(this, ...items);
 		return super.push(...validItems);
 	}
 
-	pop(): Schemas.Field {
+	pop(): Schemas.PassFieldContent {
 		return unregisterItems(this, () => super.pop());
 	}
 
 	splice(
 		start: number,
 		deleteCount: number,
-		...items: Schemas.Field[]
-	): Schemas.Field[] {
+		...items: Schemas.PassFieldContent[]
+	): Schemas.PassFieldContent[] {
 		// Perfoming frozen check, validation and getting valid items
 		const validItems = registerWithValidation(this, ...items);
 
@@ -56,7 +58,7 @@ export default class FieldsArray extends Array<Schemas.Field> {
 		return unregisterItems(this, () => super.shift());
 	}
 
-	unshift(...items: Schemas.Field[]) {
+	unshift(...items: Schemas.PassFieldContent[]) {
 		const validItems = registerWithValidation(this, ...items);
 		return super.unshift(...validItems);
 	}
@@ -64,11 +66,11 @@ export default class FieldsArray extends Array<Schemas.Field> {
 
 function registerWithValidation(
 	instance: InstanceType<typeof FieldsArray>,
-	...items: Schemas.Field[]
+	...items: Schemas.PassFieldContent[]
 ) {
 	Utils.assertUnfrozen(instance[passInstanceSymbol]);
 
-	let validItems: Schemas.Field[] = [];
+	let validItems: Schemas.PassFieldContent[] = [];
 
 	for (const field of items) {
 		if (!field) {
@@ -109,7 +111,7 @@ function unregisterItems(
 ) {
 	Utils.assertUnfrozen(instance[passInstanceSymbol]);
 
-	const element: Schemas.Field = removeFn();
+	const element: Schemas.PassFieldContent = removeFn();
 	instance[sharedKeysPoolSymbol].delete(element.key);
 	return element;
 }

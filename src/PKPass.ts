@@ -217,14 +217,14 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
-	 * Allows accessing to iOS 18 new Event Ticket
-	 * property `preferredStyleSchemes`.
+	 * Allows accessing to iOS 18 new property
+	 * `preferredStyleSchemes`.
 	 *
-	 * @throws if current type is not "eventTicket".
+	 * @throws if current type is not "eventTicket" and is not "boardingPass".
 	 */
 
 	public get preferredStyleSchemes(): Schemas.PreferredStyleSchemes {
-		if (this.type !== "eventTicket") {
+		if (this.type !== "eventTicket" && this.type !== "boardingPass") {
 			throw new TypeError(
 				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_GET,
 			);
@@ -235,7 +235,9 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows setting a preferredStyleSchemes property
-	 * for a eventTicket.
+	 * for a eventTicket. Use this to select
+	 * either the Poster Event Tickets (iOS 18+) or the Semantic
+	 * Boarding passes (iOS 26+).
 	 *
 	 * @throws if current type is not "eventTicket".
 	 * @param value
@@ -244,7 +246,7 @@ export default class PKPass extends Bundle {
 	public set preferredStyleSchemes(value: Schemas.PreferredStyleSchemes) {
 		Utils.assertUnfrozen(this);
 
-		if (this.type !== "eventTicket") {
+		if (this.type !== "eventTicket" && this.type !== "boardingPass") {
 			throw new TypeError(
 				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_SET,
 			);

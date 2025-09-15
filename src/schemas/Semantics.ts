@@ -76,6 +76,13 @@ export interface Semantics {
 	boardingSequenceNumber?: string;
 
 	/**
+	 * @iOSVersion 26
+	 *
+	 * A zone number for boarding. Don't include the word _zone_.
+	 */
+	boardingZone?: string;
+
+	/**
 	 * The number of the passenger car.
 	 * A train car is also called a carriage, wagon, coach, or bogie in some countries.
 	 * Use this key only for a train or other rail boarding pass.
@@ -99,6 +106,13 @@ export interface Semantics {
 	departureAirportName?: string;
 
 	/**
+	 * @iOSVersion 26
+	 *
+	 * The name of the departure city to display on the boarding pass, such as `London` or `Shanghai`.
+	 */
+	departureCityName?: string;
+
+	/**
 	 * The gate number or letters of the departure gate, such as 1A. Don’t include the word gate.
 	 */
 	departureGate?: string;
@@ -117,14 +131,72 @@ export interface Semantics {
 	departurePlatform?: string;
 	departureStationName?: string;
 	departureTerminal?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of security programs that exist at the departure location.
+	 * This only shows in the UI if a program is in `passengerEligibleSecurityPrograms`
+	 * and at least one of `departureLocationSecurityPrograms` or `destinationLocationSecurityPrograms`
+	 */
+	departureLocationSecurityPrograms?: (
+		| "PKTransitSecurityProgramTSAPreCheck"
+		| "PKTransitSecurityProgramTSAPreCheckTouchlessID"
+		| "PKTransitSecurityProgramOSS"
+		| "PKTransitSecurityProgramITI"
+		| "PKTransitSecurityProgramITD"
+		| "PKTransitSecurityProgramGlobalEntry"
+		| "PKTransitSecurityProgramCLEAR"
+	)[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The time zone of the departure location, such as `America/Chicago`.
+	 * See the [IANA Time Zone Database](https://www.iana.org/time-zones) for the full list of supported time zones.
+	 */
+	departureLocationTimeZone?: string;
+
 	destinationAirportCode?: string;
 	destinationAirportName?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The name of the destination city to display on the boarding pass, such as `London` or `Shanghai`.
+	 */
+	destinationCityName?: string;
+
 	destinationGate?: string;
 	destinationLocation?: SemanticTagType.Location;
 	destinationLocationDescription?: string;
 	destinationPlatform?: string;
 	destinationStationName?: string;
 	destinationTerminal?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of security programs the passenger is eligible for. This only shows in the UI if a program is in `passengerEligibleSecurityPrograms` and at least one of `departureLocationSecurityPrograms` or `destinationLocationSecurityPrograms`.
+	 */
+	destinationLocationSecurityPrograms?: (
+		| "PKTransitSecurityProgramTSAPreCheck"
+		| "PKTransitSecurityProgramTSAPreCheckTouchlessID"
+		| "PKTransitSecurityProgramOSS"
+		| "PKTransitSecurityProgramITI"
+		| "PKTransitSecurityProgramITD"
+		| "PKTransitSecurityProgramGlobalEntry"
+		| "PKTransitSecurityProgramCLEAR"
+	)[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The time zone of the destination location, such as `America/Los_Angeles`.
+	 * See the [IANA Time Zone Database](https://www.iana.org/time-zones) for the full list of supported time zones.
+	 */
+	destinationLocationTimeZone?: string;
+
 	duration?: number;
 
 	/**
@@ -197,6 +269,20 @@ export interface Semantics {
 	homeTeamName?: string;
 
 	/**
+	 * @iOSVersion 26
+	 *
+	 * An optional boolean that indicates whether the passenger's international documents are verified. If set to `true` Wallet displays the badge on the boarding pass with the value from `internationalDocumentsVerifiedDeclarationName`.
+	 */
+	internationalDocumentsAreVerified?: boolean;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The name of the declaration given once the passenger's international documents are verified. Examples include `DOCS OK` or `Travel Ready`. If `internationalDocumentsAreVerified` is true, Wallet displays a badge on the boarding pass with this value.
+	 */
+	internationalDocumentsVerifiedDeclarationName?: string;
+
+	/**
 	 * The abbreviated league name for a sports event. Use this key only for a sports event ticket.
 	 */
 	leagueAbbreviation?: string;
@@ -206,6 +292,13 @@ export interface Semantics {
 	 * Use this key only for a sports event ticket.
 	 */
 	leagueName?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The MapKit Place IDs that reference the transit provider lounge locations. For more information, see [Identifying unique locations with Place IDs](https://developer.apple.com/documentation/MapKit/identifying-unique-locations-with-place-ids)
+	 */
+	loungePlaceIDs?: string[];
 
 	/**
 	 * The name of a frequent flyer or loyalty program.
@@ -237,6 +330,54 @@ export interface Semantics {
 	 */
 	passengerName?: SemanticTagType.PersonNameComponents;
 
+	/**
+	 * @iOSVersion 26
+	 *
+	 * An array of airline-specific SSRs (Special Service Requests) that apply to the ticketed passenger.
+	 */
+	passengerAirlineSSRs?: string[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of capabilties the passenger has. Only use this key for airline boarding passes.
+	 */
+	passengerCapabilities?: (
+		| "PKPassengerCapabilityPreboarding"
+		| "PKPassengerCapabilityPriorityBoarding"
+		| "PKPassengerCapabilityCarryon"
+		| "PKPassengerCapabilityPersonalItem"
+	)[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of security programs the passenger is eligible for. This only shows in the UI if a program is in `passengerEligibleSecurityPrograms` and at least one of `departureLocationSecurityPrograms` or `destinationLocationSecurityPrograms`.
+	 */
+	passengerEligibleSecurityPrograms?: (
+		| "PKTransitSecurityProgramTSAPreCheck"
+		| "PKTransitSecurityProgramTSAPreCheckTouchlessID"
+		| "PKTransitSecurityProgramOSS"
+		| "PKTransitSecurityProgramITI"
+		| "PKTransitSecurityProgramITD"
+		| "PKTransitSecurityProgramGlobalEntry"
+		| "PKTransitSecurityProgramCLEAR"
+	)[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * An array of IATA information SSRs that apply to the ticketed passenger. A comprehensive list of service SSRs can be found in the [IATA Airlines Developer Guide](https://guides.developer.iata.org/docs/21-1_ImplementationGuide.pdf) under A List of Information SSRs.
+	 */
+	passengerInformationSSRs?: string[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * An array of IATA SSRs that apply to the ticketed passenger. A comprehensive list of service SSRs can be found in the [IATA Airlines Developer Guide](https://guides.developer.iata.org/docs/21-1_ImplementationGuide.pdf) under A List of Service SSRs.
+	 */
+	passengerServiceSSRs?: string[];
+
 	performerNames?: string[];
 
 	/**
@@ -261,6 +402,13 @@ export interface Semantics {
 	 * @passStyle eventTicket (new layout)
 	 */
 	tailgatingAllowed?: boolean;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A localizable string that denotes the ticket class, such as `Saver`, `Economy`, `First`. This value displays as a badge on the boarding pass.
+	 */
+	ticketFareClass?: string;
 
 	totalPrice?: SemanticTagType.CurrencyAmount;
 
@@ -426,6 +574,13 @@ export const Semantics = Joi.object<Semantics>().keys({
 	boardingSequenceNumber: Joi.string(),
 
 	/**
+	 * @iOSVersion 26
+	 *
+	 * A zone number for boarding. Don't include the word _zone_.
+	 */
+	boardingZone: Joi.string(),
+
+	/**
 	 * The number of the passenger car.
 	 * A train car is also called a carriage, wagon, coach, or bogie in some countries.
 	 * Use this key only for a train or other rail boarding pass.
@@ -450,6 +605,13 @@ export const Semantics = Joi.object<Semantics>().keys({
 	departureAirportName: Joi.string(),
 
 	/**
+	 * @iOSVersion 26
+	 *
+	 * The name of the departure city to display on the boarding pass, such as London or Shanghai.
+	 */
+	departureCityName: Joi.string(),
+
+	/**
 	 * The gate number or letters of the departure gate, such as 1A. Don’t include the word gate.
 	 */
 	departureGate: Joi.string(),
@@ -468,14 +630,58 @@ export const Semantics = Joi.object<Semantics>().keys({
 	departurePlatform: Joi.string(),
 	departureStationName: Joi.string(),
 	departureTerminal: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of security programs that exist at the departure location. This only shows in the UI if a program is in `passengerEligibleSecurityPrograms` and at least one of `departureLocationSecurityPrograms` or `destinationLocationSecurityPrograms`
+	 */
+	departureLocationSecurityPrograms: Joi.array().items(
+		Joi.string().regex(
+			/(PKTransitSecurityProgramTSAPreCheck|PKTransitSecurityProgramTSAPreCheckTouchlessID|PKTransitSecurityProgramOSS|PKTransitSecurityProgramITI|PKTransitSecurityProgramITD|PKTransitSecurityProgramGlobalEntry|PKTransitSecurityProgramCLEAR)/,
+		),
+	),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The time zone of the departure location, such as America/Chicago. See the IANA Time Zone Database for the full list of supported time zones.
+	 */
+	departureLocationTimeZone: Joi.string(),
 	destinationAirportCode: Joi.string(),
 	destinationAirportName: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The name of the destination city to display on the boarding pass, such as London or Shanghai.
+	 */
+	destinationCityName: Joi.string(),
+
 	destinationGate: Joi.string(),
 	destinationLocation: SemanticTagType.Location,
 	destinationLocationDescription: Joi.string(),
 	destinationPlatform: Joi.string(),
 	destinationStationName: Joi.string(),
 	destinationTerminal: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of security programs the passenger is eligible for. This only shows in the UI if a program is in passengerEligibleSecurityPrograms and at least one of departureLocationSecurityPrograms or destinationLocationSecurityPrograms.
+	 */
+	destinationLocationSecurityPrograms: Joi.array().items(
+		Joi.string().regex(
+			/(PKTransitSecurityProgramTSAPreCheck|PKTransitSecurityProgramTSAPreCheckTouchlessID|PKTransitSecurityProgramOSS|PKTransitSecurityProgramITI|PKTransitSecurityProgramITD|PKTransitSecurityProgramGlobalEntry|PKTransitSecurityProgramCLEAR)/,
+		),
+	),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The time zone of the destination location, such as America/Los_Angeles. See the IANA Time Zone Database for the full list of supported time zones.
+	 */
+	destinationLocationTimeZone: Joi.string(),
 	duration: Joi.number(),
 
 	/**
@@ -523,6 +729,20 @@ export const Semantics = Joi.object<Semantics>().keys({
 	homeTeamName: Joi.string(),
 
 	/**
+	 * @iOSVersion 26
+	 *
+	 * An optional boolean that indicates whether the passenger's international documents are verified. If set to `true` Wallet displays the badge on the boarding pass with the value from `internationalDocumentsVerifiedDeclarationName`.
+	 */
+	internationalDocumentsAreVerified: Joi.boolean(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The name of the declaration given once the passenger's international documents are verified. Examples include `DOCS OK` or `Travel Ready`. If `internationalDocumentsAreVerified` is true, Wallet displays a badge on the boarding pass with this value.
+	 */
+	internationalDocumentsVerifiedDeclarationName: Joi.string(),
+
+	/**
 	 * The abbreviated league name for a sports event. Use this key only for a sports event ticket.
 	 */
 	leagueAbbreviation: Joi.string(),
@@ -531,6 +751,13 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 * The unabbreviated league name for a sports event. Use this key only for a sports event ticket.
 	 */
 	leagueName: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The MapKit Place IDs that reference the transit provider lounge locations. For more information, see [Identifying unique locations with Place IDs](https://developer.apple.com/documentation/MapKit/identifying-unique-locations-with-place-ids)
+	 */
+	loungePlaceIDs: Joi.array().items(Joi.string()),
 
 	/**
 	 * The name of a frequent flyer or loyalty program.
@@ -563,6 +790,49 @@ export const Semantics = Joi.object<Semantics>().keys({
 	 */
 	passengerName: SemanticTagType.PersonNameComponents,
 
+	/**
+	 * @iOSVersion 26
+	 *
+	 * An array of airline-specific SSRs (Special Service Requests) that apply to the ticketed passenger.
+	 */
+	passengerAirlineSSRs: Joi.array().items(Joi.string()),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of capabilties the passenger has. Only use this key for airline boarding passes.
+	 */
+	passengerCapabilities: Joi.array().items(
+		Joi.string().regex(
+			/(PKPassengerCapabilityPreboarding|PKPassengerCapabilityPriorityBoarding|PKPassengerCapabilityCarryon|PKPassengerCapabilityPersonalItem)/,
+		),
+	),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A list of security programs the passenger is eligible for. This only shows in the UI if a program is in `passengerEligibleSecurityPrograms` and at least one of `departureLocationSecurityPrograms` or `destinationLocationSecurityPrograms`.
+	 */
+	passengerEligibleSecurityPrograms: Joi.array().items(
+		Joi.string().regex(
+			/(PKTransitSecurityProgramTSAPreCheck|PKTransitSecurityProgramTSAPreCheckTouchlessID|PKTransitSecurityProgramOSS|PKTransitSecurityProgramITI|PKTransitSecurityProgramITD|PKTransitSecurityProgramGlobalEntry|PKTransitSecurityProgramCLEAR)/,
+		),
+	),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * An array of IATA information SSRs that apply to the ticketed passenger. A comprehensive list of service SSRs can be found in the [IATA Airlines Developer Guide](https://guides.developer.iata.org/docs/21-1_ImplementationGuide.pdf) under A List of Information SSRs.
+	 */
+	passengerInformationSSRs: Joi.array().items(Joi.string()),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * An array of IATA SSRs that apply to the ticketed passenger. A comprehensive list of service SSRs can be found in the [IATA Airlines Developer Guide](https://guides.developer.iata.org/docs/21-1_ImplementationGuide.pdf) under A List of Service SSRs.
+	 */
+	passengerServiceSSRs: Joi.array().items(Joi.string()),
+
 	performerNames: Joi.array().items(Joi.string()),
 
 	/**
@@ -579,6 +849,13 @@ export const Semantics = Joi.object<Semantics>().keys({
 	sportName: Joi.string(),
 
 	tailgatingAllowed: Joi.boolean(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * A localizable string that denotes the ticket class, such as `Saver`, `Economy`, `First`. This value displays as a badge on the boarding pass.
+	 */
+	ticketFareClass: Joi.string(),
 
 	totalPrice: SemanticTagType.CurrencyAmount,
 

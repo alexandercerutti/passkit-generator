@@ -24,11 +24,17 @@ import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
 import * as Messages from "../messages.js";
 import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
 
-export type PreferredStyleSchemes = ("posterEventTicket" | "eventTicket")[];
+export type PreferredStyleSchemes = (
+	| ("posterEventTicket" | "eventTicket")
+	| ("boardingPass" | "semanticBoardingPass")
+)[];
 
 export const PreferredStyleSchemes = Joi.array().items(
 	"posterEventTicket",
 	"eventTicket",
+	// or, since iOS 26
+	"boardingPass",
+	"semanticBoardingPass",
 ) satisfies Joi.Schema<PreferredStyleSchemes>;
 
 /**

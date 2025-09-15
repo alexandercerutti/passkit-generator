@@ -55,24 +55,64 @@ export interface Semantics {
 
 	/**
 	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
+	 *
+	 * Additional ticket attributes that other tags or keys in the pass don’t include.
+	 * Use this key for any type of event ticket.
 	 */
 	additionalTicketAttributes?: string;
 
 	balance?: SemanticTagType.CurrencyAmount;
+
+	/**
+	 * A group number for boarding.
+	 * Use this key for any type of boarding pass.
+	 */
 	boardingGroup?: string;
+
+	/**
+	 * A sequence number for boarding.
+	 * Use this key for any type of boarding pass.
+	 */
 	boardingSequenceNumber?: string;
 
+	/**
+	 * The number of the passenger car.
+	 * A train car is also called a carriage, wagon, coach, or bogie in some countries.
+	 * Use this key only for a train or other rail boarding pass.
+	 */
 	carNumber?: string;
+
 	confirmationNumber?: string;
 	currentArrivalDate?: string;
 	currentBoardingDate?: string;
 	currentDepartureDate?: string;
 
+	/**
+	 * The IATA airport code for the departure airport, such as `MPM` or `LHR`.
+	 * Use this key only for airline boarding passes.
+	 */
 	departureAirportCode?: string;
+
+	/**
+	 * The full name of the departure airport, such as Maputo International Airport. Use this key only for airline boarding passes.
+	 */
 	departureAirportName?: string;
+
+	/**
+	 * The gate number or letters of the departure gate, such as 1A. Don’t include the word gate.
+	 */
 	departureGate?: string;
+
+	/**
+	 * An object that represents the geographic coordinates of the transit departure location,
+	 * suitable for display on a map.
+	 * If possible, use precise locations, which are more useful to travelers;
+	 * for example, the specific location of an airport gate.
+	 *
+	 * Use this key for any type of boarding pass.
+	 */
 	departureLocation?: SemanticTagType.Location;
+
 	departureLocationDescription?: string;
 	departurePlatform?: string;
 	departureStationName?: string;
@@ -155,18 +195,54 @@ export interface Semantics {
 	homeTeamAbbreviation?: string;
 	homeTeamLocation?: string;
 	homeTeamName?: string;
+
+	/**
+	 * The abbreviated league name for a sports event. Use this key only for a sports event ticket.
+	 */
 	leagueAbbreviation?: string;
+
+	/**
+	 * The unabbreviated league name for a sports event.
+	 * Use this key only for a sports event ticket.
+	 */
 	leagueName?: string;
 
+	/**
+	 * The name of a frequent flyer or loyalty program.
+	 * Use this key for any type of boarding pass.
+	 */
 	membershipProgramName?: string;
+
+	/**
+	 * The ticketed passenger’s frequent flyer or loyalty number.
+	 * Use this key for any type of boarding pass.
+	 */
 	membershipProgramNumber?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The ticketed passenger’s frequent flyer or loyalty program status.
+	 * Use this key for any type of boarding pass.
+	 */
+	membershipProgramStatus?: string;
 
 	originalArrivalDate?: string;
 	originalBoardingDate?: string;
 	originalDepartureDate?: string;
 
+	/**
+	 * An object that represents the name of the passenger.
+	 * Use this key for any type of boarding pass.
+	 */
 	passengerName?: SemanticTagType.PersonNameComponents;
+
 	performerNames?: string[];
+
+	/**
+	 * The priority status the ticketed passenger holds, such as `Gold` or `Silver`.
+	 * Use this key for any type of boarding pass.
+	 */
 	priorityStatus?: string;
 
 	/**
@@ -187,8 +263,23 @@ export interface Semantics {
 	tailgatingAllowed?: boolean;
 
 	totalPrice?: SemanticTagType.CurrencyAmount;
+
+	/**
+	 * The name of the transit company. Use this key for any type of boarding pass.
+	 */
 	transitProvider?: string;
+
+	/**
+	 * A brief description of the current boarding status for the vessel, such as `On Time` or `Delayed`.
+	 * For delayed status, provide `currentBoardingDate`, `currentDepartureDate`, and `currentArrivalDate` where available.
+	 * Use this key for any type of boarding pass.
+	 */
 	transitStatus?: string;
+
+	/**
+	 * A brief description that explains the reason for the current transitStatus, such as `Thunderstorms`.
+	 * Use this key for any type of boarding pass.
+	 */
 	transitStatusReason?: string;
 
 	vehicleName?: string;
@@ -312,22 +403,67 @@ export const Semantics = Joi.object<Semantics>().keys({
 	awayTeamLocation: Joi.string(),
 	awayTeamName: Joi.string(),
 
+	/**
+	 * @iOSVersion 18
+	 *
+	 * Additional ticket attributes that other tags or keys in the pass don’t include.
+	 * Use this key for any type of event ticket.
+	 */
 	additionalTicketAttributes: Joi.string(),
 
 	balance: SemanticTagType.CurrencyAmount,
+
+	/**
+	 * A group number for boarding.
+	 * Use this key for any type of boarding pass.
+	 */
 	boardingGroup: Joi.string(),
+
+	/**
+	 * A sequence number for boarding.
+	 * Use this key for any type of boarding pass.
+	 */
 	boardingSequenceNumber: Joi.string(),
 
+	/**
+	 * The number of the passenger car.
+	 * A train car is also called a carriage, wagon, coach, or bogie in some countries.
+	 * Use this key only for a train or other rail boarding pass.
+	 */
 	carNumber: Joi.string(),
+
 	confirmationNumber: Joi.string(),
 	currentArrivalDate: Joi.string(),
 	currentBoardingDate: Joi.string(),
 	currentDepartureDate: Joi.string(),
 
+	/**
+	 * The IATA airport code for the departure airport, such as `MPM` or `LHR`.
+	 * Use this key only for airline boarding passes.
+	 */
 	departureAirportCode: Joi.string(),
+
+	/**
+	 * The full name of the departure airport, such as `Maputo International Airport`.
+	 * Use this key only for airline boarding passes.
+	 */
 	departureAirportName: Joi.string(),
+
+	/**
+	 * The gate number or letters of the departure gate, such as 1A. Don’t include the word gate.
+	 */
 	departureGate: Joi.string(),
+
+	/**
+	 * An object that represents the geographic coordinates of the transit departure location,
+	 * suitable for display on a map.
+	 * If possible, use precise locations, which are more useful to travelers;
+	 * for example, the specific location of an airport gate.
+	 *
+	 * Use this key for any type of boarding pass.
+	 */
 	departureLocation: SemanticTagType.Location,
+
 	departureLocationDescription: Joi.string(),
 	departurePlatform: Joi.string(),
 	departureStationName: Joi.string(),
@@ -385,18 +521,54 @@ export const Semantics = Joi.object<Semantics>().keys({
 	homeTeamAbbreviation: Joi.string(),
 	homeTeamLocation: Joi.string(),
 	homeTeamName: Joi.string(),
+
+	/**
+	 * The abbreviated league name for a sports event. Use this key only for a sports event ticket.
+	 */
 	leagueAbbreviation: Joi.string(),
+
+	/**
+	 * The unabbreviated league name for a sports event. Use this key only for a sports event ticket.
+	 */
 	leagueName: Joi.string(),
 
+	/**
+	 * The name of a frequent flyer or loyalty program.
+	 * Use this key for any type of boarding pass.
+	 */
+
 	membershipProgramName: Joi.string(),
+
+	/**
+	 * The ticketed passenger’s frequent flyer or loyalty number.
+	 * Use this key for any type of boarding pass.
+	 */
 	membershipProgramNumber: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * The ticketed passenger’s frequent flyer or loyalty program status.
+	 * Use this key for any type of boarding pass.
+	 */
+	membershipProgramStatus: Joi.string(),
 
 	originalArrivalDate: Joi.string(),
 	originalBoardingDate: Joi.string(),
 	originalDepartureDate: Joi.string(),
 
+	/**
+	 * An object that represents the name of the passenger.
+	 * Use this key for any type of boarding pass.
+	 */
 	passengerName: SemanticTagType.PersonNameComponents,
+
 	performerNames: Joi.array().items(Joi.string()),
+
+	/**
+	 * The priority status the ticketed passenger holds, such as `Gold` or `Silver`.
+	 * Use this key for any type of boarding pass.
+	 */
 	priorityStatus: Joi.string(),
 
 	playlistIDs: Joi.array().items(Joi.string()),
@@ -409,8 +581,23 @@ export const Semantics = Joi.object<Semantics>().keys({
 	tailgatingAllowed: Joi.boolean(),
 
 	totalPrice: SemanticTagType.CurrencyAmount,
+
+	/**
+	 * The name of the transit company. Use this key for any type of boarding pass.
+	 */
 	transitProvider: Joi.string(),
+
+	/**
+	 * A brief description of the current boarding status for the vessel, such as `On Time` or `Delayed`.
+	 * For delayed status, provide `currentBoardingDate`, `currentDepartureDate`, and `currentArrivalDate` where available.
+	 * Use this key for any type of boarding pass.
+	 */
 	transitStatus: Joi.string(),
+
+	/**
+	 * A brief description that explains the reason for the current transitStatus, such as `Thunderstorms`.
+	 * Use this key for any type of boarding pass.
+	 */
 	transitStatusReason: Joi.string(),
 
 	vehicleName: Joi.string(),

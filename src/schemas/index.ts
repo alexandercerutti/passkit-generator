@@ -846,6 +846,136 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * by `associatedStoreIdentifiers`).
 	 */
 	auxiliaryStoreIdentifiers: Joi.array().items(Joi.number()),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for changing the seat for the ticket.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	changeSeatURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for in-flight entertainment.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	entertainmentURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for adding checked bags for the ticket.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	purchaseAdditionalBaggageURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL that links to information to purchase lounge access.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	purchaseLoungeAccessURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for purchasing in-flight wifi.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	purchaseWifiURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for upgrading the flight.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	upgradeURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for management.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	managementURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for registering a service animal.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	registerServiceAnimalURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL to report a lost bag.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	reportLostBagURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL to request a wheel chair.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	requestWheelchairURL: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The email for the transit provider.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	transitProviderEmail: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The phone number for the transit provider.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	transitProviderPhoneNumber: Joi.string(),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The URL for the transit provider.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	transitProviderWebsiteURL: Joi.string(),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

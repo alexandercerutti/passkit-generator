@@ -390,6 +390,136 @@ export interface PassProps {
 	 * to this pass.
 	 */
 	upcomingPassInformation?: UpcomingPassInformationEntry[];
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for changing the seat for the ticket.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	changeSeatURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for in-flight entertainment.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	entertainmentURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for adding checked bags for the ticket.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	purchaseAdditionalBaggageURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL that links to information to purchase lounge access.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	purchaseLoungeAccessURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for purchasing in-flight wifi.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	purchaseWifiURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for upgrading the flight.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	upgradeURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for management.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	managementURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL for registering a service animal.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	registerServiceAnimalURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL to report a lost bag.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	reportLostBagURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL to request a wheel chair.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	requestWheelchairURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The email for the transit provider.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	transitProviderEmail?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The phone number for the transit provider.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	transitProviderPhoneNumber?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The URL for the transit provider.
+	 * Available only with Enhanced (or semantic) Boarding Passes
+	 */
+	transitProviderWebsiteURL?: string;
 }
 
 /**

@@ -588,7 +588,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	logoText: Joi.string(),
 	description: Joi.string(),
 	serialNumber: Joi.string(),
-	appLaunchURL: Joi.string(),
+	appLaunchURL: Joi.string().regex(URL_REGEX),
 	teamIdentifier: Joi.string(),
 	organizationName: Joi.string(),
 	passTypeIdentifier: Joi.string(),
@@ -618,8 +618,8 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 
 	/**
 	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
+	 * @passStyle posterEventTicket, semanticBoardingPasses
+	 * @passDomain Event Guide, Semantic Boarding Passes
 	 *
 	 * To show buttons in the event guide,
 	 * at least two among those marked with
@@ -647,7 +647,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * at least two among those marked with
 	 * "@passDomain Event Guide" must be used.
 	 */
-	directionsInformationURL: Joi.string(),
+	directionsInformationURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -663,7 +663,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * at least two among those marked with
 	 * "@passDomain Event Guide" must be used.
 	 */
-	purchaseParkingURL: Joi.string(),
+	purchaseParkingURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -679,7 +679,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * at least two among those marked with
 	 * "@passDomain Event Guide" must be used.
 	 */
-	merchandiseURL: Joi.string(),
+	merchandiseURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -696,7 +696,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * at least two among those marked with
 	 * "@passDomain Event Guide" must be used.
 	 */
-	transitInformationURL: Joi.string(),
+	transitInformationURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -712,7 +712,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * at least two among those marked with
 	 * "@passDomain Event Guide" must be used.
 	 */
-	accessibilityURL: Joi.string(),
+	accessibilityURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -728,7 +728,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * at least two among those marked with
 	 * "@passDomain Event Guide" must be used.
 	 */
-	addOnURL: Joi.string(),
+	addOnURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -767,7 +767,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * at least two among those marked with
 	 * "@passDomain Event Guide" must be used.
 	 */
-	contactVenueWebsite: Joi.string(),
+	contactVenueWebsite: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -777,7 +777,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 *
 	 * Will add a button among options near "share"
 	 */
-	transferURL: Joi.string(),
+	transferURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -787,7 +787,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 *
 	 * Will add a button among options near "share"
 	 */
-	sellURL: Joi.string(),
+	sellURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 18
@@ -855,7 +855,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL for changing the seat for the ticket.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	changeSeatURL: Joi.string(),
+	changeSeatURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -865,7 +865,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL for in-flight entertainment.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	entertainmentURL: Joi.string(),
+	entertainmentURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -875,7 +875,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL for adding checked bags for the ticket.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	purchaseAdditionalBaggageURL: Joi.string(),
+	purchaseAdditionalBaggageURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -885,7 +885,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL that links to information to purchase lounge access.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	purchaseLoungeAccessURL: Joi.string(),
+	purchaseLoungeAccessURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -895,7 +895,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL for purchasing in-flight wifi.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	purchaseWifiURL: Joi.string(),
+	purchaseWifiURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -905,7 +905,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL for upgrading the flight.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	upgradeURL: Joi.string(),
+	upgradeURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -915,7 +915,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL for management.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	managementURL: Joi.string(),
+	managementURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -925,7 +925,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL for registering a service animal.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	registerServiceAnimalURL: Joi.string(),
+	registerServiceAnimalURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -935,7 +935,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL to report a lost bag.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	reportLostBagURL: Joi.string(),
+	reportLostBagURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -945,7 +945,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * A URL to request a wheel chair.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	requestWheelchairURL: Joi.string(),
+	requestWheelchairURL: Joi.string().regex(URL_REGEX),
 
 	/**
 	 * @iOSVersion 26
@@ -975,7 +975,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * The URL for the transit provider.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
-	transitProviderWebsiteURL: Joi.string(),
+	transitProviderWebsiteURL: Joi.string().regex(URL_REGEX),
 }).with("webServiceURL", "authenticationToken");
 
 export const PassProps = Joi.object<

@@ -1,0 +1,42 @@
+{
+	"formatVersion": 1,
+	"description": "iOS 26 Semantic Boarding Pass",
+	"serialNumber": "2w5zzretyg7n168c7c4053e961",
+	"teamIdentifier": "F53WB8AE67",
+	"passTypeIdentifier": "pass.com.passkitgenerator",
+	"foregroundColor": "rgb(0, 0, 0)",
+	"backgroundColor": "rgb(255, 255, 255)",
+	"labelColor": "rgb(0, 0, 0)",
+	"preferredStyleSchemes": ["semanticBoardingPass", "boardingPass"],
+	"organizationName": "A Generic Random Organization",
+	"boardingPass": {},
+	"barcodes": [
+		{
+			"messageEncoding": "utf-8",
+			"message": "Passkit-generator generated this",
+			"format": "PKBarcodeFormatQR",
+			"altText": "Passkit-generator generated this"
+		}
+	],
+	"semantics": {
+		"internationalDocumentsAreVerified": true,
+		"internationalDocumentsVerifiedDeclarationName": "Travel Ready (custom tag)",
+		"airlineCode": "FI",
+		"flightNumber": 533,
+
+		"originalDepartureDate": "2025-09-30T14:00:00Z",
+		"originalArrivalDate": "2025-09-30T16:00:00Z",
+		"originalBoardingDate": "2025-09-30T13:30:00Z",
+		"departureAirportCode": "MUC",
+		"departureCityName": "Munich",
+		"departureLocationTimeZone": "Europe/Berlin",
+		"departureGate": "A12",
+		"destinationGate": "B34",
+		"destinationAirportCode": "KEF",
+		"destinationCityName": "Reykjavik",
+		"destinationLocationTimeZone": "Atlantic/Reykjavik",
+		"passengerName": { "givenName": "John", "familyName": "Doe" },
+		"loungePlaceIDs": ["IB452E0A3979253B0"]
+	},
+	"entertainmentURL": "https://www.example.com"
+}

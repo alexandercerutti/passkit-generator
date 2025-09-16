@@ -38,5 +38,6 @@
 		"passengerName": { "givenName": "John", "familyName": "Doe" },
 		"loungePlaceIDs": ["IB452E0A3979253B0"]
 	},
+	"upgradeURL": "https://www.example.com",
 	"entertainmentURL": "https://www.example.com"
 }

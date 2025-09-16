@@ -278,7 +278,9 @@ export interface Semantics {
 	/**
 	 * @iOSVersion 26
 	 *
-	 * The name of the declaration given once the passenger's international documents are verified. Examples include `DOCS OK` or `Travel Ready`. If `internationalDocumentsAreVerified` is true, Wallet displays a badge on the boarding pass with this value.
+	 * The name of the declaration given once the passenger's international documents are verified.
+	 * Examples include `DOCS OK` or `Travel Ready`.
+	 * If `internationalDocumentsAreVerified` is true, Wallet displays a badge on the boarding pass with this value.
 	 */
 	internationalDocumentsVerifiedDeclarationName?: string;
 
@@ -296,7 +298,8 @@ export interface Semantics {
 	/**
 	 * @iOSVersion 26
 	 *
-	 * The MapKit Place IDs that reference the transit provider lounge locations. For more information, see [Identifying unique locations with Place IDs](https://developer.apple.com/documentation/MapKit/identifying-unique-locations-with-place-ids)
+	 * The MapKit Place IDs that reference the transit provider lounge locations.
+	 * For more information, see [Identifying unique locations with Place IDs](https://developer.apple.com/documentation/MapKit/identifying-unique-locations-with-place-ids)
 	 */
 	loungePlaceIDs?: string[];
 

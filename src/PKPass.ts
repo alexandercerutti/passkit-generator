@@ -261,6 +261,14 @@ export default class PKPass extends Bundle {
 		this[propsSymbol].preferredStyleSchemes = value;
 	}
 
+	/**
+	 * Allows setting UpcomingPassInformation for poster event tickets
+	 * (iOS 26+).
+	 *
+	 * @throws if current type is not "eventTicket"
+	 * @throws if preferredStyleSchemes is not set or does not include "posterEventTicket"
+	 */
+
 	public set upcomingPassInformation(
 		value: Schemas.UpcomingPassInformationEntry[],
 	) {

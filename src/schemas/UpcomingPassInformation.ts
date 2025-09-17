@@ -204,7 +204,7 @@ export interface UpcomingPassInformationEntry {
 	 * Information about the start and end time of the upcoming pass information entry.
 	 * If omitted, the entry is labeled as TBD.
 	 */
-	dateInformation?: DateInformation[];
+	dateInformation?: DateInformation;
 
 	/**
 	 * A string that uniquely identifies the upcoming pass information entry.
@@ -225,7 +225,9 @@ export interface UpcomingPassInformationEntry {
 	name: string;
 
 	/** The semantic, machine-readable metadata about the upcoming pass information entry. */
-	semantics?: Semantics;
+	semantics?: Semantics & {
+		venuePlaceID: string;
+	};
 
 	/**
 	 * The type of upcoming pass information entry.
@@ -240,11 +242,15 @@ export const UpcomingPassInformationEntry =
 		additionalInfoFields: Joi.array().items(PassFieldContent),
 		auxiliaryStoreIdentifiers: Joi.array().items(Joi.number()),
 		backfields: Joi.array().items(PassFieldContent),
-		dateInformation: Joi.array().items(DateInformation),
+		dateInformation: DateInformation,
 		identifier: Joi.string().required(),
 		images: Images,
 		isActive: Joi.boolean(),
 		name: Joi.string().required(),
-		semantics: Semantics,
+		semantics: Semantics.concat(
+			Joi.object({
+				venuePlaceID: Joi.string(),
+			}),
+		),
 		type: Joi.string().valid("event").required(),
 	});

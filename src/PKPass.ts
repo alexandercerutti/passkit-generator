@@ -261,6 +261,34 @@ export default class PKPass extends Bundle {
 		this[propsSymbol].preferredStyleSchemes = value;
 	}
 
+	public set upcomingPassInformation(
+		value: Schemas.UpcomingPassInformationEntry[],
+	) {
+		Utils.assertUnfrozen(this);
+
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE,
+			);
+		}
+
+		if (!this.preferredStyleSchemes?.includes("posterEventTicket")) {
+			throw new TypeError(
+				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_STYLE_SCHEME,
+			);
+		}
+
+		for (const entry of value) {
+			Schemas.assertValidity(
+				Schemas.UpcomingPassInformationEntry,
+				entry,
+				Messages.UPCOMING_PASS_INFORMATION.INVALID,
+			);
+		}
+
+		this[propsSymbol].upcomingPassInformation = value;
+	}
+
 	/**
 	 * Allows setting a transitType property
 	 * for a boardingPass.

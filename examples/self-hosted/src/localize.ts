@@ -5,9 +5,12 @@
  */
 
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.route("/localize/:modelName").get(async (request, response) => {
 	const passName =
@@ -31,7 +34,12 @@ app.route("/localize/:modelName").get(async (request, response) => {
 					signerKeyPassphrase: certificates.signerKeyPassphrase,
 				},
 			},
-			request.body || request.params || request.query,
+			Object.assign(
+				{
+					serialNumber: Math.random().toString(36).substring(2, 15),
+				},
+				request.body || request.query || {},
+			),
 		);
 
 		// Italian, already has an .lproj which gets included...

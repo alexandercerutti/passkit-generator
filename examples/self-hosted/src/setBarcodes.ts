@@ -10,8 +10,11 @@
 
 import { PKPass } from "passkit-generator";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.route("/barcodes/:modelName").get(async (request, response) => {
 	const passName =

@@ -29,11 +29,14 @@
  * A feedback to Apple have been sent for this.
  */
 
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { promises as fs } from "node:fs";
+import { PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { PKPass } from "passkit-generator";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // *************************** //
 // *** EXAMPLE FROM NOW ON *** //

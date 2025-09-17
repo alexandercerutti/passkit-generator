@@ -25,8 +25,10 @@ export const PREFERRED_STYLE_SCHEMES = {
 } as const;
 
 export const UPCOMING_PASS_INFORMATION = {
-	UNEXPECTED_PASS_TYPE:
+	UNEXPECTED_PASS_TYPE_SET:
 		"Cannot set upcomingPassInformation on a pass with type different from eventTicket.",
+	UNEXPECTED_PASS_TYPE_GET:
+		"Cannot get upcomingPassInformation on a pass with type different from eventTicket.",
 	UNEXPECTED_STYLE_SCHEME:
 		"Cannot set upcomingPassInformation because 'preferredStyleSchemes' does not include 'posterEventTicket' style.",
 	INVALID:

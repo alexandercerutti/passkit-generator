@@ -276,7 +276,7 @@ export default class PKPass extends Bundle {
 
 		if (this.type !== "eventTicket") {
 			throw new TypeError(
-				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE,
+				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE_SET,
 			);
 		}
 
@@ -295,6 +295,16 @@ export default class PKPass extends Bundle {
 		}
 
 		this[propsSymbol].upcomingPassInformation = value;
+	}
+
+	public get upcomingPassInformation(): Schemas.UpcomingPassInformationEntry[] {
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE_GET,
+			);
+		}
+
+		return this[propsSymbol].upcomingPassInformation || [];
 	}
 
 	/**

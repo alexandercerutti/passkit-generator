@@ -45,9 +45,19 @@ export interface RelevancyInterval {
 	endDate: string | Date;
 }
 
-export interface RelevancyEntry {
-	relevantDate: string | Date;
-}
+/**
+ * @iOSVersion 18 => "relevantDate"
+ * @iOSVersion 26 => "date"
+ */
+export type RelevancyEntry =
+	| {
+			date: string | Date;
+			relevantDate?: string | Date;
+	  }
+	| {
+			date?: string | Date;
+			relevantDate: string | Date;
+	  };
 
 /**
  * @iOSVersion 18
@@ -73,6 +83,14 @@ export const RelevantDate = Joi.alternatives(
 		).required(),
 	}),
 	Joi.object<RelevancyEntry>().keys({
+		/**
+		 * Since iOS 26
+		 */
+		date: Joi.alternatives(Joi.string().isoDate(), Joi.date().iso()),
+		/**
+		 * Since iOS 18, then was renamed in
+		 * 'date' in iOS 26 (what a breaking change)
+		 */
 		relevantDate: Joi.alternatives(
 			Joi.string().isoDate(),
 			Joi.date().iso(),

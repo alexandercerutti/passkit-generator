@@ -1010,6 +1010,11 @@ export default class PKPass extends Bundle {
 	 * Allows setting a series of relevancy intervals or
 	 * relevancy entries for the pass.
 	 *
+	 * Please note that `RelevantDate[]` `relevantDate` property was renamed
+	 * in "date" since iOS 26. Since retro-compatibility is not ensured,
+	 * this methods takes `date`, and fallbacks to `relevantDate`, and use
+	 * the first value found for both properties.
+	 *
 	 * @param {Schemas.RelevantDate[] | null} relevancyEntries
 	 * @returns {void}
 	 */
@@ -1031,10 +1036,13 @@ export default class PKPass extends Bundle {
 				Schemas.validate(Schemas.RelevantDate, entry);
 
 				if (isRelevantEntry(entry)) {
+					const date = Utils.processDate(
+						new Date(entry.date || entry.relevantDate),
+					);
+
 					acc.push({
-						relevantDate: Utils.processDate(
-							new Date(entry.relevantDate),
-						),
+						relevantDate: date,
+						date,
 					});
 
 					return acc;
@@ -1193,5 +1201,8 @@ function validateJSONBuffer(
 function isRelevantEntry(
 	entry: Schemas.RelevantDate,
 ): entry is Schemas.RelevancyEntry {
-	return Object.prototype.hasOwnProperty.call(entry, "relevantDate");
+	return (
+		Object.prototype.hasOwnProperty.call(entry, "relevantDate") ||
+		Object.prototype.hasOwnProperty.call(entry, "date")
+	);
 }

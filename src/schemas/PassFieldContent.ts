@@ -58,7 +58,7 @@ export interface PassFieldContentWithRow extends PassFieldContent {
 }
 
 /**
- * @deprecated Use `PassFieldContent` instead,
+ * @deprecated Use `PassFieldContentWithRow` instead,
  * which is the right Apple name.
  */
 export type FieldWithRow = PassFieldContentWithRow;

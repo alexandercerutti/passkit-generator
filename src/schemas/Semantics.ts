@@ -343,7 +343,7 @@ export interface Semantics {
 	/**
 	 * @iOSVersion 26
 	 *
-	 * A list of capabilties the passenger has. Only use this key for airline boarding passes.
+	 * A list of capabilities the passenger has. Only use this key for airline boarding passes.
 	 */
 	passengerCapabilities?: (
 		| "PKPassengerCapabilityPreboarding"
@@ -803,7 +803,7 @@ export const Semantics = Joi.object<Semantics>().keys({
 	/**
 	 * @iOSVersion 26
 	 *
-	 * A list of capabilties the passenger has. Only use this key for airline boarding passes.
+	 * A list of capabilities the passenger has. Only use this key for airline boarding passes.
 	 */
 	passengerCapabilities: Joi.array().items(
 		Joi.string().regex(

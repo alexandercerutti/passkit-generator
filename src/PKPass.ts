@@ -1201,8 +1201,12 @@ function validateJSONBuffer(
 function isRelevantEntry(
 	entry: Schemas.RelevantDate,
 ): entry is Schemas.RelevancyEntry {
-	return (
-		Object.prototype.hasOwnProperty.call(entry, "relevantDate") ||
-		Object.prototype.hasOwnProperty.call(entry, "date")
-	);
+	const isRelevantDateAvailable: boolean =
+		Object.prototype.hasOwnProperty.call(entry, "relevantDate") &&
+		"relevantDate" in entry;
+
+	const isDateAvailable: boolean =
+		Object.prototype.hasOwnProperty.call(entry, "date") && "date" in entry;
+
+	return isRelevantDateAvailable || isDateAvailable;
 }

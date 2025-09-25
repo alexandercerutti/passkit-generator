@@ -63,7 +63,7 @@ export interface PassFieldContentWithRow extends PassFieldContent {
  */
 export type FieldWithRow = PassFieldContentWithRow;
 
-export const PassFieldContent = Joi.object<Field>().keys({
+export const PassFieldContent = Joi.object<PassFieldContent>().keys({
 	attributedValue: Joi.alternatives(
 		Joi.string().allow(""),
 		Joi.number(),

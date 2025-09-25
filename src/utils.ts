@@ -49,7 +49,11 @@ export function cloneRecursive<T extends Object>(object: T) {
 				objectCopy[key] = value.slice();
 
 				for (let j = 0; j < value.length; j++) {
-					objectCopy[key][j] = cloneRecursive(value[j]);
+					const item = value[j];
+					objectCopy[key][j] =
+						item && typeof item === "object"
+							? cloneRecursive(item)
+							: item;
 				}
 			} else {
 				objectCopy[key] = cloneRecursive(value);

@@ -217,14 +217,14 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
-	 * Allows accessing to iOS 18 new Event Ticket
-	 * property `preferredStyleSchemes`.
+	 * Allows accessing to iOS 18 new property
+	 * `preferredStyleSchemes`.
 	 *
-	 * @throws if current type is not "eventTicket".
+	 * @throws if current type is not "eventTicket" and is not "boardingPass".
 	 */
 
 	public get preferredStyleSchemes(): Schemas.PreferredStyleSchemes {
-		if (this.type !== "eventTicket") {
+		if (this.type !== "eventTicket" && this.type !== "boardingPass") {
 			throw new TypeError(
 				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_GET,
 			);
@@ -235,7 +235,9 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows setting a preferredStyleSchemes property
-	 * for a eventTicket.
+	 * for a eventTicket. Use this to select
+	 * either the Poster Event Tickets (iOS 18+) or the Semantic
+	 * Boarding passes (iOS 26+).
 	 *
 	 * @throws if current type is not "eventTicket".
 	 * @param value
@@ -244,7 +246,7 @@ export default class PKPass extends Bundle {
 	public set preferredStyleSchemes(value: Schemas.PreferredStyleSchemes) {
 		Utils.assertUnfrozen(this);
 
-		if (this.type !== "eventTicket") {
+		if (this.type !== "eventTicket" && this.type !== "boardingPass") {
 			throw new TypeError(
 				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_SET,
 			);
@@ -257,6 +259,52 @@ export default class PKPass extends Bundle {
 		);
 
 		this[propsSymbol].preferredStyleSchemes = value;
+	}
+
+	/**
+	 * Allows setting UpcomingPassInformation for poster event tickets
+	 * (iOS 26+).
+	 *
+	 * @throws if current type is not "eventTicket"
+	 * @throws if preferredStyleSchemes is not set or does not include "posterEventTicket"
+	 */
+
+	public set upcomingPassInformation(
+		value: Schemas.UpcomingPassInformationEntry[],
+	) {
+		Utils.assertUnfrozen(this);
+
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE_SET,
+			);
+		}
+
+		if (!this.preferredStyleSchemes?.includes("posterEventTicket")) {
+			throw new TypeError(
+				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_STYLE_SCHEME,
+			);
+		}
+
+		for (const entry of value) {
+			Schemas.assertValidity(
+				Schemas.UpcomingPassInformationEntry,
+				entry,
+				Messages.UPCOMING_PASS_INFORMATION.INVALID,
+			);
+		}
+
+		this[propsSymbol].upcomingPassInformation = value;
+	}
+
+	public get upcomingPassInformation(): Schemas.UpcomingPassInformationEntry[] {
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE_GET,
+			);
+		}
+
+		return this[propsSymbol].upcomingPassInformation || [];
 	}
 
 	/**
@@ -302,7 +350,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get primaryFields(): Schemas.Field[] {
+	public get primaryFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].primaryFields;
 	}
 
@@ -314,7 +362,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get secondaryFields(): Schemas.Field[] {
+	public get secondaryFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].secondaryFields;
 	}
 
@@ -331,7 +379,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get auxiliaryFields(): Schemas.FieldWithRow[] {
+	public get auxiliaryFields(): Schemas.PassFieldContentWithRow[] {
 		return this[propsSymbol][this.type].auxiliaryFields;
 	}
 
@@ -343,7 +391,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get headerFields(): Schemas.Field[] {
+	public get headerFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].headerFields;
 	}
 
@@ -355,7 +403,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get backFields(): Schemas.Field[] {
+	public get backFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol][this.type].backFields;
 	}
 
@@ -368,7 +416,7 @@ export default class PKPass extends Bundle {
 	 *		type is not "eventTicket".
 	 */
 
-	public get additionalInfoFields(): Schemas.Field[] {
+	public get additionalInfoFields(): Schemas.PassFieldContent[] {
 		return this[propsSymbol]["eventTicket"].additionalInfoFields;
 	}
 
@@ -411,32 +459,34 @@ export default class PKPass extends Bundle {
 			headerFields /******/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			primaryFields /*****/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			secondaryFields /***/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			auxiliaryFields /***/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				type === "eventTicket" ? Schemas.FieldWithRow : Schemas.Field,
+				type === "eventTicket"
+					? Schemas.PassFieldContentWithRow
+					: Schemas.PassFieldContent,
 			),
 			backFields /********/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			additionalInfoFields: new FieldsArray(
 				this,
 				sharedKeysPool,
-				Schemas.Field,
+				Schemas.PassFieldContent,
 			),
 			transitType: undefined,
 		};
@@ -960,6 +1010,11 @@ export default class PKPass extends Bundle {
 	 * Allows setting a series of relevancy intervals or
 	 * relevancy entries for the pass.
 	 *
+	 * Please note that `RelevantDate[]` `relevantDate` property was renamed
+	 * in "date" since iOS 26. Since retro-compatibility is not ensured,
+	 * this methods takes `date`, and fallbacks to `relevantDate`, and use
+	 * the first value found for both properties.
+	 *
 	 * @param {Schemas.RelevantDate[] | null} relevancyEntries
 	 * @returns {void}
 	 */
@@ -981,10 +1036,13 @@ export default class PKPass extends Bundle {
 				Schemas.validate(Schemas.RelevantDate, entry);
 
 				if (isRelevantEntry(entry)) {
+					const date = Utils.processDate(
+						new Date(entry.date || entry.relevantDate),
+					);
+
 					acc.push({
-						relevantDate: Utils.processDate(
-							new Date(entry.relevantDate),
-						),
+						relevantDate: date,
+						date,
 					});
 
 					return acc;
@@ -1143,5 +1201,12 @@ function validateJSONBuffer(
 function isRelevantEntry(
 	entry: Schemas.RelevantDate,
 ): entry is Schemas.RelevancyEntry {
-	return Object.prototype.hasOwnProperty.call(entry, "relevantDate");
+	const isRelevantDateAvailable: boolean =
+		Object.prototype.hasOwnProperty.call(entry, "relevantDate") &&
+		"relevantDate" in entry;
+
+	const isDateAvailable: boolean =
+		Object.prototype.hasOwnProperty.call(entry, "date") && "date" in entry;
+
+	return isRelevantDateAvailable || isDateAvailable;
 }

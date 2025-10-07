@@ -17,11 +17,22 @@ export const TRANSIT_TYPE = {
 
 export const PREFERRED_STYLE_SCHEMES = {
 	UNEXPECTED_PASS_TYPE_SET:
-		"Cannot set preferredStyleSchemes on a pass with type different from eventTicket.",
+		"Cannot set preferredStyleSchemes on a pass with type different from eventTicket or boardingPass.",
 	UNEXPECTED_PASS_TYPE_GET:
-		"Cannot get preferredStyleSchemes on a pass with type different from eventTicket.",
+		"Cannot get preferredStyleSchemes on a pass with type different from eventTicket or boardingPass.",
 	INVALID:
 		"Cannot set preferredStyleSchemes because not compliant with Apple specifications - %s",
+} as const;
+
+export const UPCOMING_PASS_INFORMATION = {
+	UNEXPECTED_PASS_TYPE_SET:
+		"Cannot set upcomingPassInformation on a pass with type different from eventTicket.",
+	UNEXPECTED_PASS_TYPE_GET:
+		"Cannot get upcomingPassInformation on a pass with type different from eventTicket.",
+	UNEXPECTED_STYLE_SCHEME:
+		"Cannot set upcomingPassInformation because 'preferredStyleSchemes' does not include 'posterEventTicket' style.",
+	INVALID:
+		"Cannot set upcomingPassInformation: validation failed. Be sure to follow the Apple specifications. - %s",
 } as const;
 
 export const PASS_TYPE = {

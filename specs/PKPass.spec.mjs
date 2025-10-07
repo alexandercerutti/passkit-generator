@@ -1276,7 +1276,7 @@ describe("PKPass", () => {
 		});
 	});
 
-	describe("eventTicket new layout", () => {
+	describe("iOS 18 / iOS 26 new layouts", () => {
 		it("should contain preferredStyleSchemes if coming from an imported pass json", () => {
 			const passjson = modelFiles["pass.json"];
 			const changedPassJson = Buffer.from(
@@ -1355,16 +1355,16 @@ describe("PKPass", () => {
 		});
 	});
 
-	it("preferredStyleSchemes setter should throw if pass is not an eventTicket", () => {
-		pkpass.type = "boardingPass";
+	it("preferredStyleSchemes setter should throw if pass is not an eventTicket or boardingPass", () => {
+		pkpass.type = "storeCard";
 
 		expect(() => {
 			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
 		}).toThrowError();
 	});
 
-	it("preferredStyleSchemes getter should throw if pass is not an eventTicket", () => {
-		pkpass.type = "boardingPass";
+	it("preferredStyleSchemes getter should throw if pass is not an eventTicket or boardingPass", () => {
+		pkpass.type = "storeCard";
 
 		expect(() => {
 			pkpass.preferredStyleSchemes;

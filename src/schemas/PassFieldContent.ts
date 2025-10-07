@@ -30,7 +30,7 @@ export type PKNumberStyleType =
  * @see https://developer.apple.com/documentation/walletpasses/passfieldcontent
  */
 
-export interface Field {
+export interface PassFieldContent {
 	attributedValue?: string | number | Date;
 	changeMessage?: string;
 	dataDetectorTypes?: PKDataDetectorType[];
@@ -47,11 +47,23 @@ export interface Field {
 	numberStyle?: PKNumberStyleType;
 }
 
-export interface FieldWithRow extends Field {
+/**
+ * @deprecated Use `PassFieldContent` instead,
+ * which is the right Apple name.
+ */
+export type Field = PassFieldContent;
+
+export interface PassFieldContentWithRow extends PassFieldContent {
 	row?: 0 | 1;
 }
 
-export const Field = Joi.object<Field>().keys({
+/**
+ * @deprecated Use `PassFieldContentWithRow` instead,
+ * which is the right Apple name.
+ */
+export type FieldWithRow = PassFieldContentWithRow;
+
+export const PassFieldContent = Joi.object<PassFieldContent>().keys({
 	attributedValue: Joi.alternatives(
 		Joi.string().allow(""),
 		Joi.number(),
@@ -102,8 +114,20 @@ export const Field = Joi.object<Field>().keys({
 		}),
 });
 
-export const FieldWithRow = Field.concat(
-	Joi.object<FieldWithRow>().keys({
+/**
+ * @deprecated Use `PassFieldContent` instead,
+ * which is the right Apple name.
+ */
+export const Field = PassFieldContent;
+
+export const PassFieldContentWithRow = PassFieldContent.concat(
+	Joi.object<PassFieldContentWithRow>().keys({
 		row: Joi.number().min(0).max(1),
 	}),
 );
+
+/**
+ * @deprecated Use `PassFieldContentWithRow` instead,
+ * which is the right Apple name.
+ */
+export const FieldWithRow = PassFieldContentWithRow;

@@ -5,9 +5,12 @@
 
 import path from "node:path";
 import { promises as fs } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function getRandomColorPart() {
 	return Math.floor(Math.random() * 255);

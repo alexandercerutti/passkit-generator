@@ -1,5 +1,21 @@
 # Changelog
 
+### 3.5.1 (15 Oct 2025)
+
+-   Fixed support for Cloudflare workers by disabling tls email validation checks (PR #255)
+
+---
+
+### 3.5.0 (07 Oct 2025)
+
+-   Added support to iOS 26 Changes. Refer to #249 for all the details.
+    -   Added support for preferredStyleSchemes method to boardingPass value and pass type, in order to add the support to the new ✨ Semantic Boarding Passes ✨
+    -   Added new setter and getter upcomingPassInformation to add details with validation;
+    -   Deprecated type and schema Schemas.Field for Schemas.PassFieldContent;
+    -   Set setRelevantDates to set both relevantDate and date in order to support both iOS 18 and iOS 26 – the property got renamed, bringing a breaking change;
+
+---
+
 ### 3.4.0 (28 May 2025)
 
 -   Added support to undocumented feature `stripColor` (PR #245)

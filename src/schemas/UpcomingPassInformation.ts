@@ -114,7 +114,12 @@ const URLs = Joi.object<URLs>({
 	accessibilityURL: Joi.string().regex(URL_REGEX),
 	addOnURL: Joi.string().regex(URL_REGEX),
 	bagPolicyURL: Joi.string().regex(URL_REGEX),
-	contactVenueEmail: Joi.string().email(),
+	/**
+	 * Joi's email schema validates email TLDs and only allows TLDs that are registered in the IANA Registry.
+	 * This also requires NodeJS runtime to work (even though can be enabled client side, but discouraged)
+	 * Reference - https://github.com/hapijs/joi/issues/2390
+	 */
+	contactVenueEmail: Joi.string().email({ tlds: false }),
 	contactVenuePhoneNumber: Joi.string(),
 	contactVenueWebsite: Joi.string().regex(URL_REGEX),
 	directionsInformationURL: Joi.string().regex(URL_REGEX),

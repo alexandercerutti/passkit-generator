@@ -203,7 +203,7 @@ export interface UpcomingPassInformationEntry {
 	auxiliaryStoreIdentifiers?: number[];
 
 	/** The fields of information displayed on the details view of the upcoming pass information entry. */
-	backfields?: PassFieldContent[];
+	backFields?: PassFieldContent[];
 
 	/**
 	 * Information about the start and end time of the upcoming pass information entry.
@@ -246,7 +246,7 @@ export const UpcomingPassInformationEntry =
 		URLs: URLs,
 		additionalInfoFields: Joi.array().items(PassFieldContent),
 		auxiliaryStoreIdentifiers: Joi.array().items(Joi.number()),
-		backfields: Joi.array().items(PassFieldContent),
+		backFields: Joi.array().items(PassFieldContent),
 		dateInformation: DateInformation,
 		identifier: Joi.string().required(),
 		images: Images,

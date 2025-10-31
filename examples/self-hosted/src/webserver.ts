@@ -8,6 +8,7 @@ import express from "express";
 export const app = express();
 
 app.use(express.json());
+app.use(express.static("public"));
 
 app.listen(8080, "0.0.0.0", () => {
 	console.log("Webserver started on port 8080");

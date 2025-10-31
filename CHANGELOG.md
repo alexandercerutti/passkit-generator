@@ -1,5 +1,13 @@
 # Changelog
 
+### 3.5.5 (31 Oct 2025)
+
+-   Fixed `venuePlaceID` typescript signature, which was marked as mandatory while Joi schema was marking it as optional (PR #256)
+-   Added support to iOS 18.1 semantics fields `EventDateInfo.unannounced` and `EventDateInfo.undetermined`;
+-   Added support to iOS 18.1 top level key `eventLogoText`;
+
+---
+
 ### 3.5.3 (31 Oct 2025)
 
 -   Fixed `UpcomingPassInformationEntry["backFields"]`: `backFields` was lowercase by mistake, leading it to its stripping (it is required for the new Poster Event Ticket upcoming events view to appear);

@@ -28,42 +28,39 @@ export const CurrencyAmount = Joi.object<CurrencyAmount>().keys({
  * @see \<undiclosed>
  */
 
-export type EventDateInfo =
-	| {
-			date: string;
-			ignoreTimeComponents?: boolean;
-			timeZone?: string;
+export interface EventDateInfo {
+	date?: string;
+	ignoreTimeComponents?: boolean;
+	timeZone?: string;
 
-			/**
-			 * @iOSVersion 18.1
-			 *
-			 * Indicates that the time was not announced yet.
-			 * Leads to showing "TBA" in the UI when `date` is set.
-			 * Setting `ignoreTimeComponents` to true, has higher priority
-			 * over this property.
-			 */
-			unannounced?: boolean;
-	  }
-	| {
-			date?: string;
+	/**
+	 * @iOSVersion 18.1
+	 *
+	 * Indicates that the time was not announced yet.
+	 * Leads to showing "TBA" in the UI when `date` is set.
+	 * Setting `ignoreTimeComponents` to true, has higher priority
+	 * over this property.
+	 *
+	 * When both `date` and `semantics.eventStartDate` are unset,
+	 * `Date: TBA` will be shown in the UI.
+	 */
+	unannounced?: boolean;
 
-			/**
-			 * @iOSVersion 18.1
-			 *
-			 * Indicates that the time of the event has not been determined yet.
-			 * Leads to showing "TBD" in the UI when `date` is set.
-			 * Setting `ignoreTimeComponents` to true, has higher priority
-			 * over this property.
-			 *
-			 * This property has higher priority over `unannounced`.
-			 *
-			 * --- Implementation note ---
-			 *
-			 * This is the reason it was splitted from unannounced above.
-			 * Furthermore, it apparently can live without specifying `date`.
-			 */
-			undetermined: boolean;
-	  };
+	/**
+	 * @iOSVersion 18.1
+	 *
+	 * Indicates that the time of the event has not been determined yet.
+	 * Leads to showing "TBD" in the UI when `date` is set.
+	 * Setting `ignoreTimeComponents` to true, has higher priority
+	 * over this property.
+	 *
+	 * This property has higher priority over `unannounced`.
+	 *
+	 * When both `date` and `semantics.eventStartDate` are unset,
+	 * `Date: TBD` will be shown in the UI.
+	 */
+	undetermined?: boolean;
+}
 
 export const EventDateInfo = Joi.alternatives(
 	Joi.object<EventDateInfo>().keys({

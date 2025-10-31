@@ -62,37 +62,39 @@ export interface EventDateInfo {
 	undetermined?: boolean;
 }
 
-export const EventDateInfo = Joi.alternatives(
-	Joi.object<EventDateInfo>().keys({
-		date: Joi.string().isoDate().required(),
-		ignoreTimeComponents: Joi.boolean(),
-		timeZone: Joi.string(),
+export const EventDateInfo = Joi.object<EventDateInfo>().keys({
+	date: Joi.string().isoDate(),
+	ignoreTimeComponents: Joi.boolean(),
+	timeZone: Joi.string(),
 
-		/**
-		 * @iOSVersion 18.1
-		 *
-		 * Indicates that the date was not announced yet.
-		 * Leads to showing "TBA" in the UI when `date` is set.
-		 * Setting `ignoreTimeComponents` to true, has higher priority
-		 * over this property.
-		 */
-		unannounced: Joi.boolean(),
-	}),
-	Joi.object<EventDateInfo>().keys({
-		date: Joi.string().isoDate(),
-		/**
-		 * @iOSVersion 18.1
-		 *
-		 * Indicates that the time of the event has not been determined yet.
-		 * Leads to showing "TBD" in the UI when `date` is set.
-		 * Setting `ignoreTimeComponents` to true, has higher priority
-		 * over this property.
-		 *
-		 * This property has higher priority over `unannounced`.
-		 */
-		undetermined: Joi.boolean().required(),
-	}),
-);
+	/**
+	 * @iOSVersion 18.1
+	 *
+	 * Indicates that the time was not announced yet.
+	 * Leads to showing "TBA" in the UI when `date` is set.
+	 * Setting `ignoreTimeComponents` to true, has higher priority
+	 * over this property.
+	 *
+	 * When both `date` and `semantics.eventStartDate` are unset,
+	 * `Date: TBA` will be shown in the UI.
+	 */
+	unannounced: Joi.boolean(),
+
+	/**
+	 * @iOSVersion 18.1
+	 *
+	 * Indicates that the time of the event has not been determined yet.
+	 * Leads to showing "TBD" in the UI when `date` is set.
+	 * Setting `ignoreTimeComponents` to true, has higher priority
+	 * over this property.
+	 *
+	 * This property has higher priority over `unannounced`.
+	 *
+	 * When both `date` and `semantics.eventStartDate` are unset,
+	 * `Date: TBD` will be shown in the UI.
+	 */
+	undetermined: Joi.boolean(),
+});
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/semantictagtype/location-data.dictionary

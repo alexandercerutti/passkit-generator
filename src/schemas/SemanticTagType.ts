@@ -28,17 +28,74 @@ export const CurrencyAmount = Joi.object<CurrencyAmount>().keys({
  * @see \<undiclosed>
  */
 
-export interface EventDateInfo {
-	date: string;
-	ignoreTimeComponents?: boolean;
-	timeZone?: string;
-}
+export type EventDateInfo =
+	| {
+			date: string;
+			ignoreTimeComponents?: boolean;
+			timeZone?: string;
 
-export const EventDateInfo = Joi.object<EventDateInfo>().keys({
-	date: Joi.string().isoDate().required(),
-	ignoreTimeComponents: Joi.boolean(),
-	timeZone: Joi.string(),
-});
+			/**
+			 * @iOSVersion 18.1
+			 *
+			 * Indicates that the time was not announced yet.
+			 * Leads to showing "TBA" in the UI when `date` is set.
+			 * Setting `ignoreTimeComponents` to true, has higher priority
+			 * over this property.
+			 */
+			unannounced?: boolean;
+	  }
+	| {
+			date?: string;
+
+			/**
+			 * @iOSVersion 18.1
+			 *
+			 * Indicates that the time of the event has not been determined yet.
+			 * Leads to showing "TBD" in the UI when `date` is set.
+			 * Setting `ignoreTimeComponents` to true, has higher priority
+			 * over this property.
+			 *
+			 * This property has higher priority over `unannounced`.
+			 *
+			 * --- Implementation note ---
+			 *
+			 * This is the reason it was splitted from unannounced above.
+			 * Furthermore, it apparently can live without specifying `date`.
+			 */
+			undetermined: boolean;
+	  };
+
+export const EventDateInfo = Joi.alternatives(
+	Joi.object<EventDateInfo>().keys({
+		date: Joi.string().isoDate().required(),
+		ignoreTimeComponents: Joi.boolean(),
+		timeZone: Joi.string(),
+
+		/**
+		 * @iOSVersion 18.1
+		 *
+		 * Indicates that the date was not announced yet.
+		 * Leads to showing "TBA" in the UI when `date` is set.
+		 * Setting `ignoreTimeComponents` to true, has higher priority
+		 * over this property.
+		 */
+		unannounced: Joi.boolean(),
+	}),
+	Joi.object<EventDateInfo>().keys({
+		date: Joi.string().isoDate(),
+		/**
+		 * @iOSVersion 18.1
+		 *
+		 * Indicates that the time of the event has not been determined yet.
+		 * Leads to showing "TBD" in the UI when `date` is set.
+		 * Setting `ignoreTimeComponents` to true, has higher priority
+		 * over this property.
+		 *
+		 * This property has higher priority over `unannounced`.
+		 */
+		undetermined: Joi.boolean().required(),
+	}),
+);
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/semantictagtype/location-data.dictionary

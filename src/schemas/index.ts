@@ -400,6 +400,15 @@ export interface PassProps {
 	auxiliaryStoreIdentifiers?: number[];
 
 	/**
+	 * @iOSVersion 18.1
+	 *
+	 * @description
+	 *
+	 * The text to display next to the logo on posterEventTicket passes.
+	 */
+	eventLogoText?: string;
+
+	/**
 	 * @iOSVersion 26
 	 *
 	 * @description
@@ -864,6 +873,13 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * by `associatedStoreIdentifiers`).
 	 */
 	auxiliaryStoreIdentifiers: Joi.array().items(Joi.number()),
+
+	/**
+	 * @iOSVersion 18.1
+	 *
+	 * The text to display next to the logo on posterEventTicket passes.
+	 */
+	eventLogoText: Joi.string(),
 
 	/**
 	 * @iOSVersion 26

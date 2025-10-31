@@ -135,7 +135,16 @@ export interface PassProps {
 	stripColor?: string;
 
 	nfc?: NFC;
+
+	/**
+	 * @iOSChange 18
+	 * Use this to also trigger Live Activities
+	 * in poster event ticket passes. At least one
+	 * of "relevantDates", "location" and "beacons"
+	 * must be available to trigger Live Activities.
+	 */
 	beacons?: Beacon[];
+
 	barcodes?: Barcode[];
 
 	/**
@@ -144,9 +153,24 @@ export interface PassProps {
 	 */
 	relevantDate?: string;
 
+	/**
+	 * @iOSVersion 18
+	 * Use this to also trigger Live Activities
+	 * in poster event ticket passes. At least one
+	 * of "relevantDates", "location" and "beacons"
+	 * must be available to trigger Live Activities.
+	 */
 	relevantDates?: RelevantDate[];
 
 	expirationDate?: string;
+
+	/**
+	 * @iOSChange 18
+	 * Use this to also trigger Live Activities
+	 * in poster event ticket passes. At least one
+	 * of "relevantDates", "location" and "beacons"
+	 * must be available to trigger Live Activities.
+	 */
 	locations?: Location[];
 
 	boardingPass?: PassFields & { transitType: TransitType };

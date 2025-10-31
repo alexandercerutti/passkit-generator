@@ -1,6 +1,12 @@
 # Changelog
 
-### 3.5.1 (15 Oct 2025)
+### 3.5.3 (31 Oct 2025)
+
+-   Fixed `UpcomingPassInformationEntry["backFields"]`: `backFields` was lowercase by mistake, leading it to its stripping (it is required for the new Poster Event Ticket upcoming events view to appear);
+
+---
+
+### 3.5.2 (15 Oct 2025)
 
 -   Fixed support for Cloudflare workers by disabling tls email validation checks (PR #255)
 

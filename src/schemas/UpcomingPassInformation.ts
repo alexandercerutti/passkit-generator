@@ -231,7 +231,7 @@ export interface UpcomingPassInformationEntry {
 
 	/** The semantic, machine-readable metadata about the upcoming pass information entry. */
 	semantics?: Semantics & {
-		venuePlaceID: string;
+		venuePlaceID?: string;
 	};
 
 	/**

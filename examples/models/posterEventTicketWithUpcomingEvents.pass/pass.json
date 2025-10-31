@@ -48,8 +48,8 @@
 		]
 	},
 	"semantics": {
-		"venueParkingLotsOpenDate": "2025-10-09T04:00:00+00:00",
-		"venueGatesOpenDate": "2025-10-09T06:00:00+00:00",
+		"venueParkingLotsOpenDate": "2025-11-09T04:00:00+00:00",
+		"venueGatesOpenDate": "2025-11-09T06:00:00+00:00",
 		"eventLiveMessage": "This event is going to start soon! Try to relax your anus (cit.)",
 		"eventType": "PKEventTypeLivePerformance",
 		"eventName": "South Bay Jazz Festival",
@@ -60,8 +60,8 @@
 		},
 		"venueName": "The Stadium",
 		"performerNames": ["Lady Gaga"],
-		"eventStartDate": "2025-10-08T22:00:00+00:00",
-		"eventEndDate": "2025-10-09T23:59:59+00:00",
+		"eventStartDate": "2025-11-08T22:00:00+00:00",
+		"eventEndDate": "2025-11-09T23:59:59+00:00",
 		"tailgatingAllowed": true,
 		"seats": [
 			{
@@ -77,16 +77,16 @@
 	"contactVenueWebsite": "https://www.venueexample.com",
 	"relevantDates": [
 		{
-			"startDate": "2025-10-09T17:00:00+01:00",
-			"endDate": "2025-10-09T23:59:59+01:00"
+			"startDate": "2025-11-09T17:00:00+01:00",
+			"endDate": "2025-11-09T23:59:59+01:00"
 		},
 		{
-			"startDate": "2025-10-10T17:00:00+00:00",
-			"endDate": "2025-10-10T19:00:00+00:00"
+			"startDate": "2025-11-10T17:00:00+00:00",
+			"endDate": "2025-11-10T19:00:00+00:00"
 		},
 		{
-			"startDate": "2025-10-11T17:00:00+00:00",
-			"endDate": "2025-10-11T19:00:00+00:00"
+			"startDate": "2025-11-11T17:00:00+00:00",
+			"endDate": "2025-11-11T19:00:00+00:00"
 		}
 	],
 	"nfc": {
@@ -100,9 +100,7 @@
 			"isActive": true,
 			"name": "Drum'n'Bass Night",
 			"dateInformation": {
-				"date": "2025-09-18T00:00:00+01:00",
-				"timeZone": "Europe/Rome",
-				"isAllDay": true
+				"date": "2025-09-18T00:00:00+01:00"
 			},
 			"semantics": {
 				"venueName": "The Stadium",
@@ -113,27 +111,16 @@
 				},
 				"seats": [
 					{
-						"seatNumber": "1",
+						"seatNumber": "59",
 						"seatRow": "A",
 						"seatSection": "100"
 					}
 				],
+				"venueFanZoneOpenDate": "2025-11-09T06:00:00+00:00",
 				"performerNames": ["Maduk"],
-				"venueParkingLotsOpenDate": "2025-11-09T04:00:00+00:00",
-				"venueGatesOpenDate": "2025-11-09T06:00:00+00:00",
-				"eventType": "PKEventTypeLivePerformance",
-				"eventName": "South Bay Jazz Festival",
-				"entranceDescription": "Event at The Stadium",
-				"eventStartDate": "2025-11-08T22:00:00+00:00",
-				"eventEndDate": "2025-11-09T23:59:59+00:00"
+				"artistIDs": ["472328140"],
+				"eventType": "PKEventTypeLivePerformance"
 			},
-			"additionalInfoFields": [
-				{
-					"key": "huehueheu",
-					"label": "Line Item 1",
-					"value": "Value 1"
-				}
-			],
 			"backFields": [
 				{
 					"key": "huehueheu1",
@@ -147,6 +134,14 @@
 				"transferURL": "https://www.example.com/transfer"
 			},
 			"images": {
+				"headerImage": {
+					"URLs": [
+						{
+							"URL": "https://c7b4ee61586e.ngrok-free.app/liquicity_header.png",
+							"SHA256": "67da1a177c535bdf34a1e87a4714cebe74945bbf9bf8fafb0b83493e8a51acdd"
+						}
+					]
+				},
 				"venueMap": {
 					"reuseExisting": true
 				}

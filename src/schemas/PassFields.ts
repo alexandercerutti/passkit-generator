@@ -6,7 +6,7 @@ import {
 
 export type TransitType = z.infer<typeof TransitType>;
 
-const TransitType = z.literal([
+export const TransitType = z.literal([
 	"PKTransitTypeAir",
 	"PKTransitTypeBoat",
 	"PKTransitTypeBus",

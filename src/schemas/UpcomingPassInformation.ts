@@ -255,7 +255,7 @@ export const UpcomingPassInformationEntry = z.object({
 	 * Indicates whether the upcoming pass information entry is currently active.
 	 * The default value is false.
 	 */
-	isActive: z.boolean().optional().default(false),
+	isActive: z.boolean().default(false).optional(),
 
 	/** A collection of URLs used to populate UI elements in the details view. */
 	URLs: URLs.optional(),

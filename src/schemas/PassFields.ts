@@ -1,45 +1,28 @@
-import Joi from "joi";
+import { z } from "zod";
 import {
 	PassFieldContent,
 	PassFieldContentWithRow,
 } from "./PassFieldContent.js";
 
-export type TransitType =
-	| "PKTransitTypeAir"
-	| "PKTransitTypeBoat"
-	| "PKTransitTypeBus"
-	| "PKTransitTypeGeneric"
-	| "PKTransitTypeTrain";
+export type TransitType = z.infer<typeof TransitType>;
 
-export const TransitType = Joi.string().regex(
-	/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/,
-);
+const TransitType = z.literal([
+	"PKTransitTypeAir",
+	"PKTransitTypeBoat",
+	"PKTransitTypeBus",
+	"PKTransitTypeGeneric",
+	"PKTransitTypeTrain",
+]);
 
-export interface PassFields {
-	auxiliaryFields: PassFieldContentWithRow[];
-	backFields: PassFieldContent[];
-	headerFields: PassFieldContent[];
-	primaryFields: PassFieldContent[];
-	secondaryFields: PassFieldContent[];
-	transitType?: TransitType;
+export type PassFields = z.infer<typeof PassFields>;
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain dashboard
-	 *
-	 * @see \<undiclosed>
-	 */
-	additionalInfoFields?: PassFieldContent[];
-}
-
-export const PassFields = Joi.object<PassFields>().keys({
-	auxiliaryFields: Joi.array().items(PassFieldContentWithRow),
-	backFields: Joi.array().items(PassFieldContent),
-	headerFields: Joi.array().items(PassFieldContent),
-	primaryFields: Joi.array().items(PassFieldContent),
-	secondaryFields: Joi.array().items(PassFieldContent),
-	transitType: TransitType,
+export const PassFields = z.object({
+	auxiliaryFields: z.array(PassFieldContentWithRow).optional(),
+	backFields: z.array(PassFieldContent).optional(),
+	headerFields: z.array(PassFieldContent).optional(),
+	primaryFields: z.array(PassFieldContent).optional(),
+	secondaryFields: z.array(PassFieldContent).optional(),
+	transitType: TransitType.optional(),
 
 	/**
 	 * @iOSVersion 18
@@ -48,5 +31,5 @@ export const PassFields = Joi.object<PassFields>().keys({
 	 *
 	 * @see \<undiclosed>
 	 */
-	additionalInfoFields: Joi.array().items(PassFieldContent),
+	additionalInfoFields: z.array(PassFieldContent).optional(),
 });

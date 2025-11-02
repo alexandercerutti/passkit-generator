@@ -1,4 +1,4 @@
-import Joi from "joi";
+import { z } from "zod";
 import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 
 /**
@@ -11,14 +11,14 @@ import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 /**
  * @see https://developer.apple.com/documentation/walletpasses/semantictagtype/currencyamount-data.dictionary
  */
-export interface CurrencyAmount {
-	currencyCode?: string; // ISO 4217 currency code
-	amount?: string;
-}
+export type CurrencyAmount = z.infer<typeof CurrencyAmount>;
 
-export const CurrencyAmount = Joi.object<CurrencyAmount>().keys({
-	currencyCode: Joi.string(),
-	amount: Joi.string(),
+export const CurrencyAmount = z.object({
+	/**
+	 * ISO 4217 currency code
+	 */
+	currencyCode: z.string().optional(),
+	amount: z.string().optional(),
 });
 
 /**
@@ -28,10 +28,12 @@ export const CurrencyAmount = Joi.object<CurrencyAmount>().keys({
  * @see \<undiclosed>
  */
 
-export interface EventDateInfo {
-	date?: string;
-	ignoreTimeComponents?: boolean;
-	timeZone?: string;
+export type EventDateInfo = z.infer<typeof EventDateInfo>;
+
+export const EventDateInfo = z.object({
+	date: z.iso.datetime().optional(),
+	ignoreTimeComponents: z.boolean().optional(),
+	timeZone: z.string().optional(),
 
 	/**
 	 * @iOSVersion 18.1
@@ -44,7 +46,7 @@ export interface EventDateInfo {
 	 * When both `date` and `semantics.eventStartDate` are unset,
 	 * `Date: TBA` will be shown in the UI.
 	 */
-	unannounced?: boolean;
+	unannounced: z.boolean().optional(),
 
 	/**
 	 * @iOSVersion 18.1
@@ -59,145 +61,72 @@ export interface EventDateInfo {
 	 * When both `date` and `semantics.eventStartDate` are unset,
 	 * `Date: TBD` will be shown in the UI.
 	 */
-	undetermined?: boolean;
-}
-
-export const EventDateInfo = Joi.object<EventDateInfo>().keys({
-	date: Joi.string().isoDate(),
-	ignoreTimeComponents: Joi.boolean(),
-	timeZone: Joi.string(),
-
-	/**
-	 * @iOSVersion 18.1
-	 *
-	 * Indicates that the time was not announced yet.
-	 * Leads to showing "TBA" in the UI when `date` is set.
-	 * Setting `ignoreTimeComponents` to true, has higher priority
-	 * over this property.
-	 *
-	 * When both `date` and `semantics.eventStartDate` are unset,
-	 * `Date: TBA` will be shown in the UI.
-	 */
-	unannounced: Joi.boolean(),
-
-	/**
-	 * @iOSVersion 18.1
-	 *
-	 * Indicates that the time of the event has not been determined yet.
-	 * Leads to showing "TBD" in the UI when `date` is set.
-	 * Setting `ignoreTimeComponents` to true, has higher priority
-	 * over this property.
-	 *
-	 * This property has higher priority over `unannounced`.
-	 *
-	 * When both `date` and `semantics.eventStartDate` are unset,
-	 * `Date: TBD` will be shown in the UI.
-	 */
-	undetermined: Joi.boolean(),
+	undetermined: z.boolean().optional(),
 });
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/semantictagtype/location-data.dictionary
  */
-export interface Location {
-	latitude: number;
-	longitude: number;
-}
+export type Location = z.infer<typeof Location>;
 
-export const Location = Joi.object<Location>().keys({
-	latitude: Joi.number().required(),
-	longitude: Joi.number().required(),
+export const Location = z.object({
+	latitude: z.number(),
+	longitude: z.number(),
 });
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/semantictagtype/personnamecomponents-data.dictionary
  */
-export interface PersonNameComponents {
-	familyName?: string;
-	givenName?: string;
-	middleName?: string;
-	namePrefix?: string;
-	nameSuffix?: string;
-	nickname?: string;
-	phoneticRepresentation?: string;
-}
+export type PersonNameComponents = z.infer<typeof PersonNameComponents>;
 
-export const PersonNameComponents = Joi.object<PersonNameComponents>().keys({
-	givenName: Joi.string(),
-	familyName: Joi.string(),
-	middleName: Joi.string(),
-	namePrefix: Joi.string(),
-	nameSuffix: Joi.string(),
-	nickname: Joi.string(),
-	phoneticRepresentation: Joi.string(),
+export const PersonNameComponents = z.object({
+	givenName: z.string().optional(),
+	familyName: z.string().optional(),
+	middleName: z.string().optional(),
+	namePrefix: z.string().optional(),
+	nameSuffix: z.string().optional(),
+	nickname: z.string().optional(),
+	phoneticRepresentation: z.string().optional(),
 });
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/semantictagtype/seat-data.dictionary
  */
-export interface Seat {
-	seatSection?: string;
-	seatRow?: string;
-	seatNumber?: string;
-	seatIdentifier?: string;
-	seatType?: string;
-	seatDescription?: string;
+export type Seat = z.infer<typeof Seat>;
+
+export const Seat = z.object({
+	seatSection: z.string().optional(),
+	seatRow: z.string().optional(),
+	seatNumber: z.string().optional(),
+	seatIdentifier: z.string().optional(),
+	seatType: z.string().optional(),
+	seatDescription: z.string().optional(),
 
 	/**
 	 * @iOSVersion 18
 	 * @passStyle eventTicket (new layout)
 	 */
-	seatAisle?: string;
+	seatAisle: z.string().optional(),
 
 	/**
 	 * @iOSVersion 18
 	 * @passStyle eventTicket (new layout)
 	 */
-	seatLevel?: string;
+	seatLevel: z.string().optional(),
 
 	/**
 	 * @iOSVersion 18
 	 * @passStyle eventTicket (new layout)
 	 */
-	seatSectionColor?: string;
-}
-
-export const Seat = Joi.object<Seat>().keys({
-	seatSection: Joi.string(),
-	seatRow: Joi.string(),
-	seatNumber: Joi.string(),
-	seatIdentifier: Joi.string(),
-	seatType: Joi.string(),
-	seatDescription: Joi.string(),
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 */
-	seatAisle: Joi.string(),
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 */
-	seatLevel: Joi.string(),
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 */
-	seatSectionColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+	seatSectionColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
 });
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/semantictagtype/wifinetwork-data.dictionary
  */
-export interface WifiNetwork {
-	password: string;
-	ssid: string;
-}
+export type WifiNetwork = z.infer<typeof WifiNetwork>;
 
-export const WifiNetwork = Joi.object<WifiNetwork>().keys({
-	password: Joi.string().required(),
-	ssid: Joi.string().required(),
+export const WifiNetwork = z.object({
+	password: z.string(),
+	ssid: z.string(),
 });

@@ -6,7 +6,8 @@
 		"importHelpers": true,
 		"useUnknownInCatchVariables": true,
 		"moduleResolution": "Node16",
-		"module": "Node16"
+		"module": "Node16",
+		"strict": true
 	},
 	"include": ["src/**/*"]
 }

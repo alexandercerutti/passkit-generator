@@ -9,7 +9,7 @@ export * from "./Personalize.js";
 export * from "./Certificates.js";
 export * from "./UpcomingPassInformation.js";
 
-import Joi from "joi";
+import { z } from "zod";
 import type { Buffer } from "node:buffer";
 
 import { Barcode } from "./Barcode.js";
@@ -22,42 +22,74 @@ import { CertificatesSchema } from "./Certificates.js";
 import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
 
 import * as Messages from "../messages.js";
-import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
-
-export type PreferredStyleSchemes = (
-	| ("posterEventTicket" | "eventTicket")
-	| ("boardingPass" | "semanticBoardingPass")
-)[];
-
-export const PreferredStyleSchemes = Joi.array().items(
-	"posterEventTicket",
-	"eventTicket",
-	// or, since iOS 26
-	"boardingPass",
-	"semanticBoardingPass",
-) satisfies Joi.Schema<PreferredStyleSchemes>;
+import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 
 /**
- * A single interval can span at most 24 hours
+ * @iOSVersion 18
  */
-export interface RelevancyInterval {
-	startDate: string | Date;
-	endDate: string | Date;
-}
+const PosterEventTicketSchemes = z.literal([
+	"posterEventTicket",
+	"eventTicket",
+]);
+
+/**
+ * @iOSVersion 26
+ */
+const BoardingPassSchemes = z.literal(["boardingPass", "semanticBoardingPass"]);
+
+/**
+ * @iOSVersion 18
+ */
+export type PreferredStyleSchemes = z.infer<typeof PreferredStyleSchemes>;
+
+export const PreferredStyleSchemes = z
+	.array(BoardingPassSchemes)
+	.or(z.array(PosterEventTicketSchemes));
 
 /**
  * @iOSVersion 18 => "relevantDate"
  * @iOSVersion 26 => "date"
  */
-export type RelevancyEntry =
-	| {
-			date: string | Date;
-			relevantDate?: string | Date;
-	  }
-	| {
-			date?: string | Date;
-			relevantDate: string | Date;
-	  };
+export type RelevancyEntry = z.infer<typeof RelevancyEntry>;
+
+export const RelevancyEntry = z.union([
+	z.object({
+		/**
+		 * Since iOS 26
+		 */
+		date: z.union([z.string(), z.iso.datetime(), z.date()]),
+
+		/**
+		 * Since iOS 18, then was renamed in
+		 * 'date' in iOS 26 (what a breaking change)
+		 */
+		relevantDate: z
+			.union([z.string(), z.iso.datetime(), z.date()])
+			.optional(),
+	}),
+	z.object({
+		/**
+		 * Since iOS 26
+		 */
+		date: z.union([z.string(), z.iso.datetime(), z.date()]).optional(),
+
+		/**
+		 * Since iOS 18, then was renamed in
+		 * 'date' in iOS 26 (what a breaking change)
+		 */
+		relevantDate: z.union([z.string(), z.iso.datetime(), z.date()]),
+	}),
+]);
+
+/**
+ * A single interval can span at most 24 hours
+ */
+export type RelevancyInterval = z.infer<typeof RelevancyInterval>;
+
+export const RelevancyInterval = z.object({
+	startDate: z.union([z.string(), z.iso.datetime(), z.date()]),
+	endDate: z.union([z.string(), z.iso.datetime(), z.date()]),
+});
 
 /**
  * @iOSVersion 18
@@ -71,310 +103,46 @@ export type RelevancyEntry =
 
 export type RelevantDate = RelevancyInterval | RelevancyEntry;
 
-export const RelevantDate = Joi.alternatives(
-	Joi.object<RelevancyInterval>().keys({
-		startDate: Joi.alternatives(
-			Joi.string().isoDate(),
-			Joi.date().iso(),
-		).required(),
-		endDate: Joi.alternatives(
-			Joi.string().isoDate(),
-			Joi.date().iso(),
-		).required(),
-	}),
-	Joi.object<RelevancyEntry>().keys({
-		/**
-		 * Since iOS 26
-		 */
-		date: Joi.alternatives(Joi.string().isoDate(), Joi.date().iso()),
-		/**
-		 * Since iOS 18, then was renamed in
-		 * 'date' in iOS 26 (what a breaking change)
-		 */
-		relevantDate: Joi.alternatives(
-			Joi.string().isoDate(),
-			Joi.date().iso(),
-		).required(),
-	}),
-);
+export const RelevantDate = z.union([
+	//
+	RelevancyInterval,
+	RelevancyEntry,
+]);
 
 export interface FileBuffers {
 	[key: string]: Buffer;
 }
 
-export interface PassProps {
-	formatVersion?: 1;
-	serialNumber?: string;
-	description?: string;
-	organizationName?: string;
-	passTypeIdentifier?: string;
-	teamIdentifier?: string;
-	appLaunchURL?: string;
-	voided?: boolean;
-	userInfo?: { [key: string]: any };
-	sharingProhibited?: boolean;
-	groupingIdentifier?: string;
-	suppressStripShine?: boolean;
-	logoText?: string;
-	maxDistance?: number;
-	semantics?: Semantics;
+// ***************** //
+// *** PASS TYPE *** //
+// ***************** //
 
-	webServiceURL?: string;
-	associatedStoreIdentifiers?: Array<number>;
-	authenticationToken?: string;
+export type PassType = z.infer<typeof PassType>;
 
-	backgroundColor?: string;
-	foregroundColor?: string;
-	labelColor?: string;
+export const PassType = z.literal([
+	"boardingPass",
+	"coupon",
+	"eventTicket",
+	"storeCard",
+	"generic",
+]);
 
-	/**
-	 * Undocumented feature:
-	 * Color of primary fields value when
-	 * rendered on top of a strip.
-	 */
-	stripColor?: string;
+/**
+ * @deprecated use PassType instead
+ */
+export type PassTypesProps = PassType;
 
-	nfc?: NFC;
+// ************************ //
+// *** COLOR PROPERTIES *** //
+// ************************ //
 
-	/**
-	 * @iOSChange 18
-	 * Use this to also trigger Live Activities
-	 * in poster event ticket passes. At least one
-	 * of "relevantDates", "location" and "beacons"
-	 * must be available to trigger Live Activities.
-	 */
-	beacons?: Beacon[];
+export type PassColors = z.infer<typeof PassColors>;
 
-	barcodes?: Barcode[];
-
-	/**
-	 * @deprecated starting from iOS 18
-	 * Use `relevantDates`
-	 */
-	relevantDate?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * Use this to also trigger Live Activities
-	 * in poster event ticket passes. At least one
-	 * of "relevantDates", "location" and "beacons"
-	 * must be available to trigger Live Activities.
-	 */
-	relevantDates?: RelevantDate[];
-
-	expirationDate?: string;
-
-	/**
-	 * @iOSChange 18
-	 * Use this to also trigger Live Activities
-	 * in poster event ticket passes. At least one
-	 * of "relevantDates", "location" and "beacons"
-	 * must be available to trigger Live Activities.
-	 */
-	locations?: Location[];
-
-	boardingPass?: PassFields & { transitType: TransitType };
-	eventTicket?: PassFields;
-	coupon?: PassFields;
-	generic?: PassFields;
-	storeCard?: PassFields;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 */
-	preferredStyleSchemes?: PreferredStyleSchemes;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain event guide" must be used.
-	 */
-	bagPolicyURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	orderFoodURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	parkingInformationURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	directionsInformationURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource to buy or access
-	 * the parking spot.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	purchaseParkingURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource to buy the
-	 * merchandise.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	merchandiseURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource about public or
-	 * private transportation to reach the
-	 * venue.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	transitInformationURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource about accessibility
-	 * in the events venue.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	accessibilityURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * An URL to link experiences to the
-	 * pass (upgrades and more).
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	addOnURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	contactVenueEmail?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	contactVenuePhoneNumber?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	contactVenueWebsite?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Menu dropdown
-	 *
-	 * @description
-	 *
-	 * Will add a button among options near "share"
-	 */
-	transferURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Menu dropdown
-	 *
-	 * @description
-	 *
-	 * Will add a button among options near "share"
-	 */
-	sellURL?: string;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Will remove an automatic shadow in the new
-	 * event ticket layouts.
-	 */
-	suppressHeaderDarkening?: boolean;
+export const PassColors = z.object({
+	backgroundColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
+	foregroundColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
+	labelColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
+	stripColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
 
 	/**
 	 * @iOSVersion 18
@@ -387,7 +155,10 @@ export interface PassProps {
 	 * to specify a different and specific color
 	 * for it.
 	 */
-	footerBackgroundColor?: string;
+	footerBackgroundColor: z
+		.string()
+		.check(z.regex(RGB_HEX_COLOR_REGEX))
+		.optional(),
 
 	/**
 	 * @iOSVersion 18
@@ -403,654 +174,454 @@ export interface PassProps {
 	 * If enabled, `foregroundColor` and `labelColor`
 	 * are ignored.
 	 */
-	useAutomaticColors?: boolean;
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Applications AppStore Identifiers
-	 * related to the event ticket.
-	 *
-	 * It is not mandatory for the app to
-	 * be related to the pass issuer.
-	 *
-	 * Such applications won't be able to read
-	 * the passes users has (probably differently
-	 * by `associatedStoreIdentifiers`).
-	 */
-	auxiliaryStoreIdentifiers?: number[];
-
-	/**
-	 * @iOSVersion 18.1
-	 *
-	 * @description
-	 *
-	 * The text to display next to the logo on posterEventTicket passes.
-	 */
-	eventLogoText?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * Information about upcoming passes related
-	 * to this pass.
-	 */
-	upcomingPassInformation?: UpcomingPassInformationEntry[];
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for changing the seat for the ticket.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	changeSeatURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for in-flight entertainment.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	entertainmentURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for adding checked bags for the ticket.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	purchaseAdditionalBaggageURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL that links to information to purchase lounge access.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	purchaseLoungeAccessURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for purchasing in-flight wifi.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	purchaseWifiURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for upgrading the flight.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	upgradeURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for management.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	managementURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for registering a service animal.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	registerServiceAnimalURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL to report a lost bag.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	reportLostBagURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL to request a wheel chair.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	requestWheelchairURL?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * The email for the transit provider.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	transitProviderEmail?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * The phone number for the transit provider.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	transitProviderPhoneNumber?: string;
-
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * The URL for the transit provider.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	transitProviderWebsiteURL?: string;
-}
-
-/**
- * These are the properties passkit-generator will
- * handle through its methods
- */
-
-type PassMethodsProps =
-	| "nfc"
-	| "beacons"
-	| "barcodes"
-	| "relevantDate"
-	| "relevantDates"
-	| "expirationDate"
-	| "locations"
-	| "preferredStyleSchemes"
-	| "upcomingPassInformation";
-
-export type PassTypesProps =
-	| "boardingPass"
-	| "eventTicket"
-	| "coupon"
-	| "generic"
-	| "storeCard";
-
-export type OverridablePassProps = Omit<
-	PassProps,
-	PassMethodsProps | PassTypesProps
->;
-export type PassPropsFromMethods = { [K in PassMethodsProps]: PassProps[K] };
-export type PassKindsProps = { [K in PassTypesProps]: PassProps[K] };
-
-export type PassColors = Pick<
-	OverridablePassProps,
-	"backgroundColor" | "foregroundColor" | "labelColor" | "stripColor"
->;
-
-export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
-	nfc: NFC,
-	beacons: Joi.array().items(Beacon),
-	barcodes: Joi.array().items(Barcode),
-	relevantDate: Joi.string().isoDate(),
-	relevantDates: Joi.array().items(RelevantDate),
-	expirationDate: Joi.string().isoDate(),
-	locations: Joi.array().items(Location),
-	preferredStyleSchemes: PreferredStyleSchemes,
-	upcomingPassInformation: Joi.array().items(UpcomingPassInformationEntry),
+	useAutomaticColors: z.boolean().optional(),
 });
 
-export const PassKindsProps = Joi.object<PassKindsProps>({
-	coupon: PassFields.disallow("transitType"),
-	generic: PassFields.disallow("transitType"),
-	storeCard: PassFields.disallow("transitType"),
-	eventTicket: PassFields.disallow("transitType"),
+// ******************************* //
+// *** PROPERTIES FROM METHODS *** //
+// ******************************* //
+
+export type PassPropsFromMethods = z.infer<typeof PassPropsFromMethods>;
+
+export const PassPropsFromMethods = z.object({
+	nfc: NFC,
+	beacons: z.array(Beacon),
+	barcodes: z.array(Barcode),
+	relevantDate: z.iso.datetime(),
+	relevantDates: z.array(RelevantDate),
+	expirationDate: z.iso.datetime(),
+	locations: z.array(Location),
+	preferredStyleSchemes: PreferredStyleSchemes,
+	upcomingPassInformation: z.array(UpcomingPassInformationEntry),
+});
+
+// ***************************** //
+// *** PASS TYPE WITH FIELDS *** //
+// ***************************** //
+
+export type PassKindsProps = z.infer<typeof PassKindsProps>;
+
+export const PassKindsProps = z.object({
+	coupon: PassFields.omit({ transitType: true }),
+	generic: PassFields.omit({ transitType: true }),
+	storeCard: PassFields.omit({ transitType: true }),
+	eventTicket: PassFields.omit({ transitType: true }),
 	boardingPass: PassFields,
 });
 
-export const PassType = Joi.string().regex(
-	/(boardingPass|coupon|eventTicket|storeCard|generic)/,
-);
+// *********************************** //
+// *** OVERRIDABLE PASS PROPERTIES *** //
+// *********************************** //
 
-export const OverridablePassProps = Joi.object<OverridablePassProps>({
-	formatVersion: Joi.number().default(1),
-	semantics: Semantics,
-	voided: Joi.boolean(),
-	logoText: Joi.string(),
-	description: Joi.string(),
-	serialNumber: Joi.string(),
-	appLaunchURL: Joi.string().regex(URL_REGEX),
-	teamIdentifier: Joi.string(),
-	organizationName: Joi.string(),
-	passTypeIdentifier: Joi.string(),
-	sharingProhibited: Joi.boolean(),
-	groupingIdentifier: Joi.string(),
-	suppressStripShine: Joi.boolean(),
-	maxDistance: Joi.number().positive(),
-	authenticationToken: Joi.string().min(16),
-	labelColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
-	stripColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
-	backgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
-	foregroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
-	associatedStoreIdentifiers: Joi.array().items(Joi.number()),
-	userInfo: Joi.alternatives(Joi.object().unknown(), Joi.array()),
-	webServiceURL: Joi.string().regex(URL_REGEX),
+export type OverridablePassProps = z.infer<typeof OverridablePassProps>;
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	bagPolicyURL: Joi.string().regex(URL_REGEX),
+export const OverridablePassProps = z.union([
+	PassColors,
+	z
+		.object({
+			formatVersion: z.number().default(1).optional(),
+			passTypeIdentifier: z.string(),
+			teamIdentifier: z.string(),
+			organizationName: z.string(),
+			semantics: Semantics,
+			voided: z.boolean().optional(),
+			logoText: z.string().optional(),
+			description: z.string().optional(),
+			serialNumber: z.string().optional(),
+			appLaunchURL: z.httpUrl().optional(),
+			sharingProhibited: z.boolean().optional(),
+			groupingIdentifier: z.string().optional(),
+			suppressStripShine: z.boolean().optional(),
+			maxDistance: z.number().positive().optional(),
+			authenticationToken: z.string().min(16).optional(),
+			associatedStoreIdentifiers: z.array(z.number()).optional(),
+			userInfo: z.record(z.string(), z.json()).optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle posterEventTicket, semanticBoardingPasses
-	 * @passDomain Event Guide, Semantic Boarding Passes
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	orderFoodURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			bagPolicyURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	parkingInformationURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle posterEventTicket, semanticBoardingPasses
+			 * @passDomain Event Guide, Semantic Boarding Passes
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			orderFoodURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	directionsInformationURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			parkingInformationURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource to buy or access
-	 * the parking spot.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	purchaseParkingURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			directionsInformationURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource to buy the
-	 * merchandise.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	merchandiseURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * URL to a resource to buy or access
+			 * the parking spot.
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			purchaseParkingURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource about public or
-	 * private transportation to reach the
-	 * venue.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	transitInformationURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * URL to a resource to buy the
+			 * merchandise.
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			merchandiseURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * URL to a resource about accessibility
-	 * in the events venue.
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	accessibilityURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * URL to a resource about public or
+			 * private transportation to reach the
+			 * venue.
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			transitInformationURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * An URL to link experiences to the
-	 * pass (upgrades and more).
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	addOnURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * URL to a resource about accessibility
+			 * in the events venue.
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			accessibilityURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	contactVenueEmail: Joi.string(),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * An URL to link experiences to the
+			 * pass (upgrades and more).
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			addOnURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	contactVenuePhoneNumber: Joi.string(),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			contactVenueEmail: z.string().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain Event Guide
-	 *
-	 * @description
-	 *
-	 * To show buttons in the event guide,
-	 * at least two among those marked with
-	 * "@passDomain Event Guide" must be used.
-	 */
-	contactVenueWebsite: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			contactVenuePhoneNumber: z.string().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Will add a button among options near "share"
-	 */
-	transferURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 * @passDomain Event Guide
+			 *
+			 * @description
+			 *
+			 * To show buttons in the event guide,
+			 * at least two among those marked with
+			 * "@passDomain Event Guide" must be used.
+			 */
+			contactVenueWebsite: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Will add a button among options near "share"
-	 */
-	sellURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 *
+			 * @description
+			 *
+			 * Will add a button among options near "share"
+			 */
+			transferURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Will remove an automatic shadow in the new
-	 * event ticket layouts.
-	 */
-	suppressHeaderDarkening: Joi.boolean(),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 *
+			 * @description
+			 *
+			 * Will add a button among options near "share"
+			 */
+			sellURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * By default, the chin is colored with a
-	 * blur. Through this option, it is possible
-	 * to specify a different and specific color
-	 * for it.
-	 */
-	footerBackgroundColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 *
+			 * @description
+			 *
+			 * Will remove an automatic shadow in the new
+			 * event ticket layouts.
+			 */
+			suppressHeaderDarkening: z.boolean().optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Enables the automatic calculation of the
-	 * `foregroundColor` and `labelColor` based
-	 * on the background image in the new event
-	 * ticket passes.
-	 *
-	 * If enabled, `foregroundColor` and `labelColor`
-	 * are ignored.
-	 */
-	useAutomaticColors: Joi.boolean(),
+			/**
+			 * @iOSVersion 18
+			 * @passStyle eventTicket (new layout)
+			 *
+			 * @description
+			 *
+			 * Applications AppStore Identifiers
+			 * related to the event ticket.
+			 *
+			 * It is not mandatory for the app to
+			 * be related to the pass issuer.
+			 *
+			 * Such applications won't be able to read
+			 * the passes users has (probably differently
+			 * by `associatedStoreIdentifiers`).
+			 */
+			auxiliaryStoreIdentifiers: z.array(z.number()).optional(),
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Applications AppStore Identifiers
-	 * related to the event ticket.
-	 *
-	 * It is not mandatory for the app to
-	 * be related to the pass issuer.
-	 *
-	 * Such applications won't be able to read
-	 * the passes users has (probably differently
-	 * by `associatedStoreIdentifiers`).
-	 */
-	auxiliaryStoreIdentifiers: Joi.array().items(Joi.number()),
+			/**
+			 * @iOSVersion 18.1
+			 *
+			 * The text to display next to the logo on posterEventTicket passes.
+			 */
+			eventLogoText: z.string().optional(),
 
-	/**
-	 * @iOSVersion 18.1
-	 *
-	 * The text to display next to the logo on posterEventTicket passes.
-	 */
-	eventLogoText: Joi.string(),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL for changing the seat for the ticket.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			changeSeatURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for changing the seat for the ticket.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	changeSeatURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL for in-flight entertainment.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			entertainmentURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for in-flight entertainment.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	entertainmentURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL for adding checked bags for the ticket.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			purchaseAdditionalBaggageURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for adding checked bags for the ticket.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	purchaseAdditionalBaggageURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL that links to information to purchase lounge access.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			purchaseLoungeAccessURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL that links to information to purchase lounge access.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	purchaseLoungeAccessURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL for purchasing in-flight wifi.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			purchaseWifiURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for purchasing in-flight wifi.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	purchaseWifiURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL for upgrading the flight.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			upgradeURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for upgrading the flight.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	upgradeURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL for management.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			managementURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for management.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	managementURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL for registering a service animal.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			registerServiceAnimalURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL for registering a service animal.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	registerServiceAnimalURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL to report a lost bag.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			reportLostBagURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL to report a lost bag.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	reportLostBagURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * A URL to request a wheel chair.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			requestWheelchairURL: z.httpUrl().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * A URL to request a wheel chair.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	requestWheelchairURL: Joi.string().regex(URL_REGEX),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * The email for the transit provider.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			transitProviderEmail: z.string().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * The email for the transit provider.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	transitProviderEmail: Joi.string(),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * The phone number for the transit provider.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			transitProviderPhoneNumber: z.string().optional(),
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * The phone number for the transit provider.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	transitProviderPhoneNumber: Joi.string(),
+			/**
+			 * @iOSVersion 26
+			 *
+			 * @description
+			 *
+			 * The URL for the transit provider.
+			 * Available only with Enhanced (or semantic) Boarding Passes
+			 */
+			transitProviderWebsiteURL: z.httpUrl().optional(),
+		})
+		.and(
+			z.union([
+				z.object({
+					webServiceURL: z.httpUrl(),
+					authenticationToken: z.string().min(16),
+				}),
+				z.object({
+					webServiceURL: z.never().optional(),
+					authenticationToken: z.never().optional(),
+				}),
+			]),
+		),
+]);
 
-	/**
-	 * @iOSVersion 26
-	 *
-	 * @description
-	 *
-	 * The URL for the transit provider.
-	 * Available only with Enhanced (or semantic) Boarding Passes
-	 */
-	transitProviderWebsiteURL: Joi.string().regex(URL_REGEX),
-}).with("webServiceURL", "authenticationToken");
+// *************************** //
+// *** ALL PASS PROPERTIES *** //
+// *************************** //
 
-export const PassProps = Joi.object<
-	OverridablePassProps & PassKindsProps & PassPropsFromMethods
->()
-	.concat(OverridablePassProps)
-	.concat(PassKindsProps)
-	.concat(PassPropsFromMethods);
+export type PassProps = z.infer<typeof PassProps>;
 
-export interface Template {
-	model: string;
-	certificates?: CertificatesSchema;
-}
+export const PassProps = z.union([
+	OverridablePassProps,
+	PassKindsProps,
+	PassPropsFromMethods,
+]);
 
-export const Template = Joi.object<Template>({
-	model: Joi.string().required(),
-	certificates: Joi.object().required(),
+// *********************** //
+// *** TEMPLATE SCHEMA *** //
+// *********************** //
+
+export type Template = z.infer<typeof Template>;
+
+export const Template = z.object({
+	model: z.string(),
+	certificates: CertificatesSchema.optional(),
 });
 
 // --------- UTILITIES ---------- //

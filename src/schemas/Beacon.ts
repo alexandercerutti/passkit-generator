@@ -1,19 +1,14 @@
-import Joi from "joi";
+import { z } from "zod";
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/pass/beacons
  */
 
-export interface Beacon {
-	major?: number;
-	minor?: number;
-	relevantText?: string;
-	proximityUUID: string;
-}
+export type Beacon = z.infer<typeof Beacon>;
 
-export const Beacon = Joi.object<Beacon>().keys({
-	major: Joi.number().integer().min(0).max(65535),
-	minor: Joi.number().integer().min(0).max(65535),
-	proximityUUID: Joi.string().required(),
-	relevantText: Joi.string(),
+export const Beacon = z.object({
+	proximityUUID: z.string(),
+	major: z.number().min(0).max(65535).optional(),
+	minor: z.number().min(0).max(65535).optional(),
+	relevantText: z.string().optional(),
 });

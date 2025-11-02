@@ -1,30 +1,23 @@
-import Joi from "joi";
+import { z } from "zod";
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/pass/barcodes
  */
 
-export type BarcodeFormat =
-	| "PKBarcodeFormatQR"
-	| "PKBarcodeFormatPDF417"
-	| "PKBarcodeFormatAztec"
-	| "PKBarcodeFormatCode128";
+export type BarcodeFormat = z.infer<typeof BarcodeFormat>;
 
-export interface Barcode {
-	altText?: string;
-	messageEncoding?: string;
-	format: BarcodeFormat;
-	message: string;
-}
+export const BarcodeFormat = z.literal([
+	"PKBarcodeFormatQR",
+	"PKBarcodeFormatPDF417",
+	"PKBarcodeFormatAztec",
+	"PKBarcodeFormatCode128",
+]);
 
-export const Barcode = Joi.object<Barcode>().keys({
-	altText: Joi.string(),
-	messageEncoding: Joi.string().default("iso-8859-1"),
-	format: Joi.string()
-		.required()
-		.regex(
-			/(PKBarcodeFormatQR|PKBarcodeFormatPDF417|PKBarcodeFormatAztec|PKBarcodeFormatCode128)/,
-			"barcodeType",
-		),
-	message: Joi.string().required(),
+export type Barcode = z.infer<typeof Barcode>;
+
+export const Barcode = z.object({
+	format: BarcodeFormat,
+	message: z.string(),
+	altText: z.string().optional(),
+	messageEncoding: z.string().default("iso-8859-1").optional(),
 });

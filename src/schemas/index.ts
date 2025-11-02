@@ -16,7 +16,7 @@ import { Barcode } from "./Barcode.js";
 import { Location } from "./Location.js";
 import { Beacon } from "./Beacon.js";
 import { NFC } from "./NFC.js";
-import { PassFields, TransitType } from "./PassFields.js";
+import { PassFields } from "./PassFields.js";
 import { Semantics } from "./Semantics.js";
 import { CertificatesSchema } from "./Certificates.js";
 import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
@@ -202,11 +202,11 @@ export const PassPropsFromMethods = z.object({
 export type PassKindsProps = z.infer<typeof PassKindsProps>;
 
 export const PassKindsProps = z.object({
-	coupon: PassFields.omit({ transitType: true }),
-	generic: PassFields.omit({ transitType: true }),
-	storeCard: PassFields.omit({ transitType: true }),
-	eventTicket: PassFields.omit({ transitType: true }),
-	boardingPass: PassFields,
+	coupon: PassFields.omit({ transitType: true }).optional(),
+	generic: PassFields.omit({ transitType: true }).optional(),
+	storeCard: PassFields.omit({ transitType: true }).optional(),
+	eventTicket: PassFields.omit({ transitType: true }).optional(),
+	boardingPass: PassFields.optional(),
 });
 
 // *********************************** //
@@ -607,11 +607,10 @@ export const OverridablePassProps = z.union([
 
 export type PassProps = z.infer<typeof PassProps>;
 
-export const PassProps = z.union([
+export const PassProps = z.intersection(
 	OverridablePassProps,
-	PassKindsProps,
-	PassPropsFromMethods,
-]);
+	z.intersection(PassKindsProps, PassPropsFromMethods),
+);
 
 // *********************** //
 // *** TEMPLATE SCHEMA *** //
@@ -635,11 +634,11 @@ export const Template = z.object({
  */
 
 export function assertValidity<T>(
-	schema: Joi.Schema<T>,
+	schema: z.ZodType<T>,
 	data: T,
 	customErrorMessage?: string,
 ): void {
-	const validation = schema.validate(data);
+	const validation = schema.safeParse(data);
 
 	if (validation.error) {
 		if (customErrorMessage) {
@@ -662,28 +661,16 @@ export function assertValidity<T>(
  * options (it depends on the schema)
  *
  * @param schema
- * @param options
+ * @param value
  * @returns
  */
 
-export function validate<T extends Object>(
-	schema: Joi.Schema<T>,
-	options: T,
-): T {
-	const validationResult = schema.validate(options, {
-		stripUnknown: true,
-		abortEarly: true,
-	});
-
-	if (validationResult.error) {
-		throw validationResult.error;
-	}
-
-	return validationResult.value;
+export function validate<T extends Object>(schema: z.ZodType<T>, value: T): T {
+	return schema.parse(value);
 }
 
 export function filterValid<T extends Object>(
-	schema: Joi.ObjectSchema<T>,
+	schema: z.ZodType<T>,
 	source: T[],
 ): T[] {
 	if (!source) {

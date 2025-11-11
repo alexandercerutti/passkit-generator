@@ -42,9 +42,9 @@ const BoardingPassSchemes = z.literal(["boardingPass", "semanticBoardingPass"]);
  */
 export type PreferredStyleSchemes = z.infer<typeof PreferredStyleSchemes>;
 
-export const PreferredStyleSchemes = z
-	.array(BoardingPassSchemes)
-	.or(z.array(PosterEventTicketSchemes));
+export const PreferredStyleSchemes = z.array(
+	z.union([BoardingPassSchemes, PosterEventTicketSchemes]),
+);
 
 /**
  * @iOSVersion 18 => "relevantDate"
@@ -101,7 +101,7 @@ export const RelevancyInterval = z.object({
  * currently deprecated property `relevantDate`.
  */
 
-export type RelevantDate = RelevancyInterval | RelevancyEntry;
+export type RelevantDate = z.infer<typeof RelevantDate>;
 
 export const RelevantDate = z.union([
 	//
@@ -184,15 +184,15 @@ export const PassColors = z.object({
 export type PassPropsFromMethods = z.infer<typeof PassPropsFromMethods>;
 
 export const PassPropsFromMethods = z.object({
-	nfc: NFC,
-	beacons: z.array(Beacon),
-	barcodes: z.array(Barcode),
-	relevantDate: z.iso.datetime(),
-	relevantDates: z.array(RelevantDate),
-	expirationDate: z.iso.datetime(),
-	locations: z.array(Location),
-	preferredStyleSchemes: PreferredStyleSchemes,
-	upcomingPassInformation: z.array(UpcomingPassInformationEntry),
+	nfc: NFC.optional(),
+	beacons: z.array(Beacon).optional(),
+	barcodes: z.array(Barcode).optional(),
+	relevantDate: z.iso.datetime().optional(),
+	relevantDates: z.array(RelevantDate).optional(),
+	expirationDate: z.iso.datetime().optional(),
+	locations: z.array(Location).optional(),
+	preferredStyleSchemes: PreferredStyleSchemes.optional(),
+	upcomingPassInformation: z.array(UpcomingPassInformationEntry).optional(),
 });
 
 // ***************************** //

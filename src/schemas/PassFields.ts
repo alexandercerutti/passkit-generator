@@ -17,11 +17,11 @@ export const TransitType = z.literal([
 export type PassFields = z.infer<typeof PassFields>;
 
 export const PassFields = z.object({
-	auxiliaryFields: z.array(PassFieldContentWithRow).optional(),
-	backFields: z.array(PassFieldContent).optional(),
-	headerFields: z.array(PassFieldContent).optional(),
-	primaryFields: z.array(PassFieldContent).optional(),
-	secondaryFields: z.array(PassFieldContent).optional(),
+	auxiliaryFields: z.array(PassFieldContentWithRow.or(PassFieldContent)),
+	backFields: z.array(PassFieldContent),
+	headerFields: z.array(PassFieldContent),
+	primaryFields: z.array(PassFieldContent),
+	secondaryFields: z.array(PassFieldContent),
 	transitType: TransitType.optional(),
 
 	/**
@@ -31,5 +31,5 @@ export const PassFields = z.object({
 	 *
 	 * @see \<undiclosed>
 	 */
-	additionalInfoFields: z.array(PassFieldContent).optional(),
+	additionalInfoFields: z.array(PassFieldContent),
 });

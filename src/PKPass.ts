@@ -30,14 +30,14 @@ const RegExps = {
 } as const;
 
 export default class PKPass extends Bundle {
-	private [certificatesSymbol]: Schemas.CertificatesSchema;
-	private [propsSymbol]: Schemas.PassProps = {};
+	private [certificatesSymbol]: Schemas.CertificatesSchema | undefined;
+	private [propsSymbol]: Schemas.PassProps = {} as Schemas.PassProps;
 	private [localizationSymbol]: {
 		[lang: string]: {
 			[placeholder: string]: string;
 		};
 	} = {};
-	private [passTypeSymbol]: Schemas.PassTypesProps | undefined = undefined;
+	private [passTypeSymbol]: Schemas.PassType | undefined = undefined;
 
 	/**
 	 * Either create a pass from another one
@@ -223,7 +223,9 @@ export default class PKPass extends Bundle {
 	 * @throws if current type is not "eventTicket" and is not "boardingPass".
 	 */
 
-	public get preferredStyleSchemes(): Schemas.PreferredStyleSchemes {
+	public get preferredStyleSchemes():
+		| Schemas.PreferredStyleSchemes
+		| undefined {
 		if (this.type !== "eventTicket" && this.type !== "boardingPass") {
 			throw new TypeError(
 				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_GET,
@@ -239,7 +241,7 @@ export default class PKPass extends Bundle {
 	 * either the Poster Event Tickets (iOS 18+) or the Semantic
 	 * Boarding passes (iOS 26+).
 	 *
-	 * @throws if current type is not "eventTicket".
+	 * @throws if current type is not "eventTicket" or "boardingPass".
 	 * @param value
 	 */
 
@@ -328,7 +330,7 @@ export default class PKPass extends Bundle {
 			Messages.TRANSIT_TYPE.INVALID,
 		);
 
-		this[propsSymbol]["boardingPass"].transitType = value;
+		this[propsSymbol][this.type]!.transitType = value;
 	}
 
 	/**
@@ -338,8 +340,8 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if current type is not "boardingPass".
 	 */
 
-	public get transitType() {
-		return this[propsSymbol]["boardingPass"].transitType;
+	public get transitType(): Schemas.TransitType | undefined {
+		return this[propsSymbol]["boardingPass"]!.transitType;
 	}
 
 	/**
@@ -351,7 +353,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get primaryFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].primaryFields;
+		const type = this.type as NonNullable<Schemas.PassType>;
+		return this[propsSymbol][type]!.primaryFields;
 	}
 
 	/**
@@ -363,7 +366,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get secondaryFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].secondaryFields;
+		const type = this.type as NonNullable<Schemas.PassType>;
+		return this[propsSymbol][type]!.secondaryFields;
 	}
 
 	/**
@@ -379,8 +383,12 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get auxiliaryFields(): Schemas.PassFieldContentWithRow[] {
-		return this[propsSymbol][this.type].auxiliaryFields;
+	public get auxiliaryFields(): (
+		| Schemas.PassFieldContentWithRow
+		| Schemas.PassFieldContent
+	)[] {
+		const type = this.type as NonNullable<Schemas.PassType>;
+		return this[propsSymbol][type]!.auxiliaryFields;
 	}
 
 	/**
@@ -392,7 +400,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get headerFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].headerFields;
+		const type = this.type as NonNullable<Schemas.PassType>;
+		return this[propsSymbol][type]!.headerFields;
 	}
 
 	/**
@@ -404,7 +413,8 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get backFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].backFields;
+		const type = this.type as NonNullable<Schemas.PassType>;
+		return this[propsSymbol][type]!.backFields;
 	}
 
 	/**
@@ -417,7 +427,7 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get additionalInfoFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol]["eventTicket"].additionalInfoFields;
+		return this[propsSymbol]["eventTicket"]!.additionalInfoFields;
 	}
 
 	/**
@@ -492,7 +502,7 @@ export default class PKPass extends Bundle {
 		};
 	}
 
-	public get type(): Schemas.PassTypesProps | undefined {
+	public get type(): Schemas.PassType | undefined {
 		return this[passTypeSymbol] ?? undefined;
 	}
 
@@ -624,7 +634,7 @@ export default class PKPass extends Bundle {
 			"eventTicket",
 			"storeCard",
 			"generic",
-		] as Schemas.PassTypesProps[];
+		] as Schemas.PassType[];
 
 		const type = possibleTypes.find((type) => Boolean(data[type]));
 
@@ -647,32 +657,41 @@ export default class PKPass extends Bundle {
 			if (!this[passTypeSymbol]) {
 				console.warn(Messages.PASS_SOURCE.UNKNOWN_TYPE);
 			}
-		} else {
-			this.type = type;
 
-			const {
-				headerFields = [],
-				primaryFields = [],
-				secondaryFields = [],
-				auxiliaryFields = [],
-				backFields = [],
-				transitType,
-				additionalInfoFields = [],
-			} = data[type] || {};
+			return;
+		}
 
-			this.headerFields.push(...headerFields);
-			this.primaryFields.push(...primaryFields);
-			this.secondaryFields.push(...secondaryFields);
-			this.auxiliaryFields.push(...auxiliaryFields);
-			this.backFields.push(...backFields);
+		this.type = type;
 
-			if (this.type === "boardingPass") {
-				this.transitType = transitType;
-			}
+		if (
+			typeof data[type] !== "object" ||
+			data[type] === null ||
+			Array.isArray(data[type])
+		) {
+			return;
+		}
 
-			if (this.type === "eventTicket") {
-				this.additionalInfoFields.push(...additionalInfoFields);
-			}
+		const {
+			headerFields = [],
+			primaryFields = [],
+			secondaryFields = [],
+			auxiliaryFields = [],
+			backFields = [],
+			additionalInfoFields = [],
+		} = data[type];
+
+		this.headerFields.push(...headerFields);
+		this.primaryFields.push(...primaryFields);
+		this.secondaryFields.push(...secondaryFields);
+		this.auxiliaryFields.push(...auxiliaryFields);
+		this.backFields.push(...backFields);
+
+		if (type === "boardingPass" && data[type].transitType) {
+			this.transitType = data[type].transitType;
+		}
+
+		if (type === "eventTicket") {
+			this.additionalInfoFields.push(...additionalInfoFields);
 		}
 	}
 
@@ -778,6 +797,10 @@ export default class PKPass extends Bundle {
 
 		const manifestBuffer = this[createManifestSymbol]();
 		super.addBuffer("manifest.json", manifestBuffer);
+
+		if (!this[certificatesSymbol]) {
+			throw new TypeError(Messages.CLOSE.MISSING_CERTIFICATES);
+		}
 
 		const signatureBuffer = Signature.create(
 			manifestBuffer,
@@ -1036,16 +1059,24 @@ export default class PKPass extends Bundle {
 				Schemas.validate(Schemas.RelevantDate, entry);
 
 				if (isRelevantEntry(entry)) {
-					const date = Utils.processDate(
-						new Date(entry.date || entry.relevantDate),
-					);
+					const targetDate = entry.date || entry.relevantDate;
 
-					acc.push({
-						relevantDate: date,
-						date,
-					});
+					if (!targetDate) {
+						throw new TypeError(Messages.RELEVANT_DATE.INVALID);
+					}
 
-					return acc;
+					try {
+						const date = Utils.processDate(new Date(targetDate));
+
+						acc.push({
+							relevantDate: date,
+							date,
+						});
+
+						return acc;
+					} catch {
+						return acc;
+					}
 				}
 
 				acc.push({

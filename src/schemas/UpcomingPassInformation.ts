@@ -284,9 +284,7 @@ export const UpcomingPassInformationEntry = z.object({
 	images: Images.optional(),
 
 	/** The semantic, machine-readable metadata about the upcoming pass information entry. */
-	semantics: Semantics.extend(
-		z.object({
-			venuePlaceID: z.string().optional(),
-		}),
-	).optional(),
+	semantics: Semantics.extend({
+		venuePlaceID: z.string().optional(),
+	}).optional(),
 });

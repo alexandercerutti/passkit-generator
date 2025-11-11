@@ -2,6 +2,7 @@ import type PKPass from "./PKPass.js";
 import * as Schemas from "./schemas/index.js";
 import * as Utils from "./utils.js";
 import * as Messages from "./messages.js";
+import type { ZodType } from "zod";
 
 /**
  * Class to represent lower-level keys pass fields
@@ -12,38 +13,38 @@ const passInstanceSymbol = Symbol("passInstance");
 const sharedKeysPoolSymbol = Symbol("keysPool");
 const fieldSchemaSymbol = Symbol("fieldSchema");
 
-export default class FieldsArray extends Array<Schemas.PassFieldContent> {
+type PassFieldContent =
+	| Schemas.PassFieldContent
+	| Schemas.PassFieldContentWithRow;
+
+export default class FieldsArray<
+	T extends PassFieldContent = PassFieldContent,
+> extends Array<T> {
 	private [passInstanceSymbol]: InstanceType<typeof PKPass>;
 	private [sharedKeysPoolSymbol]: Set<string>;
+	private [fieldSchemaSymbol]: ZodType<T>;
 
 	constructor(
 		passInstance: InstanceType<typeof PKPass>,
 		keysPool: Set<string>,
-		fieldSchema:
-			| typeof Schemas.PassFieldContent
-			| typeof Schemas.PassFieldContentWithRow,
-		...args: Schemas.PassFieldContent[]
+		fieldSchema: ZodType<T>,
 	) {
-		super(...args);
+		super();
 		this[fieldSchemaSymbol] = fieldSchema;
 		this[passInstanceSymbol] = passInstance;
 		this[sharedKeysPoolSymbol] = keysPool;
 	}
 
-	push(...items: Schemas.PassFieldContent[]): number {
+	push(...items: T[]): number {
 		const validItems = registerWithValidation(this, ...items);
 		return super.push(...validItems);
 	}
 
-	pop(): Schemas.PassFieldContent {
-		return unregisterItems(this, () => super.pop());
+	pop(): T | undefined {
+		return unregisterItems<T>(this, () => super.pop());
 	}
 
-	splice(
-		start: number,
-		deleteCount: number,
-		...items: Schemas.PassFieldContent[]
-	): Schemas.PassFieldContent[] {
+	splice(start: number, deleteCount: number, ...items: T[]): T[] {
 		// Perfoming frozen check, validation and getting valid items
 		const validItems = registerWithValidation(this, ...items);
 
@@ -55,22 +56,22 @@ export default class FieldsArray extends Array<Schemas.PassFieldContent> {
 	}
 
 	shift() {
-		return unregisterItems(this, () => super.shift());
+		return unregisterItems<T>(this, () => super.shift());
 	}
 
-	unshift(...items: Schemas.PassFieldContent[]) {
+	unshift(...items: T[]) {
 		const validItems = registerWithValidation(this, ...items);
 		return super.unshift(...validItems);
 	}
 }
 
-function registerWithValidation(
+function registerWithValidation<T extends PassFieldContent>(
 	instance: InstanceType<typeof FieldsArray>,
-	...items: Schemas.PassFieldContent[]
+	...items: T[]
 ) {
 	Utils.assertUnfrozen(instance[passInstanceSymbol]);
 
-	let validItems: Schemas.PassFieldContent[] = [];
+	let validItems: T[] = [];
 
 	for (const field of items) {
 		if (!field) {
@@ -105,13 +106,13 @@ function registerWithValidation(
 	return validItems;
 }
 
-function unregisterItems(
+function unregisterItems<T extends PassFieldContent>(
 	instance: InstanceType<typeof FieldsArray>,
 	removeFn: Function,
-) {
+): T {
 	Utils.assertUnfrozen(instance[passInstanceSymbol]);
 
-	const element: Schemas.PassFieldContent = removeFn();
+	const element: T = removeFn();
 	instance[sharedKeysPoolSymbol].delete(element.key);
 	return element;
 }

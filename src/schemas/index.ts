@@ -199,15 +199,33 @@ export const PassPropsFromMethods = z.object({
 // *** PASS TYPE WITH FIELDS *** //
 // ***************************** //
 
-export type PassKindsProps = z.infer<typeof PassKindsProps>;
+export type PassTypesFields = z.infer<typeof PassTypesFields>;
 
-export const PassKindsProps = z.object({
-	coupon: PassFields.omit({ transitType: true }).optional(),
-	generic: PassFields.omit({ transitType: true }).optional(),
-	storeCard: PassFields.omit({ transitType: true }).optional(),
-	eventTicket: PassFields.omit({ transitType: true }).optional(),
-	boardingPass: PassFields.optional(),
+export const PassTypesFields = z.object({
+	coupon: PassFields.omit({
+		transitType: true,
+		additionalInfoFields: true,
+	}).optional(),
+	generic: PassFields.omit({
+		transitType: true,
+		additionalInfoFields: true,
+	}).optional(),
+	storeCard: PassFields.omit({
+		transitType: true,
+		additionalInfoFields: true,
+	}).optional(),
+	eventTicket: PassFields.omit({
+		transitType: true,
+	}).optional(),
+	boardingPass: PassFields.omit({
+		additionalInfoFields: true,
+	}).optional(),
 });
+
+/**
+ * @deprecated use `PassTypesFields` instead
+ */
+export type PassKindProps = PassTypesFields;
 
 // *********************************** //
 // *** OVERRIDABLE PASS PROPERTIES *** //
@@ -609,7 +627,7 @@ export type PassProps = z.infer<typeof PassProps>;
 
 export const PassProps = z.intersection(
 	OverridablePassProps,
-	z.intersection(PassKindsProps, PassPropsFromMethods),
+	z.intersection(PassTypesFields, PassPropsFromMethods),
 );
 
 // *********************** //

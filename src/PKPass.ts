@@ -438,7 +438,7 @@ export default class PKPass extends Bundle {
 	 * both imported or manually set.
 	 */
 
-	public set type(nextType: Schemas.PassTypesProps | undefined) {
+	public set type(nextType: Schemas.PassType | undefined) {
 		Utils.assertUnfrozen(this);
 
 		Schemas.assertValidity(
@@ -446,9 +446,6 @@ export default class PKPass extends Bundle {
 			nextType,
 			Messages.PASS_TYPE.INVALID,
 		);
-
-		/** Shut up, typescript strict mode! */
-		const type = nextType as Schemas.PassTypesProps;
 
 		if (this.type) {
 			/**
@@ -463,8 +460,8 @@ export default class PKPass extends Bundle {
 
 		const sharedKeysPool = new Set<string>();
 
-		this[passTypeSymbol] = type;
-		this[propsSymbol][type] = {
+		this[passTypeSymbol] = nextType;
+		this[propsSymbol][nextType] = {
 			headerFields /******/: new FieldsArray(
 				this,
 				sharedKeysPool,
@@ -483,7 +480,7 @@ export default class PKPass extends Bundle {
 			auxiliaryFields /***/: new FieldsArray(
 				this,
 				sharedKeysPool,
-				type === "eventTicket"
+				nextType === "eventTicket"
 					? Schemas.PassFieldContentWithRow
 					: Schemas.PassFieldContent,
 			),

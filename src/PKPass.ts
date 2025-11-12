@@ -352,7 +352,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get primaryFields(): Schemas.PassFieldContent[] {
+	public get primaryFields(): Schemas.PassFieldContent[] | undefined {
 		const type = this.type as NonNullable<Schemas.PassType>;
 		return this[propsSymbol][type]!.primaryFields;
 	}
@@ -365,7 +365,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get secondaryFields(): Schemas.PassFieldContent[] {
+	public get secondaryFields(): Schemas.PassFieldContent[] | undefined {
 		const type = this.type as NonNullable<Schemas.PassType>;
 		return this[propsSymbol][type]!.secondaryFields;
 	}
@@ -383,10 +383,9 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get auxiliaryFields(): (
-		| Schemas.PassFieldContentWithRow
-		| Schemas.PassFieldContent
-	)[] {
+	public get auxiliaryFields():
+		| (Schemas.PassFieldContentWithRow | Schemas.PassFieldContent)[]
+		| undefined {
 		const type = this.type as NonNullable<Schemas.PassType>;
 		return this[propsSymbol][type]!.auxiliaryFields;
 	}
@@ -399,7 +398,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get headerFields(): Schemas.PassFieldContent[] {
+	public get headerFields(): Schemas.PassFieldContent[] | undefined {
 		const type = this.type as NonNullable<Schemas.PassType>;
 		return this[propsSymbol][type]!.headerFields;
 	}
@@ -412,7 +411,7 @@ export default class PKPass extends Bundle {
 	 * 		instance has not a valid type set yet.
 	 */
 
-	public get backFields(): Schemas.PassFieldContent[] {
+	public get backFields(): Schemas.PassFieldContent[] | undefined {
 		const type = this.type as NonNullable<Schemas.PassType>;
 		return this[propsSymbol][type]!.backFields;
 	}
@@ -426,7 +425,7 @@ export default class PKPass extends Bundle {
 	 *		type is not "eventTicket".
 	 */
 
-	public get additionalInfoFields(): Schemas.PassFieldContent[] {
+	public get additionalInfoFields(): Schemas.PassFieldContent[] | undefined {
 		return this[propsSymbol]["eventTicket"]!.additionalInfoFields;
 	}
 
@@ -661,7 +660,12 @@ export default class PKPass extends Bundle {
 			return;
 		}
 
-		this.type = type;
+		/**
+		 * This is an "hack" because we know that fields accessors are available
+		 * as soon we assign the type. However, we need to apply an assertion on
+		 * `this` to prevent Typescript errors.
+		 */
+		assignType(this, type);
 
 		if (
 			typeof data[type] !== "object" ||
@@ -677,7 +681,6 @@ export default class PKPass extends Bundle {
 			secondaryFields = [],
 			auxiliaryFields = [],
 			backFields = [],
-			additionalInfoFields = [],
 		} = data[type];
 
 		this.headerFields.push(...headerFields);
@@ -690,8 +693,8 @@ export default class PKPass extends Bundle {
 			this.transitType = data[type].transitType;
 		}
 
-		if (type === "eventTicket") {
-			this.additionalInfoFields.push(...additionalInfoFields);
+		if (type === "eventTicket" && data[type].additionalInfoFields?.length) {
+			this.additionalInfoFields.push(...data[type].additionalInfoFields);
 		}
 	}
 
@@ -1240,4 +1243,21 @@ function isRelevantEntry(
 		Object.prototype.hasOwnProperty.call(entry, "date") && "date" in entry;
 
 	return isRelevantDateAvailable || isDateAvailable;
+}
+
+type EnsuredPassFields = {
+	[k in keyof Schemas.PassFields]-?: Schemas.PassFields[k];
+};
+
+/**
+ * This is an "hack" because we know that fields accessors are available
+ * as soon we assign the type. However, we need to apply an assertion on
+ * `pkpass` to prevent Typescript errors.
+ */
+function assignType(
+	pkpass: PKPass,
+	type: Schemas.PassType,
+): asserts pkpass is Exclude<PKPass, keyof Schemas.PassFields> &
+	EnsuredPassFields {
+	pkpass.type = type;
 }

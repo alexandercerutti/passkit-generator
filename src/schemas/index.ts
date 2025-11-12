@@ -241,7 +241,7 @@ export const OverridablePassProps = z.union([
 			passTypeIdentifier: z.string(),
 			teamIdentifier: z.string(),
 			organizationName: z.string(),
-			semantics: Semantics,
+			semantics: Semantics.optional(),
 			voided: z.boolean().optional(),
 			logoText: z.string().optional(),
 			description: z.string().optional(),
@@ -655,7 +655,7 @@ export function assertValidity<T>(
 	schema: z.ZodType<T>,
 	data: T,
 	customErrorMessage?: string,
-): void {
+): asserts data is T & {} {
 	const validation = schema.safeParse(data);
 
 	if (validation.error) {

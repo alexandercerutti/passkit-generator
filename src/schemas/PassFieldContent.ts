@@ -69,16 +69,19 @@ const PassFieldContentShared = z.object({
 	timeStyle: PKDateStyleType.optional(),
 });
 
-export const PassFieldContent = z.discriminatedUnion("value", [
-	PassFieldContentShared.extend({
-		value: z.union([z.string(), z.iso.date()]),
-	}),
-	PassFieldContentShared.extend({
-		value: z.number(),
-		currencyCode: z.string().optional(),
-		numberStyle: PKNumberStyleType.optional(),
-	}),
-]);
+export const PassFieldContent = z.intersection(
+	PassFieldContentShared,
+	z.union([
+		z.object({
+			value: z.union([z.string(), z.iso.date()]),
+		}),
+		z.object({
+			value: z.number(),
+			currencyCode: z.string().optional(),
+			numberStyle: PKNumberStyleType.optional(),
+		}),
+	]),
+);
 
 export type PassFieldContentWithRow = z.infer<typeof PassFieldContentWithRow>;
 

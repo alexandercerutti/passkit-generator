@@ -24,6 +24,9 @@ import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
 import * as Messages from "../messages.js";
 import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 
+const httpAddressSchema = z.url({
+	protocol: /^https?$/,
+});
 const dateTimeSchema = z.iso.datetime({
 	offset: true,
 	local: true,
@@ -252,7 +255,7 @@ export const OverridablePassProps = z.union([
 			logoText: z.string().optional(),
 			description: z.string().optional(),
 			serialNumber: z.string().optional(),
-			appLaunchURL: z.httpUrl().optional(),
+			appLaunchURL: httpAddressSchema.optional(),
 			sharingProhibited: z.boolean().optional(),
 			groupingIdentifier: z.string().optional(),
 			suppressStripShine: z.boolean().optional(),
@@ -270,7 +273,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			bagPolicyURL: z.httpUrl().optional(),
+			bagPolicyURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -281,7 +284,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			orderFoodURL: z.httpUrl().optional(),
+			orderFoodURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -292,7 +295,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			parkingInformationURL: z.httpUrl().optional(),
+			parkingInformationURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -303,7 +306,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			directionsInformationURL: z.httpUrl().optional(),
+			directionsInformationURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -319,7 +322,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			purchaseParkingURL: z.httpUrl().optional(),
+			purchaseParkingURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -335,7 +338,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			merchandiseURL: z.httpUrl().optional(),
+			merchandiseURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -352,7 +355,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			transitInformationURL: z.httpUrl().optional(),
+			transitInformationURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -368,7 +371,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			accessibilityURL: z.httpUrl().optional(),
+			accessibilityURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -384,7 +387,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			addOnURL: z.httpUrl().optional(),
+			addOnURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -423,7 +426,7 @@ export const OverridablePassProps = z.union([
 			 * at least two among those marked with
 			 * "@passDomain Event Guide" must be used.
 			 */
-			contactVenueWebsite: z.httpUrl().optional(),
+			contactVenueWebsite: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -433,7 +436,7 @@ export const OverridablePassProps = z.union([
 			 *
 			 * Will add a button among options near "share"
 			 */
-			transferURL: z.httpUrl().optional(),
+			transferURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -443,7 +446,7 @@ export const OverridablePassProps = z.union([
 			 *
 			 * Will add a button among options near "share"
 			 */
-			sellURL: z.httpUrl().optional(),
+			sellURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 18
@@ -489,7 +492,7 @@ export const OverridablePassProps = z.union([
 			 * A URL for changing the seat for the ticket.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			changeSeatURL: z.httpUrl().optional(),
+			changeSeatURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -499,7 +502,7 @@ export const OverridablePassProps = z.union([
 			 * A URL for in-flight entertainment.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			entertainmentURL: z.httpUrl().optional(),
+			entertainmentURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -509,7 +512,7 @@ export const OverridablePassProps = z.union([
 			 * A URL for adding checked bags for the ticket.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			purchaseAdditionalBaggageURL: z.httpUrl().optional(),
+			purchaseAdditionalBaggageURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -519,7 +522,7 @@ export const OverridablePassProps = z.union([
 			 * A URL that links to information to purchase lounge access.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			purchaseLoungeAccessURL: z.httpUrl().optional(),
+			purchaseLoungeAccessURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -529,7 +532,7 @@ export const OverridablePassProps = z.union([
 			 * A URL for purchasing in-flight wifi.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			purchaseWifiURL: z.httpUrl().optional(),
+			purchaseWifiURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -539,7 +542,7 @@ export const OverridablePassProps = z.union([
 			 * A URL for upgrading the flight.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			upgradeURL: z.httpUrl().optional(),
+			upgradeURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -549,7 +552,7 @@ export const OverridablePassProps = z.union([
 			 * A URL for management.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			managementURL: z.httpUrl().optional(),
+			managementURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -559,7 +562,7 @@ export const OverridablePassProps = z.union([
 			 * A URL for registering a service animal.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			registerServiceAnimalURL: z.httpUrl().optional(),
+			registerServiceAnimalURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -569,7 +572,7 @@ export const OverridablePassProps = z.union([
 			 * A URL to report a lost bag.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			reportLostBagURL: z.httpUrl().optional(),
+			reportLostBagURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -579,7 +582,7 @@ export const OverridablePassProps = z.union([
 			 * A URL to request a wheel chair.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			requestWheelchairURL: z.httpUrl().optional(),
+			requestWheelchairURL: httpAddressSchema.optional(),
 
 			/**
 			 * @iOSVersion 26
@@ -609,12 +612,12 @@ export const OverridablePassProps = z.union([
 			 * The URL for the transit provider.
 			 * Available only with Enhanced (or semantic) Boarding Passes
 			 */
-			transitProviderWebsiteURL: z.httpUrl().optional(),
+			transitProviderWebsiteURL: httpAddressSchema.optional(),
 		})
 		.and(
 			z.union([
 				z.object({
-					webServiceURL: z.httpUrl(),
+					webServiceURL: httpAddressSchema,
 					authenticationToken: z.string().min(16),
 				}),
 				z.object({

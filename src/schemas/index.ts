@@ -27,10 +27,13 @@ import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 const httpAddressSchema = z.url({
 	protocol: /^https?$/,
 });
-const dateTimeSchema = z.iso.datetime({
-	offset: true,
-	local: true,
-});
+const dateTimeSchema = z.union([
+	z.iso.datetime({
+		offset: true,
+		local: true,
+	}),
+	z.date(),
+]);
 
 /**
  * @iOSVersion 18

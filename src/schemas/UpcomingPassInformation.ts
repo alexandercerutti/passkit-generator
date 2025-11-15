@@ -1,11 +1,10 @@
 import { z } from "zod";
 import { PassFieldContent } from "./PassFieldContent.js";
 import { Semantics } from "./Semantics.js";
-import { URL_REGEX } from "./regexps.js";
+import { dateTimeSchema, httpAddressSchema } from "./sharedSchemas.js";
 
-const dateTimeSchema = z.iso.datetime({
-	offset: true,
-	local: true,
+const httpsAddressSchema = z.url({
+	protocol: /^https$/,
 });
 
 /**
@@ -19,7 +18,7 @@ const ImageURLEntry = z.object({
 	SHA256: z.string(),
 
 	/** The URL that points to the image asset to be downloaded. This must be an https link. */
-	URL: z.string().check(z.regex(URL_REGEX)),
+	URL: httpsAddressSchema,
 
 	/** The scale of the image. If unspecified, defaults to 1. */
 	scale: z.number().default(1).optional(),
@@ -89,7 +88,7 @@ const URLs = z.object({
 	/**
 	 * A URL that links to your or the venue's accessibility content.
 	 */
-	accessibilityURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	accessibilityURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links to experiences that you can add on to your ticket
@@ -98,12 +97,12 @@ const URLs = z.object({
 	 * access the experience. For example, loaded value or upgrades for
 	 * an experience.
 	 */
-	addOnURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	addOnURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links out to the bag policy of the venue.
 	 */
-	bagPolicyURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	bagPolicyURL: httpAddressSchema.optional(),
 
 	/**
 	 * Joi's email schema validates email TLDs and only allows TLDs that are registered in the IANA Registry.
@@ -126,12 +125,12 @@ const URLs = z.object({
 	/**
 	 * A URL that links the user to the website of the venue, event, or issuer.
 	 */
-	contactVenueWebsite: z.string().check(z.regex(URL_REGEX)).optional(),
+	contactVenueWebsite: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links to content you have about getting to the venue.
 	 */
-	directionsInformationURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	directionsInformationURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links to order merchandise for the specific event.
@@ -145,43 +144,43 @@ const URLs = z.object({
 	 * This can be done through a pass update. For more information on updating a
 	 * pass, see Distributing and updating a pass.
 	 */
-	merchandiseURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	merchandiseURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links out to the food-ordering page for the venue.
 	 * This can be in-seat food delivery, pre-order for pickup at a vendor,
 	 * or other appropriate food-ordering service.
 	 */
-	orderFoodURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	orderFoodURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links to any information you have about parking.
 	 */
-	parkingInformationURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	parkingInformationURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links to your experience to buy or access prepaid parking
 	 * or general parking information.
 	 */
-	purchaseParkingURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	purchaseParkingURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that launches the user into the issuer's flow for selling their
 	 * current ticket. Provide as deep a link as possible into the sale flow.
 	 */
-	sellURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	sellURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that launches the user into the issuer's flow for transferring
 	 * the current ticket. Provide as deep a link as possible into the transfer flow.
 	 */
-	transferURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	transferURL: httpAddressSchema.optional(),
 
 	/**
 	 * A URL that links to documentation you have about public or private
 	 * transit to the venue.
 	 */
-	transitInformationURL: z.string().check(z.regex(URL_REGEX)).optional(),
+	transitInformationURL: httpAddressSchema.optional(),
 });
 
 /**

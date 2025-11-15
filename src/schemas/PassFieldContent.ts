@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { Semantics } from "./Semantics.js";
-
-const dateTimeSchema = z.iso.datetime({
-	offset: true,
-	local: true,
-});
+import { dateTimeSchema } from "./sharedSchemas.js";
 
 export type PKDataDetectorType = z.infer<typeof PKDataDetectorType>;
 

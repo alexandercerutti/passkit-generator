@@ -22,18 +22,11 @@ import { CertificatesSchema } from "./Certificates.js";
 import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
 
 import * as Messages from "../messages.js";
-import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
-
-const httpAddressSchema = z.url({
-	protocol: /^https?$/,
-});
-const dateTimeSchema = z.union([
-	z.iso.datetime({
-		offset: true,
-		local: true,
-	}),
-	z.date(),
-]);
+import {
+	colorRgbHexSchema,
+	dateTimeSchema,
+	httpAddressSchema,
+} from "./sharedSchemas.js";
 
 /**
  * @iOSVersion 18
@@ -148,10 +141,10 @@ export type PassTypesProps = PassType;
 export type PassColors = z.infer<typeof PassColors>;
 
 export const PassColors = z.object({
-	backgroundColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
-	foregroundColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
-	labelColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
-	stripColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
+	backgroundColor: colorRgbHexSchema.optional(),
+	foregroundColor: colorRgbHexSchema.optional(),
+	labelColor: colorRgbHexSchema.optional(),
+	stripColor: colorRgbHexSchema.optional(),
 
 	/**
 	 * @iOSVersion 18
@@ -164,10 +157,7 @@ export const PassColors = z.object({
 	 * to specify a different and specific color
 	 * for it.
 	 */
-	footerBackgroundColor: z
-		.string()
-		.check(z.regex(RGB_HEX_COLOR_REGEX))
-		.optional(),
+	footerBackgroundColor: colorRgbHexSchema.optional(),
 
 	/**
 	 * @iOSVersion 18

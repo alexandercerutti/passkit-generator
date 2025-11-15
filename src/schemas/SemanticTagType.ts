@@ -1,10 +1,5 @@
 import { z } from "zod";
-import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
-
-const dateTimeSchema = z.iso.datetime({
-	offset: true,
-	local: true,
-});
+import { dateTimeSchema, colorRgbHexSchema } from "./sharedSchemas.js";
 
 /**
  * These couple of structures are organized alphabetically,
@@ -123,7 +118,7 @@ export const Seat = z.object({
 	 * @iOSVersion 18
 	 * @passStyle eventTicket (new layout)
 	 */
-	seatSectionColor: z.string().check(z.regex(RGB_HEX_COLOR_REGEX)).optional(),
+	seatSectionColor: colorRgbHexSchema.optional(),
 });
 
 /**

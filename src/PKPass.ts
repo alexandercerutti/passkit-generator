@@ -547,7 +547,7 @@ export default class PKPass extends Bundle {
 
 			try {
 				this[importMetadataSymbol](
-					validateJSONBuffer(buffer, Schemas.PassProps),
+					Schemas.validateJSONBuffer(buffer, Schemas.PassProps),
 				);
 			} catch (err) {
 				console.warn(
@@ -573,7 +573,7 @@ export default class PKPass extends Bundle {
 			 */
 
 			try {
-				validateJSONBuffer(buffer, Schemas.Personalize);
+				Schemas.validateJSONBuffer(buffer, Schemas.Personalize);
 			} catch (err) {
 				console.warn(
 					Messages.format(Messages.PERSONALIZE.INVALID, err),
@@ -1212,21 +1212,6 @@ export default class PKPass extends Bundle {
 		this[propsSymbol]["nfc"] =
 			Schemas.validate(Schemas.NFC, nfc) ?? undefined;
 	}
-}
-
-function validateJSONBuffer(
-	buffer: Buffer,
-	schema: Parameters<typeof Schemas.validate>[0],
-): Schemas.PassProps {
-	let contentAsJSON: Schemas.PassProps;
-
-	try {
-		contentAsJSON = JSON.parse(buffer.toString("utf8"));
-	} catch (err) {
-		throw new TypeError(Messages.JSON.INVALID);
-	}
-
-	return Schemas.validate(schema, contentAsJSON);
 }
 
 function isRelevantEntry(

@@ -733,3 +733,18 @@ export function filterValid<T extends Object>(
 		}
 	}, []);
 }
+
+export function validateJSONBuffer<T extends Object>(
+	buffer: Buffer,
+	schema: z.ZodType<T>,
+): T {
+	let contentAsJSON: T;
+
+	try {
+		contentAsJSON = JSON.parse(buffer.toString("utf8"));
+	} catch (err) {
+		throw new TypeError(Messages.JSON.INVALID);
+	}
+
+	return validate(schema, contentAsJSON);
+}

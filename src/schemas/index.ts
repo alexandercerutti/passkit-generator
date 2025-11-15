@@ -140,41 +140,43 @@ export type PassTypesProps = PassType;
 
 export type PassColors = z.infer<typeof PassColors>;
 
-export const PassColors = z.object({
-	backgroundColor: colorRgbHexSchema.optional(),
-	foregroundColor: colorRgbHexSchema.optional(),
-	labelColor: colorRgbHexSchema.optional(),
-	stripColor: colorRgbHexSchema.optional(),
+export const PassColors = z
+	.object({
+		backgroundColor: colorRgbHexSchema,
+		foregroundColor: colorRgbHexSchema,
+		labelColor: colorRgbHexSchema,
+		stripColor: colorRgbHexSchema,
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * By default, the chin is colored with a
-	 * blur. Through this option, it is possible
-	 * to specify a different and specific color
-	 * for it.
-	 */
-	footerBackgroundColor: colorRgbHexSchema.optional(),
+		/**
+		 * @iOSVersion 18
+		 * @passStyle eventTicket (new layout)
+		 *
+		 * @description
+		 *
+		 * By default, the chin is colored with a
+		 * blur. Through this option, it is possible
+		 * to specify a different and specific color
+		 * for it.
+		 */
+		footerBackgroundColor: colorRgbHexSchema,
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 *
-	 * @description
-	 *
-	 * Enables the automatic calculation of the
-	 * `foregroundColor` and `labelColor` based
-	 * on the background image in the new event
-	 * ticket passes.
-	 *
-	 * If enabled, `foregroundColor` and `labelColor`
-	 * are ignored.
-	 */
-	useAutomaticColors: z.boolean().optional(),
-});
+		/**
+		 * @iOSVersion 18
+		 * @passStyle eventTicket (new layout)
+		 *
+		 * @description
+		 *
+		 * Enables the automatic calculation of the
+		 * `foregroundColor` and `labelColor` based
+		 * on the background image in the new event
+		 * ticket passes.
+		 *
+		 * If enabled, `foregroundColor` and `labelColor`
+		 * are ignored.
+		 */
+		useAutomaticColors: z.boolean(),
+	})
+	.partial();
 
 // ******************************* //
 // *** PROPERTIES FROM METHODS *** //

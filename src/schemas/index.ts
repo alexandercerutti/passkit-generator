@@ -207,26 +207,28 @@ export const PassPropsFromMethods = z
 
 export type PassTypesFields = z.infer<typeof PassTypesFields>;
 
-export const PassTypesFields = z.object({
-	coupon: PassFields.omit({
-		transitType: true,
-		additionalInfoFields: true,
-	}).optional(),
-	generic: PassFields.omit({
-		transitType: true,
-		additionalInfoFields: true,
-	}).optional(),
-	storeCard: PassFields.omit({
-		transitType: true,
-		additionalInfoFields: true,
-	}).optional(),
-	eventTicket: PassFields.omit({
-		transitType: true,
-	}).optional(),
-	boardingPass: PassFields.omit({
-		additionalInfoFields: true,
-	}).optional(),
-});
+export const PassTypesFields = z
+	.object({
+		coupon: PassFields.omit({
+			transitType: true,
+			additionalInfoFields: true,
+		}),
+		generic: PassFields.omit({
+			transitType: true,
+			additionalInfoFields: true,
+		}),
+		storeCard: PassFields.omit({
+			transitType: true,
+			additionalInfoFields: true,
+		}),
+		eventTicket: PassFields.omit({
+			transitType: true,
+		}),
+		boardingPass: PassFields.omit({
+			additionalInfoFields: true,
+		}),
+	})
+	.partial();
 
 /**
  * @deprecated use `PassTypesFields` instead

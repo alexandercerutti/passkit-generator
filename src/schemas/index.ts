@@ -184,20 +184,22 @@ export const PassColors = z
 
 export type PassPropsFromMethods = z.infer<typeof PassPropsFromMethods>;
 
-export const PassPropsFromMethods = z.object({
-	nfc: NFC.optional(),
-	beacons: z.array(Beacon).optional(),
-	barcodes: z.array(Barcode).optional(),
-	/**
-	 * @deprecated since iOS 18. Use `relevantDates` instead.
-	 */
-	relevantDate: dateTimeSchema.optional(),
-	relevantDates: z.array(RelevantDate).optional(),
-	expirationDate: dateTimeSchema.optional(),
-	locations: z.array(Location).optional(),
-	preferredStyleSchemes: PreferredStyleSchemes.optional(),
-	upcomingPassInformation: z.array(UpcomingPassInformationEntry).optional(),
-});
+export const PassPropsFromMethods = z
+	.object({
+		nfc: NFC,
+		beacons: z.array(Beacon),
+		barcodes: z.array(Barcode),
+		/**
+		 * @deprecated since iOS 18. Use `relevantDates` instead.
+		 */
+		relevantDate: dateTimeSchema,
+		relevantDates: z.array(RelevantDate),
+		expirationDate: dateTimeSchema,
+		locations: z.array(Location),
+		preferredStyleSchemes: PreferredStyleSchemes,
+		upcomingPassInformation: z.array(UpcomingPassInformationEntry),
+	})
+	.partial();
 
 // ***************************** //
 // *** PASS TYPE WITH FIELDS *** //

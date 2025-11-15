@@ -50,7 +50,7 @@ const PKNumberStyleType = z.literal([
 export type PassFieldContent = z.infer<typeof PassFieldContent>;
 
 const PassFieldContentShared = z.object({
-	attributedValue: z.union([z.string(), z.number(), z.iso.date()]).optional(),
+	attributedValue: z.string().optional(),
 
 	changeMessage: z.string().optional(),
 
@@ -92,7 +92,7 @@ export type PassFieldContentWithRow = z.infer<typeof PassFieldContentWithRow>;
 
 export const PassFieldContentWithRow = PassFieldContent.and(
 	z.object({
-		row: z.literal([0, 1]),
+		row: z.literal([0, 1]).optional(),
 	}),
 );
 

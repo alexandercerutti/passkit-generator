@@ -39,7 +39,7 @@ type Image = z.infer<typeof Image>;
 
 const Image = z.discriminatedUnion("reuseExisting", [
 	z.object({
-		URLs: z.undefined().or(z.never()),
+		URLs: z.undefined().optional(),
 		/**
 		 * Indicates whether to use the local equivalent image instead of the image specified by URLs.
 		 */
@@ -55,7 +55,7 @@ const Image = z.discriminatedUnion("reuseExisting", [
 		/**
 		 * Indicates whether to use the local equivalent image instead of the image specified by URLs.
 		 */
-		reuseExisting: z.literal(false).or(z.never()).optional(),
+		reuseExisting: z.literal(false).optional(),
 	}),
 ]);
 

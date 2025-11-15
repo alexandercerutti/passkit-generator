@@ -245,14 +245,31 @@ export type PassKindProps = PassTypesFields;
 
 export type OverridablePassProps = z.infer<typeof OverridablePassProps>;
 
-export const OverridablePassProps = z.union([
-	PassColors,
+export const OverridablePassProps = PassColors.and(
 	z
 		.object({
 			formatVersion: z.number().default(1).optional(),
-			passTypeIdentifier: z.string(),
-			teamIdentifier: z.string(),
-			organizationName: z.string(),
+			/**
+			 * Required in order to create a valid pass.
+			 * Optional because it can be overrided and available
+			 * in the model.
+			 */
+			passTypeIdentifier: z.string().optional(),
+
+			/**
+			 * Required in order to create a valid pass.
+			 * Optional because it can be overrided and available
+			 * in the model.
+			 */
+			teamIdentifier: z.string().optional(),
+
+			/**
+			 * Required in order to create a valid pass.
+			 * Optional because it can be overrided and available
+			 * in the model.
+			 */
+			organizationName: z.string().optional(),
+
 			semantics: Semantics.optional(),
 			voided: z.boolean().optional(),
 			logoText: z.string().optional(),
@@ -629,7 +646,7 @@ export const OverridablePassProps = z.union([
 				}),
 			]),
 		),
-]);
+);
 
 // *************************** //
 // *** ALL PASS PROPERTIES *** //

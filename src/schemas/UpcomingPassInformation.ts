@@ -3,6 +3,11 @@ import { PassFieldContent } from "./PassFieldContent.js";
 import { Semantics } from "./Semantics.js";
 import { URL_REGEX } from "./regexps.js";
 
+const dateTimeSchema = z.iso.datetime({
+	offset: true,
+	local: true,
+});
+
 /**
  * @iOSVersion 26
  * @see https://developer.apple.com/documentation/walletpasses/upcomingpassinformationentrytype/imageurlentry-data.dictionary
@@ -190,11 +195,7 @@ const DateInformation = z.object({
 	 * A string containing an ISO 8601 date and time.
 	 * The date and time when the event is scheduled.
 	 */
-	date: z.iso
-		.datetime({
-			offset: true,
-		})
-		.optional(),
+	date: dateTimeSchema.optional(),
 
 	/**
 	 * A Boolean value that controls whether the time appears on the pass.

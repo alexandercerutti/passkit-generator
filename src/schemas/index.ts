@@ -24,6 +24,11 @@ import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
 import * as Messages from "../messages.js";
 import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 
+const dateTimeSchema = z.iso.datetime({
+	offset: true,
+	local: true,
+});
+
 /**
  * @iOSVersion 18
  */
@@ -57,27 +62,25 @@ export const RelevancyEntry = z.union([
 		/**
 		 * Since iOS 26
 		 */
-		date: z.union([z.string(), z.iso.datetime(), z.date()]),
+		date: dateTimeSchema,
 
 		/**
 		 * Since iOS 18, then was renamed in
 		 * 'date' in iOS 26 (what a breaking change)
 		 */
-		relevantDate: z
-			.union([z.string(), z.iso.datetime(), z.date()])
-			.optional(),
+		relevantDate: dateTimeSchema.optional(),
 	}),
 	z.object({
 		/**
 		 * Since iOS 26
 		 */
-		date: z.union([z.string(), z.iso.datetime(), z.date()]).optional(),
+		date: dateTimeSchema.optional(),
 
 		/**
 		 * Since iOS 18, then was renamed in
 		 * 'date' in iOS 26 (what a breaking change)
 		 */
-		relevantDate: z.union([z.string(), z.iso.datetime(), z.date()]),
+		relevantDate: dateTimeSchema,
 	}),
 ]);
 
@@ -87,8 +90,8 @@ export const RelevancyEntry = z.union([
 export type RelevancyInterval = z.infer<typeof RelevancyInterval>;
 
 export const RelevancyInterval = z.object({
-	startDate: z.union([z.string(), z.iso.datetime(), z.date()]),
-	endDate: z.union([z.string(), z.iso.datetime(), z.date()]),
+	startDate: dateTimeSchema,
+	endDate: dateTimeSchema,
 });
 
 /**
@@ -187,9 +190,12 @@ export const PassPropsFromMethods = z.object({
 	nfc: NFC.optional(),
 	beacons: z.array(Beacon).optional(),
 	barcodes: z.array(Barcode).optional(),
-	relevantDate: z.iso.datetime().optional(),
+	/**
+	 * @deprecated since iOS 18. Use `relevantDates` instead.
+	 */
+	relevantDate: dateTimeSchema.optional(),
 	relevantDates: z.array(RelevantDate).optional(),
-	expirationDate: z.iso.datetime().optional(),
+	expirationDate: dateTimeSchema.optional(),
 	locations: z.array(Location).optional(),
 	preferredStyleSchemes: PreferredStyleSchemes.optional(),
 	upcomingPassInformation: z.array(UpcomingPassInformationEntry).optional(),

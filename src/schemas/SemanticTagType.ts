@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
 
+const dateTimeSchema = z.iso.datetime({
+	offset: true,
+	local: true,
+});
+
 /**
  * These couple of structures are organized alphabetically,
  * according to the order on the developer documentation.
@@ -31,7 +36,7 @@ export const CurrencyAmount = z.object({
 export type EventDateInfo = z.infer<typeof EventDateInfo>;
 
 export const EventDateInfo = z.object({
-	date: z.iso.datetime().optional(),
+	date: dateTimeSchema.optional(),
 	ignoreTimeComponents: z.boolean().optional(),
 	timeZone: z.string().optional(),
 

@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { Semantics } from "./Semantics.js";
 
+const dateTimeSchema = z.iso.datetime({
+	offset: true,
+	local: true,
+});
+
 export type PKDataDetectorType = z.infer<typeof PKDataDetectorType>;
 
 const PKDataDetectorType = z.literal([
@@ -73,7 +78,7 @@ export const PassFieldContent = z.intersection(
 	PassFieldContentShared,
 	z.union([
 		z.object({
-			value: z.union([z.string(), z.iso.date()]),
+			value: z.union([z.string(), dateTimeSchema]),
 		}),
 		z.object({
 			value: z.number(),

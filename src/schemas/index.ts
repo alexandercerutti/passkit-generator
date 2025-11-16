@@ -266,7 +266,7 @@ export const OverridablePassProps = PassColors.and(
 			 */
 			organizationName: z.string(),
 
-			semantics: Semantics,
+			semantics: Semantics.optional(),
 			voided: z.boolean(),
 			logoText: z.string(),
 			description: z.string(),

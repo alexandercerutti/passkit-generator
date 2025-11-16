@@ -120,6 +120,11 @@ function unpackFolder(folder) {
 	return fileList;
 }
 
+/**
+ *
+ * @param {PKPass} pkpass
+ * @returns
+ */
 function getGeneratedPassJson(pkpass) {
 	const buffers = pkpass.getAsRaw();
 	return JSON.parse(buffers["pass.json"].toString("utf-8"));
@@ -142,6 +147,8 @@ describe("PKPass", () => {
 			wwdr: WWDR,
 			signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
 		});
+
+		pkpass.type = "eventTicket";
 	});
 
 	it("should throw an error if certificates provided are not complete or invalid", () => {
@@ -415,7 +422,7 @@ describe("PKPass", () => {
 		});
 
 		pkpass.auxiliaryFields.push({
-			key: "testField-pf",
+			key: "testField-af",
 			value: "test",
 			row: 1,
 		});
@@ -431,7 +438,10 @@ describe("PKPass", () => {
 		expect(passjsonGenerated.eventTicket.primaryFields).toBeInstanceOf(
 			Array,
 		);
-		expect(passjsonGenerated.eventTicket.primaryFields.length).toBe(0);
+		expect(passjsonGenerated.eventTicket.primaryFields.length).toBe(1);
+		expect(
+			passjsonGenerated.eventTicket.primaryFields[0].row,
+		).toBeUndefined();
 	});
 
 	it("should reset clear all the fields if the type changes", () => {

@@ -1,27 +1,22 @@
+import { z } from "zod";
 import { Buffer } from "node:buffer";
-import Joi from "joi";
 
-export interface CertificatesSchema {
-	wwdr: string | Buffer;
-	signerCert: string | Buffer;
-	signerKey: string | Buffer;
-	signerKeyPassphrase?: string;
-}
+export type CertificatesSchema = z.infer<typeof CertificatesSchema>;
 
 /**
  * Joi.binary is not available in browser-like environments (like Cloudflare workers)
  * so we fallback to manual checking. Buffer must be polyfilled.
+ *
+ * @TODO Check if zod has similar issues in such environments.
  */
 
-const binary = Joi.binary
-	? Joi.binary()
-	: Joi.custom((obj) => Buffer.isBuffer(obj));
+// const binary = Joi.binary
+// 	? Joi.binary()
+// 	: Joi.custom((obj) => Buffer.isBuffer(obj));
 
-export const CertificatesSchema = Joi.object<CertificatesSchema>()
-	.keys({
-		wwdr: Joi.alternatives(binary, Joi.string()).required(),
-		signerCert: Joi.alternatives(binary, Joi.string()).required(),
-		signerKey: Joi.alternatives(binary, Joi.string()).required(),
-		signerKeyPassphrase: Joi.string(),
-	})
-	.required();
+export const CertificatesSchema = z.object({
+	wwdr: z.union([z.instanceof(Buffer), z.string()]),
+	signerCert: z.union([z.instanceof(Buffer), z.string()]),
+	signerKey: z.union([z.instanceof(Buffer), z.string()]),
+	signerKeyPassphrase: z.string().optional(),
+});

@@ -91,6 +91,8 @@ export const JSON = {
 
 export const CLOSE = {
 	MISSING_TYPE: "Cannot proceed creating the pass because type is missing.",
+	MISSING_CERTIFICATES:
+		"Cannot proceed creating the pass because certificates are missing.",
 	MISSING_ICON:
 		"At least one icon file is missing in your bundle. Your pass won't be openable by any Apple Device.",
 	PERSONALIZATION_REMOVED:

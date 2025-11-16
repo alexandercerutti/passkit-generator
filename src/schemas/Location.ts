@@ -1,19 +1,14 @@
-import Joi from "joi";
+import { z } from "zod";
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/pass/locations
  */
 
-export interface Location {
-	relevantText?: string;
-	altitude?: number;
-	latitude: number;
-	longitude: number;
-}
+export type Location = z.infer<typeof Location>;
 
-export const Location = Joi.object<Location>().keys({
-	altitude: Joi.number(),
-	latitude: Joi.number().required(),
-	longitude: Joi.number().required(),
-	relevantText: Joi.string(),
+export const Location = z.object({
+	latitude: z.number(),
+	longitude: z.number(),
+	altitude: z.number().optional(),
+	relevantText: z.string().optional(),
 });

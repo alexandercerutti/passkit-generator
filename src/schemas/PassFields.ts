@@ -1,52 +1,37 @@
-import Joi from "joi";
+import { z } from "zod";
 import {
 	PassFieldContent,
 	PassFieldContentWithRow,
 } from "./PassFieldContent.js";
 
-export type TransitType =
-	| "PKTransitTypeAir"
-	| "PKTransitTypeBoat"
-	| "PKTransitTypeBus"
-	| "PKTransitTypeGeneric"
-	| "PKTransitTypeTrain";
+export type TransitType = z.infer<typeof TransitType>;
 
-export const TransitType = Joi.string().regex(
-	/(PKTransitTypeAir|PKTransitTypeBoat|PKTransitTypeBus|PKTransitTypeGeneric|PKTransitTypeTrain)/,
-);
+export const TransitType = z.literal([
+	"PKTransitTypeAir",
+	"PKTransitTypeBoat",
+	"PKTransitTypeBus",
+	"PKTransitTypeGeneric",
+	"PKTransitTypeTrain",
+]);
 
-export interface PassFields {
-	auxiliaryFields: PassFieldContentWithRow[];
-	backFields: PassFieldContent[];
-	headerFields: PassFieldContent[];
-	primaryFields: PassFieldContent[];
-	secondaryFields: PassFieldContent[];
-	transitType?: TransitType;
+export type PassFields = z.infer<typeof PassFields>;
 
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain dashboard
-	 *
-	 * @see \<undiclosed>
-	 */
-	additionalInfoFields?: PassFieldContent[];
-}
+export const PassFields = z
+	.object({
+		auxiliaryFields: z.array(PassFieldContentWithRow.or(PassFieldContent)),
+		backFields: z.array(PassFieldContent),
+		headerFields: z.array(PassFieldContent),
+		primaryFields: z.array(PassFieldContent),
+		secondaryFields: z.array(PassFieldContent),
+		transitType: TransitType,
 
-export const PassFields = Joi.object<PassFields>().keys({
-	auxiliaryFields: Joi.array().items(PassFieldContentWithRow),
-	backFields: Joi.array().items(PassFieldContent),
-	headerFields: Joi.array().items(PassFieldContent),
-	primaryFields: Joi.array().items(PassFieldContent),
-	secondaryFields: Joi.array().items(PassFieldContent),
-	transitType: TransitType,
-
-	/**
-	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
-	 * @passDomain dashboard
-	 *
-	 * @see \<undiclosed>
-	 */
-	additionalInfoFields: Joi.array().items(PassFieldContent),
-});
+		/**
+		 * @iOSVersion 18
+		 * @passStyle eventTicket (new layout)
+		 * @passDomain dashboard
+		 *
+		 * @see \<undiclosed>
+		 */
+		additionalInfoFields: z.array(PassFieldContent),
+	})
+	.partial();

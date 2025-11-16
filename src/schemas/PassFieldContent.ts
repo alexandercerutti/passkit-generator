@@ -1,128 +1,94 @@
-import Joi from "joi";
+import { z } from "zod";
 import { Semantics } from "./Semantics.js";
+import { dateTimeSchema } from "./sharedSchemas.js";
 
-export type PKDataDetectorType =
-	| "PKDataDetectorTypePhoneNumber"
-	| "PKDataDetectorTypeLink"
-	| "PKDataDetectorTypeAddress"
-	| "PKDataDetectorTypeCalendarEvent";
+export type PKDataDetectorType = z.infer<typeof PKDataDetectorType>;
 
-export type PKTextAlignmentType =
-	| "PKTextAlignmentLeft"
-	| "PKTextAlignmentCenter"
-	| "PKTextAlignmentRight"
-	| "PKTextAlignmentNatural";
+const PKDataDetectorType = z.literal([
+	"PKDataDetectorTypePhoneNumber",
+	"PKDataDetectorTypeLink",
+	"PKDataDetectorTypeAddress",
+	"PKDataDetectorTypeCalendarEvent",
+]);
 
-export type PKDateStyleType =
-	| "PKDateStyleNone"
-	| "PKDateStyleShort"
-	| "PKDateStyleMedium"
-	| "PKDateStyleLong"
-	| "PKDateStyleFull";
+export type PKTextAlignmentType = z.infer<typeof PKTextAlignmentType>;
 
-export type PKNumberStyleType =
-	| "PKNumberStyleDecimal"
-	| "PKNumberStylePercent"
-	| "PKNumberStyleScientific"
-	| "PKNumberStyleSpellOut";
+const PKTextAlignmentType = z.literal([
+	"PKTextAlignmentLeft",
+	"PKTextAlignmentCenter",
+	"PKTextAlignmentRight",
+	"PKTextAlignmentNatural",
+]);
+
+export type PKDateStyleType = z.infer<typeof PKDateStyleType>;
+
+const PKDateStyleType = z.literal([
+	"PKDateStyleNone",
+	"PKDateStyleShort",
+	"PKDateStyleMedium",
+	"PKDateStyleLong",
+	"PKDateStyleFull",
+]);
+
+export type PKNumberStyleType = z.infer<typeof PKNumberStyleType>;
+
+const PKNumberStyleType = z.literal([
+	"PKNumberStyleDecimal",
+	"PKNumberStylePercent",
+	"PKNumberStyleScientific",
+	"PKNumberStyleSpellOut",
+]);
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/passfieldcontent
  */
 
-export interface PassFieldContent {
-	attributedValue?: string | number | Date;
-	changeMessage?: string;
-	dataDetectorTypes?: PKDataDetectorType[];
-	label?: string;
-	textAlignment?: PKTextAlignmentType;
-	key: string;
-	value: string | number | Date;
-	semantics?: Semantics;
-	dateStyle?: PKDateStyleType;
-	ignoresTimeZone?: boolean;
-	isRelative?: boolean;
-	timeStyle?: PKDateStyleType;
-	currencyCode?: string;
-	numberStyle?: PKNumberStyleType;
-}
+export type PassFieldContent = z.infer<typeof PassFieldContent>;
 
-/**
- * @deprecated Use `PassFieldContent` instead,
- * which is the right Apple name.
- */
-export type Field = PassFieldContent;
+const PassFieldContentShared = z.object({
+	attributedValue: z.string().optional(),
 
-export interface PassFieldContentWithRow extends PassFieldContent {
-	row?: 0 | 1;
-}
+	changeMessage: z.string().optional(),
 
-/**
- * @deprecated Use `PassFieldContentWithRow` instead,
- * which is the right Apple name.
- */
-export type FieldWithRow = PassFieldContentWithRow;
+	dataDetectorTypes: z.array(PKDataDetectorType).optional(),
 
-export const PassFieldContent = Joi.object<PassFieldContent>().keys({
-	attributedValue: Joi.alternatives(
-		Joi.string().allow(""),
-		Joi.number(),
-		Joi.date().iso(),
-	),
-	changeMessage: Joi.string(),
-	dataDetectorTypes: Joi.array().items(
-		Joi.string().regex(
-			/(PKDataDetectorTypePhoneNumber|PKDataDetectorTypeLink|PKDataDetectorTypeAddress|PKDataDetectorTypeCalendarEvent)/,
-			"dataDetectorType",
-		),
-	),
-	label: Joi.string().allow(""),
-	textAlignment: Joi.string().regex(
-		/(PKTextAlignmentLeft|PKTextAlignmentCenter|PKTextAlignmentRight|PKTextAlignmentNatural)/,
-		"graphic-alignment",
-	),
-	key: Joi.string().required(),
-	value: Joi.alternatives(
-		Joi.string().allow(""),
-		Joi.number(),
-		Joi.date().iso(),
-	).required(),
-	semantics: Semantics,
+	label: z.string().optional(),
+
+	textAlignment: PKTextAlignmentType.optional(),
+
+	key: z.string(),
+
+	semantics: Semantics.optional(),
+
 	// date fields formatters, all optionals
-	dateStyle: Joi.string().regex(
-		/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/,
-		"date style",
-	),
-	ignoresTimeZone: Joi.boolean(),
-	isRelative: Joi.boolean(),
-	timeStyle: Joi.string().regex(
-		/(PKDateStyleNone|PKDateStyleShort|PKDateStyleMedium|PKDateStyleLong|PKDateStyleFull)/,
-		"date style",
-	),
-	// number fields formatters, all optionals
-	currencyCode: Joi.string().when("value", {
-		is: Joi.number(),
-		otherwise: Joi.string().forbidden(),
-	}),
-	numberStyle: Joi.string()
-		.regex(
-			/(PKNumberStyleDecimal|PKNumberStylePercent|PKNumberStyleScientific|PKNumberStyleSpellOut)/,
-		)
-		.when("value", {
-			is: Joi.number(),
-			otherwise: Joi.string().forbidden(),
-		}),
+	dateStyle: PKDateStyleType.optional(),
+
+	ignoresTimeZone: z.boolean().optional(),
+
+	isRelative: z.boolean().optional(),
+
+	timeStyle: PKDateStyleType.optional(),
 });
 
-/**
- * @deprecated Use `PassFieldContent` instead,
- * which is the right Apple name.
- */
-export const Field = PassFieldContent;
+export const PassFieldContent = z.intersection(
+	PassFieldContentShared,
+	z.union([
+		z.object({
+			value: z.union([z.string(), dateTimeSchema]),
+		}),
+		z.object({
+			value: z.number(),
+			currencyCode: z.string().optional(),
+			numberStyle: PKNumberStyleType.optional(),
+		}),
+	]),
+);
 
-export const PassFieldContentWithRow = PassFieldContent.concat(
-	Joi.object<PassFieldContentWithRow>().keys({
-		row: Joi.number().min(0).max(1),
+export type PassFieldContentWithRow = z.infer<typeof PassFieldContentWithRow>;
+
+export const PassFieldContentWithRow = PassFieldContent.and(
+	z.object({
+		row: z.literal([0, 1]).optional(),
 	}),
 );
 
@@ -130,4 +96,22 @@ export const PassFieldContentWithRow = PassFieldContent.concat(
  * @deprecated Use `PassFieldContentWithRow` instead,
  * which is the right Apple name.
  */
+export type FieldWithRow = PassFieldContentWithRow;
+
+/**
+ * @deprecated Use `PassFieldContentWithRow` instead,
+ * which is the right Apple name.
+ */
 export const FieldWithRow = PassFieldContentWithRow;
+
+/**
+ * @deprecated Use `PassFieldContent` instead,
+ * which is the right Apple name.
+ */
+export type Field = PassFieldContent;
+
+/**
+ * @deprecated Use `PassFieldContent` instead,
+ * which is the right Apple name.
+ */
+export const Field = PassFieldContent;

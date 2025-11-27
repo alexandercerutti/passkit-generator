@@ -15,8 +15,8 @@ importers:
         specifier: 17.4.2
         version: 17.4.2
       node-forge:
-        specifier: ^1.3.1
-        version: 1.3.1
+        specifier: ^1.3.2
+        version: 1.3.2
       tslib:
         specifier: ^2.7.0
         version: 2.7.0
@@ -3134,6 +3134,7 @@ packages:
 
   formidable@2.1.2:
     resolution: {integrity: sha512-CM3GuJ57US06mlpQ47YcunuUZ9jpm8Vx+P2CGt2j7HpgkKZO/DJYQ0Bobim8G6PFQmK5lOqOOdUXboU+h73A4g==}
+    deprecated: 'ACTION REQUIRED: SWITCH TO v3 - v1 and v2 are VULNERABLE! v1 is DEPRECATED FOR OVER 2 YEARS! Use formidable@latest or try formidable-mini for fresh projects'
 
   forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
@@ -4168,6 +4169,7 @@ packages:
 
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
+    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.includes@4.3.0:
     resolution: {integrity: sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==}
@@ -4566,8 +4568,8 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-forge@1.3.1:
-    resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
+  node-forge@1.3.2:
+    resolution: {integrity: sha512-6xKiQ+cph9KImrRh0VsjH2d8/GXA4FIMlgU4B757iI1ApvcyA9VlouP0yZJha01V+huImO+kKMU7ih+2+E14fw==}
     engines: {node: '>= 6.13.0'}
 
   node-gyp@10.3.1:
@@ -5608,7 +5610,7 @@ packages:
   superagent@7.1.6:
     resolution: {integrity: sha512-gZkVCQR1gy/oUXr+kxJMLDjla434KmSOKbx5iGD30Ql+AkJQ/YlPKECJy2nhqOsHLjGHzoDTXNSjhnvWhzKk7g==}
     engines: {node: '>=6.4.0 <13 || >=14'}
-    deprecated: Please upgrade to v9.0.0+ as we have fixed a public vulnerability with formidable dependency. Note that v9.0.0+ requires Node.js v14.18.0+. See https://github.com/ladjs/superagent/pull/1800 for insight. This project is supported and maintained by the team at Forward Email @ https://forwardemail.net
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   superstatic@9.1.0:
     resolution: {integrity: sha512-1PcxGREb5My6iX/DL9x+3+XFY5lM2nOiPBQV45RwbpM5bHGsStz+Lduts7y8W+xo68pHa7F8atTF52+dwfwxcw==}
@@ -10535,7 +10537,7 @@ snapshots:
       google-auth-library: 9.15.0(encoding@0.1.13)
       jsonwebtoken: 9.0.2
       jwks-rsa: 3.1.0
-      node-forge: 1.3.1
+      node-forge: 1.3.2
       uuid: 11.0.5
     optionalDependencies:
       '@google-cloud/firestore': 7.11.0(encoding@0.1.13)
@@ -12523,7 +12525,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-forge@1.3.1: {}
+  node-forge@1.3.2: {}
 
   node-gyp@10.3.1:
     dependencies:
@@ -13278,7 +13280,7 @@ snapshots:
   selfsigned@2.4.1:
     dependencies:
       '@types/node-forge': 1.3.11
-      node-forge: 1.3.1
+      node-forge: 1.3.2
 
   semver-diff@3.1.1:
     dependencies:

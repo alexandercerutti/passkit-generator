@@ -639,7 +639,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	logoText: Joi.string(),
 	description: Joi.string(),
 	serialNumber: Joi.string(),
-	appLaunchURL: Joi.string().regex(URL_REGEX),
+	appLaunchURL: Joi.string().uri(),
 	teamIdentifier: Joi.string(),
 	organizationName: Joi.string(),
 	passTypeIdentifier: Joi.string(),

@@ -20,6 +20,9 @@ importers:
       tslib:
         specifier: ^2.7.0
         version: 2.7.0
+      zod:
+        specifier: ^4.1.12
+        version: 4.1.12
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -6055,6 +6058,7 @@ packages:
   wrangler@3.101.0:
     resolution: {integrity: sha512-zKRqL/jjyF54DH8YCCaF4B2x0v9kSdxLpNkxGDltZ17vCBbq9PCchooN25jbmxOTC2LWdB2LVDw7S66zdl7XuQ==}
     engines: {node: '>=16.17.0'}
+    deprecated: Downgrade to 3.99.0
     hasBin: true
     peerDependencies:
       '@cloudflare/workers-types': ^4.20241230.0
@@ -6193,6 +6197,9 @@ packages:
 
   zod@3.24.1:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
+
+  zod@4.1.12:
+    resolution: {integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==}
 
 snapshots:
 
@@ -14529,3 +14536,5 @@ snapshots:
       readable-stream: 4.7.0
 
   zod@3.24.1: {}
+
+  zod@4.1.12: {}

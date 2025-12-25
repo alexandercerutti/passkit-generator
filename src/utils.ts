@@ -7,7 +7,7 @@ import type Bundle from "./Bundle.js";
  * @returns
  */
 
-export function processDate(date: Date): string | undefined {
+export function processDate(date: Date): string {
 	if (!(date instanceof Date) || Number.isNaN(Number(date))) {
 		throw "Invalid date";
 	}

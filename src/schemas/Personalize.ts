@@ -1,30 +1,24 @@
-import Joi from "joi";
+import { z } from "zod";
 
 /**
  * @see https://developer.apple.com/documentation/walletpasses/personalize
  */
 
-type RequiredPersonalizationFields =
-	| "PKPassPersonalizationFieldName"
-	| "PKPassPersonalizationFieldPostalCode"
-	| "PKPassPersonalizationFieldEmailAddress"
-	| "PKPassPersonalizationFieldPhoneNumber";
+type RequiredPersonalizationFields = z.infer<
+	typeof RequiredPersonalizationFields
+>;
 
-export interface Personalize {
-	description: string;
-	requiredPersonalizationFields: RequiredPersonalizationFields[];
-	termsAndConditions?: string;
-}
+const RequiredPersonalizationFields = z.literal([
+	"PKPassPersonalizationFieldName",
+	"PKPassPersonalizationFieldPostalCode",
+	"PKPassPersonalizationFieldEmailAddress",
+	"PKPassPersonalizationFieldPhoneNumber",
+]);
 
-export const Personalize = Joi.object<Personalize>().keys({
-	description: Joi.string().required(),
-	requiredPersonalizationFields: Joi.array()
-		.items(
-			"PKPassPersonalizationFieldName",
-			"PKPassPersonalizationFieldPostalCode",
-			"PKPassPersonalizationFieldEmailAddress",
-			"PKPassPersonalizationFieldPhoneNumber",
-		)
-		.required(),
-	termsAndConditions: Joi.string(),
+export type Personalize = z.infer<typeof Personalize>;
+
+export const Personalize = z.object({
+	description: z.string(),
+	requiredPersonalizationFields: z.array(RequiredPersonalizationFields),
+	termsAndConditions: z.string().optional(),
 });

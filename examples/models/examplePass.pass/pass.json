@@ -4,6 +4,7 @@
 	"serialNumber": "nmyuxofgna",
 	"teamIdentifier": "F53WB8AE67",
 	"webServiceURL": "https://192.168.1.254:80/",
+	"appLaunchURL": "myapp://product?id=123",
 	"authenticationToken": "vxwxd7J8AlNNFPS8k0a0FfUFtq0ewzFdc",
 	"relevantDate": "2011-12-08T13:00-08:00",
 	"locations": [

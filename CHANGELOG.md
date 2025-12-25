@@ -1,5 +1,11 @@
 # Changelog
 
+### 3.5.7 (25 Dec 2025)
+
+-   Unlocked possibility to use URI other than http/s for `appLaunchURL` (PR #263)
+
+---
+
 ### 3.5.6 (27 Nov 2025)
 
 -   Updated `node-forge` to v1.3.2 to address CVE-2025-12816 (PR #258)

@@ -271,7 +271,7 @@ export const OverridablePassProps = PassColors.and(
 			logoText: z.string(),
 			description: z.string(),
 			serialNumber: z.string(),
-			appLaunchURL: httpAddressSchema,
+			appLaunchURL: z.url(),
 			sharingProhibited: z.boolean(),
 			groupingIdentifier: z.string(),
 			suppressStripShine: z.boolean(),

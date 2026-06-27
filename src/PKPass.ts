@@ -217,6 +217,33 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
+	 * Allows getting the current featured actions for the pass.
+	 *
+	 * @iOSVersion 27
+	 */
+
+	public get featuredActions(): Schemas.FeaturedAction[] {
+		return this[propsSymbol].featuredActions || [];
+	}
+
+	/**
+	 * Allows setting featured actions for the pass. Only up to two actions are allowed,
+	 * so any further (among valid) will be ignored.
+	 *
+	 * @iOSVersion 27
+	 */
+
+	public set featuredActions(value: Schemas.FeaturedAction[]) {
+		const validActions = Schemas.filterValid(Schemas.FeaturedAction, value);
+
+		/**
+		 * Apple Wallet allows to have only up to two featured actions.
+		 */
+		const firstTwoActions = validActions.slice(0, 2);
+		this[propsSymbol].featuredActions = firstTwoActions;
+	}
+
+	/**
 	 * Allows accessing to iOS 18 new property
 	 * `preferredStyleSchemes`.
 	 *

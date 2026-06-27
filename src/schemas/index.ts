@@ -21,6 +21,7 @@ import { PassFields, TransitType } from "./PassFields.js";
 import { Semantics } from "./Semantics.js";
 import { CertificatesSchema } from "./Certificates.js";
 import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
+import { FeaturedAction } from "./FeaturedAction.js";
 
 import * as Messages from "../messages.js";
 import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
@@ -572,6 +573,16 @@ export interface PassProps {
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
 	transitProviderWebsiteURL?: string;
+
+	/**
+	 * @iOSVersion 27
+	 *
+	 * @description
+	 *
+	 * Featured action to be rendered under the pass
+	 */
+
+	featuredActions?: FeaturedAction[];
 }
 
 /**
@@ -588,7 +599,8 @@ type PassMethodsProps =
 	| "expirationDate"
 	| "locations"
 	| "preferredStyleSchemes"
-	| "upcomingPassInformation";
+	| "upcomingPassInformation"
+	| "featuredActions";
 
 export type PassTypesProps =
 	| "boardingPass"
@@ -619,6 +631,7 @@ export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
 	locations: Joi.array().items(Location),
 	preferredStyleSchemes: PreferredStyleSchemes,
 	upcomingPassInformation: Joi.array().items(UpcomingPassInformationEntry),
+	featuredActions: Joi.array().items(FeaturedAction),
 });
 
 export const PassKindsProps = Joi.object<PassKindsProps>({

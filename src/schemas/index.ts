@@ -8,6 +8,7 @@ export * from "./PassFields.js";
 export * from "./Personalize.js";
 export * from "./Certificates.js";
 export * from "./UpcomingPassInformation.js";
+export * from "./FeaturedAction.js";
 
 import Joi from "joi";
 import type { Buffer } from "node:buffer";

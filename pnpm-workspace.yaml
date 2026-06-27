@@ -1,4 +1,13 @@
 packages:
-    - "."
-    - "examples/*"
-    - "examples/firebase/functions"
+  - "."
+  - "examples/*"
+  - "examples/firebase/functions"
+
+allowBuilds:
+  aws-sdk: true
+  es5-ext: true
+  esbuild: true
+  protobufjs: true
+  re2: true
+  serverless: true
+  workerd: true

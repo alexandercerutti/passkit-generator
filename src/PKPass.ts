@@ -1167,6 +1167,10 @@ export default class PKPass extends Bundle {
 				"PKBarcodeFormatPDF417",
 				"PKBarcodeFormatAztec",
 				"PKBarcodeFormatCode128",
+				"PKBarcodeFormatCode39",
+				"PKBarcodeFormatCodabar",
+				"PKBarcodeFormatEAN13",
+				"PKBarcodeFormatI2of5",
 			];
 
 			finalBarcodes = supportedFormats.map((format) =>

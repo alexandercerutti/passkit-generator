@@ -651,6 +651,7 @@ export default class PKPass extends Bundle {
 			"eventTicket",
 			"storeCard",
 			"generic",
+			"posterGeneric",
 		] as Schemas.PassTypesProps[];
 
 		const type = possibleTypes.find((type) => Boolean(data[type]));
@@ -661,6 +662,7 @@ export default class PKPass extends Bundle {
 			storeCard,
 			generic,
 			eventTicket,
+			posterGeneric,
 			...otherPassData
 		} = data;
 

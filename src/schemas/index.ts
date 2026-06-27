@@ -182,6 +182,11 @@ export interface PassProps {
 	storeCard?: PassFields;
 
 	/**
+	 * @iOSVersion 27
+	 */
+	posterGeneric?: PassFields;
+
+	/**
 	 * @iOSVersion 18
 	 * @passStyle eventTicket (new layout)
 	 */
@@ -607,7 +612,11 @@ export type PassTypesProps =
 	| "eventTicket"
 	| "coupon"
 	| "generic"
-	| "storeCard";
+	| "storeCard"
+	/**
+	 * @iOSVersion 27
+	 */
+	| "posterGeneric";
 
 export type OverridablePassProps = Omit<
 	PassProps,
@@ -637,13 +646,14 @@ export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
 export const PassKindsProps = Joi.object<PassKindsProps>({
 	coupon: PassFields.disallow("transitType"),
 	generic: PassFields.disallow("transitType"),
+	posterGeneric: PassFields.disallow("transitType"),
 	storeCard: PassFields.disallow("transitType"),
 	eventTicket: PassFields.disallow("transitType"),
 	boardingPass: PassFields,
 });
 
 export const PassType = Joi.string().regex(
-	/(boardingPass|coupon|eventTicket|storeCard|generic)/,
+	/(boardingPass|coupon|eventTicket|storeCard|generic|posterGeneric)/,
 );
 
 export const OverridablePassProps = Joi.object<OverridablePassProps>({

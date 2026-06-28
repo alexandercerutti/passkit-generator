@@ -973,7 +973,7 @@ describe("PKPass", () => {
 
 			expect(passjsonGenerated.barcode).toBeUndefined();
 			expect(passjsonGenerated.barcodes).toBeInstanceOf(Array);
-			expect(passjsonGenerated.barcodes.length).toBe(4);
+			expect(passjsonGenerated.barcodes.length).toBe(8);
 			expect(passjsonGenerated.barcodes).toEqual([
 				{
 					format: "PKBarcodeFormatQR",
@@ -992,6 +992,26 @@ describe("PKPass", () => {
 				},
 				{
 					format: "PKBarcodeFormatCode128",
+					message: "a test barcode",
+					messageEncoding: "iso-8859-1",
+				},
+				{
+					format: "PKBarcodeFormatCode39",
+					message: "a test barcode",
+					messageEncoding: "iso-8859-1",
+				},
+				{
+					format: "PKBarcodeFormatCodabar",
+					message: "a test barcode",
+					messageEncoding: "iso-8859-1",
+				},
+				{
+					format: "PKBarcodeFormatEAN13",
+					message: "a test barcode",
+					messageEncoding: "iso-8859-1",
+				},
+				{
+					format: "PKBarcodeFormatI2of5",
 					message: "a test barcode",
 					messageEncoding: "iso-8859-1",
 				},

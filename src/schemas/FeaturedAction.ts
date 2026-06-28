@@ -67,6 +67,9 @@ export type FeaturedActionType =
 
 /**
  * @iOSVersion 27
+ *
+ * Up to two Featured Action can be specified per pass in order to provide quick access to relevant actions.
+ * This applies to all the pass types but posterEventTicket and semanticBoardingPass.
  */
 export interface FeaturedAction {
 	identifier: string;

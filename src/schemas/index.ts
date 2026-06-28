@@ -376,6 +376,9 @@ export interface PassProps {
 	 * @iOSVersion 18
 	 * @passStyle eventTicket (new layout)
 	 *
+	 * @iOSVersion 27
+	 * @passStyle posterGeneric
+	 *
 	 * @description
 	 *
 	 * Will remove an automatic shadow in the new

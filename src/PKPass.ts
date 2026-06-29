@@ -448,6 +448,19 @@ export default class PKPass extends Bundle {
 	}
 
 	/**
+	 * Allows accessing to new iOS 27 footer fields
+	 * for `posterGeneric` fields.
+	 *
+	 * @throws (automatically) if no valid pass.json
+	 * 		has been parsed yet or, anyway, if current
+	 *		type is not "posterGeneric".
+	 */
+
+	public get footerFields(): Schemas.PassFieldContent[] {
+		return this[propsSymbol]["posterGeneric"].footerFields;
+	}
+
+	/**
 	 * Allows setting a pass type.
 	 *
 	 * **Warning**: setting a type with this setter,
@@ -506,6 +519,11 @@ export default class PKPass extends Bundle {
 					: Schemas.PassFieldContent,
 			),
 			backFields /********/: new FieldsArray(
+				this,
+				sharedKeysPool,
+				Schemas.PassFieldContent,
+			),
+			footerFields /******/: new FieldsArray(
 				this,
 				sharedKeysPool,
 				Schemas.PassFieldContent,
@@ -687,6 +705,7 @@ export default class PKPass extends Bundle {
 				backFields = [],
 				transitType,
 				additionalInfoFields = [],
+				footerFields = [],
 			} = data[type] || {};
 
 			this.headerFields.push(...headerFields);
@@ -699,8 +718,12 @@ export default class PKPass extends Bundle {
 				this.transitType = transitType;
 			}
 
-			if (this.type === "eventTicket") {
+			if (this.type === "eventTicket" && additionalInfoFields.length) {
 				this.additionalInfoFields.push(...additionalInfoFields);
+			}
+
+			if (this.type === "posterGeneric" && footerFields.length) {
+				this.footerFields.push(...footerFields);
 			}
 		}
 	}

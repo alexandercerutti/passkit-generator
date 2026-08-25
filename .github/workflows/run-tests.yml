@@ -13,21 +13,27 @@ on:
 jobs:
     test-on-ubuntu:
         name: Testing Workflow Linux
+
         runs-on: ubuntu-latest
+
         env:
             SIGNER_CERT: ${{ secrets.SIGNER_CERT }}
             SIGNER_KEY: ${{ secrets.SIGNER_KEY }}
             WWDR: ${{ secrets.WWDR }}
             SIGNER_KEY_PASSPHRASE: ${{ secrets.SIGNER_KEY_PASSPHRASE }}
+
         steps:
-            - uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v6
               with:
-                  version: 9
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+                  version: 11
+
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-node@v7
               with:
-                  node-version: "20.x"
+                  node-version: 24
                   check-latest: true
+
             - run: |
                   pnpm install
                   pnpm build

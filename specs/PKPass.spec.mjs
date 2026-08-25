@@ -1,5 +1,6 @@
 // @ts-check
-import { beforeEach, beforeAll, expect, it, describe } from "@jest/globals";
+import { test } from "node:test";
+import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -125,8 +126,8 @@ function getGeneratedPassJson(pkpass) {
 	return JSON.parse(buffers["pass.json"].toString("utf-8"));
 }
 
-describe("PKPass", () => {
-	beforeAll(() => {
+test("PKPass", async (t) => {
+	t.before(() => {
 		Object.assign(modelFiles, unpackFolder(EXAMPLE_PATH_RELATIVE));
 	});
 
@@ -135,7 +136,7 @@ describe("PKPass", () => {
 	 */
 	let pkpass;
 
-	beforeEach(() => {
+	t.beforeEach(() => {
 		pkpass = new PKPass(modelFiles, {
 			signerCert: SIGNER_CERT,
 			signerKey: SIGNER_KEY,
@@ -144,209 +145,238 @@ describe("PKPass", () => {
 		});
 	});
 
-	it("should throw an error if certificates provided are not complete or invalid", () => {
-		expect(() => {
-			// @ts-expect-error
-			pkpass.certificates = {
-				signerCert: "",
-			};
-		}).toThrow();
-
-		expect(() => {
-			pkpass.certificates = {
+	await t.test(
+		"should throw an error if certificates provided are not complete or invalid",
+		() => {
+			assert.throws(() => {
 				// @ts-expect-error
-				signerCert: 5,
-				// @ts-expect-error
-				signerKey: 3,
-				wwdr: "",
-			};
-		}).toThrow();
+				pkpass.certificates = {
+					signerCert: "",
+				};
+			});
 
-		expect(() => {
-			pkpass.certificates = {
-				// @ts-expect-error
-				signerCert: undefined,
-				// @ts-expect-error
-				signerKey: null,
-				wwdr: "",
-			};
-		}).toThrow();
+			assert.throws(() => {
+				pkpass.certificates = {
+					// @ts-expect-error
+					signerCert: 5,
+					// @ts-expect-error
+					signerKey: 3,
+					wwdr: "",
+				};
+			});
+
+			assert.throws(() => {
+				pkpass.certificates = {
+					// @ts-expect-error
+					signerCert: undefined,
+					// @ts-expect-error
+					signerKey: null,
+					wwdr: "",
+				};
+			});
+		},
+	);
+
+	await t.test("should own pkpass mimetype", () => {
+		assert.equal(pkpass.mimeType, "application/vnd.apple.pkpass");
 	});
 
-	it("should own pkpass mimetype", () => {
-		expect(pkpass.mimeType).toBe("application/vnd.apple.pkpass");
-	});
+	await t.test(
+		"should throw error if a non recognized type is assigned",
+		() => {
+			assert.throws(
+				() =>
+					// @ts-expect-error
+					(pkpass.type = "asfdg"),
+			);
+		},
+	);
 
-	it("should throw error if a non recognized type is assigned", () => {
-		expect(
-			() =>
-				// @ts-expect-error
-				(pkpass.type = "asfdg"),
-		).toThrowError();
-	});
-
-	it("should throw if fields getters are accessed without specifying a type first", () => {
-		/** Resetting pass.json */
-		const passjson = modelFiles["pass.json"];
-		const changedPassJson = Buffer.from(
-			JSON.stringify(
-				Object.assign({}, JSON.parse(passjson.toString("utf-8")), {
-					eventTicket: undefined,
-					boardingPass: undefined,
-					coupon: undefined,
-					storeCard: undefined,
-					generic: undefined,
-					transitType: undefined,
-				}),
-			),
-			"utf-8",
-		);
-
-		pkpass = new PKPass(
-			Object.assign({}, modelFiles, { "pass.json": changedPassJson }),
-			{
-				signerCert: SIGNER_CERT,
-				signerKey: SIGNER_KEY,
-				wwdr: WWDR,
-				signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
-			},
-		);
-
-		expect(() => pkpass.headerFields).toThrowError();
-		expect(() => pkpass.primaryFields).toThrowError();
-		expect(() => pkpass.auxiliaryFields).toThrowError();
-		expect(() => pkpass.secondaryFields).toThrowError();
-		expect(() => pkpass.backFields).toThrowError();
-		expect(() => pkpass.transitType).toThrowError();
-	});
-
-	it("should throw if transitType is set on a non-boardingPass", () => {
-		pkpass.type = "eventTicket";
-		expect(() => (pkpass.transitType = "PKTransitTypeAir")).toThrowError();
-		expect(() => pkpass.transitType).toThrowError();
-	});
-
-	it("should throw if transitType is not specified on a boardingPass", () => {
-		pkpass.type = "boardingPass";
-		expect(() => pkpass.getAsRaw()).toThrowError();
-	});
-
-	it("should include the transitType if generating a boardingPass", () => {
-		pkpass.type = "boardingPass";
-		pkpass.transitType = "PKTransitTypeAir";
-
-		expect(pkpass.transitType).toBe("PKTransitTypeAir");
-
-		const passjsonGenerated = getGeneratedPassJson(pkpass);
-		expect(passjsonGenerated.boardingPass).not.toBeUndefined();
-		expect(passjsonGenerated.boardingPass.transitType).toBe(
-			"PKTransitTypeAir",
-		);
-	});
-
-	it("should import transitType and fields from a pass.json", () => {
-		pkpass = new PKPass(
-			{
-				...modelFiles,
-				"pass.json": Buffer.from(
-					JSON.stringify({
-						...modelFiles["pass.json"],
-						boardingPass: {
-							transitType: "PKTransitTypeAir",
-							primaryFields: [
-								{
-									key: "blue",
-									value: "not-blue",
-								},
-							],
-							headerFields: [
-								{
-									key: "red",
-									value: "not-red",
-								},
-							],
-						},
+	await t.test(
+		"should throw if fields getters are accessed without specifying a type first",
+		() => {
+			/** Resetting pass.json */
+			const passjson = modelFiles["pass.json"];
+			const changedPassJson = Buffer.from(
+				JSON.stringify(
+					Object.assign({}, JSON.parse(passjson.toString("utf-8")), {
+						eventTicket: undefined,
+						boardingPass: undefined,
+						coupon: undefined,
+						storeCard: undefined,
+						generic: undefined,
+						transitType: undefined,
 					}),
 				),
-			},
-			{
-				signerCert: SIGNER_CERT,
-				signerKey: SIGNER_KEY,
-				signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
-				wwdr: WWDR,
-			},
-		);
+				"utf-8",
+			);
 
-		const passjsonGenerated = getGeneratedPassJson(pkpass);
+			pkpass = new PKPass(
+				Object.assign({}, modelFiles, { "pass.json": changedPassJson }),
+				{
+					signerCert: SIGNER_CERT,
+					signerKey: SIGNER_KEY,
+					wwdr: WWDR,
+					signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+				},
+			);
 
-		expect(passjsonGenerated.boardingPass).not.toBeUndefined();
-		expect(passjsonGenerated.boardingPass.transitType).toBe(
-			"PKTransitTypeAir",
-		);
-		expect(passjsonGenerated.boardingPass.primaryFields).toBeInstanceOf(
-			Array,
-		);
-		expect(passjsonGenerated.boardingPass.primaryFields.length).toBe(1);
-	});
+			assert.throws(() => pkpass.headerFields);
+			assert.throws(() => pkpass.primaryFields);
+			assert.throws(() => pkpass.auxiliaryFields);
+			assert.throws(() => pkpass.secondaryFields);
+			assert.throws(() => pkpass.backFields);
+			assert.throws(() => pkpass.transitType);
+		},
+	);
 
-	it("should include fields modifications inside final pass.json", () => {
-		/** Resetting fields */
-		pkpass.type = "eventTicket";
+	await t.test(
+		"should throw if transitType is set on a non-boardingPass",
+		() => {
+			pkpass.type = "eventTicket";
+			assert.throws(() => (pkpass.transitType = "PKTransitTypeAir"));
+			assert.throws(() => pkpass.transitType);
+		},
+	);
 
-		pkpass.primaryFields.push({
-			key: "testField-pf",
-			value: "test",
-		});
-		pkpass.headerFields.push({
-			key: "testField-hf",
-			value: "test",
-		});
-		pkpass.auxiliaryFields.push({
-			key: "testField-af",
-			value: "test",
-		});
-		pkpass.secondaryFields.push({
-			key: "testField-sf",
-			value: "test",
-		});
-		pkpass.backFields.push({
-			key: "testField-bf",
-			value: "test",
-		});
+	await t.test(
+		"should throw if transitType is not specified on a boardingPass",
+		() => {
+			pkpass.type = "boardingPass";
+			assert.throws(() => pkpass.getAsRaw());
+		},
+	);
 
-		const passjsonGenerated = getGeneratedPassJson(pkpass);
+	await t.test(
+		"should include the transitType if generating a boardingPass",
+		() => {
+			pkpass.type = "boardingPass";
+			pkpass.transitType = "PKTransitTypeAir";
 
-		const {
-			headerFields,
-			primaryFields,
-			auxiliaryFields,
-			secondaryFields,
-			backFields,
-		} = passjsonGenerated.eventTicket;
+			assert.equal(pkpass.transitType, "PKTransitTypeAir");
 
-		expect(primaryFields[0]).toEqual({
-			key: "testField-pf",
-			value: "test",
-		});
-		expect(headerFields[0]).toEqual({
-			key: "testField-hf",
-			value: "test",
-		});
-		expect(auxiliaryFields[0]).toEqual({
-			key: "testField-af",
-			value: "test",
-		});
-		expect(secondaryFields[0]).toEqual({
-			key: "testField-sf",
-			value: "test",
-		});
-		expect(backFields[0]).toEqual({
-			key: "testField-bf",
-			value: "test",
-		});
-	});
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+			assert.notEqual(passjsonGenerated.boardingPass, undefined);
+			assert.equal(
+				passjsonGenerated.boardingPass.transitType,
+				"PKTransitTypeAir",
+			);
+		},
+	);
 
-	it("should maintain fields addition order", () => {
+	await t.test(
+		"should import transitType and fields from a pass.json",
+		() => {
+			pkpass = new PKPass(
+				{
+					...modelFiles,
+					"pass.json": Buffer.from(
+						JSON.stringify({
+							...modelFiles["pass.json"],
+							boardingPass: {
+								transitType: "PKTransitTypeAir",
+								primaryFields: [
+									{
+										key: "blue",
+										value: "not-blue",
+									},
+								],
+								headerFields: [
+									{
+										key: "red",
+										value: "not-red",
+									},
+								],
+							},
+						}),
+					),
+				},
+				{
+					signerCert: SIGNER_CERT,
+					signerKey: SIGNER_KEY,
+					signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+					wwdr: WWDR,
+				},
+			);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			assert.notEqual(passjsonGenerated.boardingPass, undefined);
+			assert.equal(
+				passjsonGenerated.boardingPass.transitType,
+				"PKTransitTypeAir",
+			);
+			assert.ok(
+				passjsonGenerated.boardingPass.primaryFields instanceof Array,
+			);
+			assert.equal(
+				passjsonGenerated.boardingPass.primaryFields.length,
+				1,
+			);
+		},
+	);
+
+	await t.test(
+		"should include fields modifications inside final pass.json",
+		() => {
+			/** Resetting fields */
+			pkpass.type = "eventTicket";
+
+			pkpass.primaryFields.push({
+				key: "testField-pf",
+				value: "test",
+			});
+			pkpass.headerFields.push({
+				key: "testField-hf",
+				value: "test",
+			});
+			pkpass.auxiliaryFields.push({
+				key: "testField-af",
+				value: "test",
+			});
+			pkpass.secondaryFields.push({
+				key: "testField-sf",
+				value: "test",
+			});
+			pkpass.backFields.push({
+				key: "testField-bf",
+				value: "test",
+			});
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			const {
+				headerFields,
+				primaryFields,
+				auxiliaryFields,
+				secondaryFields,
+				backFields,
+			} = passjsonGenerated.eventTicket;
+
+			assert.deepEqual(primaryFields[0], {
+				key: "testField-pf",
+				value: "test",
+			});
+			assert.deepEqual(headerFields[0], {
+				key: "testField-hf",
+				value: "test",
+			});
+			assert.deepEqual(auxiliaryFields[0], {
+				key: "testField-af",
+				value: "test",
+			});
+			assert.deepEqual(secondaryFields[0], {
+				key: "testField-sf",
+				value: "test",
+			});
+			assert.deepEqual(backFields[0], {
+				key: "testField-bf",
+				value: "test",
+			});
+		},
+	);
+
+	await t.test("should maintain fields addition order", () => {
 		/** Resetting fields */
 		pkpass.type = "eventTicket";
 
@@ -369,235 +399,273 @@ describe("PKPass", () => {
 
 		const { primaryFields } = passjsonGenerated.eventTicket;
 
-		expect(primaryFields[0]).toEqual({
+		assert.deepEqual(primaryFields[0], {
 			key: "testField-pf0",
 			value: "test",
 		});
 
-		expect(primaryFields[1]).toEqual({
+		assert.deepEqual(primaryFields[1], {
 			key: "testField-pf1",
 			value: "test",
 		});
 
-		expect(primaryFields[2]).toEqual({
+		assert.deepEqual(primaryFields[2], {
 			key: "testField-pf2",
 			value: "test",
 		});
 	});
 
-	it("should omit fields with the same keys in final pass.json", () => {
-		/** Resetting fields */
-		pkpass.type = "eventTicket";
+	await t.test(
+		"should omit fields with the same keys in final pass.json",
+		() => {
+			/** Resetting fields */
+			pkpass.type = "eventTicket";
 
-		pkpass.primaryFields.push({
-			key: "testField-pf",
-			value: "test",
-		});
-
-		pkpass.headerFields.push({
-			key: "testField-pf",
-			value: "test",
-		});
-
-		const passjsonGenerated = getGeneratedPassJson(pkpass);
-		expect(passjsonGenerated.eventTicket.headerFields.length).toBe(0);
-	});
-
-	it("should include row property in auxiliary fields but omit it in others", () => {
-		/** Resetting fields */
-		pkpass.type = "eventTicket";
-
-		pkpass.primaryFields.push({
-			key: "testField-pf",
-			value: "test",
-			// @ts-expect-error
-			row: 0,
-		});
-
-		pkpass.auxiliaryFields.push({
-			key: "testField-pf",
-			value: "test",
-			row: 1,
-		});
-
-		const passjsonGenerated = getGeneratedPassJson(pkpass);
-
-		expect(passjsonGenerated.eventTicket.auxiliaryFields).toBeInstanceOf(
-			Array,
-		);
-
-		expect(passjsonGenerated.eventTicket.auxiliaryFields.length).toBe(1);
-		expect(passjsonGenerated.eventTicket.auxiliaryFields[0].row).toBe(1);
-		expect(passjsonGenerated.eventTicket.primaryFields).toBeInstanceOf(
-			Array,
-		);
-		expect(passjsonGenerated.eventTicket.primaryFields.length).toBe(0);
-	});
-
-	it("should reset clear all the fields if the type changes", () => {
-		pkpass.type = "boardingPass";
-
-		pkpass.primaryFields.push({
-			key: "testField-pf",
-			value: "test",
-		});
-		pkpass.headerFields.push({
-			key: "testField-hf",
-			value: "test",
-		});
-		pkpass.auxiliaryFields.push({
-			key: "testField-af",
-			value: "test",
-		});
-		pkpass.secondaryFields.push({
-			key: "testField-sf",
-			value: "test",
-		});
-		pkpass.backFields.push({
-			key: "testField-bf",
-			value: "test",
-		});
-
-		pkpass.transitType = "PKTransitTypeAir";
-		pkpass.type = "eventTicket";
-
-		const passjsonGenerated = getGeneratedPassJson(pkpass);
-
-		const {
-			headerFields,
-			primaryFields,
-			secondaryFields,
-			auxiliaryFields,
-			backFields,
-		} = passjsonGenerated.eventTicket;
-
-		expect(headerFields).toBeInstanceOf(Array);
-		expect(headerFields.length).toBe(0);
-
-		expect(primaryFields).toBeInstanceOf(Array);
-		expect(primaryFields.length).toBe(0);
-
-		expect(secondaryFields).toBeInstanceOf(Array);
-		expect(secondaryFields.length).toBe(0);
-
-		expect(auxiliaryFields).toBeInstanceOf(Array);
-		expect(auxiliaryFields.length).toBe(0);
-
-		expect(backFields).toBeInstanceOf(Array);
-		expect(backFields.length).toBe(0);
-	});
-
-	it("should export a buffer when getAsBuffer is used", () => {
-		expect(pkpass.getAsBuffer()).toBeInstanceOf(Buffer);
-	});
-
-	describe("pkpass should get frozen once an export is done", () => {
-		it("getAsRaw", () => {
-			pkpass.getAsRaw();
-
-			/** We might want to test all the methods, but methods might change... so should we? */
-			expect(() => pkpass.localize("en", { a: "b" })).toThrowError();
-		});
-
-		it("getAsBuffer", () => {
-			pkpass.getAsBuffer();
-
-			/** We might want to test all the methods, but methods might change... so should we? */
-			expect(() => pkpass.localize("en", { a: "b" })).toThrowError();
-		});
-
-		it("getAsStream", () => {
-			pkpass.getAsStream();
-
-			/** We might want to test all the methods, but methods might change... so should we? */
-			expect(() => pkpass.localize("en", { a: "b" })).toThrowError();
-		});
-	});
-
-	describe("localize and languages", () => {
-		it("should delete a language, all of its translations and all of its files, when null is passed as parameter", () => {
-			pkpass.addBuffer("it.lproj/icon@3x.png", Buffer.alloc(0));
-			pkpass.addBuffer("en.lproj/icon@3x.png", Buffer.alloc(0));
-
-			pkpass.localize("it", null);
-			pkpass.localize("en", null);
-
-			const buffers = pkpass.getAsRaw();
-
-			expect(pkpass.languages.length).toBe(0);
-			expect(buffers["it.lproj/icon@3x.png"]).toBeUndefined();
-			expect(buffers["en.lproj/icon@3x.png"]).toBeUndefined();
-		});
-
-		it("should throw if lang is not a string", () => {
-			// @ts-expect-error
-			expect(() => pkpass.localize(null)).toThrowError();
-
-			// @ts-expect-error
-			expect(() => pkpass.localize(undefined)).toThrowError();
-
-			// @ts-expect-error
-			expect(() => pkpass.localize(5)).toThrowError();
-
-			// @ts-expect-error
-			expect(() => pkpass.localize(true)).toThrowError();
-
-			// @ts-expect-error
-			expect(() => pkpass.localize({})).toThrowError();
-		});
-
-		it("should create a new pass.strings from passed translations", () => {
-			pkpass.localize("en", {
-				mimmo: "Domenic",
+			pkpass.primaryFields.push({
+				key: "testField-pf",
+				value: "test",
 			});
 
-			const buffers = pkpass.getAsRaw();
-
-			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
-				'"mimmo" = "Domenic";',
-			);
-		});
-	});
-
-	describe("addBuffer", () => {
-		it("should include a file buffer inside the final pass", () => {
-			pkpass.addBuffer("icon@3x.png", modelFiles["icon.png"]);
-
-			const buffers = pkpass.getAsRaw();
-
-			expect(buffers["icon@3x.png"]).not.toBeUndefined();
-			expect(buffers["icon@3x.png"]).toBe(modelFiles["icon.png"]);
-		});
-
-		it("should include localized files buffer inside final pass", () => {
-			pkpass.addBuffer("it.lproj/icon@3x.png", modelFiles["icon.png"]);
-
-			const buffers = pkpass.getAsRaw();
-
-			expect(buffers["it.lproj/icon@3x.png"]).not.toBeUndefined();
-			expect(buffers["it.lproj/icon@3x.png"]).toBe(
-				modelFiles["icon.png"],
-			);
-		});
-
-		it("should ignore further pass.json addition if already available", () => {
-			expect(modelFiles["pass.json"]).not.toBeUndefined();
-
-			pkpass.addBuffer(
-				"pass.json",
-				Buffer.from(
-					JSON.stringify({
-						boardingPass: {},
-					}),
-				),
-			);
+			pkpass.headerFields.push({
+				key: "testField-pf",
+				value: "test",
+			});
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
-			expect(passjsonGenerated.boardingPass).toBeUndefined();
-			expect(passjsonGenerated.eventTicket).toBeInstanceOf(Object);
+			assert.equal(passjsonGenerated.eventTicket.headerFields.length, 0);
+		},
+	);
+
+	await t.test(
+		"should include row property in auxiliary fields but omit it in others",
+		() => {
+			/** Resetting fields */
+			pkpass.type = "eventTicket";
+
+			pkpass.primaryFields.push({
+				key: "testField-pf",
+				value: "test",
+				// @ts-expect-error
+				row: 0,
+			});
+
+			pkpass.auxiliaryFields.push({
+				key: "testField-pf",
+				value: "test",
+				row: 1,
+			});
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			assert.ok(
+				passjsonGenerated.eventTicket.auxiliaryFields instanceof Array,
+			);
+
+			assert.equal(
+				passjsonGenerated.eventTicket.auxiliaryFields.length,
+				1,
+			);
+			assert.equal(
+				passjsonGenerated.eventTicket.auxiliaryFields[0].row,
+				1,
+			);
+			assert.ok(
+				passjsonGenerated.eventTicket.primaryFields instanceof Array,
+			);
+			assert.equal(passjsonGenerated.eventTicket.primaryFields.length, 0);
+		},
+	);
+
+	await t.test(
+		"should reset clear all the fields if the type changes",
+		() => {
+			pkpass.type = "boardingPass";
+
+			pkpass.primaryFields.push({
+				key: "testField-pf",
+				value: "test",
+			});
+			pkpass.headerFields.push({
+				key: "testField-hf",
+				value: "test",
+			});
+			pkpass.auxiliaryFields.push({
+				key: "testField-af",
+				value: "test",
+			});
+			pkpass.secondaryFields.push({
+				key: "testField-sf",
+				value: "test",
+			});
+			pkpass.backFields.push({
+				key: "testField-bf",
+				value: "test",
+			});
+
+			pkpass.transitType = "PKTransitTypeAir";
+			pkpass.type = "eventTicket";
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			const {
+				headerFields,
+				primaryFields,
+				secondaryFields,
+				auxiliaryFields,
+				backFields,
+			} = passjsonGenerated.eventTicket;
+
+			assert.ok(headerFields instanceof Array);
+			assert.equal(headerFields.length, 0);
+
+			assert.ok(primaryFields instanceof Array);
+			assert.equal(primaryFields.length, 0);
+
+			assert.ok(secondaryFields instanceof Array);
+			assert.equal(secondaryFields.length, 0);
+
+			assert.ok(auxiliaryFields instanceof Array);
+			assert.equal(auxiliaryFields.length, 0);
+
+			assert.ok(backFields instanceof Array);
+			assert.equal(backFields.length, 0);
+		},
+	);
+
+	await t.test("should export a buffer when getAsBuffer is used", () => {
+		assert.ok(pkpass.getAsBuffer() instanceof Buffer);
+	});
+
+	await t.test(
+		"pkpass should get frozen once an export is done",
+		async (t) => {
+			await t.test("getAsRaw", () => {
+				pkpass.getAsRaw();
+
+				/** We might want to test all the methods, but methods might change... so should we? */
+				assert.throws(() => pkpass.localize("en", { a: "b" }));
+			});
+
+			await t.test("getAsBuffer", () => {
+				pkpass.getAsBuffer();
+
+				/** We might want to test all the methods, but methods might change... so should we? */
+				assert.throws(() => pkpass.localize("en", { a: "b" }));
+			});
+
+			await t.test("getAsStream", () => {
+				pkpass.getAsStream();
+
+				/** We might want to test all the methods, but methods might change... so should we? */
+				assert.throws(() => pkpass.localize("en", { a: "b" }));
+			});
+		},
+	);
+
+	await t.test("localize and languages", async (t) => {
+		await t.test(
+			"should delete a language, all of its translations and all of its files, when null is passed as parameter",
+			() => {
+				pkpass.addBuffer("it.lproj/icon@3x.png", Buffer.alloc(0));
+				pkpass.addBuffer("en.lproj/icon@3x.png", Buffer.alloc(0));
+
+				pkpass.localize("it", null);
+				pkpass.localize("en", null);
+
+				const buffers = pkpass.getAsRaw();
+
+				assert.equal(pkpass.languages.length, 0);
+				assert.equal(buffers["it.lproj/icon@3x.png"], undefined);
+				assert.equal(buffers["en.lproj/icon@3x.png"], undefined);
+			},
+		);
+
+		await t.test("should throw if lang is not a string", () => {
+			// @ts-expect-error
+			assert.throws(() => pkpass.localize(null));
+
+			// @ts-expect-error
+			assert.throws(() => pkpass.localize(undefined));
+
+			// @ts-expect-error
+			assert.throws(() => pkpass.localize(5));
+
+			// @ts-expect-error
+			assert.throws(() => pkpass.localize(true));
+
+			// @ts-expect-error
+			assert.throws(() => pkpass.localize({}));
 		});
 
-		it("should accept a pass.json if not already added", () => {
+		await t.test(
+			"should create a new pass.strings from passed translations",
+			() => {
+				pkpass.localize("en", {
+					mimmo: "Domenic",
+				});
+
+				const buffers = pkpass.getAsRaw();
+
+				assert.equal(
+					buffers["en.lproj/pass.strings"].toString("utf-8"),
+					'"mimmo" = "Domenic";',
+				);
+			},
+		);
+	});
+
+	await t.test("addBuffer", async (t) => {
+		await t.test(
+			"should include a file buffer inside the final pass",
+			() => {
+				pkpass.addBuffer("icon@3x.png", modelFiles["icon.png"]);
+
+				const buffers = pkpass.getAsRaw();
+
+				assert.notEqual(buffers["icon@3x.png"], undefined);
+				assert.equal(buffers["icon@3x.png"], modelFiles["icon.png"]);
+			},
+		);
+
+		await t.test(
+			"should include localized files buffer inside final pass",
+			() => {
+				pkpass.addBuffer(
+					"it.lproj/icon@3x.png",
+					modelFiles["icon.png"],
+				);
+
+				const buffers = pkpass.getAsRaw();
+
+				assert.notEqual(buffers["it.lproj/icon@3x.png"], undefined);
+				assert.equal(
+					buffers["it.lproj/icon@3x.png"],
+					modelFiles["icon.png"],
+				);
+			},
+		);
+
+		await t.test(
+			"should ignore further pass.json addition if already available",
+			() => {
+				assert.notEqual(modelFiles["pass.json"], undefined);
+
+				pkpass.addBuffer(
+					"pass.json",
+					Buffer.from(
+						JSON.stringify({
+							boardingPass: {},
+						}),
+					),
+				);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+				assert.equal(passjsonGenerated.boardingPass, undefined);
+				assert.ok(passjsonGenerated.eventTicket instanceof Object);
+			},
+		);
+
+		await t.test("should accept a pass.json if not already added", () => {
 			const modelFilesCopy = Object.assign({}, modelFiles, {
 				"pass.json": undefined,
 			});
@@ -629,81 +697,94 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.boardingPass).not.toBeUndefined();
-			expect(passjsonGenerated.boardingPass.primaryFields[0]).toEqual({
+			assert.notEqual(passjsonGenerated.boardingPass, undefined);
+			assert.deepEqual(passjsonGenerated.boardingPass.primaryFields[0], {
 				key: "test",
 				value: "meh",
 			});
-			expect(passjsonGenerated.boardingPass.transitType).toBe(
+			assert.equal(
+				passjsonGenerated.boardingPass.transitType,
 				"PKTransitTypeAir",
 			);
 		});
 
-		it("should accept personalization files if nfc data is added", () => {
-			pkpass.setNFC({
-				encryptionPublicKey: "fakeEPK",
-				message: "Not-a-valid-message-but-we-dont-care",
-			});
+		await t.test(
+			"should accept personalization files if nfc data is added",
+			() => {
+				pkpass.setNFC({
+					encryptionPublicKey: "fakeEPK",
+					message: "Not-a-valid-message-but-we-dont-care",
+				});
 
-			pkpass.addBuffer(
-				"personalization.json",
-				Buffer.from(
-					JSON.stringify({
-						requiredPersonalizationFields: [
-							"PKPassPersonalizationFieldName",
-						],
-						description: "reward enrollement test",
-					}),
-				),
-			);
+				pkpass.addBuffer(
+					"personalization.json",
+					Buffer.from(
+						JSON.stringify({
+							requiredPersonalizationFields: [
+								"PKPassPersonalizationFieldName",
+							],
+							description: "reward enrollement test",
+						}),
+					),
+				);
 
-			pkpass.addBuffer(
-				"personalizationLogo@2x.png",
-				modelFiles["icon.png"],
-			);
+				pkpass.addBuffer(
+					"personalizationLogo@2x.png",
+					modelFiles["icon.png"],
+				);
 
-			const buffers = pkpass.getAsRaw();
+				const buffers = pkpass.getAsRaw();
 
-			expect(buffers["personalization.json"]).not.toBeUndefined();
-			expect(
-				JSON.parse(buffers["personalization.json"].toString("utf-8"))
-					.requiredPersonalizationFields,
-			).not.toBeUndefined();
-			expect(
-				JSON.parse(buffers["personalization.json"].toString("utf-8"))
-					.requiredPersonalizationFields.length,
-			).toBe(1);
-			expect(
-				JSON.parse(buffers["personalization.json"].toString("utf-8"))
-					.requiredPersonalizationFields[0],
-			).toBe("PKPassPersonalizationFieldName");
-		});
+				assert.notEqual(buffers["personalization.json"], undefined);
+				assert.notEqual(
+					JSON.parse(
+						buffers["personalization.json"].toString("utf-8"),
+					).requiredPersonalizationFields,
+					undefined,
+				);
+				assert.equal(
+					JSON.parse(
+						buffers["personalization.json"].toString("utf-8"),
+					).requiredPersonalizationFields.length,
+					1,
+				);
+				assert.equal(
+					JSON.parse(
+						buffers["personalization.json"].toString("utf-8"),
+					).requiredPersonalizationFields[0],
+					"PKPassPersonalizationFieldName",
+				);
+			},
+		);
 
-		it("should remove personalization files if nfc data is not specified", () => {
-			pkpass.addBuffer(
-				"personalization.json",
-				Buffer.from(
-					JSON.stringify({
-						requiredPersonalizationFields: [
-							"PKPassPersonalizationFieldName",
-						],
-						description: "reward enrollement test",
-					}),
-				),
-			);
+		await t.test(
+			"should remove personalization files if nfc data is not specified",
+			() => {
+				pkpass.addBuffer(
+					"personalization.json",
+					Buffer.from(
+						JSON.stringify({
+							requiredPersonalizationFields: [
+								"PKPassPersonalizationFieldName",
+							],
+							description: "reward enrollement test",
+						}),
+					),
+				);
 
-			pkpass.addBuffer(
-				"personalizationLogo@2x.png",
-				modelFiles["icon.png"],
-			);
+				pkpass.addBuffer(
+					"personalizationLogo@2x.png",
+					modelFiles["icon.png"],
+				);
 
-			const buffers = pkpass.getAsRaw();
+				const buffers = pkpass.getAsRaw();
 
-			expect(buffers["personalization.json"]).toBeUndefined();
-			expect(buffers["personalizationLogo@2x.png"]).toBeUndefined();
-		});
+				assert.equal(buffers["personalization.json"], undefined);
+				assert.equal(buffers["personalizationLogo@2x.png"], undefined);
+			},
+		);
 
-		it("should convert Windows paths to unix paths", () => {
+		await t.test("should convert Windows paths to unix paths", () => {
 			/**
 			 * This should not be reassignable, but we are actually able to set it.
 			 * And this is fine for testing Windows-like behavior.
@@ -716,37 +797,42 @@ describe("PKPass", () => {
 
 			const buffers = pkpass.getAsRaw();
 
-			expect(
+			assert.notEqual(
 				JSON.parse(buffers["manifest.json"].toString("utf-8"))[
 					"it.lproj/icon@2x.png"
 				],
-			).not.toBeUndefined();
+				undefined,
+			);
 
 			/** Resetting for the next tests */
 			// @ts-ignore
 			path.sep = "/";
 		});
 
-		it("should merge translations files with translations", () => {
-			const translationFile = `"MY_DESCRIPTION" = "test";
+		await t.test(
+			"should merge translations files with translations",
+			() => {
+				const translationFile = `"MY_DESCRIPTION" = "test";
 "MY_DESCRIPTION_2" = "test";`;
 
-			pkpass.addBuffer(
-				"en.lproj/pass.strings",
-				Buffer.from(translationFile),
-			);
+				pkpass.addBuffer(
+					"en.lproj/pass.strings",
+					Buffer.from(translationFile),
+				);
 
-			expect(pkpass.languages.length).toBe(1);
+				assert.equal(pkpass.languages.length, 1);
 
-			const buffers = pkpass.getAsRaw();
+				const buffers = pkpass.getAsRaw();
 
-			expect(buffers["en.lproj/pass.strings"]).not.toBeUndefined();
-			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
-				translationFile,
-			);
-		});
+				assert.notEqual(buffers["en.lproj/pass.strings"], undefined);
+				assert.equal(
+					buffers["en.lproj/pass.strings"].toString("utf-8"),
+					translationFile,
+				);
+			},
+		);
 
-		it("should ignore invalid l10n files", () => {
+		await t.test("should ignore invalid l10n files", () => {
 			const invalidTranslationStrings = `
 "Insert Element"="Insert Element
 "ErrorString_1= "An unknown error occurred."
@@ -757,50 +843,51 @@ describe("PKPass", () => {
 				Buffer.from(invalidTranslationStrings),
 			);
 
-			expect(pkpass.files["en.lproj/pass.strings"]).toBeUndefined();
+			assert.equal(pkpass.files["en.lproj/pass.strings"], undefined);
 
 			const buffers = pkpass.getAsRaw();
 
-			expect(buffers["en.lproj/pass.strings"]).toBeUndefined();
+			assert.equal(buffers["en.lproj/pass.strings"], undefined);
 		});
 	});
 
-	describe("expiration date", () => {
-		it("should set a pass expiration date", () => {
+	await t.test("expiration date", async (t) => {
+		await t.test("should set a pass expiration date", () => {
 			pkpass.setExpirationDate(new Date("2023-04-09T17:00-07:00"));
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.expirationDate).toBe(
+			assert.equal(
+				passjsonGenerated.expirationDate,
 				"2023-04-10T00:00:00.000Z",
 			);
 		});
 
-		it("should reset an expiration date", () => {
+		await t.test("should reset an expiration date", () => {
 			pkpass.setExpirationDate(new Date(2023, 3, 10));
 			pkpass.setExpirationDate(null);
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.expirationDate).toBeUndefined();
+			assert.equal(passjsonGenerated.expirationDate, undefined);
 		});
 
-		it("should throw if an invalid date is received", () => {
-			expect(() =>
+		await t.test("should throw if an invalid date is received", () => {
+			assert.throws(() =>
 				// @ts-expect-error
 				pkpass.setExpirationDate("32/18/228317"),
-			).toThrowError();
+			);
 			// @ts-expect-error
-			expect(() => pkpass.setExpirationDate(undefined)).toThrowError();
+			assert.throws(() => pkpass.setExpirationDate(undefined));
 			// @ts-expect-error
-			expect(() => pkpass.setExpirationDate(5)).toThrowError();
+			assert.throws(() => pkpass.setExpirationDate(5));
 			// @ts-expect-error
-			expect(() => pkpass.setExpirationDate({})).toThrowError();
+			assert.throws(() => pkpass.setExpirationDate({}));
 		});
 	});
 
-	describe("beacons", () => {
-		it("should set pass beacons", () => {
+	await t.test("beacons", async (t) => {
+		await t.test("should set pass beacons", () => {
 			pkpass.setBeacons({
 				proximityUUID: "0000000000",
 				relevantText: "immabeacon",
@@ -808,8 +895,8 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.beacons.length).toBe(1);
-			expect(passjsonGenerated.beacons).toEqual([
+			assert.equal(passjsonGenerated.beacons.length, 1);
+			assert.deepEqual(passjsonGenerated.beacons, [
 				{
 					proximityUUID: "0000000000",
 					relevantText: "immabeacon",
@@ -817,7 +904,7 @@ describe("PKPass", () => {
 			]);
 		});
 
-		it("should reset beacons", () => {
+		await t.test("should reset beacons", () => {
 			pkpass.setBeacons({
 				proximityUUID: "0000000000",
 				relevantText: "immabeacon",
@@ -826,12 +913,12 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.beacons).toBeUndefined();
+			assert.equal(passjsonGenerated.beacons, undefined);
 		});
 	});
 
-	describe("locations", () => {
-		it("should set pass locations", () => {
+	await t.test("locations", async (t) => {
+		await t.test("should set pass locations", () => {
 			pkpass.setLocations({
 				latitude: 0,
 				longitude: 0,
@@ -839,8 +926,8 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.locations.length).toBe(1);
-			expect(passjsonGenerated.locations).toEqual([
+			assert.equal(passjsonGenerated.locations.length, 1);
+			assert.deepEqual(passjsonGenerated.locations, [
 				{
 					latitude: 0,
 					longitude: 0,
@@ -848,7 +935,7 @@ describe("PKPass", () => {
 			]);
 		});
 
-		it("should reset locations", () => {
+		await t.test("should reset locations", () => {
 			pkpass.setLocations({
 				latitude: 0,
 				longitude: 0,
@@ -857,47 +944,48 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.locations).toBeUndefined();
+			assert.equal(passjsonGenerated.locations, undefined);
 		});
 	});
 
-	describe("Date relevancy", () => {
-		describe("(deprecated iOS 18) (root).relevantDate", () => {
-			it("should set pass relevant date", () => {
+	await t.test("Date relevancy", async (t) => {
+		await t.test("(deprecated iOS 18) (root).relevantDate", async (t) => {
+			await t.test("should set pass relevant date", () => {
 				pkpass.setRelevantDate(new Date("2023-04-11T00:15+10:00"));
 
 				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-				expect(passjsonGenerated.relevantDate).toBe(
+				assert.equal(
+					passjsonGenerated.relevantDate,
 					"2023-04-10T14:15:00.000Z",
 				);
 			});
 
-			it("should reset relevant date", () => {
+			await t.test("should reset relevant date", () => {
 				pkpass.setRelevantDate(new Date(2023, 3, 10, 14, 15));
 				pkpass.setRelevantDate(null);
 
 				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-				expect(passjsonGenerated.relevantDate).toBeUndefined();
+				assert.equal(passjsonGenerated.relevantDate, undefined);
 			});
 
-			it("should throw if an invalid date is received", () => {
-				expect(() =>
+			await t.test("should throw if an invalid date is received", () => {
+				assert.throws(() =>
 					// @ts-expect-error
 					pkpass.setRelevantDate("32/18/228317"),
-				).toThrowError();
+				);
 				// @ts-expect-error
-				expect(() => pkpass.setRelevantDate(undefined)).toThrowError();
+				assert.throws(() => pkpass.setRelevantDate(undefined));
 				// @ts-expect-error
-				expect(() => pkpass.setRelevantDate(5)).toThrowError();
+				assert.throws(() => pkpass.setRelevantDate(5));
 				// @ts-expect-error
-				expect(() => pkpass.setRelevantDate({})).toThrowError();
+				assert.throws(() => pkpass.setRelevantDate({}));
 			});
 		});
 
-		describe("setRelevantDates", () => {
-			it("should accept strings", () => {
+		await t.test("setRelevantDates", async (t) => {
+			await t.test("should accept strings", () => {
 				pkpass.setRelevantDates([
 					{
 						startDate: "2025-01-08T22:17:30.000Z",
@@ -910,7 +998,7 @@ describe("PKPass", () => {
 
 				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-				expect(passjsonGenerated.relevantDates).toMatchObject([
+				assert.partialDeepStrictEqual(passjsonGenerated.relevantDates, [
 					{
 						startDate: "2025-01-08T22:17:30.000Z",
 						endDate: "2025-01-08T23:58:25.000Z",
@@ -921,7 +1009,7 @@ describe("PKPass", () => {
 				]);
 			});
 
-			it("should accept dates", () => {
+			await t.test("should accept dates", () => {
 				pkpass.setRelevantDates([
 					{
 						startDate: new Date(2025, 1, 8, 23, 58, 25),
@@ -934,7 +1022,7 @@ describe("PKPass", () => {
 
 				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-				expect(passjsonGenerated.relevantDates).toMatchObject([
+				assert.partialDeepStrictEqual(passjsonGenerated.relevantDates, [
 					{
 						startDate: "2025-02-08T22:58:25.000Z",
 						endDate: "2025-02-08T22:58:25.000Z",
@@ -945,7 +1033,7 @@ describe("PKPass", () => {
 				]);
 			});
 
-			it("should allow resetting", () => {
+			await t.test("should allow resetting", () => {
 				pkpass.setRelevantDates([
 					{
 						startDate: "2025-01-08T22:17:30.000Z",
@@ -960,45 +1048,48 @@ describe("PKPass", () => {
 
 				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-				expect(passjsonGenerated.relevantDates).toBeUndefined();
+				assert.equal(passjsonGenerated.relevantDates, undefined);
 			});
 		});
 	});
 
-	describe("barcodes", () => {
-		it("should create all barcode structures if a message is used", () => {
-			pkpass.setBarcodes("a test barcode");
+	await t.test("barcodes", async (t) => {
+		await t.test(
+			"should create all barcode structures if a message is used",
+			() => {
+				pkpass.setBarcodes("a test barcode");
 
-			const passjsonGenerated = getGeneratedPassJson(pkpass);
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.barcode).toBeUndefined();
-			expect(passjsonGenerated.barcodes).toBeInstanceOf(Array);
-			expect(passjsonGenerated.barcodes.length).toBe(4);
-			expect(passjsonGenerated.barcodes).toEqual([
-				{
-					format: "PKBarcodeFormatQR",
-					message: "a test barcode",
-					messageEncoding: "iso-8859-1",
-				},
-				{
-					format: "PKBarcodeFormatPDF417",
-					message: "a test barcode",
-					messageEncoding: "iso-8859-1",
-				},
-				{
-					format: "PKBarcodeFormatAztec",
-					message: "a test barcode",
-					messageEncoding: "iso-8859-1",
-				},
-				{
-					format: "PKBarcodeFormatCode128",
-					message: "a test barcode",
-					messageEncoding: "iso-8859-1",
-				},
-			]);
-		});
+				assert.equal(passjsonGenerated.barcode, undefined);
+				assert.ok(passjsonGenerated.barcodes instanceof Array);
+				assert.equal(passjsonGenerated.barcodes.length, 4);
+				assert.deepEqual(passjsonGenerated.barcodes, [
+					{
+						format: "PKBarcodeFormatQR",
+						message: "a test barcode",
+						messageEncoding: "iso-8859-1",
+					},
+					{
+						format: "PKBarcodeFormatPDF417",
+						message: "a test barcode",
+						messageEncoding: "iso-8859-1",
+					},
+					{
+						format: "PKBarcodeFormatAztec",
+						message: "a test barcode",
+						messageEncoding: "iso-8859-1",
+					},
+					{
+						format: "PKBarcodeFormatCode128",
+						message: "a test barcode",
+						messageEncoding: "iso-8859-1",
+					},
+				]);
+			},
+		);
 
-		it("should use only the barcode structure provided", () => {
+		await t.test("should use only the barcode structure provided", () => {
 			pkpass.setBarcodes({
 				format: "PKBarcodeFormatQR",
 				message: "a test barcode",
@@ -1006,10 +1097,10 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.barcode).toBeUndefined();
-			expect(passjsonGenerated.barcodes).toBeInstanceOf(Array);
-			expect(passjsonGenerated.barcodes.length).toBe(1);
-			expect(passjsonGenerated.barcodes).toEqual([
+			assert.equal(passjsonGenerated.barcode, undefined);
+			assert.ok(passjsonGenerated.barcodes instanceof Array);
+			assert.equal(passjsonGenerated.barcodes.length, 1);
+			assert.deepEqual(passjsonGenerated.barcodes, [
 				{
 					format: "PKBarcodeFormatQR",
 					message: "a test barcode",
@@ -1018,48 +1109,51 @@ describe("PKPass", () => {
 			]);
 		});
 
-		it("should ignore objects and values that not comply with Schema.Barcodes", () => {
-			/**
-			 * @type {Parameters<typeof pkpass["setBarcodes"]>}
-			 */
+		await t.test(
+			"should ignore objects and values that not comply with Schema.Barcodes",
+			() => {
+				/**
+				 * @type {Parameters<typeof pkpass["setBarcodes"]>}
+				 */
 
-			const setBarcodesArguments = [
-				// @ts-expect-error
-				5,
-				// @ts-expect-error
-				10,
-				// @ts-expect-error
-				15,
-				{
+				const setBarcodesArguments = [
+					// @ts-expect-error
+					5,
+					// @ts-expect-error
+					10,
+					// @ts-expect-error
+					15,
+					{
+						message: "28363516282",
+						format: "PKBarcodeFormatPDF417",
+					},
+					// @ts-expect-error
+					{
+						format: "PKBarcodeFormatPDF417",
+					},
+					// @ts-expect-error
+					7,
+					// @ts-expect-error
+					1,
+				];
+
+				pkpass.setBarcodes(...setBarcodesArguments);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				assert.ok(passjsonGenerated.barcodes instanceof Array);
+				assert.equal(passjsonGenerated.barcodes.length, 1);
+				assert.deepEqual(passjsonGenerated.barcodes[0], {
 					message: "28363516282",
 					format: "PKBarcodeFormatPDF417",
-				},
-				// @ts-expect-error
-				{
-					format: "PKBarcodeFormatPDF417",
-				},
-				// @ts-expect-error
-				7,
-				// @ts-expect-error
-				1,
-			];
-
-			pkpass.setBarcodes(...setBarcodesArguments);
-
-			const passjsonGenerated = getGeneratedPassJson(pkpass);
-
-			expect(passjsonGenerated.barcodes).toBeInstanceOf(Array);
-			expect(passjsonGenerated.barcodes.length).toBe(1);
-			expect(passjsonGenerated.barcodes[0]).toEqual({
-				message: "28363516282",
-				format: "PKBarcodeFormatPDF417",
-				messageEncoding: "iso-8859-1",
-			});
-		});
+					messageEncoding: "iso-8859-1",
+				});
+			},
+		);
 	});
 
-	describe("nfc", () => {
-		it("should set pass nfc", () => {
+	await t.test("nfc", async (t) => {
+		await t.test("should set pass nfc", () => {
 			pkpass.setNFC({
 				encryptionPublicKey: "blabla",
 				message: "nfc data",
@@ -1067,13 +1161,13 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.nfc).toEqual({
+			assert.deepEqual(passjsonGenerated.nfc, {
 				encryptionPublicKey: "blabla",
 				message: "nfc data",
 			});
 		});
 
-		it("should reset nfc data", () => {
+		await t.test("should reset nfc data", () => {
 			pkpass.setNFC({
 				encryptionPublicKey: "blabla",
 				message: "nfc data",
@@ -1082,12 +1176,12 @@ describe("PKPass", () => {
 
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			expect(passjsonGenerated.nfc).toBeUndefined();
+			assert.equal(passjsonGenerated.nfc, undefined);
 		});
 	});
 
-	describe("props getter", () => {
-		it("should return a copy of all props", () => {
+	await t.test("props getter", async (t) => {
+		await t.test("should return a copy of all props", () => {
 			pkpass.setBarcodes({
 				format: "PKBarcodeFormatQR",
 				message: "a test barcode",
@@ -1097,7 +1191,7 @@ describe("PKPass", () => {
 
 			pkpass.setBarcodes(null);
 
-			expect(firstPropsCheck.barcodes).toEqual([
+			assert.deepEqual(firstPropsCheck.barcodes, [
 				{
 					format: "PKBarcodeFormatQR",
 					message: "a test barcode",
@@ -1107,49 +1201,54 @@ describe("PKPass", () => {
 		});
 	});
 
-	describe("PKPass.from", () => {
-		it("should clone the properties and the buffers of another pkpass", async () => {
-			const passcopy = await PKPass.from(pkpass);
-			expect(pkpass).not.toBe(passcopy);
+	await t.test("PKPass.from", async (t) => {
+		await t.test(
+			"should clone the properties and the buffers of another pkpass",
+			async () => {
+				const passcopy = await PKPass.from(pkpass);
+				assert.notEqual(pkpass, passcopy);
 
-			const buffers1 = pkpass.getAsRaw();
-			const buffers2 = passcopy.getAsRaw();
+				const buffers1 = pkpass.getAsRaw();
+				const buffers2 = passcopy.getAsRaw();
 
-			const fileNames = new Set([
-				...Object.keys(buffers1),
-				...Object.keys(buffers2),
-			]);
+				const fileNames = new Set([
+					...Object.keys(buffers1),
+					...Object.keys(buffers2),
+				]);
 
-			for (let key in fileNames) {
-				expect(buffers1[key]).not.toBeUndefined();
-				expect(buffers2[key]).not.toBeUndefined();
-				expect(buffers1[key]).not.toBe(buffers2[key]);
-				expect(buffers1[key]).toEqual(buffers2[key]);
-			}
+				for (let key in fileNames) {
+					assert.notEqual(buffers1[key], undefined);
+					assert.notEqual(buffers2[key], undefined);
+					assert.notEqual(buffers1[key], buffers2[key]);
+					assert.deepEqual(buffers1[key], buffers2[key]);
+				}
 
-			const passjsonGenerated1 = getGeneratedPassJson(pkpass);
-			const passjsonGenerated2 = getGeneratedPassJson(passcopy);
-			expect(passjsonGenerated1.eventTicket).toEqual(
-				passjsonGenerated2.eventTicket,
-			);
-		});
+				const passjsonGenerated1 = getGeneratedPassJson(pkpass);
+				const passjsonGenerated2 = getGeneratedPassJson(passcopy);
+				assert.deepEqual(
+					passjsonGenerated1.eventTicket,
+					passjsonGenerated2.eventTicket,
+				);
+			},
+		);
 
-		it("should throw error when falsy value is passed as source", () => {
-			expect.assertions(5);
+		await t.test(
+			"should throw error when falsy value is passed as source",
+			async () => {
+				// @ts-expect-error
+				await assert.rejects(() => PKPass.from(null));
+				// @ts-expect-error
+				await assert.rejects(() => PKPass.from(false));
+				// @ts-expect-error
+				await assert.rejects(() => PKPass.from(undefined));
+				// @ts-expect-error
+				await assert.rejects(() => PKPass.from(""));
+				// @ts-expect-error
+				await assert.rejects(() => PKPass.from({}));
+			},
+		);
 
-			// @ts-expect-error
-			expect(PKPass.from(null)).rejects.not.toBeUndefined();
-			// @ts-expect-error
-			expect(PKPass.from(false)).rejects.not.toBeUndefined();
-			// @ts-expect-error
-			expect(PKPass.from(undefined)).rejects.not.toBeUndefined();
-			// @ts-expect-error
-			expect(PKPass.from("")).rejects.not.toBeUndefined();
-			// @ts-expect-error
-			expect(PKPass.from({})).rejects.not.toBeUndefined();
-		});
-
-		it("should read all the files from a fs model", async () => {
+		await t.test("should read all the files from a fs model", async () => {
 			pkpass = await PKPass.from({
 				model: path.resolve(__dirname, EXAMPLE_PATH_RELATIVE),
 				certificates: {
@@ -1172,24 +1271,29 @@ describe("PKPass", () => {
 					continue;
 				}
 
-				expect(modelFiles[fileName]).not.toBeUndefined();
-				expect(modelFiles[fileName]).toEqual(buffers[fileName]);
+				assert.notEqual(modelFiles[fileName], undefined);
+				assert.deepEqual(modelFiles[fileName], buffers[fileName]);
 			}
 		});
 
-		it("should throw an error if a model folder doesn't exist", () => {
-			expect(() =>
-				PKPass.from({
-					model: path.resolve(
-						__dirname,
-						"this/model/doesnt/exists.pass",
-					),
-				}),
-			).rejects.toBeInstanceOf(Error);
-		});
+		await t.test(
+			"should throw an error if a model folder doesn't exist",
+			async () => {
+				await assert.rejects(
+					() =>
+						PKPass.from({
+							model: path.resolve(
+								__dirname,
+								"this/model/doesnt/exists.pass",
+							),
+						}),
+					Error,
+				);
+			},
+		);
 
-		it("should enforce .pass model extension", async () => {
-			expect(
+		await t.test("should enforce .pass model extension", async () => {
+			await assert.doesNotReject(
 				async () =>
 					await PKPass.from({
 						model: path.resolve(
@@ -1203,171 +1307,222 @@ describe("PKPass", () => {
 							wwdr: WWDR,
 						},
 					}),
-			).not.toThrow();
+			);
 		});
 
-		it("should silently filter out manifest and signature files", async () => {
-			pkpass = await PKPass.from({
-				model: path.resolve(__dirname, EXAMPLE_PATH_RELATIVE),
-				certificates: {
-					signerCert: SIGNER_CERT,
-					signerKey: SIGNER_KEY,
-					signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
-					wwdr: WWDR,
-				},
-			});
+		await t.test(
+			"should silently filter out manifest and signature files",
+			async () => {
+				pkpass = await PKPass.from({
+					model: path.resolve(__dirname, EXAMPLE_PATH_RELATIVE),
+					certificates: {
+						signerCert: SIGNER_CERT,
+						signerKey: SIGNER_KEY,
+						signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+						wwdr: WWDR,
+					},
+				});
 
-			pkpass.addBuffer("manifest.json", Buffer.alloc(0));
-			pkpass.addBuffer("signature", Buffer.alloc(0));
+				pkpass.addBuffer("manifest.json", Buffer.alloc(0));
+				pkpass.addBuffer("signature", Buffer.alloc(0));
 
-			expect(pkpass.files["manifest.json"]).toBeUndefined();
-			expect(pkpass.files["signature"]).toBeUndefined();
-		});
+				assert.equal(pkpass.files["manifest.json"], undefined);
+				assert.equal(pkpass.files["signature"], undefined);
+			},
+		);
 
-		it("should accept additional properties to be added to new buffer and ignore unknown props", async () => {
-			const newPass = await PKPass.from(pkpass, {
-				description: "mimmoh",
-				serialNumber: "626621523738123",
-				// @ts-expect-error
-				insert_here_invalid_unknown_parameter_name: false,
-			});
+		await t.test(
+			"should accept additional properties to be added to new buffer and ignore unknown props",
+			async () => {
+				const newPass = await PKPass.from(pkpass, {
+					description: "mimmoh",
+					serialNumber: "626621523738123",
+					// @ts-expect-error
+					insert_here_invalid_unknown_parameter_name: false,
+				});
 
-			expect(newPass.props.description).toBe("mimmoh");
-			expect(newPass.props.serialNumber).toBe("626621523738123");
-			expect(
-				// @ts-expect-error
-				newPass.props.insert_here_invalid_unknown_parameter_name,
-			).toBeUndefined();
+				assert.equal(newPass.props.description, "mimmoh");
+				assert.equal(newPass.props.serialNumber, "626621523738123");
+				assert.equal(
+					// @ts-expect-error
+					newPass.props.insert_here_invalid_unknown_parameter_name,
+					undefined,
+				);
 
-			const passjsonGenerated = getGeneratedPassJson(newPass);
+				const passjsonGenerated = getGeneratedPassJson(newPass);
 
-			expect(passjsonGenerated.description).toBe("mimmoh");
-			expect(passjsonGenerated.serialNumber).toBe("626621523738123");
-			expect(
-				passjsonGenerated.insert_here_invalid_unknown_parameter_name,
-			).toBeUndefined();
-		});
+				assert.equal(passjsonGenerated.description, "mimmoh");
+				assert.equal(passjsonGenerated.serialNumber, "626621523738123");
+				assert.equal(
+					passjsonGenerated.insert_here_invalid_unknown_parameter_name,
+					undefined,
+				);
+			},
+		);
 	});
 
-	describe("PKPass.pack", () => {
-		it("should should throw error if not all the files passed are PKPasses", () => {
-			expect(
-				// @ts-expect-error
-				() => PKPass.pack(pkpass, "pass.json", pkpass),
-			).toThrowError();
-		});
+	await t.test("PKPass.pack", async (t) => {
+		await t.test(
+			"should should throw error if not all the files passed are PKPasses",
+			() => {
+				assert.throws(
+					// @ts-expect-error
+					() => PKPass.pack(pkpass, "pass.json", pkpass),
+				);
+			},
+		);
 
-		it("should output a frozen bundle of frozen bundles", () => {
+		await t.test("should output a frozen bundle of frozen bundles", () => {
 			const pkPassesBundle = PKPass.pack(pkpass, pkpass);
 
 			const buffers = pkPassesBundle.getAsRaw();
 
-			expect(buffers["packed-pass-1.pkpass"]).toBeInstanceOf(Buffer);
-			expect(buffers["packed-pass-2.pkpass"]).toBeInstanceOf(Buffer);
-			expect(pkpass.isFrozen).toBe(true);
-			expect(pkPassesBundle.isFrozen).toBe(true);
+			assert.ok(buffers["packed-pass-1.pkpass"] instanceof Buffer);
+			assert.ok(buffers["packed-pass-2.pkpass"] instanceof Buffer);
+			assert.equal(pkpass.isFrozen, true);
+			assert.equal(pkPassesBundle.isFrozen, true);
 		});
 
-		it("should output a bundle with pkpasses mimetype", () => {
+		await t.test("should output a bundle with pkpasses mimetype", () => {
 			const pkPassesBundle = PKPass.pack(pkpass, pkpass);
-			expect(pkPassesBundle.mimeType).toBe(
+			assert.equal(
+				pkPassesBundle.mimeType,
 				"application/vnd.apple.pkpasses",
 			);
 		});
 	});
 
-	describe("iOS 18 / iOS 26 new layouts", () => {
-		it("should contain preferredStyleSchemes if coming from an imported pass json", () => {
-			const passjson = modelFiles["pass.json"];
-			const changedPassJson = Buffer.from(
-				JSON.stringify(
-					Object.assign({}, JSON.parse(passjson.toString("utf-8")), {
-						preferredStyleSchemes: [
-							"posterEventTicket",
-							"eventTicket",
-						],
-						eventTicket: {},
+	await t.test("iOS 18 / iOS 26 new layouts", async (t) => {
+		await t.test(
+			"should contain preferredStyleSchemes if coming from an imported pass json",
+			() => {
+				const passjson = modelFiles["pass.json"];
+				const changedPassJson = Buffer.from(
+					JSON.stringify(
+						Object.assign(
+							{},
+							JSON.parse(passjson.toString("utf-8")),
+							{
+								preferredStyleSchemes: [
+									"posterEventTicket",
+									"eventTicket",
+								],
+								eventTicket: {},
+							},
+						),
+					),
+					"utf-8",
+				);
+
+				pkpass = new PKPass(
+					Object.assign({}, modelFiles, {
+						"pass.json": changedPassJson,
 					}),
-				),
-				"utf-8",
-			);
+					{
+						signerCert: SIGNER_CERT,
+						signerKey: SIGNER_KEY,
+						wwdr: WWDR,
+						signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+					},
+				);
 
-			pkpass = new PKPass(
-				Object.assign({}, modelFiles, { "pass.json": changedPassJson }),
-				{
-					signerCert: SIGNER_CERT,
-					signerKey: SIGNER_KEY,
-					wwdr: WWDR,
-					signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
-				},
-			);
+				assert.deepEqual(pkpass.preferredStyleSchemes, [
+					"posterEventTicket",
+					"eventTicket",
+				]);
 
-			expect(pkpass.preferredStyleSchemes).toEqual([
-				"posterEventTicket",
-				"eventTicket",
-			]);
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			const passjsonGenerated = getGeneratedPassJson(pkpass);
+				assert.notEqual(
+					passjsonGenerated.preferredStyleSchemes,
+					undefined,
+				);
+				assert.deepEqual(passjsonGenerated.preferredStyleSchemes, [
+					"posterEventTicket",
+					"eventTicket",
+				]);
+			},
+		);
 
-			expect(passjsonGenerated.preferredStyleSchemes).not.toBeUndefined();
-			expect(passjsonGenerated.preferredStyleSchemes).toEqual([
-				"posterEventTicket",
-				"eventTicket",
-			]);
-		});
+		await t.test(
+			"should contain preferredStyleSchemes if coming from the setter (legacy order)",
+			() => {
+				pkpass.type = "eventTicket";
 
-		it("should contain preferredStyleSchemes if coming from the setter (legacy order)", () => {
-			pkpass.type = "eventTicket";
+				pkpass.preferredStyleSchemes = [
+					"eventTicket",
+					"posterEventTicket",
+				];
 
-			pkpass.preferredStyleSchemes = ["eventTicket", "posterEventTicket"];
+				assert.deepEqual(pkpass.preferredStyleSchemes, [
+					"eventTicket",
+					"posterEventTicket",
+				]);
 
-			expect(pkpass.preferredStyleSchemes).toEqual([
-				"eventTicket",
-				"posterEventTicket",
-			]);
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			const passjsonGenerated = getGeneratedPassJson(pkpass);
+				assert.notEqual(
+					passjsonGenerated.preferredStyleSchemes,
+					undefined,
+				);
+				assert.deepEqual(passjsonGenerated.preferredStyleSchemes, [
+					"eventTicket",
+					"posterEventTicket",
+				]);
+			},
+		);
 
-			expect(passjsonGenerated.preferredStyleSchemes).not.toBeUndefined();
-			expect(passjsonGenerated.preferredStyleSchemes).toEqual([
-				"eventTicket",
-				"posterEventTicket",
-			]);
-		});
+		await t.test(
+			"should contain preferredStyleSchemes if coming from the setter (new order)",
+			() => {
+				pkpass.type = "eventTicket";
 
-		it("should contain preferredStyleSchemes if coming from the setter (new order)", () => {
-			pkpass.type = "eventTicket";
+				pkpass.preferredStyleSchemes = [
+					"posterEventTicket",
+					"eventTicket",
+				];
 
-			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
+				assert.deepEqual(pkpass.preferredStyleSchemes, [
+					"posterEventTicket",
+					"eventTicket",
+				]);
 
-			expect(pkpass.preferredStyleSchemes).toEqual([
-				"posterEventTicket",
-				"eventTicket",
-			]);
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
 
-			const passjsonGenerated = getGeneratedPassJson(pkpass);
-
-			expect(passjsonGenerated.preferredStyleSchemes).not.toBeUndefined();
-			expect(passjsonGenerated.preferredStyleSchemes).toEqual([
-				"posterEventTicket",
-				"eventTicket",
-			]);
-		});
+				assert.notEqual(
+					passjsonGenerated.preferredStyleSchemes,
+					undefined,
+				);
+				assert.deepEqual(passjsonGenerated.preferredStyleSchemes, [
+					"posterEventTicket",
+					"eventTicket",
+				]);
+			},
+		);
 	});
 
-	it("preferredStyleSchemes setter should throw if pass is not an eventTicket or boardingPass", () => {
-		pkpass.type = "storeCard";
+	await t.test(
+		"preferredStyleSchemes setter should throw if pass is not an eventTicket or boardingPass",
+		() => {
+			pkpass.type = "storeCard";
 
-		expect(() => {
-			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
-		}).toThrowError();
-	});
+			assert.throws(() => {
+				pkpass.preferredStyleSchemes = [
+					"posterEventTicket",
+					"eventTicket",
+				];
+			});
+		},
+	);
 
-	it("preferredStyleSchemes getter should throw if pass is not an eventTicket or boardingPass", () => {
-		pkpass.type = "storeCard";
+	await t.test(
+		"preferredStyleSchemes getter should throw if pass is not an eventTicket or boardingPass",
+		() => {
+			pkpass.type = "storeCard";
 
-		expect(() => {
-			pkpass.preferredStyleSchemes;
-		}).toThrowError();
-	});
+			assert.throws(() => {
+				pkpass.preferredStyleSchemes;
+			});
+		},
+	);
 });

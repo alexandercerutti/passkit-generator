@@ -1,6 +1,6 @@
 import { Readable, Stream } from "node:stream";
 import { Buffer } from "node:buffer";
-import { toArray as zipToArray } from "do-not-zip";
+import { createZip } from "./Zip.js";
 import * as Messages from "./messages.js";
 
 export const filesSymbol = Symbol("bundleFiles");
@@ -129,7 +129,7 @@ export default class Bundle {
 
 	public getAsBuffer(): Buffer {
 		this[freezeSymbol]();
-		return Buffer.from(zipToArray(createZipFilesMap(this[filesSymbol])));
+		return createZip(createZipFilesMap(this[filesSymbol]));
 	}
 
 	/**
@@ -142,9 +142,7 @@ export default class Bundle {
 
 	public getAsStream(): Stream {
 		this[freezeSymbol]();
-		return Readable.from(
-			Buffer.from(zipToArray(createZipFilesMap(this[filesSymbol]))),
-		);
+		return Readable.from(createZip(createZipFilesMap(this[filesSymbol])));
 	}
 
 	/**
@@ -164,7 +162,7 @@ export default class Bundle {
 }
 
 /**
- * Creates a files map for do-not-zip
+ * Creates a files map for the zip writer
  *
  * @param files
  * @returns

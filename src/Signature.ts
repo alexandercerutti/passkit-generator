@@ -1,4 +1,5 @@
 import forge from "node-forge";
+import { createHash as createNativeHash } from "node:crypto";
 import type * as Schemas from "./schemas/index.js";
 import { Buffer } from "node:buffer";
 
@@ -14,6 +15,61 @@ export function createHash(buffer: Buffer) {
 	hashFlow.update(buffer.toString("binary"));
 
 	return hashFlow.digest().toHex();
+}
+
+/**
+ * Decrypting a PEM private key runs the key derivation function that protects
+ * it, which is by far the most expensive part of parsing the certificates.
+ * A service issuing passes reuses the very same signing key for every pass, so
+ * the parsed key is memoized instead of being derived over and over again.
+ *
+ * The cache is bounded because a multi-tenant issuer may legitimately rotate
+ * between several keys, and it is keyed by a digest rather than by the key
+ * material itself so that neither the PEM nor the passphrase is retained in a
+ * long-lived structure.
+ */
+
+const SIGNER_KEY_CACHE_LIMIT = 32;
+
+const signerKeyCache = new Map<string, forge.pki.rsa.PrivateKey>();
+
+function getSignerKeyCacheKey(signerKey: string, passphrase: string): string {
+	/**
+	 * Both fields are length-prefixed so that no two different
+	 * (key, passphrase) pairs can produce the same digest input.
+	 */
+
+	return createNativeHash("sha256")
+		.update(
+			`${signerKey.length}:${signerKey}:${passphrase.length}:${passphrase}`,
+		)
+		.digest("base64");
+}
+
+function getCachedSignerKey(
+	signerKey: string,
+	passphrase: string | undefined,
+): forge.pki.rsa.PrivateKey {
+	const cacheKey = getSignerKeyCacheKey(signerKey, passphrase ?? "");
+	const cached = signerKeyCache.get(cacheKey);
+
+	if (cached) {
+		/** Re-inserting refreshes recency, so the map evicts least-recently-used */
+		signerKeyCache.delete(cacheKey);
+		signerKeyCache.set(cacheKey, cached);
+
+		return cached;
+	}
+
+	const parsedKey = forge.pki.decryptRsaPrivateKey(signerKey, passphrase);
+
+	if (signerKeyCache.size >= SIGNER_KEY_CACHE_LIMIT) {
+		signerKeyCache.delete(signerKeyCache.keys().next().value as string);
+	}
+
+	signerKeyCache.set(cacheKey, parsedKey);
+
+	return parsedKey;
 }
 
 /**
@@ -108,7 +164,7 @@ function parseCertificates(certificates: Schemas.CertificatesSchema) {
 	return {
 		signerCert: forge.pki.certificateFromPem(signerCert.toString("utf-8")),
 		wwdr: forge.pki.certificateFromPem(wwdr.toString("utf-8")),
-		signerKey: forge.pki.decryptRsaPrivateKey(
+		signerKey: getCachedSignerKey(
 			signerKey.toString("utf-8"),
 			signerKeyPassphrase,
 		),

@@ -12,11 +12,11 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       joi:
-        specifier: 17.4.2
-        version: 17.4.2
+        specifier: 17.13.4
+        version: 17.13.4
       node-forge:
-        specifier: ^1.3.2
-        version: 1.3.2
+        specifier: ^1.4.0
+        version: 1.4.0
       tslib:
         specifier: ^2.7.0
         version: 2.7.0
@@ -1057,8 +1057,8 @@ packages:
   '@hapi/hoek@11.0.7':
     resolution: {integrity: sha512-HV5undWkKzcB4RZUusqOpcgxOaq6VOAH7zhhIr2g3G8NF/MlFO75SjOr2NfuSx0Mh40+1FqCkagKLJRykUWoFQ==}
 
-  '@hapi/hoek@9.1.1':
-    resolution: {integrity: sha512-CAEbWH7OIur6jEOzaai83jq3FmKmv4PmX1JYfs9IrYcGEVI/lyL1EXJGCj7eFVJ0bg5QR8LMxBlEtA+xKiLpFw==}
+  '@hapi/hoek@9.3.0':
+    resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
 
   '@hapi/iron@6.0.0':
     resolution: {integrity: sha512-zvGvWDufiTGpTJPG1Y/McN8UqWBu0k/xs/7l++HVU535NLHXsHhy54cfEMdW7EjwKfbBfM9Xy25FmTiobb7Hvw==}
@@ -1124,8 +1124,8 @@ packages:
     resolution: {integrity: sha512-05HumSy3LWfXpmJ9cr6HzwhAavrHkJ1ZRCmNE2qJMihdM5YcWreWPfyN0yKT2ZjCM92au3ZkuodjBxOibxM67A==}
     engines: {node: '>=14.0.0'}
 
-  '@hapi/topo@5.0.0':
-    resolution: {integrity: sha512-tFJlT47db0kMqVm3H4nQYgn6Pwg10GTZHb1pwmSiv1K4ks6drQOtfEF5ZnPjkvC+y4/bUPHK+bc87QvLcL+WMw==}
+  '@hapi/topo@5.1.0':
+    resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
 
   '@hapi/topo@6.0.2':
     resolution: {integrity: sha512-KR3rD5inZbGMrHmgPxsJ9dbi6zEK+C3ZwUwTa+eMwWLz7oijWUTWD2pMSNNYJAU6Qq+65NkxXjqHr/7LM2Xkqg==}
@@ -1365,11 +1365,11 @@ packages:
     resolution: {integrity: sha512-7eDbqKv/OBd11jjdZjUwFGN8sHWkeUqLeHXHQxQ1azja2IM7WIH+z/aLgzR6LhB3/MINNwtjesDpjGqTMj2JKQ==}
     engines: {node: '>=12.0'}
 
-  '@sideway/address@4.1.3':
-    resolution: {integrity: sha512-8ncEUtmnTsMmL7z1YPB47kPUq7LpKWJNFPsRzHiIajGC5uXlWGn+AmkYPcHNl8S4tcEGx+cnORnNYaw2wvL+LQ==}
+  '@sideway/address@4.1.5':
+    resolution: {integrity: sha512-IqO/DUQHUkPeixNQ8n0JA6102hT9CmaljNTPmQ1u8MEhBo/R4Q8eKLN/vGZxuebwOroDB4cbpjheD4+/sKFK4Q==}
 
-  '@sideway/formula@3.0.0':
-    resolution: {integrity: sha512-vHe7wZ4NOXVfkoRb8T5otiENVlT7a3IAiw7H5M2+GO+9CDgcVUUsX1zalAztCmwyOr2RUTGJdgB+ZvSVqmdHmg==}
+  '@sideway/formula@3.0.1':
+    resolution: {integrity: sha512-/poHZJJVjx3L+zVD6g9KgHfYnb443oi7wLu/XKojDviHy6HOEOA6z1Trk5aR1dGcmPenJEgb2sK2I80LeS3MIg==}
 
   '@sideway/pinpoint@2.0.0':
     resolution: {integrity: sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==}
@@ -1958,6 +1958,7 @@ packages:
   aws-sdk@2.1692.0:
     resolution: {integrity: sha512-x511uiJ/57FIsbgUe5csJ13k3uzu25uWQE+XqfBis/sB0SFoiElJWXRkgEAUh0U6n40eT3ay5Ue4oPkRMu1LYw==}
     engines: {node: '>= 10.0.0'}
+    deprecated: The AWS SDK for JavaScript (v2) has reached end-of-support, and no longer receives updates. Please migrate your code to use AWS SDK for JavaScript (v3). More info https://a.co/cUPnyil
 
   axios@1.7.9:
     resolution: {integrity: sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==}
@@ -2009,6 +2010,7 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
+    deprecated: Security vulnerability fixed in 5.2.1, please upgrade
 
   bignumber.js@9.1.2:
     resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
@@ -3285,15 +3287,17 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   glob@9.3.5:
     resolution: {integrity: sha512-e1LleDykUz2Iu+MTYdkSsuWX8lvAjAcs0Xef0lNIu0S2wOAzuTxCJtcd9S3cijlwYF18EsU3rzb8jPVobxDh9Q==}
     engines: {node: '>=16 || 14 >=14.17'}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-dirs@3.0.1:
     resolution: {integrity: sha512-NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==}
@@ -3961,8 +3965,8 @@ packages:
     resolution: {integrity: sha512-9FzQjJ7MATs1tSpnco1K6ayiYE3figslrXA72G2HQ/n76RzvYlofyi5QM+iX4YRs/pu3yzxlVQSST23+dMDknw==}
     engines: {node: '>= 0.6.0'}
 
-  joi@17.4.2:
-    resolution: {integrity: sha512-Lm56PP+n0+Z2A2rfRvsfWVDXGEWjXxatPopkQ8qQ5mxCEhwHG+Ettgg5o98FFaxilOxozoa14cFhrE/hOzh/Nw==}
+  joi@17.13.4:
+    resolution: {integrity: sha512-1RuuER6kmt8K8I3nIWvPZKi5RQCb568ZPyY4Pwjlua+yo+63ZTmIwxLZH0heBmiKN4uxjvCiarDrjaeH84xicQ==}
 
   join-path@1.1.1:
     resolution: {integrity: sha512-jnt9OC34sLXMLJ6YfPQ2ZEKrR9mB5ZbSnQb4LPaOx1c5rTzxpR33L18jjp0r75mGGTJmsil3qwN1B5IBeTnSSA==}
@@ -4021,6 +4025,7 @@ packages:
 
   json-ptr@3.1.1:
     resolution: {integrity: sha512-SiSJQ805W1sDUCD1+/t1/1BIrveq2Fe9HJqENxZmMCILmrPI7WhS/pePpIOx85v6/H2z1Vy7AI08GV2TzfXocg==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   json-refs@3.0.15:
     resolution: {integrity: sha512-0vOQd9eLNBL18EGl5yYaO44GhixmImes2wiYn9Z3sag3QnehWrYWlB9AFtMxCL2Bj3fyxgDYkxGFEU/chlYssw==}
@@ -4550,6 +4555,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-emoji@2.2.0:
     resolution: {integrity: sha512-Z3lTE9pLaJF47NyMhd4ww1yFTAP8YhYI8SleJiHzM46Fgpm5cnNzSl9XfzFNqbaz+VlJrIj3fXQ4DeN1Rjm6cw==}
@@ -4568,8 +4574,8 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-forge@1.3.2:
-    resolution: {integrity: sha512-6xKiQ+cph9KImrRh0VsjH2d8/GXA4FIMlgU4B757iI1ApvcyA9VlouP0yZJha01V+huImO+kKMU7ih+2+E14fw==}
+  node-forge@1.4.0:
+    resolution: {integrity: sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==}
     engines: {node: '>= 6.13.0'}
 
   node-gyp@10.3.1:
@@ -5655,6 +5661,7 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   tcp-port-used@1.0.2:
     resolution: {integrity: sha512-l7ar8lLUD3XS1V2lfoJlCBaeoaWo/2xfYt81hM7VlvR4RrMVFqfmzfhLVk40hAb368uitje5gPtBRL1m/DGvLA==}
@@ -5942,14 +5949,17 @@ packages:
 
   uuid@8.0.0:
     resolution: {integrity: sha512-jOXGuXZAWdsTH7eZLtyXMqUb9EcWMGZNbL9YcGBJl4MH4nrxHmZJhEHvyLFrkxo+28uLb/NYRcStH48fnD0Vzw==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   v8-compile-cache-lib@3.0.1:
@@ -6055,6 +6065,7 @@ packages:
   wrangler@3.101.0:
     resolution: {integrity: sha512-zKRqL/jjyF54DH8YCCaF4B2x0v9kSdxLpNkxGDltZ17vCBbq9PCchooN25jbmxOTC2LWdB2LVDw7S66zdl7XuQ==}
     engines: {node: '>=16.17.0'}
+    deprecated: Downgrade to 3.99.0
     hasBin: true
     peerDependencies:
       '@cloudflare/workers-types': ^4.20241230.0
@@ -7546,7 +7557,7 @@ snapshots:
   '@hapi/accept@5.0.2':
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/accept@6.0.3':
     dependencies:
@@ -7555,7 +7566,7 @@ snapshots:
 
   '@hapi/ammo@5.0.1':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/ammo@6.0.1':
     dependencies:
@@ -7563,7 +7574,7 @@ snapshots:
 
   '@hapi/b64@5.0.0':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/b64@6.0.1':
     dependencies:
@@ -7575,12 +7586,12 @@ snapshots:
 
   '@hapi/boom@9.1.4':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/bounce@2.0.0':
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/bounce@3.0.2':
     dependencies:
@@ -7594,7 +7605,7 @@ snapshots:
   '@hapi/call@8.0.1':
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/call@9.0.1':
     dependencies:
@@ -7604,7 +7615,7 @@ snapshots:
   '@hapi/catbox-memory@5.0.1':
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/catbox-memory@6.0.2':
     dependencies:
@@ -7614,7 +7625,7 @@ snapshots:
   '@hapi/catbox@11.1.1':
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/podium': 4.1.3
       '@hapi/validate': 1.1.3
 
@@ -7655,7 +7666,7 @@ snapshots:
   '@hapi/h2o2@9.1.0':
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/validate': 1.1.3
       '@hapi/wreck': 17.2.0
 
@@ -7669,7 +7680,7 @@ snapshots:
       '@hapi/catbox': 11.1.1
       '@hapi/catbox-memory': 5.0.1
       '@hapi/heavy': 7.0.1
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/mimos': 6.0.0
       '@hapi/podium': 4.1.3
       '@hapi/shot': 5.0.5
@@ -7677,7 +7688,7 @@ snapshots:
       '@hapi/statehood': 7.0.4
       '@hapi/subtext': 7.1.0
       '@hapi/teamwork': 5.1.1
-      '@hapi/topo': 5.0.0
+      '@hapi/topo': 5.1.0
       '@hapi/validate': 1.1.3
 
   '@hapi/hapi@21.3.12':
@@ -7704,7 +7715,7 @@ snapshots:
   '@hapi/heavy@7.0.1':
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/validate': 1.1.3
 
   '@hapi/heavy@8.0.1':
@@ -7715,7 +7726,7 @@ snapshots:
 
   '@hapi/hoek@11.0.7': {}
 
-  '@hapi/hoek@9.1.1': {}
+  '@hapi/hoek@9.3.0': {}
 
   '@hapi/iron@6.0.0':
     dependencies:
@@ -7723,7 +7734,7 @@ snapshots:
       '@hapi/boom': 9.1.4
       '@hapi/bourne': 2.1.0
       '@hapi/cryptiles': 5.1.0
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/iron@7.0.1':
     dependencies:
@@ -7735,7 +7746,7 @@ snapshots:
 
   '@hapi/mimos@6.0.0':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       mime-db: 1.53.0
 
   '@hapi/mimos@7.0.1':
@@ -7745,7 +7756,7 @@ snapshots:
 
   '@hapi/nigel@4.0.2':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/vise': 4.0.0
 
   '@hapi/nigel@5.0.1':
@@ -7758,7 +7769,7 @@ snapshots:
       '@hapi/b64': 5.0.0
       '@hapi/boom': 9.1.4
       '@hapi/content': 5.0.2
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/nigel': 4.0.2
 
   '@hapi/pez@6.1.0':
@@ -7771,7 +7782,7 @@ snapshots:
 
   '@hapi/podium@4.1.3':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/teamwork': 5.1.1
       '@hapi/validate': 1.1.3
 
@@ -7783,7 +7794,7 @@ snapshots:
 
   '@hapi/shot@5.0.5':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/validate': 1.1.3
 
   '@hapi/shot@6.0.1':
@@ -7794,7 +7805,7 @@ snapshots:
   '@hapi/somever@3.0.1':
     dependencies:
       '@hapi/bounce': 2.0.0
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/somever@4.1.1':
     dependencies:
@@ -7807,7 +7818,7 @@ snapshots:
       '@hapi/bounce': 2.0.0
       '@hapi/bourne': 2.1.0
       '@hapi/cryptiles': 5.1.0
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/iron': 6.0.0
       '@hapi/validate': 1.1.3
 
@@ -7827,7 +7838,7 @@ snapshots:
       '@hapi/bourne': 2.1.0
       '@hapi/content': 5.0.2
       '@hapi/file': 2.0.0
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
       '@hapi/pez': 5.1.0
       '@hapi/wreck': 17.2.0
 
@@ -7845,9 +7856,9 @@ snapshots:
 
   '@hapi/teamwork@6.0.0': {}
 
-  '@hapi/topo@5.0.0':
+  '@hapi/topo@5.1.0':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/topo@6.0.2':
     dependencies:
@@ -7855,8 +7866,8 @@ snapshots:
 
   '@hapi/validate@1.1.3':
     dependencies:
-      '@hapi/hoek': 9.1.1
-      '@hapi/topo': 5.0.0
+      '@hapi/hoek': 9.3.0
+      '@hapi/topo': 5.1.0
 
   '@hapi/validate@2.0.1':
     dependencies:
@@ -7865,7 +7876,7 @@ snapshots:
 
   '@hapi/vise@4.0.0':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/vise@5.0.1':
     dependencies:
@@ -7875,7 +7886,7 @@ snapshots:
     dependencies:
       '@hapi/boom': 9.1.4
       '@hapi/bourne': 2.1.0
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
   '@hapi/wreck@18.1.0':
     dependencies:
@@ -8320,11 +8331,11 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@sideway/address@4.1.3':
+  '@sideway/address@4.1.5':
     dependencies:
-      '@hapi/hoek': 9.1.1
+      '@hapi/hoek': 9.3.0
 
-  '@sideway/formula@3.0.0': {}
+  '@sideway/formula@3.0.1': {}
 
   '@sideway/pinpoint@2.0.0': {}
 
@@ -10537,7 +10548,7 @@ snapshots:
       google-auth-library: 9.15.0(encoding@0.1.13)
       jsonwebtoken: 9.0.2
       jwks-rsa: 3.1.0
-      node-forge: 1.3.2
+      node-forge: 1.4.0
       uuid: 11.0.5
     optionalDependencies:
       '@google-cloud/firestore': 7.11.0(encoding@0.1.13)
@@ -11856,12 +11867,12 @@ snapshots:
 
   jmespath@0.16.0: {}
 
-  joi@17.4.2:
+  joi@17.13.4:
     dependencies:
-      '@hapi/hoek': 9.1.1
-      '@hapi/topo': 5.0.0
-      '@sideway/address': 4.1.3
-      '@sideway/formula': 3.0.0
+      '@hapi/hoek': 9.3.0
+      '@hapi/topo': 5.1.0
+      '@sideway/address': 4.1.5
+      '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
   join-path@1.1.1:
@@ -12525,7 +12536,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-forge@1.3.2: {}
+  node-forge@1.4.0: {}
 
   node-gyp@10.3.1:
     dependencies:
@@ -13280,7 +13291,7 @@ snapshots:
   selfsigned@2.4.1:
     dependencies:
       '@types/node-forge': 1.3.11
-      node-forge: 1.3.2
+      node-forge: 1.4.0
 
   semver-diff@3.1.1:
     dependencies:

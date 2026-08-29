@@ -60,36 +60,6 @@
 				"attributedValue": "Visitor",
 				"value": "Visitor"
 			}
-		],
-		"backFields": [
-			{
-				"key": "g36mh00ncsj",
-				"label": "Information 📍",
-				"textAlignment": "PKTextAlignmentNatural",
-				"attributedValue": "l$value-g36mh00ncsj-apple",
-				"value": "l$value-g36mh00ncsj-apple"
-			},
-			{
-				"key": "zbj9r88tm7",
-				"label": "l$label-zbj9r88tm7-apple",
-				"textAlignment": "PKTextAlignmentNatural",
-				"attributedValue": "l$value-zbj9r88tm7-apple",
-				"value": "l$value-zbj9r88tm7-apple"
-			},
-			{
-				"key": "mj4yjkf23v",
-				"label": "l$label-mj4yjkf23v-apple",
-				"textAlignment": "PKTextAlignmentNatural",
-				"attributedValue": "l$value-mj4yjkf23v-apple",
-				"value": "l$value-mj4yjkf23v-apple"
-			},
-			{
-				"key": "s9wctf29r2",
-				"label": "l$label-s9wctf29r2-apple",
-				"textAlignment": "PKTextAlignmentNatural",
-				"attributedValue": "<a href='https://example.com'>Example Link</a>",
-				"value": "<a href='https://example.com'>Example Link</a>"
-			}
 		]
 	},
 	"semantics": {

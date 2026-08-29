@@ -87,8 +87,8 @@
 				"key": "s9wctf29r2",
 				"label": "l$label-s9wctf29r2-apple",
 				"textAlignment": "PKTextAlignmentNatural",
-				"attributedValue": "<a href='https://dev.gets.li/~eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJtb2xpYSIsInN1YiI6Ikc3d3VJWFBRVUd0RTQyZkIiLCJpYXQiOjE3ODc4NDk5MTUsInUiOiJodHRwczovL25lb3N0b3JlLmNsb3VkIiwiZCI6ImEiLCJzIjoiYmYiLCJzaSI6InM5d2N0ZjI5cjIifQ.ueL5dyHZw-C_g2KVOcPkMUJnd4G4WhYPlykKWWfq730'>neostore.cloud</a>",
-				"value": "<a href='https://dev.gets.li/~eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJtb2xpYSIsInN1YiI6Ikc3d3VJWFBRVUd0RTQyZkIiLCJpYXQiOjE3ODc4NDk5MTUsInUiOiJodHRwczovL25lb3N0b3JlLmNsb3VkIiwiZCI6ImEiLCJzIjoiYmYiLCJzaSI6InM5d2N0ZjI5cjIifQ.ueL5dyHZw-C_g2KVOcPkMUJnd4G4WhYPlykKWWfq730'>neostore.cloud</a>"
+				"attributedValue": "<a href='https://example.com'>Example Link</a>",
+				"value": "<a href='https://example.com'>Example Link</a>"
 			}
 		]
 	},

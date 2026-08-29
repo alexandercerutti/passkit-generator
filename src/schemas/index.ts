@@ -625,35 +625,11 @@ export type OverridablePassProps = Omit<
 	PassProps,
 	PassMethodsProps | PassTypesProps
 >;
-export type PassPropsFromMethods = { [K in PassMethodsProps]: PassProps[K] };
-export type PassKindsProps = { [K in PassTypesProps]: PassProps[K] };
 
 export type PassColors = Pick<
 	OverridablePassProps,
 	"backgroundColor" | "foregroundColor" | "labelColor" | "stripColor"
 >;
-
-export const PassPropsFromMethods = Joi.object<PassPropsFromMethods>({
-	nfc: NFC,
-	beacons: Joi.array().items(Beacon),
-	barcodes: Joi.array().items(Barcode),
-	relevantDate: Joi.string().isoDate(),
-	relevantDates: Joi.array().items(RelevantDate),
-	expirationDate: Joi.string().isoDate(),
-	locations: Joi.array().items(Location),
-	preferredStyleSchemes: PreferredStyleSchemes,
-	upcomingPassInformation: Joi.array().items(UpcomingPassInformationEntry),
-	featuredActions: Joi.array().items(FeaturedAction),
-});
-
-export const PassKindsProps = Joi.object<PassKindsProps>({
-	coupon: PassFields.disallow("transitType"),
-	generic: PassFields.disallow("transitType"),
-	posterGeneric: PassFields.disallow("transitType"),
-	storeCard: PassFields.disallow("transitType"),
-	eventTicket: PassFields.disallow("transitType"),
-	boardingPass: PassFields,
-});
 
 export const PassType = Joi.string().regex(
 	/(boardingPass|coupon|eventTicket|storeCard|generic|posterGeneric)/,
@@ -1063,12 +1039,42 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	transitProviderWebsiteURL: Joi.string().regex(URL_REGEX),
 }).with("webServiceURL", "authenticationToken");
 
-export const PassProps = Joi.object<
-	OverridablePassProps & PassKindsProps & PassPropsFromMethods
->()
-	.concat(OverridablePassProps)
-	.concat(PassKindsProps)
-	.concat(PassPropsFromMethods);
+/**
+ * Same as `Joi.SchemaMap`, but every key of the slice is mandatory.
+ * Adding a prop to `PassTypesProps` or `PassMethodsProps` becomes a
+ * compilation error until a schema for it is provided below.
+ */
+type ExhaustiveSchemaMap<T> = Required<Joi.SchemaMap<T>>;
+
+export const PassProps = OverridablePassProps
+	/**
+	 * Pass style payload sections.
+	 */
+	.append<PassProps>({
+		posterGeneric: PassFields.disallow("transitType"),
+		coupon: PassFields.disallow("transitType"),
+		generic: PassFields.disallow("transitType"),
+		storeCard: PassFields.disallow("transitType"),
+		eventTicket: PassFields.disallow("transitType"),
+		boardingPass: PassFields,
+	} satisfies ExhaustiveSchemaMap<Pick<PassProps, PassTypesProps>>)
+	/**
+	 * Props managed through PKPass helper methods.
+	 */
+	.append<PassProps>({
+		nfc: NFC,
+		beacons: Joi.array().items(Beacon),
+		barcodes: Joi.array().items(Barcode),
+		relevantDate: Joi.string().isoDate(),
+		relevantDates: Joi.array().items(RelevantDate),
+		expirationDate: Joi.string().isoDate(),
+		locations: Joi.array().items(Location),
+		preferredStyleSchemes: PreferredStyleSchemes,
+		upcomingPassInformation: Joi.array().items(
+			UpcomingPassInformationEntry,
+		),
+		featuredActions: Joi.array().items(FeaturedAction),
+	} satisfies ExhaustiveSchemaMap<Pick<PassProps, PassMethodsProps>>);
 
 export interface Template {
 	model: string;

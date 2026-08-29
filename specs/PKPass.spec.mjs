@@ -924,11 +924,11 @@ describe("PKPass", () => {
 			it("should accept dates", () => {
 				pkpass.setRelevantDates([
 					{
-						startDate: new Date(2025, 1, 8, 23, 58, 25),
-						endDate: new Date(2025, 1, 8, 23, 58, 25),
+						startDate: new Date(Date.UTC(2025, 1, 8, 23, 58, 25)),
+						endDate: new Date(Date.UTC(2025, 1, 8, 23, 58, 25)),
 					},
 					{
-						relevantDate: new Date(2025, 1, 8, 23, 58, 25),
+						relevantDate: new Date(Date.UTC(2025, 1, 8, 23, 58, 25)),
 					},
 				]);
 
@@ -936,11 +936,11 @@ describe("PKPass", () => {
 
 				expect(passjsonGenerated.relevantDates).toMatchObject([
 					{
-						startDate: "2025-02-08T22:58:25.000Z",
-						endDate: "2025-02-08T22:58:25.000Z",
+						startDate: "2025-02-08T23:58:25.000Z",
+						endDate: "2025-02-08T23:58:25.000Z",
 					},
 					{
-						relevantDate: "2025-02-08T22:58:25.000Z",
+						relevantDate: "2025-02-08T23:58:25.000Z",
 					},
 				]);
 			});

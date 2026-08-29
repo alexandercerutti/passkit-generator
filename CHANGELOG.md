@@ -1,5 +1,13 @@
 # Changelog
 
+### 3.5.8 (28 Aug 2026)
+
+-   Updated Joi to latest v17
+-   Updated node-forge to v1.4.0
+-   Reworked Joi schemes to fix CVE (#271)
+
+---
+
 ### 3.5.7 (25 Dec 2025)
 
 -   Unlocked possibility to use URI other than http/s for `appLaunchURL` (PR #263)

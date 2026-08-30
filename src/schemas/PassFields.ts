@@ -36,7 +36,7 @@ export interface PassFields {
 	 * @iOSVersion 27
 	 * @passStyle posterGeneric (new layout)
 	 */
-	footerFields: PassFieldContent[];
+	footerFields?: PassFieldContent[];
 }
 
 export const PassFields = Joi.object<PassFields>().keys({

@@ -165,6 +165,10 @@ export class PassType<Type extends PassTypesProps> {
 	 * Throws an error if the pass type is not boardingPass.
 	 */
 	public set transitType(transitType: TransitType) {
+		if (this[frozenSymbol]) {
+			throw new Error(Messages.BUNDLE.CLOSED);
+		}
+
 		if (this.type !== "boardingPass") {
 			throw new TypeError(Messages.TRANSIT_TYPE.UNEXPECTED_PASS_TYPE);
 		}

@@ -9,6 +9,7 @@ import {
 import * as Messages from "./messages.js";
 
 const headerFieldsSymbol = Symbol("headerFields");
+const frozenSymbol = Symbol("frozen");
 const primaryFieldsSymbol = Symbol("primaryFields");
 const secondaryFieldsSymbol = Symbol("secondaryFields");
 const auxiliaryFieldsSymbol = Symbol("auxiliaryFields");
@@ -22,6 +23,7 @@ const keyPoolSymbol = Symbol("sharedKey");
 export class PassType<Type extends PassTypesProps> {
 	public readonly type: Type;
 	private [keyPoolSymbol]: Set<string> = new Set();
+	private [frozenSymbol]: boolean = false;
 
 	private [headerFieldsSymbol]: PassFieldContent[];
 	private [primaryFieldsSymbol]: PassFieldContent[];
@@ -40,39 +42,48 @@ export class PassType<Type extends PassTypesProps> {
 			configurable: false,
 		});
 
+		const isFrozen = () => this[frozenSymbol];
+
 		this[headerFieldsSymbol] = createValidatedArray(
 			this[keyPoolSymbol],
 			PassFieldContent,
+			isFrozen,
 		);
 
 		this[primaryFieldsSymbol] = createValidatedArray(
 			this[keyPoolSymbol],
 			PassFieldContent,
+			isFrozen,
 		);
 
 		this[secondaryFieldsSymbol] = createValidatedArray(
 			this[keyPoolSymbol],
 			PassFieldContent,
+			isFrozen,
 		);
 
 		this[auxiliaryFieldsSymbol] = createValidatedArray(
 			this[keyPoolSymbol],
 			type === "eventTicket" ? PassFieldContentWithRow : PassFieldContent,
+			isFrozen,
 		);
 
 		this[backFieldsSymbol] = createValidatedArray(
 			this[keyPoolSymbol],
 			PassFieldContent,
+			isFrozen,
 		);
 
 		this[additionalInfoFieldsSymbol] = createValidatedArray(
 			this[keyPoolSymbol],
 			PassFieldContent,
+			isFrozen,
 		);
 
 		this[footerFieldsSymbol] = createValidatedArray(
 			this[keyPoolSymbol],
 			PassFieldContent,
+			isFrozen,
 		);
 	}
 
@@ -110,6 +121,10 @@ export class PassType<Type extends PassTypesProps> {
 		return {
 			[this.type]: passFields,
 		};
+	}
+
+	public freeze(): void {
+		this[frozenSymbol] = true;
 	}
 
 	// ******************//
@@ -167,9 +182,14 @@ export class PassType<Type extends PassTypesProps> {
 function createValidatedArray(
 	keysPool: Set<string>,
 	schema: typeof PassFieldContent | typeof PassFieldContentWithRow,
+	isFrozen: () => boolean,
 ): PassFieldContent[] {
 	return new Proxy<PassFieldContent[]>([], {
 		set(target, property, value) {
+			if (isFrozen()) {
+				throw new Error(Messages.BUNDLE.CLOSED);
+			}
+
 			if (property === "length") {
 				const droppedItems = target.slice(Number(value));
 				const result = Reflect.set(target, property, value);
@@ -232,6 +252,10 @@ function createValidatedArray(
 		},
 
 		deleteProperty(target, property) {
+			if (isFrozen()) {
+				throw new Error(Messages.BUNDLE.CLOSED);
+			}
+
 			const index = toArrayIndex(property);
 
 			if (index === undefined) {

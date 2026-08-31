@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import forge from "node-forge";
-import { PKPass } from "passkit-generator";
+import { PKPass, PassType } from "passkit-generator";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -1395,5 +1395,249 @@ describe("PKPass", () => {
 		expect(() => {
 			pkpass.preferredStyleSchemes;
 		}).toThrowError();
+	});
+
+	describe("types", () => {
+		const certificates = {
+			signerCert: SIGNER_CERT,
+			signerKey: SIGNER_KEY,
+			wwdr: WWDR,
+			signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+		};
+
+		/**
+		 * Builds a pass out of the example model, with its pass.json
+		 * style sections replaced by the provided ones.
+		 */
+
+		function passWithStyles(styles) {
+			const modelPassJson = JSON.parse(
+				modelFiles["pass.json"].toString("utf-8"),
+			);
+
+			const passJson = Object.assign(
+				{},
+				modelPassJson,
+				{
+					boardingPass: undefined,
+					coupon: undefined,
+					eventTicket: undefined,
+					generic: undefined,
+					storeCard: undefined,
+					posterGeneric: undefined,
+					transitType: undefined,
+					preferredStyleSchemes: undefined,
+				},
+				styles,
+			);
+
+			return new PKPass(
+				Object.assign({}, modelFiles, {
+					"pass.json": Buffer.from(JSON.stringify(passJson), "utf-8"),
+				}),
+				certificates,
+			);
+		}
+
+		it("should create a type for every style found in pass.json", () => {
+			const pass = passWithStyles({
+				generic: { primaryFields: [{ key: "a", value: "classic" }] },
+				posterGeneric: {
+					primaryFields: [{ key: "a", value: "poster" }],
+					footerFields: [{ key: "f", value: "foot" }],
+				},
+			});
+
+			expect(pass.types.map((passType) => passType.type)).toEqual([
+				"generic",
+				"posterGeneric",
+			]);
+		});
+
+		it("should expose the first type through the deprecated type accessor", () => {
+			const pass = passWithStyles({
+				generic: { primaryFields: [] },
+				posterGeneric: { primaryFields: [] },
+			});
+
+			expect(pass.type).toBe("generic");
+		});
+
+		it("should let the deprecated accessors read and write the first type", () => {
+			const pass = passWithStyles({
+				generic: { primaryFields: [{ key: "a", value: "v" }] },
+			});
+
+			pass.primaryFields.push({ key: "b", value: "v" });
+
+			expect(pass.types[0].primaryFields.map((f) => f.key)).toEqual([
+				"a",
+				"b",
+			]);
+
+			pass.types[0].primaryFields.push({ key: "c", value: "v" });
+
+			expect(pass.primaryFields.map((f) => f.key)).toEqual([
+				"a",
+				"b",
+				"c",
+			]);
+		});
+
+		it("should replace every type when the deprecated type setter is used", () => {
+			const pass = passWithStyles({
+				generic: { primaryFields: [{ key: "a", value: "v" }] },
+				posterGeneric: { primaryFields: [] },
+			});
+
+			pass.type = "storeCard";
+
+			expect(pass.types.map((passType) => passType.type)).toEqual([
+				"storeCard",
+			]);
+			expect(pass.primaryFields.length).toBe(0);
+		});
+
+		it("should export every type into the same pass.json", () => {
+			const pass = passWithStyles({
+				generic: { primaryFields: [{ key: "a", value: "classic" }] },
+				posterGeneric: {
+					primaryFields: [{ key: "a", value: "poster" }],
+					footerFields: [{ key: "f", value: "foot" }],
+				},
+			});
+
+			const passjsonGenerated = getGeneratedPassJson(pass);
+
+			expect(passjsonGenerated.generic.primaryFields).toEqual([
+				{ key: "a", value: "classic" },
+			]);
+			expect(passjsonGenerated.posterGeneric.primaryFields).toEqual([
+				{ key: "a", value: "poster" },
+			]);
+			expect(passjsonGenerated.posterGeneric.footerFields).toEqual([
+				{ key: "f", value: "foot" },
+			]);
+		});
+
+		it("should export a type added through the types accessor", () => {
+			const pass = passWithStyles({
+				generic: { primaryFields: [{ key: "a", value: "classic" }] },
+			});
+
+			const posterGeneric = new PassType("posterGeneric");
+			posterGeneric.footerFields.push({ key: "f", value: "foot" });
+
+			pass.types.push(posterGeneric);
+
+			const passjsonGenerated = getGeneratedPassJson(pass);
+
+			expect(passjsonGenerated.posterGeneric.footerFields).toEqual([
+				{ key: "f", value: "foot" },
+			]);
+		});
+
+		it("should keep the keys pool of two types independent", () => {
+			const pass = passWithStyles({
+				generic: { primaryFields: [{ key: "a", value: "classic" }] },
+				posterGeneric: {
+					primaryFields: [{ key: "a", value: "poster" }],
+				},
+			});
+
+			expect(pass.types[0].primaryFields.length).toBe(1);
+			expect(pass.types[1].primaryFields.length).toBe(1);
+		});
+
+		it("should skip invalid template fields instead of discarding the pass.json", () => {
+			const pass = passWithStyles({
+				generic: {
+					primaryFields: [{ key: "dup", value: "1" }],
+					headerFields: [{ key: "dup", value: "2" }],
+				},
+			});
+
+			/**
+			 * Which of the two arrays gets to keep the key depends on
+			 * the order they are imported in: what matters here is that
+			 * the duplicate got skipped and the pass.json survived it.
+			 */
+
+			expect(pass.type).toBe("generic");
+			expect(pass.primaryFields.length + pass.headerFields.length).toBe(
+				1,
+			);
+		});
+	});
+
+	describe("freezing of pass types", () => {
+		const certificates = {
+			signerCert: SIGNER_CERT,
+			signerKey: SIGNER_KEY,
+			wwdr: WWDR,
+			signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+		};
+
+		function exportedPass() {
+			const pass = new PKPass(modelFiles, certificates);
+			pass.getAsRaw();
+			return pass;
+		}
+
+		it("should block pushing fields after an export", () => {
+			const pass = exportedPass();
+
+			expect(() =>
+				pass.primaryFields.push({ key: "late", value: "v" }),
+			).toThrowError();
+		});
+
+		it("should block deleting a field after an export", () => {
+			const pass = exportedPass();
+
+			expect(() => delete pass.primaryFields[0]).toThrowError();
+		});
+
+		it("should block truncating fields after an export", () => {
+			const pass = exportedPass();
+
+			expect(() => {
+				pass.primaryFields.length = 0;
+			}).toThrowError();
+		});
+
+		it("should block popping a field after an export", () => {
+			const pass = exportedPass();
+
+			expect(() => pass.primaryFields.pop()).toThrowError();
+		});
+
+		it("should block setting transitType after an export", () => {
+			const pass = new PKPass(modelFiles, certificates);
+
+			pass.type = "boardingPass";
+			pass.transitType = "PKTransitTypeAir";
+			pass.getAsRaw();
+
+			expect(() => {
+				pass.transitType = "PKTransitTypeBoat";
+			}).toThrowError();
+		});
+
+		it("should block adding a type after an export", () => {
+			const pass = exportedPass();
+
+			expect(() =>
+				pass.types.push(new PassType("posterGeneric")),
+			).toThrowError();
+		});
+
+		it("should leave a PassType writable while it belongs to no pass", () => {
+			const detached = new PassType("generic");
+
+			expect(() =>
+				detached.primaryFields.push({ key: "a", value: "v" }),
+			).not.toThrowError();
+		});
 	});
 });

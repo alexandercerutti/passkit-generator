@@ -6,7 +6,7 @@
 import path from "node:path";
 import { promises as fs } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { PKPass } from "passkit-generator";
+import { PassType, PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
 
@@ -54,10 +54,11 @@ app.route("/scratch/:modelName").get(async (request, response) => {
 			},
 		);
 
-		pass.type = "boardingPass";
-		pass.transitType = "PKTransitTypeAir";
+		const boardingPassType = new PassType("boardingPass");
+		boardingPassType.transitType = "PKTransitTypeAir";
+		pass.types.push(boardingPassType);
 
-		pass.headerFields.push(
+		boardingPassType.headerFields.push(
 			{
 				key: "header-field-test-1",
 				value: "Unknown",
@@ -68,7 +69,7 @@ app.route("/scratch/:modelName").get(async (request, response) => {
 			},
 		);
 
-		pass.primaryFields.push(
+		boardingPassType.primaryFields.push(
 			{
 				key: "primaryField-1",
 				value: "NAP",

@@ -8,6 +8,7 @@ export * from "./PassFields.js";
 export * from "./Personalize.js";
 export * from "./Certificates.js";
 export * from "./UpcomingPassInformation.js";
+export * from "./FeaturedAction.js";
 
 import Joi from "joi";
 import type { Buffer } from "node:buffer";
@@ -20,6 +21,7 @@ import { PassFields, TransitType } from "./PassFields.js";
 import { Semantics } from "./Semantics.js";
 import { CertificatesSchema } from "./Certificates.js";
 import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
+import { FeaturedAction } from "./FeaturedAction.js";
 
 import * as Messages from "../messages.js";
 import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
@@ -178,6 +180,11 @@ export interface PassProps {
 	coupon?: PassFields;
 	generic?: PassFields;
 	storeCard?: PassFields;
+
+	/**
+	 * @iOSVersion 27
+	 */
+	posterGeneric?: PassFields;
 
 	/**
 	 * @iOSVersion 18
@@ -368,6 +375,9 @@ export interface PassProps {
 	/**
 	 * @iOSVersion 18
 	 * @passStyle eventTicket (new layout)
+	 *
+	 * @iOSVersion 27
+	 * @passStyle posterGeneric
 	 *
 	 * @description
 	 *
@@ -571,6 +581,16 @@ export interface PassProps {
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
 	transitProviderWebsiteURL?: string;
+
+	/**
+	 * @iOSVersion 27
+	 *
+	 * @description
+	 *
+	 * Featured action to be rendered under the pass
+	 */
+
+	featuredActions?: FeaturedAction[];
 }
 
 /**
@@ -587,14 +607,19 @@ type PassMethodsProps =
 	| "expirationDate"
 	| "locations"
 	| "preferredStyleSchemes"
-	| "upcomingPassInformation";
+	| "upcomingPassInformation"
+	| "featuredActions";
 
 export type PassTypesProps =
 	| "boardingPass"
 	| "eventTicket"
 	| "coupon"
 	| "generic"
-	| "storeCard";
+	| "storeCard"
+	/**
+	 * @iOSVersion 27
+	 */
+	| "posterGeneric";
 
 export type OverridablePassProps = Omit<
 	PassProps,
@@ -607,7 +632,7 @@ export type PassColors = Pick<
 >;
 
 export const PassType = Joi.string().regex(
-	/(boardingPass|coupon|eventTicket|storeCard|generic)/,
+	/(boardingPass|coupon|eventTicket|storeCard|generic|posterGeneric)/,
 );
 
 export const OverridablePassProps = Joi.object<OverridablePassProps>({
@@ -1026,6 +1051,7 @@ export const PassProps = OverridablePassProps
 	 * Pass style payload sections.
 	 */
 	.append<PassProps>({
+		posterGeneric: PassFields.disallow("transitType"),
 		coupon: PassFields.disallow("transitType"),
 		generic: PassFields.disallow("transitType"),
 		storeCard: PassFields.disallow("transitType"),
@@ -1047,6 +1073,7 @@ export const PassProps = OverridablePassProps
 		upcomingPassInformation: Joi.array().items(
 			UpcomingPassInformationEntry,
 		),
+		featuredActions: Joi.array().items(FeaturedAction),
 	} satisfies ExhaustiveSchemaMap<Pick<PassProps, PassMethodsProps>>);
 
 export interface Template {

@@ -1,0 +1,95 @@
+{
+	"formatVersion": 1,
+	"passTypeIdentifier": "pass.com.passkitgenerator",
+	"teamIdentifier": "F53WB8AE67",
+	"serialNumber": "dfajkvkabdckjahdhbcladsn",
+	"description": "Venetian Wallet Festival",
+	"organizationName": "demo",
+	"logoText": "Venetian Wallet Festival",
+	"preferredStyleSchemes": ["posterEventTicket", "eventTicket"],
+	"foregroundColor": "rgb(255,255,255)",
+	"backgroundColor": "rgb(102,153,248)",
+	"labelColor": "rgb(211,211,211)",
+	"barcodes": [
+		{
+			"format": "PKBarcodeFormatPDF417",
+			"message": "1234",
+			"messageEncoding": "iso-8859-1"
+		}
+	],
+	"eventTicket": {
+		"headerFields": [
+			{
+				"key": "jjaykmji5z",
+				"label": "26/08/2026",
+				"textAlignment": "PKTextAlignmentCenter",
+				"attributedValue": "7pm",
+				"value": "7pm"
+			}
+		],
+		"primaryFields": [],
+		"additionalInfoFields": [],
+		"secondaryFields": [
+			{
+				"key": "jgc4eod5prk",
+				"label": "Entrance",
+				"textAlignment": "PKTextAlignmentCenter",
+				"attributedValue": "General Entrance",
+				"value": "General Entrance"
+			},
+			{
+				"key": "4ix66i7oiwf",
+				"label": "Place",
+				"textAlignment": "PKTextAlignmentCenter",
+				"attributedValue": "Wallet Park",
+				"value": "Wallet Park"
+			}
+		],
+		"auxiliaryFields": [
+			{
+				"key": "y2bpn31btai",
+				"label": "Name",
+				"textAlignment": "PKTextAlignmentCenter",
+				"attributedValue": "Alexander Cerutti",
+				"value": "Alexander Cerutti"
+			},
+			{
+				"key": "pnxsbfdj9kq",
+				"label": "Type",
+				"textAlignment": "PKTextAlignmentCenter",
+				"attributedValue": "Visitor",
+				"value": "Visitor"
+			}
+		]
+	},
+	"semantics": {
+		"eventName": "Festival",
+		"eventStartDate": "2026-08-26T17:00:00+02:00",
+		"eventEndDate": "2026-08-26T23:00:00+02:00",
+		"eventType": "PKEventTypeGeneric",
+		"silenceRequested": true,
+		"venueName": "Venice Auditorium",
+		"venueRegionName": "Venice",
+		"venueRoom": "B112",
+		"venueEntrance": "ABC",
+		"venueEntranceDoor": "D3",
+		"venueEntranceGate": "G2",
+		"venueEntrancePortal": "P2",
+		"entranceDescription": "entrance to the left",
+		"venuePhoneNumber": "tel:+39-000-0000000",
+		"venueDoorsOpenDate": "2026-08-26T15:00:00+02:00",
+		"venueGatesOpenDate": "2026-08-26T14:45:00+02:00",
+		"venueOpenDate": "2026-08-26T16:00:00+02:00",
+		"venueCloseDate": "2026-08-26T23:00:00+02:00",
+		"seats": [
+			{
+				"seatAisle": "67",
+				"seatIdentifier": "3837",
+				"seatLevel": "2",
+				"seatNumber": "283",
+				"seatRow": "56",
+				"seatSection": "B"
+			}
+		]
+	}
+}

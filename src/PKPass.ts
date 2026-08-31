@@ -1,7 +1,6 @@
 import { Stream } from "node:stream";
 import { Buffer } from "node:buffer";
 import path from "node:path";
-import FieldsArray from "./FieldsArray.js";
 import Bundle, { filesSymbol } from "./Bundle.js";
 import getModelFolderContents from "./getModelFolderContents.js";
 import * as Schemas from "./schemas/index.js";
@@ -9,13 +8,14 @@ import * as Signature from "./Signature.js";
 import * as Strings from "./StringsUtils.js";
 import * as Utils from "./utils.js";
 import * as Messages from "./messages.js";
+import { PassType } from "./PassType.js";
 
 const propsSymbol = Symbol("props");
 const localizationSymbol = Symbol("pass.l10n");
 const importMetadataSymbol = Symbol("import.pass.metadata");
 const createManifestSymbol = Symbol("pass.manifest");
 const closePassSymbol = Symbol("pass.close");
-const passTypeSymbol = Symbol("pass.type");
+const passTypesSymbol = Symbol("pass.types");
 const certificatesSymbol = Symbol("pass.certificates");
 
 const RegExps = {
@@ -31,13 +31,18 @@ const RegExps = {
 
 export default class PKPass extends Bundle {
 	private [certificatesSymbol]: Schemas.CertificatesSchema;
+
+	/**
+	 * Will not include the pass types until exported
+	 */
 	private [propsSymbol]: Schemas.PassProps = {};
 	private [localizationSymbol]: {
 		[lang: string]: {
 			[placeholder: string]: string;
 		};
 	} = {};
-	private [passTypeSymbol]: Schemas.PassTypesProps | undefined = undefined;
+
+	private [passTypesSymbol]: PassType<Schemas.PassTypesProps>[] = [];
 
 	/**
 	 * Either create a pass from another one
@@ -81,9 +86,13 @@ export default class PKPass extends Bundle {
 			 * through validation
 			 */
 
-			buffers["pass.json"] = Buffer.from(
-				JSON.stringify(source[propsSymbol]),
-			);
+			/**
+			 * Reading through `props` and not through the symbol, as
+			 * pass types live in their own instances and get merged
+			 * into the props only when read or exported.
+			 */
+
+			buffers["pass.json"] = Buffer.from(JSON.stringify(source.props));
 		} else {
 			Schemas.assertValidity(
 				Schemas.Template,
@@ -213,7 +222,42 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get props(): Schemas.PassProps {
-		return Utils.cloneRecursive(this[propsSymbol]);
+		const propsWithTypes = Object.assign(
+			{},
+			this[propsSymbol],
+			this.types.reduce((acc, passType) => {
+				return Object.assign(acc, passType.toJSON());
+			}, {}),
+		);
+
+		return Utils.cloneRecursive(propsWithTypes);
+	}
+
+	/**
+	 * Allows getting the current featured actions for the pass.
+	 *
+	 * @iOSVersion 27
+	 */
+
+	public get featuredActions(): Schemas.FeaturedAction[] {
+		return this[propsSymbol].featuredActions || [];
+	}
+
+	/**
+	 * Allows setting featured actions for the pass. Only up to two actions are allowed,
+	 * so any further (among valid) will be ignored.
+	 *
+	 * @iOSVersion 27
+	 */
+
+	public set featuredActions(value: Schemas.FeaturedAction[]) {
+		const validActions = Schemas.filterValid(Schemas.FeaturedAction, value);
+
+		/**
+		 * Apple Wallet allows to have only up to two featured actions.
+		 */
+		const firstTwoActions = validActions.slice(0, 2);
+		this[propsSymbol].featuredActions = firstTwoActions;
 	}
 
 	/**
@@ -224,7 +268,13 @@ export default class PKPass extends Bundle {
 	 */
 
 	public get preferredStyleSchemes(): Schemas.PreferredStyleSchemes {
-		if (this.type !== "eventTicket" && this.type !== "boardingPass") {
+		if (
+			this.types.every(
+				(passType) =>
+					passType.type !== "eventTicket" &&
+					passType.type !== "boardingPass",
+			)
+		) {
 			throw new TypeError(
 				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_GET,
 			);
@@ -246,7 +296,13 @@ export default class PKPass extends Bundle {
 	public set preferredStyleSchemes(value: Schemas.PreferredStyleSchemes) {
 		Utils.assertUnfrozen(this);
 
-		if (this.type !== "eventTicket" && this.type !== "boardingPass") {
+		if (
+			this.types.every(
+				(passType) =>
+					passType.type !== "eventTicket" &&
+					passType.type !== "boardingPass",
+			)
+		) {
 			throw new TypeError(
 				Messages.PREFERRED_STYLE_SCHEMES.UNEXPECTED_PASS_TYPE_SET,
 			);
@@ -274,7 +330,7 @@ export default class PKPass extends Bundle {
 	) {
 		Utils.assertUnfrozen(this);
 
-		if (this.type !== "eventTicket") {
+		if (this.types.every((passType) => passType.type !== "eventTicket")) {
 			throw new TypeError(
 				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE_SET,
 			);
@@ -298,7 +354,7 @@ export default class PKPass extends Bundle {
 	}
 
 	public get upcomingPassInformation(): Schemas.UpcomingPassInformationEntry[] {
-		if (this.type !== "eventTicket") {
+		if (this.types.every((passType) => passType.type !== "eventTicket")) {
 			throw new TypeError(
 				Messages.UPCOMING_PASS_INFORMATION.UNEXPECTED_PASS_TYPE_GET,
 			);
@@ -313,22 +369,23 @@ export default class PKPass extends Bundle {
 	 *
 	 * @throws if current type is not "boardingPass".
 	 * @param value
+	 *
+	 * @deprecated Create a new PassType and set `transitType` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public set transitType(value: Schemas.TransitType) {
 		Utils.assertUnfrozen(this);
 
-		if (this.type !== "boardingPass") {
+		const firstBoardingPass = this[passTypesSymbol].find(
+			(passType) => passType.type === "boardingPass",
+		);
+
+		if (!firstBoardingPass) {
 			throw new TypeError(Messages.TRANSIT_TYPE.UNEXPECTED_PASS_TYPE);
 		}
 
-		Schemas.assertValidity(
-			Schemas.TransitType,
-			value,
-			Messages.TRANSIT_TYPE.INVALID,
-		);
-
-		this[propsSymbol]["boardingPass"].transitType = value;
+		firstBoardingPass.transitType = value;
 	}
 
 	/**
@@ -336,10 +393,15 @@ export default class PKPass extends Bundle {
 	 * from pass props.
 	 *
 	 * @throws (automatically) if current type is not "boardingPass".
+	 *
+	 * @deprecated Create a new PassType and read `transitType` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get transitType() {
-		return this[propsSymbol]["boardingPass"].transitType;
+		return this[passTypesSymbol].find(
+			(passType) => passType.type === "boardingPass",
+		).transitType;
 	}
 
 	/**
@@ -348,10 +410,13 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `primaryFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get primaryFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].primaryFields;
+		return this[passTypesSymbol][0].primaryFields;
 	}
 
 	/**
@@ -360,10 +425,13 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `secondaryFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get secondaryFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].secondaryFields;
+		return this[passTypesSymbol][0].secondaryFields;
 	}
 
 	/**
@@ -377,10 +445,14 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `auxiliaryFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get auxiliaryFields(): Schemas.PassFieldContentWithRow[] {
-		return this[propsSymbol][this.type].auxiliaryFields;
+		return this[passTypesSymbol][0]
+			.auxiliaryFields as Schemas.PassFieldContentWithRow[];
 	}
 
 	/**
@@ -389,10 +461,13 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `headerFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get headerFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].headerFields;
+		return this[passTypesSymbol][0].headerFields;
 	}
 
 	/**
@@ -401,10 +476,13 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `backFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get backFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol][this.type].backFields;
+		return this[passTypesSymbol][0].backFields;
 	}
 
 	/**
@@ -414,10 +492,15 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 *		type is not "eventTicket".
+	 *
+	 * @deprecated Create a new PassType and read `additionalInfoFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get additionalInfoFields(): Schemas.PassFieldContent[] {
-		return this[propsSymbol]["eventTicket"].additionalInfoFields;
+		return this[passTypesSymbol].find(
+			(passType) => passType.type === "eventTicket",
+		).additionalInfoFields;
 	}
 
 	/**
@@ -427,6 +510,11 @@ export default class PKPass extends Bundle {
 	 * will reset all the fields (primaryFields,
 	 * secondaryFields, headerFields, auxiliaryFields, backFields),
 	 * both imported or manually set.
+	 *
+	 * @deprecated Create a new PassType and provide it to `types` property.
+	 * This setter will read only the first type if multiple are set.
+	 *
+	 * Using `type` when `types` are set, will reset `types` to a single type.
 	 */
 
 	public set type(nextType: Schemas.PassTypesProps | undefined) {
@@ -443,57 +531,44 @@ export default class PKPass extends Bundle {
 
 		if (this.type) {
 			/**
-			 * Removing reference to previous type and its content because
-			 * we might have some differences between types. It is way easier
-			 * to reset everything instead of making checks.
+			 * Removing the previous type and its content because we might
+			 * have some differences between types. It is way easier to
+			 * reset everything instead of making checks.
 			 */
 
-			this[propsSymbol][this.type] = undefined;
 			this[propsSymbol].preferredStyleSchemes = undefined;
 		}
 
-		const sharedKeysPool = new Set<string>();
+		/**
+		 * Legacy accessors read and write the first type, so setting a
+		 * type through here means replacing the whole set with a fresh
+		 * one. Fields live in the PassType alone: there is no second
+		 * copy in props to keep in sync.
+		 */
 
-		this[passTypeSymbol] = type;
-		this[propsSymbol][type] = {
-			headerFields /******/: new FieldsArray(
-				this,
-				sharedKeysPool,
-				Schemas.PassFieldContent,
-			),
-			primaryFields /*****/: new FieldsArray(
-				this,
-				sharedKeysPool,
-				Schemas.PassFieldContent,
-			),
-			secondaryFields /***/: new FieldsArray(
-				this,
-				sharedKeysPool,
-				Schemas.PassFieldContent,
-			),
-			auxiliaryFields /***/: new FieldsArray(
-				this,
-				sharedKeysPool,
-				type === "eventTicket"
-					? Schemas.PassFieldContentWithRow
-					: Schemas.PassFieldContent,
-			),
-			backFields /********/: new FieldsArray(
-				this,
-				sharedKeysPool,
-				Schemas.PassFieldContent,
-			),
-			additionalInfoFields: new FieldsArray(
-				this,
-				sharedKeysPool,
-				Schemas.PassFieldContent,
-			),
-			transitType: undefined,
-		};
+		this[passTypesSymbol] = [new PassType(type)];
 	}
 
+	/**
+	 * @deprecated Create a new PassType and use it to reference the pass type instead.
+	 * This accessor will read only the first type if multiple are set.
+	 */
 	public get type(): Schemas.PassTypesProps | undefined {
-		return this[passTypeSymbol] ?? undefined;
+		return this[passTypesSymbol][0]?.type ?? undefined;
+	}
+
+	/**
+	 * Allows accessing internal symbol to assign multiple pass types
+	 * to the current instance. This allows, for example, to use `posterGeneric` and
+	 * legacy `generic` types simultaneously, or a legacy `storeCard` and a new `posterGeneric`.
+	 *
+	 * Or whatever new future types will be released by Apple.
+	 *
+	 * Using types overrides what is set through the `type` property when exporting the pass,
+	 * as well as fields pushed through deprecated fields accessors like `primaryFields`, `secondaryFields`, etc.
+	 */
+	public get types(): PassType<Schemas.PassTypesProps>[] {
+		return this[passTypesSymbol];
 	}
 
 	// **************************** //
@@ -618,15 +693,16 @@ export default class PKPass extends Bundle {
 	 */
 
 	private [importMetadataSymbol](data: Schemas.PassProps) {
-		const possibleTypes = [
+		const possibleTypes: Schemas.PassTypesProps[] = [
 			"boardingPass",
 			"coupon",
 			"eventTicket",
 			"storeCard",
 			"generic",
-		] as Schemas.PassTypesProps[];
+			"posterGeneric",
+		];
 
-		const type = possibleTypes.find((type) => Boolean(data[type]));
+		const types = possibleTypes.filter((type) => Boolean(data[type]));
 
 		const {
 			boardingPass,
@@ -634,6 +710,7 @@ export default class PKPass extends Bundle {
 			storeCard,
 			generic,
 			eventTicket,
+			posterGeneric,
 			...otherPassData
 		} = data;
 
@@ -643,36 +720,65 @@ export default class PKPass extends Bundle {
 
 		Object.assign(this[propsSymbol], otherPassData);
 
-		if (!type) {
-			if (!this[passTypeSymbol]) {
+		if (!types.length) {
+			if (!this[passTypesSymbol].length) {
 				console.warn(Messages.PASS_SOURCE.UNKNOWN_TYPE);
 			}
 		} else {
-			this.type = type;
+			/**
+			 * Pushes fields into a pass type, one at a time, warning about the
+			 * ones that get rejected instead of letting them interrupt the import.
+			 *
+			 * @param fieldsArray
+			 * @param fields
+			 */
 
-			const {
-				headerFields = [],
-				primaryFields = [],
-				secondaryFields = [],
-				auxiliaryFields = [],
-				backFields = [],
-				transitType,
-				additionalInfoFields = [],
-			} = data[type] || {};
-
-			this.headerFields.push(...headerFields);
-			this.primaryFields.push(...primaryFields);
-			this.secondaryFields.push(...secondaryFields);
-			this.auxiliaryFields.push(...auxiliaryFields);
-			this.backFields.push(...backFields);
-
-			if (this.type === "boardingPass") {
-				this.transitType = transitType;
+			function importFields(
+				fieldsArray: Schemas.PassFieldContent[],
+				fields: Schemas.PassFieldContent[],
+			): void {
+				for (const field of fields) {
+					try {
+						fieldsArray.push(field);
+					} catch (err) {
+						console.warn(err instanceof Error ? err.message : err);
+					}
+				}
 			}
 
-			if (this.type === "eventTicket") {
-				this.additionalInfoFields.push(...additionalInfoFields);
-			}
+			this[passTypesSymbol].push(
+				...types.map((type) => {
+					const {
+						headerFields = [],
+						primaryFields = [],
+						secondaryFields = [],
+						auxiliaryFields = [],
+						backFields = [],
+						additionalInfoFields = [],
+						footerFields = [],
+						transitType,
+					} = data[type];
+
+					const typeInstance = new PassType(type);
+
+					importFields(typeInstance.headerFields, headerFields);
+					importFields(typeInstance.primaryFields, primaryFields);
+					importFields(typeInstance.secondaryFields, secondaryFields);
+					importFields(typeInstance.auxiliaryFields, auxiliaryFields);
+					importFields(typeInstance.backFields, backFields);
+					importFields(
+						typeInstance.additionalInfoFields,
+						additionalInfoFields,
+					);
+					importFields(typeInstance.footerFields, footerFields);
+
+					if (type === "boardingPass") {
+						typeInstance.transitType = transitType;
+					}
+
+					return typeInstance;
+				}),
+			);
 		}
 	}
 
@@ -703,14 +809,21 @@ export default class PKPass extends Bundle {
 	 */
 
 	private [closePassSymbol]() {
-		if (!this.type) {
+		if (!this[passTypesSymbol].length) {
 			throw new TypeError(Messages.CLOSE.MISSING_TYPE);
 		}
 
-		const fileNames = Object.keys(this[filesSymbol]);
+		Object.freeze(this[passTypesSymbol]);
+
+		for (const passType of this[passTypesSymbol]) {
+			passType.freeze();
+			Object.assign(this[propsSymbol], passType.toJSON());
+		}
 
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
 		super.addBuffer("pass.json", passJson);
+
+		const fileNames = Object.keys(this[filesSymbol]);
 
 		if (!fileNames.some((fileName) => RegExps.PASS_ICON.test(fileName))) {
 			console.warn(Messages.CLOSE.MISSING_ICON);
@@ -768,7 +881,12 @@ export default class PKPass extends Bundle {
 		// *** BOARDING PASS VALIDATION *** //
 		// ******************************** //
 
-		if (this.type === "boardingPass" && !this.transitType) {
+		const lacksOfTransitType = this[passTypesSymbol].some(
+			(passType) =>
+				passType.type === "boardingPass" && !passType.transitType,
+		);
+
+		if (lacksOfTransitType) {
 			throw new TypeError(Messages.CLOSE.MISSING_TRANSIT_TYPE);
 		}
 
@@ -1140,6 +1258,10 @@ export default class PKPass extends Bundle {
 				"PKBarcodeFormatPDF417",
 				"PKBarcodeFormatAztec",
 				"PKBarcodeFormatCode128",
+				"PKBarcodeFormatCode39",
+				"PKBarcodeFormatCodabar",
+				"PKBarcodeFormatEAN13",
+				"PKBarcodeFormatI2of5",
 			];
 
 			finalBarcodes = supportedFormats.map((format) =>

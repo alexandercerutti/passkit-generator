@@ -816,6 +816,7 @@ export default class PKPass extends Bundle {
 		const fileNames = Object.keys(this[filesSymbol]);
 
 		for (const passType of this[passTypesSymbol]) {
+			passType.freeze();
 			Object.assign(this[propsSymbol], passType.toJSON());
 		}
 

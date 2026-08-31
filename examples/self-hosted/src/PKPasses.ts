@@ -32,7 +32,7 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { promises as fs } from "node:fs";
-import { PKPass } from "passkit-generator";
+import { PassType, PKPass } from "passkit-generator";
 import { app } from "./webserver.js";
 import { getCertificates } from "./shared.js";
 
@@ -79,15 +79,16 @@ async function generatePass(props: Object) {
 		},
 	);
 
-	pass.type = "boardingPass";
-	pass.transitType = "PKTransitTypeAir";
+	const boardingPassType = new PassType("boardingPass");
+	boardingPassType.transitType = "PKTransitTypeAir";
+	pass.types.push(boardingPassType);
 
 	pass.setBarcodes({
 		message: "123456789",
 		format: "PKBarcodeFormatQR",
 	});
 
-	pass.headerFields.push(
+	boardingPassType.headerFields.push(
 		{
 			key: "header-field-test-1",
 			value: "Unknown",
@@ -98,7 +99,7 @@ async function generatePass(props: Object) {
 		},
 	);
 
-	pass.primaryFields.push(
+	boardingPassType.primaryFields.push(
 		{
 			key: "primaryField-1",
 			value: "NAP",

@@ -385,7 +385,7 @@ describe("PKPass", () => {
 		});
 	});
 
-	it("should omit fields with the same keys in final pass.json", () => {
+	it("should reject fields with the same keys", () => {
 		/** Resetting fields */
 		pkpass.type = "eventTicket";
 
@@ -394,25 +394,29 @@ describe("PKPass", () => {
 			value: "test",
 		});
 
-		pkpass.headerFields.push({
-			key: "testField-pf",
-			value: "test",
-		});
+		expect(() =>
+			pkpass.headerFields.push({
+				key: "testField-pf",
+				value: "test",
+			}),
+		).toThrowError();
 
 		const passjsonGenerated = getGeneratedPassJson(pkpass);
 		expect(passjsonGenerated.eventTicket.headerFields.length).toBe(0);
 	});
 
-	it("should include row property in auxiliary fields but omit it in others", () => {
+	it("should include row property in auxiliary fields but reject it in others", () => {
 		/** Resetting fields */
 		pkpass.type = "eventTicket";
 
-		pkpass.primaryFields.push({
-			key: "testField-pf",
-			value: "test",
-			// @ts-expect-error
-			row: 0,
-		});
+		expect(() =>
+			pkpass.primaryFields.push({
+				key: "testField-pf",
+				value: "test",
+				// @ts-expect-error
+				row: 0,
+			}),
+		).toThrowError();
 
 		pkpass.auxiliaryFields.push({
 			key: "testField-pf",
@@ -928,7 +932,9 @@ describe("PKPass", () => {
 						endDate: new Date(Date.UTC(2025, 1, 8, 23, 58, 25)),
 					},
 					{
-						relevantDate: new Date(Date.UTC(2025, 1, 8, 23, 58, 25)),
+						relevantDate: new Date(
+							Date.UTC(2025, 1, 8, 23, 58, 25),
+						),
 					},
 				]);
 

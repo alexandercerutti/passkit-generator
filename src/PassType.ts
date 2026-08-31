@@ -1,4 +1,3 @@
-import FieldsArray from "./FieldsArray.js";
 import {
 	assertValidity,
 	PassFieldContent,

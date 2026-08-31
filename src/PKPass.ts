@@ -9,6 +9,7 @@ import * as Signature from "./Signature.js";
 import * as Strings from "./StringsUtils.js";
 import * as Utils from "./utils.js";
 import * as Messages from "./messages.js";
+import { PassType } from "./PassType.js";
 
 const propsSymbol = Symbol("props");
 const localizationSymbol = Symbol("pass.l10n");
@@ -16,6 +17,7 @@ const importMetadataSymbol = Symbol("import.pass.metadata");
 const createManifestSymbol = Symbol("pass.manifest");
 const closePassSymbol = Symbol("pass.close");
 const passTypeSymbol = Symbol("pass.type");
+const passTypesSymbol = Symbol("pass.types");
 const certificatesSymbol = Symbol("pass.certificates");
 
 const RegExps = {
@@ -37,7 +39,13 @@ export default class PKPass extends Bundle {
 			[placeholder: string]: string;
 		};
 	} = {};
+
+	/**
+	 * @deprecated Privately, use `[passTypesSymbol]` instead.
+	 */
 	private [passTypeSymbol]: Schemas.PassTypesProps | undefined = undefined;
+
+	private [passTypesSymbol]: PassType<Schemas.PassTypesProps>[] = [];
 
 	/**
 	 * Either create a pass from another one
@@ -340,6 +348,9 @@ export default class PKPass extends Bundle {
 	 *
 	 * @throws if current type is not "boardingPass".
 	 * @param value
+	 *
+	 * @deprecated Create a new PassType and set `transitType` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public set transitType(value: Schemas.TransitType) {
@@ -363,6 +374,9 @@ export default class PKPass extends Bundle {
 	 * from pass props.
 	 *
 	 * @throws (automatically) if current type is not "boardingPass".
+	 *
+	 * @deprecated Create a new PassType and read `transitType` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get transitType() {
@@ -375,6 +389,9 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `primaryFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get primaryFields(): Schemas.PassFieldContent[] {
@@ -387,6 +404,9 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `secondaryFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get secondaryFields(): Schemas.PassFieldContent[] {
@@ -404,6 +424,9 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `auxiliaryFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get auxiliaryFields(): Schemas.PassFieldContentWithRow[] {
@@ -416,6 +439,9 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `headerFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get headerFields(): Schemas.PassFieldContent[] {
@@ -428,6 +454,9 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 * 		instance has not a valid type set yet.
+	 *
+	 * @deprecated Create a new PassType and read `backFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get backFields(): Schemas.PassFieldContent[] {
@@ -441,6 +470,9 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 *		type is not "eventTicket".
+	 *
+	 * @deprecated Create a new PassType and read `additionalInfoFields` there instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get additionalInfoFields(): Schemas.PassFieldContent[] {
@@ -454,6 +486,9 @@ export default class PKPass extends Bundle {
 	 * @throws (automatically) if no valid pass.json
 	 * 		has been parsed yet or, anyway, if current
 	 *		type is not "posterGeneric".
+	 *
+	 * @deprecated Use (insert here something else) instead.
+	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get footerFields(): Schemas.PassFieldContent[] {
@@ -467,6 +502,9 @@ export default class PKPass extends Bundle {
 	 * will reset all the fields (primaryFields,
 	 * secondaryFields, headerFields, auxiliaryFields, backFields),
 	 * both imported or manually set.
+	 *
+	 * @deprecated Create a new PassType and provide it to `types` property.
+	 * This setter will read only the first type if multiple are set.
 	 */
 
 	public set type(nextType: Schemas.PassTypesProps | undefined) {
@@ -537,8 +575,23 @@ export default class PKPass extends Bundle {
 		};
 	}
 
+	/**
+	 * @deprecated Create a new PassType and use it to reference the pass type instead.
+	 * This accessor will read only the first type if multiple are set.
+	 */
 	public get type(): Schemas.PassTypesProps | undefined {
 		return this[passTypeSymbol] ?? undefined;
+	}
+
+	/**
+	 * Allows accessing internal symbol to assign multiple pass types
+	 * to the current instance. This allows, for example, to use `posterGeneric` and
+	 * legacy `generic` types simultaneously, or a legacy `storeCard` and a new `posterGeneric`.
+	 *
+	 * Or whatever new future types will be released by Apple.
+	 */
+	public get types(): PassType<Schemas.PassTypesProps>[] {
+		return this[passTypesSymbol];
 	}
 
 	// **************************** //

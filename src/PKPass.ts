@@ -813,7 +813,7 @@ export default class PKPass extends Bundle {
 			throw new TypeError(Messages.CLOSE.MISSING_TYPE);
 		}
 
-		const fileNames = Object.keys(this[filesSymbol]);
+		Object.freeze(this[passTypesSymbol]);
 
 		for (const passType of this[passTypesSymbol]) {
 			passType.freeze();
@@ -822,6 +822,8 @@ export default class PKPass extends Bundle {
 
 		const passJson = Buffer.from(JSON.stringify(this[propsSymbol]));
 		super.addBuffer("pass.json", passJson);
+
+		const fileNames = Object.keys(this[filesSymbol]);
 
 		if (!fileNames.some((fileName) => RegExps.PASS_ICON.test(fileName))) {
 			console.warn(Messages.CLOSE.MISSING_ICON);

@@ -8,6 +8,7 @@
 	"scripts": {
 		"build": "rm -rf lib && pnpm tsc -b tsconfig.esm.json tsconfig.cjs.json && pnpm build:dual",
 		"build:dual": "pnpm tsconfig-to-dual-package tsconfig.esm.json tsconfig.cjs.json",
+		"prepare": "rimraf lib && tsc -b tsconfig.esm.json tsconfig.cjs.json && tsconfig-to-dual-package tsconfig.esm.json tsconfig.cjs.json",
 		"build:all": "pnpm build && pnpm build:examples",
 		"prepublishOnly": "pnpm build && pnpm test",
 		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" pnpm jest -c jest.config.mjs --silent"

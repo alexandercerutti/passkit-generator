@@ -1,5 +1,5 @@
 {
-	"name": "passkit-generator",
+	"name": "@jericommerce/passkit-generator",
 	"version": "3.5.8",
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
 	"main": "lib/cjs/index.js",
@@ -14,8 +14,12 @@
 	},
 	"author": "Alexander Patrick Cerutti",
 	"license": "MIT",
-	"repository": "https://github.com/alexandercerutti/passkit-generator",
+	"repository": "https://github.com/cuni0716/passkit-generator",
 	"bugs": "https://github.com/alexandercerutti/passkit-generator/issues",
+	"publishConfig": {
+		"registry": "https://registry.npmjs.org",
+		"access": "public"
+	},
 	"keywords": [
 		"Apple",
 		"Passkit",
@@ -23,9 +27,8 @@
 		"Pass"
 	],
 	"dependencies": {
-		"do-not-zip": "^1.0.0",
+		"asn1js": "^3.0.10",
 		"joi": "17.13.4",
-		"node-forge": "^1.4.0",
 		"tslib": "^2.7.0"
 	},
 	"engines": {
@@ -33,11 +36,12 @@
 	},
 	"devDependencies": {
 		"@jest/globals": "^29.7.0",
-		"@types/do-not-zip": "^1.0.2",
 		"@types/node": "^16.11.26",
 		"@types/node-forge": "^1.3.11",
+		"do-not-zip": "^1.0.0",
 		"jest": "^29.7.0",
 		"jest-environment-node": "^29.7.0",
+		"node-forge": "^1.4.0",
 		"prettier": "^3.3.3",
 		"rimraf": "^4.4.1",
 		"tsconfig-to-dual-package": "^1.2.0",

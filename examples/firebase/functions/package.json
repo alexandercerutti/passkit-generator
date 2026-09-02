@@ -18,10 +18,10 @@
 		"firebase-admin": "^13.0.2",
 		"firebase-functions": "^6.2.0",
 		"tslib": "^2.8.1",
-		"passkit-generator": "workspace:*"
+		"passkit-generator": "workspace:@jericommerce/passkit-generator@*"
 	},
 	"peerDependencies": {
-		"passkit-generator": "workspace:*"
+		"passkit-generator": "workspace:@jericommerce/passkit-generator@*"
 	},
 	"devDependencies": {
 		"firebase-functions-test": "^3.4.0",

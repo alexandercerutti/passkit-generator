@@ -12,12 +12,12 @@
 		"example:debug": "pnpm tsx --inspect-brk src/index.ts"
 	},
 	"peerDependencies": {
-		"passkit-generator": "workspace:*"
+		"passkit-generator": "workspace:@jericommerce/passkit-generator@*"
 	},
 	"dependencies": {
 		"express": "^5.0.1",
 		"node-fetch": "^3.2.3",
-		"passkit-generator": "workspace:*",
+		"passkit-generator": "workspace:@jericommerce/passkit-generator@*",
 		"tslib": "^2.7.0"
 	},
 	"devDependencies": {

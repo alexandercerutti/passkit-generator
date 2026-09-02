@@ -55,7 +55,7 @@ importers:
   examples/cloudflare-worker:
     dependencies:
       passkit-generator:
-        specifier: workspace:*
+        specifier: workspace:@jericommerce/passkit-generator@*
         version: link:../..
     devDependencies:
       '@cloudflare/workers-types':
@@ -80,7 +80,7 @@ importers:
         specifier: ^6.2.0
         version: 6.2.0(firebase-admin@13.0.2(encoding@0.1.13))
       passkit-generator:
-        specifier: workspace:*
+        specifier: workspace:@jericommerce/passkit-generator@*
         version: link:../../..
       tslib:
         specifier: ^2.8.1
@@ -108,7 +108,7 @@ importers:
         specifier: ^3.2.3
         version: 3.3.2
       passkit-generator:
-        specifier: workspace:*
+        specifier: workspace:@jericommerce/passkit-generator@*
         version: link:../..
       tslib:
         specifier: ^2.7.0
@@ -136,7 +136,7 @@ importers:
         specifier: ^2.1692.0
         version: 2.1692.0
       passkit-generator:
-        specifier: workspace:*
+        specifier: workspace:@jericommerce/passkit-generator@*
         version: link:../..
       tslib:
         specifier: ^2.8.1

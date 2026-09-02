@@ -14,7 +14,7 @@
 	"dependencies": {
 		"aws-sdk": "^2.1692.0",
 		"tslib": "^2.8.1",
-		"passkit-generator": "workspace:*"
+		"passkit-generator": "workspace:@jericommerce/passkit-generator@*"
 	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.147",

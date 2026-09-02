@@ -8,7 +8,7 @@
 		"example": "pnpm wrangler dev"
 	},
 	"dependencies": {
-		"passkit-generator": "workspace:*"
+		"passkit-generator": "workspace:@jericommerce/passkit-generator@*"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250109.0",

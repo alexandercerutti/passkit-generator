@@ -53,6 +53,11 @@ export const ADDITIONAL_INFO_FIELDS = {
 		"Cannot access additionalInfoFields on a pass with type different from eventTicket.",
 } as const;
 
+export const FOOTER_FIELDS = {
+	UNEXPECTED_PASS_TYPE:
+		"Cannot access footerFields on a pass with type different from posterGeneric.",
+} as const;
+
 export const FIELDS = {
 	INVALID: "Cannot add field. %s",
 	REPEATED_KEY:

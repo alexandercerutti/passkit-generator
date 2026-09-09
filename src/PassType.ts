@@ -163,6 +163,10 @@ export class PassType<Type extends PassTypesProps> {
 	}
 
 	public get footerFields(): PassFieldContent[] {
+		if (this.type !== "posterGeneric") {
+			throw new TypeError(Messages.FOOTER_FIELDS.UNEXPECTED_PASS_TYPE);
+		}
+
 		return this[footerFieldsSymbol];
 	}
 

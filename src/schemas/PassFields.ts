@@ -55,5 +55,10 @@ export const PassFields = Joi.object<PassFields>().keys({
 	 * @see \<undiclosed>
 	 */
 	additionalInfoFields: Joi.array().items(PassFieldContent),
+
+	/**
+	 * @iOSVersion 27
+	 * @passStyle posterGeneric (new layout)
+	 */
 	footerFields: Joi.array().items(PassFieldContent),
 });

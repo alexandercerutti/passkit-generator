@@ -48,6 +48,11 @@ export const FILTER_VALID = {
 	INVALID: "Cannot validate property. %s",
 } as const;
 
+export const ADDITIONAL_INFO_FIELDS = {
+	UNEXPECTED_PASS_TYPE:
+		"Cannot access additionalInfoFields on a pass with type different from eventTicket.",
+} as const;
+
 export const FIELDS = {
 	INVALID: "Cannot add field. %s",
 	REPEATED_KEY:

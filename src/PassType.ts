@@ -153,6 +153,12 @@ export class PassType<Type extends PassTypesProps> {
 	}
 
 	public get additionalInfoFields(): PassFieldContent[] {
+		if (this.type !== "eventTicket") {
+			throw new TypeError(
+				Messages.ADDITIONAL_INFO_FIELDS.UNEXPECTED_PASS_TYPE,
+			);
+		}
+
 		return this[additionalInfoFieldsSymbol];
 	}
 

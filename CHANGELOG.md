@@ -1,5 +1,25 @@
 # Changelog
 
+### 3.6.0 (09 Sep 2026)
+
+This version introduces support to iOS 27 changes. Along with it, introduces some deprecations and new patterns.
+
+Root getters for fields (`primaryFields`, `secondaryFields`, ...) and `transitType` have been deprecated along with `type` getter and setter.
+A new root getter `.types` is available to retrieve an array that will contain all the types supported in your pass.
+
+This is the case of `generic` and `posterGeneric` for example.
+
+A new class `PassType` has been added. It has all the fields accessors as root (`transitType` included), plus a new `footerFields` for `posterGeneric`.
+
+Old `.type` setter, if used, **will override** the whole content of `.types`.
+Old `.type` getter, if used, will retrieve the first `PassType`.
+
+All the field getters, if used, will retrieve the first `PassType`.
+
+Refer to documentation for more.
+
+---
+
 ### 3.5.8 (28 Aug 2026)
 
 -   Updated Joi to latest v17

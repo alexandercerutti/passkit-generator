@@ -1,5 +1,5 @@
 import { ALBEvent, ALBResult } from "aws-lambda";
-import { PKPass } from "passkit-generator";
+import { PassType, PKPass } from "passkit-generator";
 import {
 	createPassGenerator,
 	getRandomColorPart,
@@ -32,10 +32,11 @@ export async function scratch(event: ALBEvent) {
 
 	const pass = value as PKPass;
 
-	pass.type = "boardingPass";
-	pass.transitType = "PKTransitTypeAir";
+	const boardingPassType = new PassType("boardingPass");
+	boardingPassType.transitType = "PKTransitTypeAir";
+	pass.types.push(boardingPassType);
 
-	pass.headerFields.push(
+	boardingPassType.headerFields.push(
 		{
 			key: "header-field-test-1",
 			value: "Unknown",
@@ -46,7 +47,7 @@ export async function scratch(event: ALBEvent) {
 		},
 	);
 
-	pass.primaryFields.push(
+	boardingPassType.primaryFields.push(
 		{
 			key: "primaryField-1",
 			value: "NAP",

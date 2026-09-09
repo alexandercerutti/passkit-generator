@@ -766,11 +766,23 @@ export default class PKPass extends Bundle {
 					importFields(typeInstance.secondaryFields, secondaryFields);
 					importFields(typeInstance.auxiliaryFields, auxiliaryFields);
 					importFields(typeInstance.backFields, backFields);
-					importFields(
-						typeInstance.additionalInfoFields,
-						additionalInfoFields,
-					);
-					importFields(typeInstance.footerFields, footerFields);
+					/**
+					 * Type exclusive fields are guarded by their own
+					 * accessors: reaching for them on a type that cannot
+					 * own them throws, so they are only imported where
+					 * they belong.
+					 */
+
+					if (type === "eventTicket") {
+						importFields(
+							typeInstance.additionalInfoFields,
+							additionalInfoFields,
+						);
+					}
+
+					if (type === "posterGeneric") {
+						importFields(typeInstance.footerFields, footerFields);
+					}
 
 					if (type === "boardingPass") {
 						typeInstance.transitType = transitType;

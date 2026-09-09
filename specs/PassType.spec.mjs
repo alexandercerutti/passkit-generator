@@ -270,9 +270,16 @@ describe("PassType", () => {
 			}).toThrow();
 		});
 
-		it("should expose every fields array, exclusive ones included", () => {
-			expect(passType.footerFields).toEqual([]);
-			expect(passType.additionalInfoFields).toEqual([]);
+		it("should refuse the exclusive fields of other types", () => {
+			expect(() => passType.footerFields).toThrowError();
+			expect(() => passType.additionalInfoFields).toThrowError();
+		});
+
+		it("should expose the exclusive fields to the types owning them", () => {
+			expect(new PassType("posterGeneric").footerFields).toEqual([]);
+			expect(new PassType("eventTicket").additionalInfoFields).toEqual(
+				[],
+			);
 		});
 
 		it("should leave transitType unset on types that cannot own it", () => {
@@ -311,9 +318,6 @@ describe("PassType", () => {
 		});
 
 		it("should not serialize exclusive fields of other types", () => {
-			passType.footerFields.push(field("a"));
-			passType.additionalInfoFields.push(field("b"));
-
 			const { generic } = JSON.parse(JSON.stringify(passType));
 
 			expect(generic).not.toHaveProperty("footerFields");

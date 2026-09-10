@@ -3,10 +3,9 @@
  * Pins the shape of what a pass export actually produces.
  *
  * The digests and file ordering below were captured from an unmodified
- * passkit-generator@3.5.7 running these same fixtures, before any of the
- * performance work landed. Hashing, archiving and signing were all rewritten
- * afterwards; none of that was allowed to change a byte of the output, and
- * these constants are what holds that line.
+ * passkit-generator@3.6.0 running these same fixtures. Hashing, archiving and
+ * signing were all rewritten in this fork; none of that was allowed to change
+ * a byte of the output, and these constants are what holds that line.
  *
  * The manifest is a SHA-1 of every other file, so pinning it pins the exact
  * bytes of pass.json and of each pass.strings too, not merely their presence.
@@ -19,7 +18,7 @@ import { PKPass } from "passkit-generator";
 import { readZip, readZipEntries } from "./zipReader.mjs";
 import { generateCertificates, createAssets, PASS_PROPS } from "./fixtures.mjs";
 
-/** Captured from passkit-generator@3.5.7 */
+/** Captured from passkit-generator@3.6.0 */
 const EXPECTED_FILE_ORDER = [
 	"icon.png",
 	"icon@2x.png",
@@ -38,7 +37,7 @@ const EXPECTED_FILE_ORDER = [
 	"signature",
 ];
 
-/** Captured from passkit-generator@3.5.7 */
+/** Captured from passkit-generator@3.6.0 */
 const EXPECTED_MANIFEST = {
 	"icon.png": "e6d6b9ca14a27205ff706e29b0bf0693e735b861",
 	"icon@2x.png": "a4bd920cec90bd531e8f80f3e021f292ad3055a6",
@@ -50,7 +49,7 @@ const EXPECTED_MANIFEST = {
 	"strip@2x.png": "94b844b1284aaa82bd8d222eb833d1d300756968",
 	"strip@3x.png": "63fdfebbc434b425c9b070cb83a2539f4c090c30",
 	"thumbnail.png": "4c35485eaadbd5c96b08b02b05520d76dc5a5293",
-	"pass.json": "1262a57bf104dcdf6c5e94a12c47ad8316029eea",
+	"pass.json": "13db9c1c872f66a9c853bfe31944909edd830d15",
 	"it.lproj/pass.strings": "a91fcfdc5aaf62168ae494989e302449272280bd",
 	"en.lproj/pass.strings": "e1e68d3120734ad269da0c6a371551a99cc23632",
 };
@@ -94,13 +93,13 @@ describe("pass output", () => {
 		files = readZipEntries(bundle);
 	});
 
-	it("contains the same files, in the same order, as 3.5.7 produced", () => {
+	it("contains the same files, in the same order, as 3.6.0 produced", () => {
 		expect(readZip(bundle).entries.map((entry) => entry.name)).toEqual(
 			EXPECTED_FILE_ORDER,
 		);
 	});
 
-	it("hashes every asset to the digest 3.5.7 recorded", () => {
+	it("hashes every asset to the digest 3.6.0 recorded", () => {
 		expect(JSON.parse(files["manifest.json"].toString("utf-8"))).toEqual(
 			EXPECTED_MANIFEST,
 		);

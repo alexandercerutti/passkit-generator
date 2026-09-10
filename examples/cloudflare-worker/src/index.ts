@@ -1,4 +1,4 @@
-import { PKPass } from "passkit-generator";
+import { PassType, PKPass } from "passkit-generator";
 import { Buffer } from "node:buffer";
 
 /** Assets are handled by Wrangler by specifying the rule inside wrangler.toml */
@@ -67,10 +67,12 @@ async function generatePass(env: Env) {
 	);
 
 	pass.setBarcodes("1276451828321");
-	pass.type = "boardingPass";
-	pass.transitType = "PKTransitTypeAir";
 
-	pass.headerFields.push(
+	const boardingPassType = new PassType("boardingPass");
+	boardingPassType.transitType = "PKTransitTypeAir";
+	pass.types.push(boardingPassType);
+
+	boardingPassType.headerFields.push(
 		{
 			key: "header1",
 			label: "Data",
@@ -85,7 +87,7 @@ async function generatePass(env: Env) {
 		},
 	);
 
-	pass.primaryFields.push(
+	boardingPassType.primaryFields.push(
 		{
 			key: "IATA-source",
 			value: "NAP",
@@ -100,7 +102,7 @@ async function generatePass(env: Env) {
 		},
 	);
 
-	pass.secondaryFields.push(
+	boardingPassType.secondaryFields.push(
 		{
 			key: "secondary1",
 			label: "Imbarco chiuso",
@@ -127,7 +129,7 @@ async function generatePass(env: Env) {
 		},
 	);
 
-	pass.auxiliaryFields.push(
+	boardingPassType.auxiliaryFields.push(
 		{
 			key: "aux1",
 			label: "Passeggero",
@@ -142,7 +144,7 @@ async function generatePass(env: Env) {
 		},
 	);
 
-	pass.backFields.push(
+	boardingPassType.backFields.push(
 		{
 			key: "document number",
 			label: "Numero documento:",

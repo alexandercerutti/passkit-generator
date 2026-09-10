@@ -1,4 +1,5 @@
 export { default as PKPass } from "./PKPass.js";
+export { PassType } from "./PassType.js";
 
 // ***************************************** //
 // *** Exporting only schemas interfaces *** //

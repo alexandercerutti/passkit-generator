@@ -30,7 +30,7 @@
  */
 
 import { ALBEvent } from "aws-lambda";
-import { PKPass } from "passkit-generator";
+import { PassType, PKPass } from "passkit-generator";
 import {
 	getCertificates,
 	getSpecificFileInModel,
@@ -73,10 +73,11 @@ export async function pkpasses(event: ALBEvent) {
 			backgroundColor: `rgb(${getRandomColorPart()}, ${getRandomColorPart()}, ${getRandomColorPart()})`,
 		});
 
-		pass.type = "boardingPass";
-		pass.transitType = "PKTransitTypeAir";
+		const boardingPassType = new PassType("boardingPass");
+		boardingPassType.transitType = "PKTransitTypeAir";
+		pass.types.push(boardingPassType);
 
-		pass.headerFields.push(
+		boardingPassType.headerFields.push(
 			{
 				key: "header-field-test-1",
 				value: "Unknown",
@@ -87,7 +88,7 @@ export async function pkpasses(event: ALBEvent) {
 			},
 		);
 
-		pass.primaryFields.push(
+		boardingPassType.primaryFields.push(
 			{
 				key: "primaryField-1",
 				value: "NAP",

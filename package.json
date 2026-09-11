@@ -1,6 +1,6 @@
 {
 	"name": "@jericommerce/passkit-generator",
-	"version": "3.6.0",
+	"version": "3.6.1",
 	"description": "The easiest way to generate custom Apple Wallet passes in Node.js",
 	"main": "lib/cjs/index.js",
 	"types": "lib/types/index.d.ts",
@@ -9,7 +9,7 @@
 		"build": "rm -rf lib && pnpm tsc -b tsconfig.esm.json tsconfig.cjs.json && pnpm build:dual",
 		"build:dual": "pnpm tsconfig-to-dual-package tsconfig.esm.json tsconfig.cjs.json",
 		"build:all": "pnpm build && pnpm build:examples",
-		"prepublishOnly": "pnpm build && pnpm test",
+		"prepublishOnly": "pnpm build && pnpm test && node scripts/check-pack.mjs",
 		"test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" pnpm jest -c jest.config.mjs --silent"
 	},
 	"author": "Alexander Patrick Cerutti",
@@ -48,9 +48,9 @@
 		"typescript": "^5.7.3"
 	},
 	"files": [
-		"lib/cjs/**/*.+(js*)",
-		"lib/esm/**/*.+(js*)",
-		"lib/types/**/*.+(d.ts*)"
+		"lib/cjs/**/*.js*",
+		"lib/esm/**/*.js*",
+		"lib/types/**/*.d.ts*"
 	],
 	"exports": {
 		".": {

@@ -16,6 +16,16 @@ process.env.TZ = "UTC";
 
 export default {
 	moduleFileExtensions: ["js", "mjs", "cjs"],
+	/**
+	 * The specs import the package by its bare name, which used to resolve
+	 * through Node's self-reference on `name`. The package is published under
+	 * the @jericommerce scope, so that self-reference no longer matches. Map
+	 * the bare name back to the build to keep the specs identical to
+	 * upstream's.
+	 */
+	moduleNameMapper: {
+		"^passkit-generator$": "<rootDir>/lib/esm/index.js",
+	},
 	testEnvironment: "node",
 	testMatch: ["**/specs/**/*.spec.mjs"],
 	injectGlobals: false,

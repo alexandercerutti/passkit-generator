@@ -74,7 +74,16 @@ export type FeaturedActionType =
 export interface FeaturedAction {
 	identifier: string;
 	type: FeaturedActionType;
-	url: string;
+	/**
+	 * Required for every action type except `place`, which uses
+	 * `placeIdentifier` instead.
+	 */
+	url?: string;
+	/**
+	 * A Maps place identifier. Required (and used in place of `url`) when
+	 * `type` is `place`.
+	 */
+	placeIdentifier?: string;
 }
 
 /**
@@ -88,5 +97,16 @@ export const FeaturedAction = Joi.object<FeaturedAction>().keys({
 			"featuredActionType",
 		)
 		.required(),
-	url: Joi.string().uri().required(),
+	url: Joi.string()
+		.uri()
+		.when("type", {
+			is: "place",
+			then: Joi.optional(),
+			otherwise: Joi.required(),
+		}),
+	placeIdentifier: Joi.string().when("type", {
+		is: "place",
+		then: Joi.required(),
+		otherwise: Joi.optional(),
+	}),
 });

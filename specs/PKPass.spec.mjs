@@ -205,6 +205,7 @@ describe("PKPass", () => {
 
 		it("should drop a place action that is missing placeIdentifier", () => {
 			pkpass.featuredActions = [
+				// @ts-expect-error intentionally invalid: place requires placeIdentifier
 				{
 					identifier: "action-1",
 					type: "place",
@@ -233,9 +234,51 @@ describe("PKPass", () => {
 
 		it("should drop a non-place action that is missing url", () => {
 			pkpass.featuredActions = [
+				// @ts-expect-error intentionally invalid: non-place requires url
 				{
 					identifier: "shop",
 					type: "shop",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should drop a place action that also defines a url", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "action-1",
+					type: "place",
+					placeIdentifier: "I87A8F52C8A209A35",
+					// @ts-expect-error intentionally invalid: place forbids url
+					url: "https://maps.apple.com/?q=Apple+Park",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should drop a non-place action that also defines a placeIdentifier", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "call-support",
+					type: "call",
+					url: "tel:+1234567890",
+					// @ts-expect-error intentionally invalid: non-place forbids placeIdentifier
+					placeIdentifier: "I87A8F52C8A209A35",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should drop an action with an unrecognized type", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "action-1",
+					// @ts-expect-error intentionally invalid: unrecognized action type
+					type: "teleport",
+					url: "https://example.com",
 				},
 			];
 

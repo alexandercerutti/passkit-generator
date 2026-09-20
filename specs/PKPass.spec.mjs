@@ -173,6 +173,145 @@ describe("PKPass", () => {
 		}).toThrow();
 	});
 
+	describe("featuredActions", () => {
+		it("should keep a place action defined through placeIdentifier", () => {
+			pkpass.type = "eventTicket";
+
+			pkpass.featuredActions = [
+				{
+					identifier: "action-1",
+					type: "place",
+					placeIdentifier: "I87A8F52C8A209A35",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(1);
+			expect(pkpass.featuredActions[0]).toEqual({
+				identifier: "action-1",
+				type: "place",
+				placeIdentifier: "I87A8F52C8A209A35",
+			});
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.featuredActions).toBeInstanceOf(Array);
+			expect(passjsonGenerated.featuredActions.length).toBe(1);
+			expect(passjsonGenerated.featuredActions[0]).toEqual({
+				identifier: "action-1",
+				type: "place",
+				placeIdentifier: "I87A8F52C8A209A35",
+			});
+		});
+
+		it("should drop a place action that is missing placeIdentifier", () => {
+			pkpass.featuredActions = [
+				// @ts-expect-error intentionally invalid: place requires placeIdentifier
+				{
+					identifier: "action-1",
+					type: "place",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should keep a non-place action defined through url", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "call-support",
+					type: "call",
+					url: "tel:+1234567890",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(1);
+			expect(pkpass.featuredActions[0]).toEqual({
+				identifier: "call-support",
+				type: "call",
+				url: "tel:+1234567890",
+			});
+		});
+
+		it("should drop a non-place action that is missing url", () => {
+			pkpass.featuredActions = [
+				// @ts-expect-error intentionally invalid: non-place requires url
+				{
+					identifier: "shop",
+					type: "shop",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should drop a place action that also defines a url", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "action-1",
+					type: "place",
+					placeIdentifier: "I87A8F52C8A209A35",
+					// @ts-expect-error intentionally invalid: place forbids url
+					url: "https://maps.apple.com/?q=Apple+Park",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should drop a non-place action that also defines a placeIdentifier", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "call-support",
+					type: "call",
+					url: "tel:+1234567890",
+					// @ts-expect-error intentionally invalid: non-place forbids placeIdentifier
+					placeIdentifier: "I87A8F52C8A209A35",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should drop an action with an unrecognized type", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "action-1",
+					// @ts-expect-error intentionally invalid: unrecognized action type
+					type: "teleport",
+					url: "https://example.com",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(0);
+		});
+
+		it("should keep only the first two valid actions", () => {
+			pkpass.featuredActions = [
+				{
+					identifier: "action-1",
+					type: "place",
+					placeIdentifier: "PLACE_1",
+				},
+				{
+					identifier: "action-2",
+					type: "call",
+					url: "tel:+1234567890",
+				},
+				{
+					identifier: "action-3",
+					type: "place",
+					placeIdentifier: "PLACE_3",
+				},
+			];
+
+			expect(pkpass.featuredActions.length).toBe(2);
+			expect(pkpass.featuredActions.map((action) => action.identifier)).toEqual([
+				"action-1",
+				"action-2",
+			]);
+		});
+	});
+
 	it("should own pkpass mimetype", () => {
 		expect(pkpass.mimeType).toBe("application/vnd.apple.pkpass");
 	});

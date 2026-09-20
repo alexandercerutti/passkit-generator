@@ -65,17 +65,35 @@ export type FeaturedActionType =
 	 */
 	| "viewOffersRewards";
 
+interface FeaturedActionBase {
+	identifier: string;
+}
+
+interface PlaceFeaturedAction extends FeaturedActionBase {
+	type: "place";
+	/**
+	 * An Apple Maps place identifier. Required (and used in place of `url`) when
+	 * `type` is `place`.
+	 */
+	placeIdentifier: string;
+}
+
+interface URLFeaturedAction extends FeaturedActionBase {
+	type: Exclude<FeaturedActionType, "place">;
+	/**
+	 * Required for every action type except `place`. For `call` actions, use
+	 * the `tel://` scheme (e.g. `tel://+393496847717`).
+	 */
+	url: string;
+}
+
 /**
  * @iOSVersion 27
  *
  * Up to two Featured Action can be specified per pass in order to provide quick access to relevant actions.
  * This applies to all the pass types but posterEventTicket and semanticBoardingPass.
  */
-export interface FeaturedAction {
-	identifier: string;
-	type: FeaturedActionType;
-	url: string;
-}
+export type FeaturedAction = PlaceFeaturedAction | URLFeaturedAction;
 
 /**
  * @iOSVersion 27
@@ -88,5 +106,16 @@ export const FeaturedAction = Joi.object<FeaturedAction>().keys({
 			"featuredActionType",
 		)
 		.required(),
-	url: Joi.string().uri().required(),
+	url: Joi.string()
+		.uri()
+		.when("type", {
+			is: "place",
+			then: Joi.forbidden(),
+			otherwise: Joi.required(),
+		}),
+	placeIdentifier: Joi.string().when("type", {
+		is: "place",
+		then: Joi.required(),
+		otherwise: Joi.forbidden(),
+	}),
 });

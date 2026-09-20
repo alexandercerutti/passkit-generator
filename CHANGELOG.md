@@ -1,5 +1,11 @@
 # Changelog
 
+### 3.6.1 (20 Sep 2026)
+
+-   Added support to missing `placeIdentifier` for featured actions of `type: "place"` (PR #275);
+
+---
+
 ### 3.6.0 (09 Sep 2026)
 
 This version introduces support to iOS 27 changes. Along with it, introduces some deprecations and new patterns.

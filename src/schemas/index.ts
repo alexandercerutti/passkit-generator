@@ -557,6 +557,15 @@ export interface PassProps {
 	 *
 	 * @description
 	 *
+	 * A URL to track baggage through the airline app.
+	 */
+	trackBagsURL?: string;
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
 	 * The email for the transit provider.
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
@@ -1007,6 +1016,16 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
 	requestWheelchairURL: Joi.string().regex(URL_REGEX),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * A URL to track baggage through the airline app.
+	 */
+
+	trackBagsURL: Joi.string(),
 
 	/**
 	 * @iOSVersion 26

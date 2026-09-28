@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { RGB_HEX_COLOR_REGEX } from "./regexps.js";
+import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
 
 /**
  * These couple of structures are organized alphabetically,
@@ -195,9 +195,26 @@ export const Seat = Joi.object<Seat>().keys({
 export interface WifiNetwork {
 	password: string;
 	ssid: string;
+
+	/**
+	 * @iOSVersion 26 (assumed)
+	 *
+	 * Token credential required to log in to a Captive Portal.
+	 */
+	captiveToken?: string;
+
+	/**
+	 * @iOSVersion 26 (assumed)
+	 *
+	 * The URL of the authentication server that verifies the client
+	 * using the token credential.
+	 */
+	captiveTokenAuthURL?: string;
 }
 
 export const WifiNetwork = Joi.object<WifiNetwork>().keys({
 	password: Joi.string().required(),
 	ssid: Joi.string().required(),
+	captiveToken: Joi.string(),
+	captiveTokenAuthURL: Joi.string().regex(URL_REGEX),
 });

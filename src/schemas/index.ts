@@ -592,6 +592,19 @@ export interface PassProps {
 	transitProviderWebsiteURL?: string;
 
 	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The Messages for Business (Business Chat) identifier of the transit
+	 * provider. Renders a "Message" quick action in the airline and services
+	 * page (guide).
+	 *
+	 * Available only with Enhanced (or semantic) Boarding Passes.
+	 */
+	businessChatIdentifier?: string;
+
+	/**
 	 * @iOSVersion 27
 	 *
 	 * @description
@@ -1056,6 +1069,19 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	 * Available only with Enhanced (or semantic) Boarding Passes
 	 */
 	transitProviderWebsiteURL: Joi.string().regex(URL_REGEX),
+
+	/**
+	 * @iOSVersion 26
+	 *
+	 * @description
+	 *
+	 * The Messages for Business (Business Chat) identifier of the transit
+	 * provider. Renders a "Message" quick action in the airline and services
+	 * page (guide).
+	 *
+	 * Available only with Enhanced (or semantic) Boarding Passes.
+	 */
+	businessChatIdentifier: Joi.string(),
 }).with("webServiceURL", "authenticationToken");
 
 /**

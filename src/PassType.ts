@@ -104,14 +104,11 @@ export class PassType<Type extends PassTypesProps> {
 			secondaryFields: [...this.secondaryFields],
 			auxiliaryFields: [...this.auxiliaryFields],
 			backFields: [...this.backFields],
+			additionalInfoFields: [...this.additionalInfoFields],
 		};
 
 		if (this.type === "boardingPass" && this.transitType) {
 			passFields.transitType = this.transitType;
-		}
-
-		if (this.type === "eventTicket") {
-			passFields.additionalInfoFields = [...this.additionalInfoFields];
 		}
 
 		if (this.type === "posterGeneric") {
@@ -152,13 +149,13 @@ export class PassType<Type extends PassTypesProps> {
 		return this[backFieldsSymbol];
 	}
 
+	/**
+	 * Accessor for the additional info fields of an event ticket.
+	 *
+	 * On iOS 27, all pass types support them but semanticBoardingPasses.
+	 * On iOS 26 and earlier, only event tickets support them.
+	 */
 	public get additionalInfoFields(): PassFieldContent[] {
-		if (this.type !== "eventTicket") {
-			throw new TypeError(
-				Messages.ADDITIONAL_INFO_FIELDS.UNEXPECTED_PASS_TYPE,
-			);
-		}
-
 		return this[additionalInfoFieldsSymbol];
 	}
 

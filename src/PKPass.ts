@@ -487,20 +487,19 @@ export default class PKPass extends Bundle {
 
 	/**
 	 * Allows accessing to new iOS 18
-	 * event ticket additional fields
+	 * event ticket additional fields.
+	 *
+	 * Starting from iOS 27, all pass types support additional info fields except semantic boarding passes.
 	 *
 	 * @throws (automatically) if no valid pass.json
-	 * 		has been parsed yet or, anyway, if current
-	 *		type is not "eventTicket".
+	 * 		has been parsed yet.
 	 *
 	 * @deprecated Create a new PassType and read `additionalInfoFields` there instead.
 	 * This accessor will read only the first type if multiple are set.
 	 */
 
 	public get additionalInfoFields(): Schemas.PassFieldContent[] {
-		return this[passTypesSymbol].find(
-			(passType) => passType.type === "eventTicket",
-		).additionalInfoFields;
+		return this[passTypesSymbol][0].additionalInfoFields;
 	}
 
 	/**

@@ -272,7 +272,25 @@ describe("PassType", () => {
 
 		it("should refuse the exclusive fields of other types", () => {
 			expect(() => passType.footerFields).toThrowError();
-			expect(() => passType.additionalInfoFields).toThrowError();
+		});
+
+		/**
+		 * Since iOS 27, every pass type supports additionalInfoFields
+		 * (Wallet ignores them only on semantic boarding passes), so
+		 * they are no longer exclusive to eventTicket.
+		 */
+
+		it("should expose additionalInfoFields on every type", () => {
+			for (const type of [
+				"boardingPass",
+				"coupon",
+				"eventTicket",
+				"generic",
+				"storeCard",
+				"posterGeneric",
+			]) {
+				expect(new PassType(type).additionalInfoFields).toEqual([]);
+			}
 		});
 
 		it("should expose the exclusive fields to the types owning them", () => {
@@ -313,6 +331,7 @@ describe("PassType", () => {
 					secondaryFields: [],
 					auxiliaryFields: [],
 					backFields: [],
+					additionalInfoFields: [],
 				},
 			});
 		});
@@ -321,7 +340,15 @@ describe("PassType", () => {
 			const { generic } = JSON.parse(JSON.stringify(passType));
 
 			expect(generic).not.toHaveProperty("footerFields");
-			expect(generic).not.toHaveProperty("additionalInfoFields");
+		});
+
+		it("should serialize additionalInfoFields on types other than eventTicket", () => {
+			passType.additionalInfoFields.push(field("a"));
+
+			expect(
+				JSON.parse(JSON.stringify(passType)).generic
+					.additionalInfoFields,
+			).toEqual([field("a")]);
 		});
 
 		it("should serialize footerFields on posterGeneric", () => {

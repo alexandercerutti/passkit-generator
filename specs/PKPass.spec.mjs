@@ -1272,6 +1272,101 @@ describe("PKPass", () => {
 		});
 	});
 
+	describe("upcomingPassInformation dateInformation", () => {
+		/**
+		 * Apple marks dateInformation.date as optional: without it,
+		 * Wallet lists the entry as TBA / TBD (with isUnannounced /
+		 * isUndetermined) or with a dash.
+		 */
+
+		/**
+		 * @param {Record<string, unknown>} dateInformation
+		 */
+
+		function entry(dateInformation) {
+			return {
+				type: "event",
+				identifier: "lab-0",
+				name: "Lab Event 1",
+				dateInformation,
+			};
+		}
+
+		beforeEach(() => {
+			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
+		});
+
+		it("should accept an unannounced entry without a date", () => {
+			pkpass.upcomingPassInformation = [entry({ isUnannounced: true })];
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.upcomingPassInformation).toEqual([
+				entry({ isUnannounced: true }),
+			]);
+		});
+
+		it("should accept an undetermined entry without a date", () => {
+			pkpass.upcomingPassInformation = [entry({ isUndetermined: true })];
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.upcomingPassInformation).toEqual([
+				entry({ isUndetermined: true }),
+			]);
+		});
+
+		it("should still accept an entry with a date and time zone", () => {
+			const withDate = entry({
+				date: "2026-10-20T13:30:00Z",
+				timeZone: "Pacific/Auckland",
+				isAllDay: true,
+			});
+
+			pkpass.upcomingPassInformation = [withDate];
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.upcomingPassInformation).toEqual([
+				withDate,
+			]);
+		});
+
+		it("should still refuse an entry with an invalid date", () => {
+			expect(() => {
+				pkpass.upcomingPassInformation = [
+					entry({ date: "32/18/228317" }),
+				];
+			}).toThrow();
+		});
+
+		it("should keep a model pass.json with an entry without a date", () => {
+			const modelFilesCopy = Object.assign({}, modelFiles, {
+				"pass.json": Buffer.from(
+					JSON.stringify({
+						...JSON.parse(modelFiles["pass.json"].toString("utf-8")),
+						preferredStyleSchemes: ["posterEventTicket", "eventTicket"],
+						upcomingPassInformation: [entry({ isUnannounced: true })],
+					}),
+				),
+			});
+
+			const passFromModel = new PKPass(modelFilesCopy, {
+				signerCert: SIGNER_CERT,
+				signerKey: SIGNER_KEY,
+				wwdr: WWDR,
+				signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+			});
+
+			const passjsonGenerated = getGeneratedPassJson(passFromModel);
+
+			expect(passjsonGenerated.eventTicket).toBeInstanceOf(Object);
+			expect(passjsonGenerated.upcomingPassInformation).toEqual([
+				entry({ isUnannounced: true }),
+			]);
+		});
+	});
+
 	describe("barcodes", () => {
 		it("should create all barcode structures if a message is used", () => {
 			pkpass.setBarcodes("a test barcode");

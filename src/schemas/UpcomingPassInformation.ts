@@ -140,6 +140,8 @@ interface DateInformation {
 	/**
 	 * A string containing an ISO 8601 date and time.
 	 * The date and time when the event is scheduled.
+	 *
+	 * When omitted, the entry lists the date and time as TBD.
 	 */
 	date?: string | Date;
 
@@ -175,7 +177,7 @@ interface DateInformation {
 }
 
 const DateInformation = Joi.object<DateInformation>({
-	date: Joi.alternatives(Joi.string().isoDate(), Joi.date().iso()).required(),
+	date: Joi.alternatives(Joi.string().isoDate(), Joi.date().iso()),
 	ignoreTimeComponents: Joi.boolean(),
 	isAllDay: Joi.boolean(),
 	isUnannounced: Joi.boolean(),

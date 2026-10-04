@@ -1107,6 +1107,168 @@ describe("PKPass", () => {
 
 				expect(passjsonGenerated.relevantDates).toBeUndefined();
 			});
+
+			it("should accept iOS 26 entries with only 'date' and write both keys", () => {
+				pkpass.setRelevantDates([
+					{
+						date: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDates).toEqual([
+					{
+						date: "2025-01-08T22:17:30.000Z",
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+			});
+
+			it("should accept iOS 18 entries with only 'relevantDate' and write both keys", () => {
+				pkpass.setRelevantDates([
+					{
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDates).toEqual([
+					{
+						date: "2025-01-08T22:17:30.000Z",
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+			});
+
+			it("should accept a Date object as 'date'", () => {
+				pkpass.setRelevantDates([
+					{
+						date: new Date(Date.UTC(2025, 1, 8, 23, 58, 25)),
+					},
+				]);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDates).toEqual([
+					{
+						date: "2025-02-08T23:58:25.000Z",
+						relevantDate: "2025-02-08T23:58:25.000Z",
+					},
+				]);
+			});
+
+			it("should prefer 'date' over 'relevantDate' when an entry has both", () => {
+				pkpass.setRelevantDates([
+					{
+						date: "2025-01-08T22:17:30.000Z",
+						relevantDate: "2024-12-31T10:00:00.000Z",
+					},
+				]);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDates).toEqual([
+					{
+						date: "2025-01-08T22:17:30.000Z",
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+			});
+
+			it("should discard entries with neither 'date', 'relevantDate' nor an interval", () => {
+				pkpass.setRelevantDates([
+					// @ts-expect-error
+					{},
+					{
+						date: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+
+				const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+				expect(passjsonGenerated.relevantDates).toEqual([
+					{
+						date: "2025-01-08T22:17:30.000Z",
+						relevantDate: "2025-01-08T22:17:30.000Z",
+					},
+				]);
+			});
+		});
+
+		describe("relevantDates in a model pass.json", () => {
+			/**
+			 * @param {unknown[]} relevantDates
+			 */
+
+			function passWithRelevantDates(relevantDates) {
+				const modelFilesCopy = Object.assign({}, modelFiles, {
+					"pass.json": Buffer.from(
+						JSON.stringify({
+							...JSON.parse(
+								modelFiles["pass.json"].toString("utf-8"),
+							),
+							relevantDates,
+						}),
+					),
+				});
+
+				return new PKPass(modelFilesCopy, {
+					signerCert: SIGNER_CERT,
+					signerKey: SIGNER_KEY,
+					wwdr: WWDR,
+					signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+				});
+			}
+
+			it("should keep a pass.json whose entries use only 'date' (iOS 26)", () => {
+				const passjsonGenerated = getGeneratedPassJson(
+					passWithRelevantDates([
+						{ date: "2025-01-08T22:17:30.000Z" },
+					]),
+				);
+
+				expect(passjsonGenerated.eventTicket).toBeInstanceOf(Object);
+				expect(passjsonGenerated.relevantDates).toEqual([
+					{ date: "2025-01-08T22:17:30.000Z" },
+				]);
+			});
+
+			it("should keep a pass.json whose entries use only 'relevantDate' (iOS 18)", () => {
+				const passjsonGenerated = getGeneratedPassJson(
+					passWithRelevantDates([
+						{ relevantDate: "2025-01-08T22:17:30.000Z" },
+					]),
+				);
+
+				expect(passjsonGenerated.eventTicket).toBeInstanceOf(Object);
+				expect(passjsonGenerated.relevantDates).toEqual([
+					{ relevantDate: "2025-01-08T22:17:30.000Z" },
+				]);
+			});
+
+			it("should keep a pass.json mixing intervals, 'date' and 'relevantDate' entries", () => {
+				const relevantDates = [
+					{
+						startDate: "2025-01-08T22:17:30.000Z",
+						endDate: "2025-01-08T23:58:25.000Z",
+					},
+					{ date: "2025-01-09T10:00:00.000Z" },
+					{ relevantDate: "2025-01-10T10:00:00.000Z" },
+					{
+						date: "2025-01-11T10:00:00.000Z",
+						relevantDate: "2025-01-11T10:00:00.000Z",
+					},
+				];
+
+				const passjsonGenerated = getGeneratedPassJson(
+					passWithRelevantDates(relevantDates),
+				);
+
+				expect(passjsonGenerated.eventTicket).toBeInstanceOf(Object);
+				expect(passjsonGenerated.relevantDates).toEqual(relevantDates);
+			});
 		});
 	});
 

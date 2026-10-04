@@ -84,20 +84,22 @@ export const RelevantDate = Joi.alternatives(
 			Joi.date().iso(),
 		).required(),
 	}),
-	Joi.object<RelevancyEntry>().keys({
-		/**
-		 * Since iOS 26
-		 */
-		date: Joi.alternatives(Joi.string().isoDate(), Joi.date().iso()),
-		/**
-		 * Since iOS 18, then was renamed in
-		 * 'date' in iOS 26 (what a breaking change)
-		 */
-		relevantDate: Joi.alternatives(
-			Joi.string().isoDate(),
-			Joi.date().iso(),
-		).required(),
-	}),
+	Joi.object<RelevancyEntry>()
+		.keys({
+			/**
+			 * Since iOS 26
+			 */
+			date: Joi.alternatives(Joi.string().isoDate(), Joi.date().iso()),
+			/**
+			 * Since iOS 18, then was renamed in
+			 * 'date' in iOS 26 (what a breaking change)
+			 */
+			relevantDate: Joi.alternatives(
+				Joi.string().isoDate(),
+				Joi.date().iso(),
+			),
+		})
+		.or("date", "relevantDate"),
 );
 
 export interface FileBuffers {

@@ -25,8 +25,14 @@ export interface PassFields {
 
 	/**
 	 * @iOSVersion 18
-	 * @passStyle eventTicket (new layout)
+	 * @passStyle eventTicket (posterEventTicket)
 	 * @passDomain dashboard
+	 *
+	 * @iOSVersion 27
+	 * @passStyle every style, classic included, but semanticBoardingPass
+	 * @passDomain dashboard
+	 *
+	 * Note that links inside `attributedValue` are not rendered here.
 	 *
 	 * @see \<undiclosed>
 	 */
@@ -34,7 +40,7 @@ export interface PassFields {
 
 	/**
 	 * @iOSVersion 27
-	 * @passStyle posterGeneric (new layout)
+	 * @passStyle posterGeneric
 	 */
 	footerFields?: PassFieldContent[];
 }

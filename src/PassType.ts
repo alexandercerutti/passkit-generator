@@ -150,10 +150,16 @@ export class PassType<Type extends PassTypesProps> {
 	}
 
 	/**
-	 * Accessor for the additional info fields of an event ticket.
+	 * @iOSVersion 18
+	 * @passStyle eventTicket (posterEventTicket)
+	 * @passDomain dashboard
 	 *
-	 * On iOS 27, all pass types support them but semanticBoardingPasses.
-	 * On iOS 26 and earlier, only event tickets support them.
+	 * @iOSVersion 27
+	 * @passStyle every style, classic included, but semanticBoardingPass
+	 * @passDomain dashboard
+	 *
+	 * Accessor for the additional info fields of this pass type.
+	 * Please note that links inside `attributedValue` are not rendered here.
 	 */
 	public get additionalInfoFields(): PassFieldContent[] {
 		return this[additionalInfoFieldsSymbol];

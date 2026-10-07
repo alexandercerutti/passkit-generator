@@ -25,7 +25,7 @@ const RegExps = {
 		JSON: /personalization\.json/,
 		LOGO: /personalizationLogo@(?:.{2})/,
 	} as const,
-	PASS_STRINGS: /(?<lang>[a-zA-Z-]{2,}).lproj\/pass\.strings/,
+	PASS_STRINGS: /(?<lang>[\w-]{2,})\.lproj\/pass\.strings/,
 	PASS_ICON: /icon(?:@\d{1}x)?/,
 } as const;
 

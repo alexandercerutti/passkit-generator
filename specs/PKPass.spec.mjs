@@ -889,6 +889,38 @@ describe("PKPass", () => {
 			);
 		});
 
+		it("should keep region and script of the translations file language", () => {
+			const translationFile = `"MY_DESCRIPTION" = "test";`;
+
+			pkpass.addBuffer(
+				"pt_BR.lproj/pass.strings",
+				Buffer.from(translationFile),
+			);
+			pkpass.addBuffer(
+				"zh-Hans.lproj/pass.strings",
+				Buffer.from(translationFile),
+			);
+			pkpass.addBuffer(
+				"es-419.lproj/pass.strings",
+				Buffer.from(translationFile),
+			);
+
+			expect(pkpass.languages).toEqual(["pt_BR", "zh-Hans", "es-419"]);
+
+			const buffers = pkpass.getAsRaw();
+
+			expect(buffers["pt_BR.lproj/pass.strings"].toString("utf-8")).toBe(
+				translationFile,
+			);
+			expect(buffers["zh-Hans.lproj/pass.strings"].toString("utf-8")).toBe(
+				translationFile,
+			);
+			expect(buffers["es-419.lproj/pass.strings"].toString("utf-8")).toBe(
+				translationFile,
+			);
+			expect(buffers["BR.lproj/pass.strings"]).toBeUndefined();
+		});
+
 		it("should ignore invalid l10n files", () => {
 			const invalidTranslationStrings = `
 "Insert Element"="Insert Element

@@ -1,5 +1,17 @@
 # Changelog
 
+### 3.7.0 (15 Oct 2026)
+
+-   Added support to the creation of `shoebox://` / `wallet://` urls through a new PKPass method `.getWalletPassId()`;
+-   Added support to missing `pass.json` property `businessChatIdentifier` to add the messages quick action on Semantic Boarding Passes;
+-   Added support to missing `pass.json` property `trackBagsURL` to a link to airline bag tracking in Semantic Boarding Passes;
+-   Fixed support for language localization `pt_BR` and `es-419`;
+-   Fixed `DateInformation.date` mandatory requirement as it is not required - perhaps anymore;
+-   Fixed `RelevantDate` schema validation as `relevantDate` was considered mandatory while it was renamed in a previous iOS version;
+-   Added missing `Semantics.WifiNetwork` properties `captiveToken` and `captiveTokenAuthURL`;
+
+---
+
 ### 3.6.1 (20 Sep 2026)
 
 -   Added support to missing `placeIdentifier` for featured actions of `type: "place"` (PR #275);

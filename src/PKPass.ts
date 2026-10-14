@@ -1314,6 +1314,35 @@ export default class PKPass extends Bundle {
 		this[propsSymbol]["nfc"] =
 			Schemas.validate(Schemas.NFC, nfc) ?? undefined;
 	}
+
+	/**
+	 * Return the ID to be added to the wallet:// or shoebox:// deeplinks.
+	 * Using this link on a device with this pass installed, it will open the pass.
+	 *
+	 * @example
+	 * ```
+	 * const id = pass.getWalletPassId();
+	 * const url = id ? `wallet://card/${id}` : "";
+	 * ```
+	 *
+	 * @returns The wallet pass ID as a string, or an empty string if passTypeIdentifier or serialNumber are not set.
+	 */
+	public getWalletPassId(): string {
+		const { passTypeIdentifier, serialNumber } = this[propsSymbol];
+
+		if (!passTypeIdentifier || !serialNumber) {
+			console.warn(
+				"Cannot generate wallet URL without passTypeIdentifier and serialNumber.",
+			);
+
+			return "";
+		}
+
+		return Signature.walletUniqueIdentifier(
+			passTypeIdentifier,
+			serialNumber,
+		);
+	}
 }
 
 function validateJSONBuffer(

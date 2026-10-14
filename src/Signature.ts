@@ -128,3 +128,22 @@ function getStringCertificates(
 		signerKey: Buffer.from(certificates.signerKey).toString("utf-8"),
 	};
 }
+
+/**
+ * Creates the identifier to identify and open a pass through its deeplink
+ *
+ * @param passTypeIdentifier
+ * @param serialNumber
+ * @returns
+ */
+export function walletUniqueIdentifier(
+	passTypeIdentifier: string,
+	serialNumber: string,
+): string {
+	const RECORD_SEPARATOR_CC = "\x1E";
+
+	const md = forge.md.sha1.create();
+	md.update(passTypeIdentifier + RECORD_SEPARATOR_CC + serialNumber, "utf8");
+
+	return forge.util.encode64(md.digest().getBytes()).replace(/\//g, "-");
+}

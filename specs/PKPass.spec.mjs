@@ -1,5 +1,12 @@
 // @ts-check
-import { beforeEach, beforeAll, expect, it, describe } from "@jest/globals";
+import {
+	beforeEach,
+	beforeAll,
+	expect,
+	it,
+	describe,
+	jest,
+} from "@jest/globals";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -305,10 +312,9 @@ describe("PKPass", () => {
 			];
 
 			expect(pkpass.featuredActions.length).toBe(2);
-			expect(pkpass.featuredActions.map((action) => action.identifier)).toEqual([
-				"action-1",
-				"action-2",
-			]);
+			expect(
+				pkpass.featuredActions.map((action) => action.identifier),
+			).toEqual(["action-1", "action-2"]);
 		});
 	});
 
@@ -912,9 +918,9 @@ describe("PKPass", () => {
 			expect(buffers["pt_BR.lproj/pass.strings"].toString("utf-8")).toBe(
 				translationFile,
 			);
-			expect(buffers["zh-Hans.lproj/pass.strings"].toString("utf-8")).toBe(
-				translationFile,
-			);
+			expect(
+				buffers["zh-Hans.lproj/pass.strings"].toString("utf-8"),
+			).toBe(translationFile);
 			expect(buffers["es-419.lproj/pass.strings"].toString("utf-8")).toBe(
 				translationFile,
 			);
@@ -1376,9 +1382,16 @@ describe("PKPass", () => {
 			const modelFilesCopy = Object.assign({}, modelFiles, {
 				"pass.json": Buffer.from(
 					JSON.stringify({
-						...JSON.parse(modelFiles["pass.json"].toString("utf-8")),
-						preferredStyleSchemes: ["posterEventTicket", "eventTicket"],
-						upcomingPassInformation: [entry({ isUnannounced: true })],
+						...JSON.parse(
+							modelFiles["pass.json"].toString("utf-8"),
+						),
+						preferredStyleSchemes: [
+							"posterEventTicket",
+							"eventTicket",
+						],
+						upcomingPassInformation: [
+							entry({ isUnannounced: true }),
+						],
 					}),
 				),
 			});
@@ -1537,6 +1550,95 @@ describe("PKPass", () => {
 			const passjsonGenerated = getGeneratedPassJson(pkpass);
 
 			expect(passjsonGenerated.nfc).toBeUndefined();
+		});
+	});
+
+	describe("getWalletPassId", () => {
+		const certificates = {
+			signerCert: SIGNER_CERT,
+			signerKey: SIGNER_KEY,
+			wwdr: WWDR,
+			signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+		};
+
+		it("should compute the Wallet ID from the model passTypeIdentifier and serialNumber", () => {
+			/** examplePass.pass: pass.com.passkitgenerator + nmyuxofgna */
+			expect(pkpass.getWalletPassId()).toBe(
+				"4LTbJGK9Q9Cng+B6AA1wBEhEWY8=",
+			);
+		});
+
+		it("should use the serialNumber overridden through the constructor", () => {
+			const pass = new PKPass(modelFiles, certificates, {
+				serialNumber: "serial-3",
+			});
+
+			expect(pass.getWalletPassId()).toBe("QTQCQvxSYnhVPVI0YPw0Q5mQqws=");
+		});
+
+		/**
+		 * base64(SHA-1(passTypeIdentifier + 0x1E + serialNumber)), with "/" turned
+		 * into "-" and "+" and "=" kept, as Wallet's PKGeneratePassUniqueID does.
+		 */
+
+		it.each([
+			[
+				"serial-3",
+				"QTQCQvxSYnhVPVI0YPw0Q5mQqws=",
+				"no special characters",
+			],
+			["serial-5", "zhkDEhhligst0eaHhUVpV+eVhRg=", "keeps '+'"],
+			["serial-2", "vYXNM5DKKnx4Li26xER1s-HBPm8=", "turns '/' into '-'"],
+			[
+				"serial-1",
+				"nNl0oO0HW2Nc+-wT69mTS1Q1Q00=",
+				"'+' and '/' together",
+			],
+			[
+				"nùmero-€",
+				"FnsdlcPBmMfbWP+yECC+am4HSkk=",
+				"hashes non-ASCII as UTF-8",
+			],
+		])("serialNumber %s should give %s (%s)", (serialNumber, expected) => {
+			const pass = new PKPass({}, certificates, {
+				passTypeIdentifier: "pass.com.passkitgenerator",
+				serialNumber,
+			});
+
+			const id = pass.getWalletPassId();
+
+			expect(id).toBe(expected);
+			expect(id).not.toMatch(/[/_]/);
+		});
+
+		it("should return an empty string and warn when serialNumber is missing", () => {
+			const warn = jest
+				.spyOn(console, "warn")
+				.mockImplementation(() => {});
+
+			const pass = new PKPass({}, certificates, {
+				passTypeIdentifier: "pass.com.passkitgenerator",
+			});
+
+			expect(pass.getWalletPassId()).toBe("");
+			expect(warn).toHaveBeenCalledTimes(1);
+
+			warn.mockRestore();
+		});
+
+		it("should return an empty string and warn when passTypeIdentifier is missing", () => {
+			const warn = jest
+				.spyOn(console, "warn")
+				.mockImplementation(() => {});
+
+			const pass = new PKPass({}, certificates, {
+				serialNumber: "serial-3",
+			});
+
+			expect(pass.getWalletPassId()).toBe("");
+			expect(warn).toHaveBeenCalledTimes(1);
+
+			warn.mockRestore();
 		});
 	});
 

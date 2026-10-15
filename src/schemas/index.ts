@@ -9,6 +9,7 @@ export * from "./Personalize.js";
 export * from "./Certificates.js";
 export * from "./UpcomingPassInformation.js";
 export * from "./FeaturedAction.js";
+export * from "./Sharing.js";
 
 import Joi from "joi";
 import type { Buffer } from "node:buffer";
@@ -22,6 +23,7 @@ import { Semantics } from "./Semantics.js";
 import { CertificatesSchema } from "./Certificates.js";
 import { UpcomingPassInformationEntry } from "./UpcomingPassInformation.js";
 import { FeaturedAction } from "./FeaturedAction.js";
+import { Sharing } from "./Sharing.js";
 
 import * as Messages from "../messages.js";
 import { RGB_HEX_COLOR_REGEX, URL_REGEX } from "./regexps.js";
@@ -117,6 +119,17 @@ export interface PassProps {
 	voided?: boolean;
 	userInfo?: { [key: string]: any };
 	sharingProhibited?: boolean;
+
+	/**
+	 * Undocumented feature:
+	 * Changes what the Share button of the pass shares
+	 * (the pass file, a URL with text, or nothing).
+	 * Ignored when `sharingProhibited` is `true`.
+	 *
+	 * @see Sharing
+	 */
+	sharing?: Sharing;
+
 	groupingIdentifier?: string;
 	suppressStripShine?: boolean;
 	logoText?: string;
@@ -671,6 +684,14 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	organizationName: Joi.string(),
 	passTypeIdentifier: Joi.string(),
 	sharingProhibited: Joi.boolean(),
+
+	/**
+	 * Undocumented feature:
+	 * Changes what the Share button of the pass shares.
+	 * Wallet refuses it on non-Apple passes with `formatVersion: 2`.
+	 */
+	sharing: Sharing,
+
 	groupingIdentifier: Joi.string(),
 	suppressStripShine: Joi.boolean(),
 	maxDistance: Joi.number().positive(),

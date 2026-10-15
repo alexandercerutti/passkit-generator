@@ -318,6 +318,82 @@ describe("PKPass", () => {
 		});
 	});
 
+	describe("sharing", () => {
+		const certificates = {
+			signerCert: SIGNER_CERT,
+			signerKey: SIGNER_KEY,
+			wwdr: WWDR,
+			signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+		};
+
+		it("should keep a URL sharing dictionary in pass.json", () => {
+			const sharing = {
+				method: "PKPassSharingMethodURL",
+				url: "https://example.com/share",
+				text: "Get your own ticket",
+			};
+
+			const passWithSharing = new PKPass(modelFiles, certificates, {
+				// @ts-ignore
+				sharing,
+			});
+
+			expect(passWithSharing.props.sharing).toEqual(sharing);
+			expect(getGeneratedPassJson(passWithSharing).sharing).toEqual(
+				sharing,
+			);
+		});
+
+		it("should accept the other sharing methods without url", () => {
+			for (const method of [
+				"PKPassSharingMethodPass",
+				"PKPassSharingMethodDisabled",
+			]) {
+				const passWithSharing = new PKPass(modelFiles, certificates, {
+					// @ts-ignore
+					sharing: { method },
+				});
+
+				expect(getGeneratedPassJson(passWithSharing).sharing).toEqual({
+					method,
+				});
+			}
+		});
+
+		it("should throw if the sharing method is unknown", () => {
+			expect(
+				() =>
+					new PKPass(modelFiles, certificates, {
+						// @ts-expect-error
+						sharing: { method: "PKPassSharingMethodLink" },
+					}),
+			).toThrow();
+		});
+
+		it("should throw if the URL sharing method has no url", () => {
+			expect(
+				() =>
+					new PKPass(modelFiles, certificates, {
+						sharing: { method: "PKPassSharingMethodURL" },
+					}),
+			).toThrow();
+		});
+
+		it("should keep sharing when creating a pass from another pass", async () => {
+			const sharing = {
+				method: "PKPassSharingMethodURL",
+				url: "https://example.com/share",
+			};
+
+			const newPass = await PKPass.from(pkpass, {
+				// @ts-ignore
+				sharing,
+			});
+
+			expect(getGeneratedPassJson(newPass).sharing).toEqual(sharing);
+		});
+	});
+
 	it("should own pkpass mimetype", () => {
 		expect(pkpass.mimeType).toBe("application/vnd.apple.pkpass");
 	});

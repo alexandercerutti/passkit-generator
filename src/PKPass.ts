@@ -1104,12 +1104,20 @@ export default class PKPass extends Bundle {
 	 *
 	 * Pass `null` to remove them at all.
 	 *
+	 * Use `maxDistance` in a location (not at root level)
+	 * to narrow the distance at which the pass is relevant.
+	 *
 	 * @example
 	 * ```ts
 	 *		PKPassInstance.setLocations(null)
 	 *		PKPassInstance.setLocations({
 	 *			latitude: 0.5333245342
 	 *			longitude: 0.2135332252
+	 *		});
+	 *		PKPassInstance.setLocations({
+	 *			latitude: 0.5333245342,
+	 *			longitude: 0.2135332252,
+	 *			maxDistance: 50,
 	 *		});
 	 * ```
 	 *

@@ -1116,6 +1116,64 @@ describe("PKPass", () => {
 
 			expect(passjsonGenerated.locations).toBeUndefined();
 		});
+
+		it("should keep maxDistance in each location", () => {
+			pkpass.setLocations(
+				{
+					latitude: 0,
+					longitude: 0,
+					maxDistance: 50,
+				},
+				{
+					latitude: 1,
+					longitude: 1,
+				},
+			);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.locations).toEqual([
+				{
+					latitude: 0,
+					longitude: 0,
+					maxDistance: 50,
+				},
+				{
+					latitude: 1,
+					longitude: 1,
+				},
+			]);
+		});
+
+		it("should drop locations with a maxDistance that is not greater than zero", () => {
+			pkpass.setLocations(
+				{
+					latitude: 0,
+					longitude: 0,
+					maxDistance: 0,
+				},
+				{
+					latitude: 1,
+					longitude: 1,
+					maxDistance: -100,
+				},
+				{
+					latitude: 2,
+					longitude: 2,
+					maxDistance: 1500,
+				},
+			);
+
+			const passjsonGenerated = getGeneratedPassJson(pkpass);
+
+			expect(passjsonGenerated.locations).toEqual([
+				{
+					latitude: 2,
+					longitude: 2,
+					maxDistance: 1500,
+				},
+			]);
+		});
 	});
 
 	describe("Date relevancy", () => {

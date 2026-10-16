@@ -133,7 +133,18 @@ export interface PassProps {
 	groupingIdentifier?: string;
 	suppressStripShine?: boolean;
 	logoText?: string;
+
+	/**
+	 * @since iOS 7.0
+	 * @deprecated After an analysis made through reversing engineering and Claude,
+	 * and then tests made on iPhone with iOS 27.2, Wallet **never** reads a root `maxDistance`
+	 * (verified on iOS 6.0, 7.0.1 and 10.0.1 to 27.2 device builds), even if Apple documents it here.
+	 * Therefore, this make this the longest documentation error in Apple Wallet discovered until now.
+	 *
+	 * Use `maxDistance` in each `Location` instead to narrow the location relevancy scope.
+	 */
 	maxDistance?: number;
+
 	semantics?: Semantics;
 
 	webServiceURL?: string;
@@ -694,7 +705,18 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 
 	groupingIdentifier: Joi.string(),
 	suppressStripShine: Joi.boolean(),
+
+	/**
+	 * @since iOS 7.0
+	 * @deprecated After an analysis made through reversing engineering and Claude,
+	 * and then tests made on iPhone with iOS 27.2, Wallet **never** reads a root `maxDistance`
+	 * (verified on iOS 6.0, 7.0.1 and 10.0.1 to 27.2 device builds), even if Apple documents it here.
+	 * Therefore, this make this the longest documentation error in Apple Wallet discovered until now.
+	 *
+	 * Use `maxDistance` in each `Location` instead to narrow the location relevancy scope.
+	 */
 	maxDistance: Joi.number().positive(),
+
 	authenticationToken: Joi.string().min(16),
 	labelColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),
 	stripColor: Joi.string().regex(RGB_HEX_COLOR_REGEX),

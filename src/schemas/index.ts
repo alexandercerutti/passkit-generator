@@ -52,6 +52,15 @@ export interface RelevancyInterval {
 /**
  * @iOSVersion 18 => "relevantDate"
  * @iOSVersion 26 => "date"
+ *
+ * Note: `relevantDate` is still accepted as an alias of `date`,
+ * as on iOS 18 release, documentation stated that `relevantDate`
+ * should be used instead of `date`.
+ *
+ * It got renamed to `date` in iOS 26. Till today, we are not sure
+ * if this was a documentation problem or a breaking change by Apple.
+ *
+ * This ensures backward compatibility with both iOS versions.
  */
 export type RelevancyEntry =
 	| {
@@ -94,7 +103,7 @@ export const RelevantDate = Joi.alternatives(
 			date: Joi.alternatives(Joi.string().isoDate(), Joi.date().iso()),
 			/**
 			 * Since iOS 18, then was renamed in
-			 * 'date' in iOS 26 (what a breaking change)
+			 * 'date' in iOS 26 (either a breaking change or a documentation problem)
 			 */
 			relevantDate: Joi.alternatives(
 				Joi.string().isoDate(),

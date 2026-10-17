@@ -1147,10 +1147,15 @@ export default class PKPass extends Bundle {
 	 * Allows setting a series of relevancy intervals or
 	 * relevancy entries for the pass.
 	 *
-	 * Please note that `RelevantDate[]` `relevantDate` property was renamed
-	 * in "date" since iOS 26. Since retro-compatibility is not ensured,
-	 * this methods takes `date`, and fallbacks to `relevantDate`, and use
-	 * the first value found for both properties.
+	 * Note: `RelevantDate[]` entries accept both `date` and `relevantDate`.
+	 * When iOS 18 came out, Apple docs were referring to `relevantDate` and it
+	 * changed to `date`.
+	 *
+	 * Till today, we are not sure if this was a documentation problem or
+	 * a breaking change by Apple.
+	 *
+	 * For this reason, we are accepting both. But very likely, in the next
+	 * major, `relevantDate` will likely be removed entirely.
 	 *
 	 * @param {Schemas.RelevantDate[] | null} relevancyEntries
 	 * @returns {void}
@@ -1211,7 +1216,7 @@ export default class PKPass extends Bundle {
 	 * @warning `relevantDate` property has been deprecated in iOS 18
 	 * in order to get replaced by `relevantDates` array of intervals
 	 * (`relevantDates[].startDate` + `relevantDates[].endDate`)
-	 * or single date (`relevantDates[].relevantDate`).
+	 * or single date (`relevantDates[].date`).
 	 */
 
 	public setRelevantDate(date: Date | null): void {

@@ -692,6 +692,18 @@ export const PassType = Joi.string().regex(
 	/(boardingPass|coupon|eventTicket|storeCard|generic|posterGeneric)/,
 );
 
+/**
+ * Joi's `uri()` rejects valid URIs that only have a scheme, with an
+ * empty authority or without any path (e.g. `com.example.myapp://` or
+ * `myapp:`), which are commonly used to just open an app.
+ * @see https://github.com/alexandercerutti/passkit-generator/issues/274
+ */
+
+const AppLaunchURL = Joi.alternatives().try(
+	Joi.string().uri(),
+	Joi.string().pattern(/^[a-zA-Z][a-zA-Z\d+\-.]*:(?:\/\/)?(?:[?#]\S*)?$/),
+);
+
 export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	formatVersion: Joi.number().default(1),
 	semantics: Semantics,
@@ -699,7 +711,7 @@ export const OverridablePassProps = Joi.object<OverridablePassProps>({
 	logoText: Joi.string(),
 	description: Joi.string(),
 	serialNumber: Joi.string(),
-	appLaunchURL: Joi.string().uri(),
+	appLaunchURL: AppLaunchURL,
 	teamIdentifier: Joi.string(),
 	organizationName: Joi.string(),
 	passTypeIdentifier: Joi.string(),

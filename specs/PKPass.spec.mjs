@@ -394,6 +394,58 @@ describe("PKPass", () => {
 		});
 	});
 
+	describe("appLaunchURL", () => {
+		const certificates = {
+			signerCert: SIGNER_CERT,
+			signerKey: SIGNER_KEY,
+			wwdr: WWDR,
+			signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+		};
+
+		it("should accept an URL with any scheme", () => {
+			for (const appLaunchURL of [
+				"https://example.com/app",
+				"myapp://product?id=123",
+				"myapp:///product",
+			]) {
+				const pass = new PKPass(modelFiles, certificates, {
+					appLaunchURL,
+				});
+
+				expect(getGeneratedPassJson(pass).appLaunchURL).toBe(
+					appLaunchURL,
+				);
+			}
+		});
+
+		it("should accept an URL with an empty authority or no path", () => {
+			for (const appLaunchURL of [
+				"com.example.myapp://",
+				"com.example.myapp://?ref=wallet",
+				"myapp:",
+			]) {
+				const pass = new PKPass(modelFiles, certificates, {
+					appLaunchURL,
+				});
+
+				expect(getGeneratedPassJson(pass).appLaunchURL).toBe(
+					appLaunchURL,
+				);
+			}
+		});
+
+		it("should throw if appLaunchURL is not an URL", () => {
+			for (const appLaunchURL of ["not an url", "://", "1myapp://"]) {
+				expect(
+					() =>
+						new PKPass(modelFiles, certificates, {
+							appLaunchURL,
+						}),
+				).toThrow();
+			}
+		});
+	});
+
 	it("should own pkpass mimetype", () => {
 		expect(pkpass.mimeType).toBe("application/vnd.apple.pkpass");
 	});

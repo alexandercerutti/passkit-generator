@@ -232,6 +232,24 @@ export interface Semantics {
 	eventStartDateInfo?: SemanticTagType.EventDateInfo;
 
 	/**
+	 * Undocumented feature (not in Apple's Wallet Passes documentation).
+	 *
+	 * @iOSVersion 27 (maybe)
+	 *
+	 * The time zone (IANA name, such as `America/New_York`) in which
+	 * the poster event ticket shows the start date and time and the event
+	 * guide shows its schedule times. The offset written in the dates only
+	 * fixes the moment: this zone decides how that moment is shown.
+	 *
+	 * It has higher priority over `eventStartDateInfo.timeZone` and lower
+	 * priority than `dateInformation.timeZone` in the upcoming pass
+	 * information entries.
+	 *
+	 * When none of these are specified, the device time zone is used.
+	 */
+	eventTimeZone?: string;
+
+	/**
 	 * @iOSVersion < 18
 	 * Since iOS 18, for the event tickets these determine
 	 * the template to be used when rendering the pass.
@@ -718,6 +736,25 @@ export const Semantics = Joi.object<Semantics>().keys({
 	eventStartDateInfo: SemanticTagType.EventDateInfo,
 
 	eventStartDate: Joi.string(),
+
+	/**
+	 * Undocumented feature (not in Apple's Wallet Passes documentation).
+	 *
+	 * @iOSVersion 27 (maybe)
+	 *
+	 * The time zone (IANA name, such as `America/New_York`) in which
+	 * the poster event ticket shows the start date and time and the event
+	 * guide shows its schedule times. The offset written in the dates only
+	 * fixes the moment: this zone decides how that moment is shown.
+	 *
+	 * It has higher priority over `eventStartDateInfo.timeZone` and lower
+	 * priority than `dateInformation.timeZone` in the upcoming pass
+	 * information entries.
+	 *
+	 * When none of these are specified, the device time zone is used.
+	 */
+	eventTimeZone: Joi.string(),
+
 	eventType: Joi.string().regex(
 		/(PKEventTypeGeneric|PKEventTypeLivePerformance|PKEventTypeMovie|PKEventTypeSports|PKEventTypeConference|PKEventTypeConvention|PKEventTypeWorkshop|PKEventTypeSocialGathering)/,
 	),

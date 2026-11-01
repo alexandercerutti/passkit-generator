@@ -394,6 +394,68 @@ describe("PKPass", () => {
 		});
 	});
 
+	describe("semantics eventTimeZone", () => {
+		const certificates = {
+			signerCert: SIGNER_CERT,
+			signerKey: SIGNER_KEY,
+			wwdr: WWDR,
+			signerKeyPassphrase: SIGNER_KEY_PASSPHRASE,
+		};
+
+		it("should keep eventTimeZone next to eventStartDateInfo in pass.json", () => {
+			const semantics = {
+				eventStartDate: "2026-11-20T20:00:00-05:00",
+				eventStartDateInfo: {
+					date: "2026-11-20T20:00:00-05:00",
+					timeZone: "America/New_York",
+				},
+				eventTimeZone: "America/New_York",
+			};
+
+			const passWithZone = new PKPass(modelFiles, certificates, {
+				semantics,
+			});
+
+			const generated = getGeneratedPassJson(passWithZone).semantics;
+
+			expect(generated.eventTimeZone).toBe("America/New_York");
+			expect(generated.eventStartDateInfo.timeZone).toBe(
+				"America/New_York",
+			);
+		});
+
+		it("should throw if eventTimeZone is not a string", () => {
+			expect(
+				() =>
+					new PKPass(modelFiles, certificates, {
+						semantics: {
+							// @ts-expect-error
+							eventTimeZone: 5,
+						},
+					}),
+			).toThrow();
+		});
+
+		it("should keep eventTimeZone in the semantics of an upcoming entry", () => {
+			pkpass.preferredStyleSchemes = ["posterEventTicket", "eventTicket"];
+
+			const upcomingEntry = {
+				type: "event",
+				identifier: "lab-0",
+				name: "Lab Event 1",
+				semantics: {
+					eventTimeZone: "Asia/Tokyo",
+				},
+			};
+
+			pkpass.upcomingPassInformation = [upcomingEntry];
+
+			expect(
+				getGeneratedPassJson(pkpass).upcomingPassInformation,
+			).toEqual([upcomingEntry]);
+		});
+	});
+
 	it("should own pkpass mimetype", () => {
 		expect(pkpass.mimeType).toBe("application/vnd.apple.pkpass");
 	});

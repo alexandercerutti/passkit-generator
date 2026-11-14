@@ -878,6 +878,23 @@ describe("PKPass", () => {
 				'"greeting" = "Say \\"hi\\" to \\"them\\"";',
 			);
 		});
+
+		it("should escape double quotes that follow an escaped backslash", () => {
+			/**
+			 * Two backslashes are one escaped backslash,
+			 * so the quote after them still needs its own escape.
+			 */
+
+			pkpass.localize("en", {
+				path: String.raw`C:\\"x"`,
+			});
+
+			const buffers = pkpass.getAsRaw();
+
+			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
+				String.raw`"path" = "C:\\\"x\"";`,
+			);
+		});
 	});
 
 	describe("addBuffer", () => {

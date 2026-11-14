@@ -844,6 +844,57 @@ describe("PKPass", () => {
 				'"mimmo" = "Domenic";',
 			);
 		});
+
+		it("should escape double quotes in translation values", () => {
+			/**
+			 * An unescaped quote would end the value early,
+			 * leaving a pass.strings file that cannot be read.
+			 */
+
+			pkpass.localize("en", {
+				greeting: 'Say "hi" to "them"',
+			});
+
+			const buffers = pkpass.getAsRaw();
+
+			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
+				'"greeting" = "Say \\"hi\\" to \\"them\\"";',
+			);
+		});
+
+		it("should keep already escaped double quotes in translation values", () => {
+			/**
+			 * Values escaped before this fix must keep working:
+			 * escaping them a second time would end the value early.
+			 */
+
+			pkpass.localize("en", {
+				greeting: 'Say \\"hi\\" to "them"',
+			});
+
+			const buffers = pkpass.getAsRaw();
+
+			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
+				'"greeting" = "Say \\"hi\\" to \\"them\\"";',
+			);
+		});
+
+		it("should escape double quotes that follow an escaped backslash", () => {
+			/**
+			 * Two backslashes are one escaped backslash,
+			 * so the quote after them still needs its own escape.
+			 */
+
+			pkpass.localize("en", {
+				path: String.raw`C:\\"x"`,
+			});
+
+			const buffers = pkpass.getAsRaw();
+
+			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
+				String.raw`"path" = "C:\\\"x\"";`,
+			);
+		});
 	});
 
 	describe("addBuffer", () => {
@@ -1028,6 +1079,43 @@ describe("PKPass", () => {
 			const buffers = pkpass.getAsRaw();
 
 			expect(buffers["en.lproj/pass.strings"]).not.toBeUndefined();
+			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
+				translationFile,
+			);
+		});
+
+		it("should escape double quotes in a translations file", () => {
+			/**
+			 * Unescaped quotes inside a value don't make a valid
+			 * strings file, so they get escaped when the pass is created.
+			 */
+
+			pkpass.addBuffer(
+				"en.lproj/pass.strings",
+				Buffer.from('"GREETING" = "Say "hi"";', "utf-8"),
+			);
+
+			const buffers = pkpass.getAsRaw();
+
+			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
+				'"GREETING" = "Say \\"hi\\"";',
+			);
+		});
+
+		it("should keep already escaped double quotes in a translations file", () => {
+			/**
+			 * Escaping them a second time would end the value early.
+			 */
+
+			const translationFile = '"GREETING" = "Say \\"hi\\"";';
+
+			pkpass.addBuffer(
+				"en.lproj/pass.strings",
+				Buffer.from(translationFile, "utf-8"),
+			);
+
+			const buffers = pkpass.getAsRaw();
+
 			expect(buffers["en.lproj/pass.strings"].toString("utf-8")).toBe(
 				translationFile,
 			);

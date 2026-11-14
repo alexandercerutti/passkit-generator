@@ -79,7 +79,17 @@ export function create(translations: { [key: string]: string }): Buffer {
 	for (let i = 0; i < translationsEntries.length; i++) {
 		const [key, value] = translationsEntries[i];
 
-		stringContents.push(`"${key}" = "${value}";`);
+		/**
+		 * Since we have to create a literal escape in the final file,
+		 * we need both characters of '\"' to be printed. It is correct to
+		 * let them alone if the amount of backslashes is odd. So we can add "\\"
+		 * (which in JS means just one backslash).
+		 */
+		const escapedValue = value.replace(/(\\*)"/g, (match, backslashes) =>
+			backslashes.length % 2 === 0 ? `${backslashes}\\"` : match,
+		);
+
+		stringContents.push(`"${key}" = "${escapedValue}";`);
 	}
 
 	return Buffer.from(stringContents.join(EOL));

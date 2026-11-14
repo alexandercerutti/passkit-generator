@@ -78,8 +78,9 @@ export function create(translations: { [key: string]: string }): Buffer {
 
 	for (let i = 0; i < translationsEntries.length; i++) {
 		const [key, value] = translationsEntries[i];
+		const escapedValue = value.replace(/(?<!\\)"/g, '\\"');
 
-		stringContents.push(`"${key}" = "${value}";`);
+		stringContents.push(`"${key}" = "${escapedValue}";`);
 	}
 
 	return Buffer.from(stringContents.join(EOL));
